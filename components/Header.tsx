@@ -36,7 +36,7 @@ export const Header: React.FC<HeaderProps> = ({ onAdminClick, isAdminMode, notif
               <Calendar size={16} />
               Eventi
               {notificationCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white font-bold ring-2 ring-white animate-in zoom-in">
+                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] text-white font-bold ring-2 ring-white animate-pulse shadow-sm">
                   {notificationCount > 9 ? '9+' : notificationCount}
                 </span>
               )}

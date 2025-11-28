@@ -15,6 +15,8 @@ const App: React.FC = () => {
   // State for events (initialized with constants, but mutable)
   const [events, setEvents] = useState<EventItem[]>(EVENTS);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
+  
+  // Notification State
   const [newEventsCount, setNewEventsCount] = useState(0);
 
   const [filters, setFilters] = useState<FilterState>({
@@ -35,7 +37,11 @@ const App: React.FC = () => {
 
   const clearNotifications = () => {
     setNewEventsCount(0);
-    // Optional: Scroll to events section if needed, currently just clears badge
+    // Optional: Scroll to events section if needed
+    const eventsSection = document.getElementById('eventi-section');
+    if (eventsSection) {
+      eventsSection.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   // Filter Logic
@@ -93,7 +99,7 @@ const App: React.FC = () => {
             
             <FilterBar filters={filters} setFilters={setFilters} />
             
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div id="eventi-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             
             <div className="flex justify-between items-end mb-8">
                 <div>

@@ -1,57 +1,334 @@
 <!DOCTYPE html>
 <html lang="it">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Visit Avigliano Umbro</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-      body {
-        font-family: 'Inter', sans-serif;
-        background-color: #f8f5f2; /* Warm off-white background */
-      }
-      h1, h2, h3, h4, .serif {
-        font-family: 'Playfair Display', serif;
-      }
-      /* Hide scrollbar for clean horizontal scrolling */
-      .no-scrollbar::-webkit-scrollbar {
-        display: none;
-      }
-      .no-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-      }
-    </style>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Google GenAI SDK (ES Module) -->
+    <script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0"
+  }
+}
+</script>
+
+    <!-- Custom Config & Styles -->
     <script>
       tailwind.config = {
         theme: {
           extend: {
             colors: {
               brand: {
-                900: '#4a0404', /* Deep Burgundy like the video header */
+                900: '#4a0404', 
                 800: '#701a1a',
                 100: '#fdf2f2',
+                50:  '#fffafa',
                 gold: '#d4af37',
               }
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              serif: ['Playfair Display', 'serif'],
             }
           }
         }
       }
     </script>
-  <script type="importmap">
-{
-  "imports": {
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
-  }
-}
-</script>
+    <style>
+      body { font-family: 'Inter', sans-serif; background-color: #f8f5f2; }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      
+      /* Animation Utilities */
+      .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+      .slide-up { animation: slideUp 0.3s ease-out forwards; }
+      
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
 </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<body class="min-h-screen flex flex-col text-stone-800">
+
+    <!-- HEADER -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-stone-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+                    <div class="w-10 h-10 bg-brand-900 rounded-full flex items-center justify-center text-white overflow-hidden shadow-md">
+                        <img src="https://picsum.photos/50/50" alt="Logo" class="w-full h-full object-cover opacity-90" />
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-xs uppercase tracking-widest text-brand-900 font-bold">Portale Turistico</span>
+                        <span class="text-xl font-bold font-serif leading-none text-stone-900">Visit Avigliano Umbro</span>
+                    </div>
+                </div>
+
+                <!-- Desktop Nav -->
+                <nav class="hidden md:flex items-center gap-8">
+                    <a href="#" class="text-stone-600 hover:text-brand-900 font-medium text-sm transition-colors">Territorio</a>
+                    <a href="#" class="text-stone-600 hover:text-brand-900 font-medium text-sm transition-colors">Storia</a>
+                    
+                    <button onclick="scrollToEvents()" class="relative text-brand-900 font-semibold text-sm flex items-center gap-2 bg-brand-100 px-4 py-2 rounded-full hover:bg-brand-200 transition-all group">
+                        <i data-lucide="calendar" class="w-4 h-4"></i>
+                        Eventi
+                        <span id="nav-notification" class="hidden absolute -top-1 -right-1 h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] text-white font-bold ring-2 ring-white animate-pulse shadow-sm">0</span>
+                    </button>
+
+                    <a href="#" class="text-stone-600 hover:text-brand-900 font-medium text-sm transition-colors">Contatti</a>
+                </nav>
+
+                <!-- Actions -->
+                <div class="flex items-center gap-3">
+                    <button class="hidden sm:flex items-center gap-2 text-stone-600 hover:text-brand-900 px-3 py-1.5 border border-stone-300 rounded-full text-sm font-medium transition-colors">
+                        <i data-lucide="share-2" class="w-4 h-4"></i>
+                        <span class="hidden lg:inline">Condividi</span>
+                    </button>
+                    
+                    <!-- Admin Toggle -->
+                    <button id="admin-toggle-btn" class="p-2 rounded-full transition-colors text-stone-400 hover:text-brand-900" title="Area Riservata">
+                        <i data-lucide="lock" class="w-4 h-4"></i>
+                    </button>
+
+                    <div class="hidden md:flex items-center justify-center w-10 h-10 bg-brand-900 text-white rounded-full cursor-pointer hover:bg-brand-800 transition-colors shadow-md">
+                        <i data-lucide="globe" class="w-4 h-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ADMIN DASHBOARD MODAL (Hidden by default) -->
+    <div id="admin-dashboard" class="hidden fixed inset-0 z-[60] bg-stone-100 overflow-y-auto fade-in">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex justify-between items-center mb-8 bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                <div>
+                    <h2 class="text-3xl font-serif font-bold text-stone-900">Area Amministrativa</h2>
+                    <p className="text-stone-500">Gestisci gli eventi del portale. (I dati sono salvati in Locale)</p>
+                </div>
+                <button id="close-admin-btn" class="p-2 hover:bg-stone-100 rounded-full transition-colors">
+                    <i data-lucide="x" class="w-6 h-6 text-stone-600"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Upload Form -->
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                            <i data-lucide="plus" class="w-5 h-5 text-brand-900"></i>
+                            Nuovo Evento
+                        </h3>
+
+                        <!-- AI Upload Zone -->
+                        <div id="upload-zone" class="border-2 border-dashed border-stone-300 hover:border-brand-900 hover:bg-stone-50 rounded-xl p-8 text-center cursor-pointer transition-all mb-6 group relative">
+                            <input type="file" id="poster-input" class="hidden" accept="image/*" />
+                            
+                            <div id="upload-placeholder">
+                                <i data-lucide="upload" class="w-8 h-8 mx-auto mb-2 text-stone-400 group-hover:scale-110 transition-transform"></i>
+                                <span class="font-medium text-sm text-stone-600 block">Carica Locandina (70x100)</span>
+                                <span class="text-xs text-stone-400 mt-1 block">L'AI compilerà i dati per te</span>
+                            </div>
+
+                            <div id="upload-loading" class="hidden flex flex-col items-center text-brand-900">
+                                <i data-lucide="loader-2" class="w-8 h-8 animate-spin mb-2"></i>
+                                <span class="font-medium text-sm">Analisi AI in corso...</span>
+                            </div>
+
+                            <div id="upload-preview-container" class="hidden relative">
+                                <div class="mx-auto rounded-lg shadow-sm overflow-hidden w-2/3 aspect-[7/10]">
+                                    <img id="upload-preview-img" src="" class="w-full h-full object-cover" />
+                                </div>
+                                <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-lg">
+                                    <span class="text-white text-xs font-bold">Cambia</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Manual Form -->
+                        <form id="event-form" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Titolo</label>
+                                <input type="text" id="input-title" required class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg focus:ring-1 focus:ring-brand-900 outline-none">
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Data</label>
+                                    <input type="date" id="input-date" required class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg focus:ring-1 focus:ring-brand-900 outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Ora</label>
+                                    <input type="time" id="input-time" required class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg focus:ring-1 focus:ring-brand-900 outline-none">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Luogo</label>
+                                <select id="input-location" class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none"></select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Categoria</label>
+                                <select id="input-category" class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none"></select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Descrizione</label>
+                                <textarea id="input-desc" rows="3" class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg focus:ring-1 focus:ring-brand-900 outline-none text-sm"></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-brand-900 hover:bg-brand-800 text-white font-bold py-3 rounded-xl shadow-lg transition-transform hover:scale-[1.02] flex items-center justify-center gap-2">
+                                <i data-lucide="save" class="w-4 h-4"></i>
+                                Pubblica Evento
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Admin List Section -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
+                        <div class="p-4 bg-stone-50 border-b border-stone-200">
+                            <h3 class="font-bold text-stone-700" id="admin-list-title">Eventi Attivi</h3>
+                        </div>
+                        <div id="admin-events-list" class="divide-y divide-stone-100">
+                            <!-- Items injected via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-grow pt-20">
+        
+        <!-- HERO -->
+        <div class="relative h-[60vh] min-h-[500px] w-full overflow-hidden flex items-center justify-center bg-stone-900">
+            <div class="absolute inset-0 z-0">
+                <img src="https://images.unsplash.com/photo-1514306191717-452245255e0c?q=80&w=1920&auto=format&fit=crop" alt="Teatro Comunale" class="w-full h-full object-cover opacity-60" />
+                <div class="absolute inset-0 bg-gradient-to-t from-brand-900/90 via-brand-900/40 to-black/40"></div>
+            </div>
+            <div class="relative z-10 text-center px-4 max-w-4xl mx-auto text-white slide-up">
+                <span class="inline-block py-1 px-3 border border-brand-gold/50 text-brand-gold text-xs font-bold tracking-[0.2em] uppercase rounded-full mb-6 backdrop-blur-sm">
+                    Cultura e Territorio
+                </span>
+                <h1 class="text-5xl md:text-7xl font-bold mb-6 drop-shadow-lg font-serif tracking-tight">
+                    Avigliano Umbro Eventi
+                </h1>
+                <p class="text-lg md:text-xl text-stone-100 max-w-2xl mx-auto mb-10 leading-relaxed font-light">
+                    Il calendario completo degli appuntamenti culturali, musicali e teatrali del nostro territorio.
+                </p>
+                <button onclick="scrollToEvents()" class="bg-brand-gold hover:bg-white hover:text-brand-900 text-brand-900 font-bold py-4 px-8 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center gap-2 mx-auto group">
+                    Vedi Programma
+                    <i data-lucide="chevron-down" class="w-5 h-5 group-hover:translate-y-1 transition-transform"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- FILTER BAR -->
+        <div class="sticky top-20 z-40 bg-white border-b border-stone-200 shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div class="flex flex-col lg:flex-row gap-4">
+                    <div class="relative flex-grow lg:max-w-xs">
+                        <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400 w-4 h-4"></i>
+                        <input id="search-input" type="text" placeholder="Cerca evento..." class="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:ring-2 focus:ring-brand-900/20 focus:border-brand-900 outline-none text-sm transition-all">
+                    </div>
+                    <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1 lg:pb-0 flex-1">
+                        <select id="filter-month" class="pl-3 pr-8 py-2.5 bg-white border border-stone-200 rounded-lg text-sm text-stone-700 font-medium cursor-pointer hover:bg-stone-50"></select>
+                        <select id="filter-category" class="pl-3 pr-8 py-2.5 bg-white border border-stone-200 rounded-lg text-sm text-stone-700 font-medium cursor-pointer hover:bg-stone-50"></select>
+                        <select id="filter-location" class="pl-3 pr-8 py-2.5 bg-white border border-stone-200 rounded-lg text-sm text-stone-700 font-medium cursor-pointer hover:bg-stone-50"></select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- EVENTS GRID -->
+        <div id="eventi-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="flex justify-between items-end mb-8">
+                <div>
+                    <h2 class="text-3xl font-serif font-bold text-stone-900">Eventi in Programma</h2>
+                    <p id="results-count" class="text-stone-500 mt-2">Caricamento...</p>
+                </div>
+            </div>
+
+            <!-- Grid Container -->
+            <div id="events-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                <!-- Cards will be injected here -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="hidden flex flex-col items-center justify-center py-20 text-stone-400 bg-white rounded-xl border border-dashed border-stone-300">
+                <i data-lucide="calendar-off" class="w-12 h-12 mb-4 text-stone-300"></i>
+                <p class="text-lg font-medium">Nessun evento trovato</p>
+                <button onclick="resetFilters()" class="mt-4 text-brand-900 font-bold hover:underline">Resetta filtri</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-stone-900 text-white py-12 border-t border-stone-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                <div>
+                    <h4 class="text-xl font-serif font-bold mb-4 text-brand-gold">Visit Avigliano Umbro</h4>
+                    <p class="text-stone-400 text-sm leading-relaxed mb-4">La guida ufficiale agli eventi e alla cultura.</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Contatti</h4>
+                    <ul class="space-y-2 text-sm text-stone-400">
+                        <li>Piazza del Municipio, 1</li>
+                        <li>Tel: +39 0744 933521</li>
+                        <li>Email: info@visitavigliano.it</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- AI CHAT WIDGET -->
+    <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        <!-- Chat Window -->
+        <div id="chat-window" class="hidden mb-4 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col h-[450px] fade-in">
+            <div class="bg-brand-900 p-4 flex justify-between items-center text-white">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="sparkles" class="w-4 h-4 text-brand-gold"></i>
+                    <h3 class="font-bold">Assistente Virtuale</h3>
+                </div>
+                <button onclick="toggleChat()" class="hover:bg-white/20 p-1 rounded transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 bg-stone-50 space-y-3">
+                <!-- Messages injected here -->
+            </div>
+
+            <div class="p-3 bg-white border-t border-stone-200">
+                <div class="flex gap-2">
+                    <input type="text" id="chat-input" class="flex-1 bg-stone-100 border-transparent focus:bg-white focus:border-brand-900 focus:ring-1 focus:ring-brand-900 rounded-lg px-4 py-2 text-sm outline-none transition-all" placeholder="Chiedi a Gemini..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
+                    <button onclick="sendChatMessage()" class="bg-brand-900 text-white p-2 rounded-lg hover:bg-brand-800"><i data-lucide="send" class="w-4 h-4"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Toggle Button -->
+        <button id="chat-toggle" onclick="toggleChat()" class="shadow-lg transition-all duration-300 flex items-center gap-2 px-5 py-3 rounded-full font-bold bg-white text-brand-900 hover:bg-brand-50 border border-brand-100">
+            <i data-lucide="sparkles" class="w-5 h-5 text-brand-gold animate-pulse"></i>
+            <span>Chiedi a Gemini</span>
+        </button>
+    </div>
+
+    <!-- Application Script -->
+    <script type="module" src="script.js"></script>
+</body>
 </html>

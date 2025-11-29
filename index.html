@@ -368,6 +368,47 @@
         </button>
     </div>
 
-<script type="module" src="script.js?v=6"></script>
+    <!-- EVENT DETAILS MODAL (HIDDEN) -->
+    <div id="event-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <!-- Overlay -->
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+        
+        <!-- Modal Content -->
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col md:flex-row animate-in fade-in zoom-in-95 duration-200">
+            <!-- Close Button -->
+            <button onclick="closeModal()" class="absolute top-4 right-4 z-10 p-2 bg-white/80 rounded-full hover:bg-stone-100 transition-colors shadow-sm">
+                <i data-lucide="x" class="w-6 h-6 text-stone-800"></i>
+            </button>
+
+            <!-- Image Side -->
+            <div class="w-full md:w-2/5 h-64 md:h-auto bg-stone-100 relative">
+                <img id="modal-img" src="" alt="Evento" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-50"></div>
+            </div>
+
+            <!-- Content Side -->
+            <div class="p-8 md:p-10 flex-1 space-y-6 bg-white">
+                <div>
+                    <span id="modal-category" class="inline-block px-3 py-1 bg-brand-50 text-brand-900 text-xs font-bold uppercase tracking-wider rounded-full mb-3 border border-brand-100">Categoria</span>
+                    <h3 id="modal-title" class="text-3xl md:text-4xl font-serif font-bold text-stone-900 mb-2 leading-tight">Titolo Evento</h3>
+                    <p id="modal-subtitle" class="text-lg text-brand-800 font-medium italic">Sottotitolo</p>
+                </div>
+
+                <div class="flex flex-col gap-3 text-sm text-stone-600 border-y border-stone-100 py-6 bg-stone-50/50 -mx-8 px-8 md:-mx-10 md:px-10">
+                    <div class="flex items-center gap-3"><div class="w-8 flex justify-center"><i data-lucide="calendar" class="w-5 h-5 text-brand-gold"></i></div> <span id="modal-date" class="font-medium text-stone-800">Data</span></div>
+                    <div class="flex items-center gap-3"><div class="w-8 flex justify-center"><i data-lucide="clock" class="w-5 h-5 text-brand-gold"></i></div> <span id="modal-time" class="font-medium text-stone-800">Ora</span></div>
+                    <div class="flex items-center gap-3"><div class="w-8 flex justify-center"><i data-lucide="map-pin" class="w-5 h-5 text-brand-gold"></i></div> <span id="modal-location" class="font-medium text-stone-800">Luogo</span></div>
+                    <div id="modal-organizer-container" class="flex items-center gap-3 hidden"><div class="w-8 flex justify-center"><i data-lucide="users" class="w-5 h-5 text-brand-gold"></i></div> <span id="modal-organizer" class="font-medium text-stone-800 italic">Organizzatore</span></div>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-stone-900 mb-3 text-sm uppercase tracking-widest border-b border-brand-gold/30 inline-block pb-1">Descrizione</h4>
+                    <p id="modal-desc" class="text-stone-600 leading-relaxed text-base">Descrizione evento...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script type="module" src="script.js?v=7"></script>
 </body>
 </html>

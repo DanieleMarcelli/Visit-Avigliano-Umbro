@@ -114,6 +114,46 @@ window.resetFilters = () => {
     renderEvents();
 };
 
+// --- MODAL LOGIC ---
+
+window.openModal = (eventId) => {
+    const event = events.find(e => e.id === eventId);
+    if (!event) return;
+
+    const modal = document.getElementById('event-modal');
+    
+    // Populate Data
+    document.getElementById('modal-img').src = event.imageUrl;
+    document.getElementById('modal-category').innerText = event.category;
+    document.getElementById('modal-title').innerText = event.title;
+    document.getElementById('modal-subtitle').innerText = event.subtitle || '';
+    
+    // Date formatting
+    const dateObj = new Date(event.date);
+    const fullDate = dateObj.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    document.getElementById('modal-date').innerText = fullDate;
+    
+    document.getElementById('modal-time').innerText = event.time;
+    document.getElementById('modal-location').innerText = event.location;
+    document.getElementById('modal-desc').innerText = event.description;
+
+    // Organizer
+    const orgContainer = document.getElementById('modal-organizer-container');
+    if (event.organizer) {
+        document.getElementById('modal-organizer').innerText = `A cura di: ${event.organizer}`;
+        orgContainer.classList.remove('hidden');
+    } else {
+        orgContainer.classList.add('hidden');
+    }
+
+    // Show Modal
+    modal.classList.remove('hidden');
+};
+
+window.closeModal = () => {
+    document.getElementById('event-modal').classList.add('hidden');
+};
+
 window.sendChatMessage = async () => {
     const input = document.getElementById('chat-input');
     const text = input.value.trim();
@@ -323,7 +363,7 @@ function renderEvents() {
             const month = !isNaN(dateObj) ? dateObj.toLocaleString('it-IT', { month: 'short' }).toUpperCase() : "???";
             
             const cardHtml = `
-                <div class="group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-stone-200 flex flex-col h-full relative fade-in cursor-pointer hover:scale-[1.02]">
+                <div class="group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-stone-200 flex flex-col h-full relative fade-in cursor-pointer hover:scale-[1.02] btn-open-modal" data-id="${event.id}">
                     <div class="relative aspect-[7/10] overflow-hidden bg-stone-100 border-b border-stone-100">
                         <img src="${event.imageUrl}" alt="${event.title}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" onerror="this.src='https://picsum.photos/800/600'" />
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
@@ -370,7 +410,7 @@ function renderEvents() {
                 const fullDate = dateObj.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
 
                 const compactHtml = `
-                    <div class="flex items-center gap-4 bg-white p-4 rounded-lg border border-stone-200 shadow-sm hover:shadow-md transition-all group cursor-pointer hover:border-brand-200">
+                    <div class="flex items-center gap-4 bg-white p-4 rounded-lg border border-stone-200 shadow-sm hover:shadow-md transition-all group cursor-pointer hover:border-brand-200 btn-open-modal" data-id="${event.id}">
                         <!-- VERTICAL THUMBNAIL (7:10 ratio) -->
                         <div class="w-20 aspect-[7/10] rounded-md overflow-hidden flex-shrink-0 bg-stone-100 shadow-sm border border-stone-100">
                             <img src="${event.imageUrl}" class="w-full h-full object-cover group-hover:scale-110 transition-transform" onerror="this.src='https://picsum.photos/100/100'">
@@ -419,6 +459,19 @@ function renderEvents() {
 document.addEventListener('DOMContentLoaded', async () => {
     populateSelects();
     
+    // Add Event Delegation for Modals
+    document.addEventListener('click', (e) => {
+        const trigger = e.target.closest('.btn-open-modal');
+        if (trigger) {
+            const id = trigger.dataset.id;
+            window.openModal(id);
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if(e.key === "Escape") window.closeModal();
+    });
+
     await loadContentCMS();
     await loadEvents();
     renderEvents();

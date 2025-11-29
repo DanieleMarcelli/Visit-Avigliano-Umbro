@@ -2,9 +2,11 @@
 import { GoogleGenAI } from "@google/genai";
 
 // --- CONFIGURATION ---
-// Incolla qui i link pubblici CSV dei tuoi Fogli Google
+// 1. LINK EVENTI (Struttura: Data, Ora, Titolo, Sottotitolo, Descrizione, Luogo, Categoria, Immagine, Organizzatore)
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=0&single=true&output=csv"; 
-const CONTENT_CSV_URL = "INSERISCI_QUI_URL_FOGLIO_CONTENUTI"; // << NUOVO FOGLIO PER IL CMS (Colonne: ID, Testo, Immagine)
+
+// 2. LINK CONTENUTI CMS (Struttura: ID, Testo, Immagine)
+const CONTENT_CSV_URL = "INSERISCI_QUI_IL_LINK_DEL_FOGLIO_CONTENUTI"; 
 
 // --- DATA & CONSTANTS ---
 const EventCategory = {
@@ -47,30 +49,30 @@ const getApiKey = () => localStorage.getItem('GEMINI_API_KEY');
 // --- HELPER FUNCTIONS ---
 
 /**
- * Converts Google Drive links to viewable direct links.
- * Handles standard Google Drive sharing URLs.
+ * ROBUST GOOGLE DRIVE IMAGE FORMATTER
+ * Detects Drive links and converts them to high-res thumbnails.
  */
 function formatImageUrl(url) {
-    if (!url) return 'https://picsum.photos/800/600'; // Default placeholder
+    if (!url) return ''; // Return empty if null
     
-    // Check if it's a Google Drive URL
+    // 1. Handle Google Drive Links
     if (url.includes('drive.google.com')) {
-        // Extract ID using Regex
+        // Regex to extract the ID from various Drive URL formats
         const idMatch = url.match(/\/d\/(.+?)\/|id=(.+?)&|id=(.+?)$/);
         const id = idMatch ? (idMatch[1] || idMatch[2] || idMatch[3]) : null;
         
         if (id) {
-            // Return high-res thumbnail URL
+            // Return high-res thumbnail URL (sz=w1000 requests a 1000px wide image)
             return `https://drive.google.com/thumbnail?id=${id}&sz=w1000`;
         }
     }
     
+    // 2. Return original URL if it's not Drive (e.g., Unsplash, direct links)
     return url;
 }
 
 /**
  * Simple CSV Line Parser that respects quotes
- * (Prevents breaking if descriptions contain commas)
  */
 function parseCSVLine(text) {
     const result = [];
@@ -140,9 +142,8 @@ window.deleteEvent = (id) => {
         stored = stored.filter(e => e.id !== id);
         localStorage.setItem('visit_avigliano_events', JSON.stringify(stored));
         
-        // Reload all
         loadEvents().then(() => {
-             renderAdminList(); // Only admin events
+             renderAdminList(); 
              renderEvents();
         });
     }
@@ -183,6 +184,7 @@ window.sendChatMessage = async () => {
 
 // 1. CMS CONTENT LOADER
 async function loadContentCMS() {
+    // If URL is placeholder or empty, skip
     if (!CONTENT_CSV_URL || CONTENT_CSV_URL.includes("INSERISCI_QUI")) {
         console.warn("CMS CSV URL non configurato o placeholder presente.");
         return;
@@ -192,39 +194,38 @@ async function loadContentCMS() {
         const response = await fetch(CONTENT_CSV_URL);
         const text = await response.text();
         
-        // Use Parse function to handle quotes
         const rows = text.split('\n').filter(r => r.trim() !== '');
         
-        // Skip header (row 0)
+        // Skip header (row 0), process data
         rows.slice(1).forEach(row => {
             const cols = parseCSVLine(row);
-            const id = cols[0];       // Column A: ID
+            const id = cols[0];       // Column A: ID (e.g., "nav-logo", "hero-title")
             const contentText = cols[1]; // Column B: Text
             const imageUrl = cols[2];    // Column C: Image URL
 
             if (id) {
-                // Find all elements with this ID (in case used multiple times)
+                // Find element(s) by data-content-id
                 const elements = document.querySelectorAll(`[data-content-id="${id}"]`);
                 
                 elements.forEach(element => {
-                    // Update Text if provided
+                    // Update Text
                     if (contentText) {
-                         // Check if it's an input/button or regular text
                         if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
                             element.placeholder = contentText;
                         } else {
-                            element.innerText = contentText;
+                            // Use innerHTML to allow simple formatting like <br>
+                            element.innerHTML = contentText;
                         }
                     }
 
-                    // Update Image if provided
+                    // Update Image
                     if (imageUrl) {
                         const formattedUrl = formatImageUrl(imageUrl);
                         
                         if (element.tagName === 'IMG') {
                             element.src = formattedUrl;
                         } else {
-                            // Assume background image for Divs/Sections
+                            // Assume background image for Divs
                             element.style.backgroundImage = `url('${formattedUrl}')`;
                         }
                     }
@@ -250,9 +251,9 @@ async function fetchEventsFromSheet() {
         const sheetEvents = rows.slice(1).map((row, index) => {
             const cleanCols = parseCSVLine(row); 
             
-            // Apply Image Formatting
+            // Format Image URL using the new Drive-compatible function
             const rawImg = cleanCols[7] || '';
-            const formattedImg = formatImageUrl(rawImg);
+            const formattedImg = formatImageUrl(rawImg) || 'https://picsum.photos/800/600';
 
             return {
                 id: `sheet-${index}`,
@@ -277,17 +278,12 @@ async function fetchEventsFromSheet() {
 }
 
 async function loadEvents() {
-    // 1. Get Google Sheet Events
     const sheetEvents = await fetchEventsFromSheet();
-    
-    // 2. Get Local Storage Events (Admin added)
     const stored = localStorage.getItem('visit_avigliano_events');
     const localEvents = stored ? JSON.parse(stored) : [];
 
-    // 3. Combine them
     events = [...sheetEvents, ...localEvents];
     
-    // If absolutely empty, use initial constant fallback (optional)
     if (events.length === 0 && INITIAL_EVENTS.length > 0) {
         events = [...INITIAL_EVENTS];
     }
@@ -299,14 +295,13 @@ async function loadEvents() {
 }
 
 function saveLocalEvent(newEvent) {
-    // Ensure local image is also formatted if it's a drive link
+    // Format image before saving locally
     newEvent.imageUrl = formatImageUrl(newEvent.imageUrl);
 
     const stored = JSON.parse(localStorage.getItem('visit_avigliano_events') || '[]');
     stored.unshift(newEvent);
     localStorage.setItem('visit_avigliano_events', JSON.stringify(stored));
     
-    // Reload logic to mix with sheet
     loadEvents().then(() => {
         notificationCount++;
         localStorage.setItem('visit_avigliano_notif', notificationCount.toString());
@@ -488,11 +483,10 @@ function toggleAdmin() {
 function renderAdminList() {
     const container = document.getElementById('admin-events-list');
     container.innerHTML = '';
-    // Show only local events in admin panel to allow deletion
     const localEvents = JSON.parse(localStorage.getItem('visit_avigliano_events') || '[]');
     
     if (localEvents.length === 0) {
-        container.innerHTML = '<div class="p-4 text-sm text-stone-500 italic">Nessun evento locale aggiunto. Gli eventi del Foglio Google non appaiono qui.</div>';
+        container.innerHTML = '<div class="p-4 text-sm text-stone-500 italic">Nessun evento locale aggiunto.</div>';
     }
 
     localEvents.forEach(e => {
@@ -522,14 +516,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     populateSelects();
     updateNotificationBadge();
     
-    // Initial load
-    await loadContentCMS(); // Load Text/Images from CMS Sheet
-    await loadEvents();     // Load Events
+    // LOAD SEQUENCE: CMS Content first, then Events
+    await loadContentCMS();
+    await loadEvents();
     renderEvents();
-    
     renderChatMessages();
     
-    // Event Listeners for Filters
+    // Listeners
     ['search-input', 'filter-month', 'filter-category', 'filter-location'].forEach(id => {
         document.getElementById(id).addEventListener(id === 'search-input' ? 'input' : 'change', (e) => {
             const key = id.replace('filter-', '').replace('-input', '');
@@ -538,11 +531,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    // Admin Toggles
     document.getElementById('admin-toggle-btn').addEventListener('click', toggleAdmin);
     document.getElementById('close-admin-btn').addEventListener('click', toggleAdmin);
 
-    // Image Upload & AI
     const fileInput = document.getElementById('poster-input');
     const uploadZone = document.getElementById('upload-zone');
     
@@ -588,10 +579,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 } catch (err) {
                     console.error("AI Error", err);
-                    alert("Errore durante l'analisi AI. Verifica la console o l'API Key.");
+                    alert("Errore AI. Verifica API Key.");
                 }
-            } else {
-                alert("Per l'analisi automatica, imposta prima l'API Key.");
             }
 
             document.getElementById('upload-loading').classList.add('hidden');
@@ -600,7 +589,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         reader.readAsDataURL(file);
     });
 
-    // Submit
     document.getElementById('event-form').addEventListener('submit', (e) => {
         e.preventDefault();
         const newEvt = {
@@ -611,7 +599,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             time: document.getElementById('input-time').value,
             location: document.getElementById('input-location').value,
             category: document.getElementById('input-category').value,
-            imageUrl: document.getElementById('upload-preview-img').src || 'https://picsum.photos/800/600',
+            imageUrl: document.getElementById('upload-preview-img').src || '',
             tags: ["Nuovo"]
         };
         saveLocalEvent(newEvt);
@@ -622,10 +610,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         alert('Evento Pubblicato!');
     });
 
-    // Contact Form
     document.getElementById('contact-form').addEventListener('submit', (e) => {
         e.preventDefault();
-        alert('Grazie per averci contattato! Il tuo messaggio è stato inviato.');
+        alert('Grazie per averci contattato!');
         document.getElementById('contact-form').reset();
     });
 

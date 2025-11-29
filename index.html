@@ -55,11 +55,8 @@
       body { font-family: 'Inter', sans-serif; background-color: #f8f5f2; }
       .no-scrollbar::-webkit-scrollbar { display: none; }
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      
-      /* Animation Utilities */
       .fade-in { animation: fadeIn 0.3s ease-out forwards; }
       .slide-up { animation: slideUp 0.5s ease-out forwards; }
-      
       @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
       @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
@@ -70,10 +67,10 @@
     <header class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-stone-200 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
-                <!-- Logo -->
+                <!-- Logo (CMS ID: nav-logo) -->
                 <div class="flex items-center gap-3 cursor-pointer" onclick="window.location.reload()">
                     <div class="w-10 h-10 bg-brand-900 rounded-full flex items-center justify-center text-white overflow-hidden shadow-md">
-                        <img src="https://picsum.photos/50/50" alt="Logo" class="w-full h-full object-cover opacity-90" />
+                        <img data-content-id="nav-logo" src="https://picsum.photos/50/50" alt="Logo" class="w-full h-full object-cover opacity-90" />
                     </div>
                     <div class="flex flex-col">
                         <span class="text-xs uppercase tracking-widest text-brand-900 font-bold">Portale Turistico</span>
@@ -102,14 +99,9 @@
                         <span class="hidden lg:inline">Condividi</span>
                     </button>
                     
-                    <!-- Admin Toggle -->
                     <button id="admin-toggle-btn" class="p-2 rounded-full transition-colors text-stone-400 hover:text-brand-900" title="Area Riservata">
                         <i data-lucide="lock" class="w-4 h-4"></i>
                     </button>
-
-                    <div class="hidden md:flex items-center justify-center w-10 h-10 bg-brand-900 text-white rounded-full cursor-pointer hover:bg-brand-800 transition-colors shadow-md">
-                        <i data-lucide="globe" class="w-4 h-4"></i>
-                    </div>
                 </div>
             </div>
         </div>
@@ -121,10 +113,9 @@
             <div class="flex justify-between items-center mb-8 bg-white p-6 rounded-xl shadow-sm border border-stone-200">
                 <div>
                     <h2 class="text-3xl font-serif font-bold text-stone-900">Area Amministrativa</h2>
-                    <p class="text-stone-500">Gestisci gli eventi del portale. (I dati sono salvati nel browser)</p>
+                    <p class="text-stone-500">Gestisci gli eventi (salvataggio locale). I contenuti del sito si gestiscono via Google Sheets.</p>
                 </div>
                 <div class="flex gap-4">
-                     <!-- Config Key -->
                      <button onclick="setApiKey()" class="text-sm text-brand-900 underline">Configura API Key</button>
                      <button id="close-admin-btn" class="p-2 hover:bg-stone-100 rounded-full transition-colors">
                         <i data-lucide="x" class="w-6 h-6 text-stone-600"></i>
@@ -141,7 +132,6 @@
                             Nuovo Evento
                         </h3>
 
-                        <!-- AI Upload Zone -->
                         <div id="upload-zone" class="border-2 border-dashed border-stone-300 hover:border-brand-900 hover:bg-stone-50 rounded-xl p-8 text-center cursor-pointer transition-all mb-6 group relative">
                             <input type="file" id="poster-input" class="hidden" accept="image/*" />
                             
@@ -166,51 +156,26 @@
                             </div>
                         </div>
 
-                        <!-- Manual Form -->
                         <form id="event-form" class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Titolo</label>
-                                <input type="text" id="input-title" required class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg focus:ring-1 focus:ring-brand-900 outline-none">
-                            </div>
+                            <div><label class="block text-xs font-bold text-stone-500 uppercase mb-1">Titolo</label><input type="text" id="input-title" required class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none"></div>
                             <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Data</label>
-                                    <input type="date" id="input-date" required class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg focus:ring-1 focus:ring-brand-900 outline-none">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Ora</label>
-                                    <input type="time" id="input-time" required class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg focus:ring-1 focus:ring-brand-900 outline-none">
-                                </div>
+                                <div><label class="block text-xs font-bold text-stone-500 uppercase mb-1">Data</label><input type="date" id="input-date" required class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none"></div>
+                                <div><label class="block text-xs font-bold text-stone-500 uppercase mb-1">Ora</label><input type="time" id="input-time" required class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none"></div>
                             </div>
-                            <div>
-                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Luogo</label>
-                                <select id="input-location" class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none"></select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Categoria</label>
-                                <select id="input-category" class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none"></select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Descrizione</label>
-                                <textarea id="input-desc" rows="3" class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg focus:ring-1 focus:ring-brand-900 outline-none text-sm"></textarea>
-                            </div>
+                            <div><label class="block text-xs font-bold text-stone-500 uppercase mb-1">Luogo</label><select id="input-location" class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none"></select></div>
+                            <div><label class="block text-xs font-bold text-stone-500 uppercase mb-1">Categoria</label><select id="input-category" class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none"></select></div>
+                            <div><label class="block text-xs font-bold text-stone-500 uppercase mb-1">Descrizione</label><textarea id="input-desc" rows="3" class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none text-sm"></textarea></div>
                             <button type="submit" class="w-full bg-brand-900 hover:bg-brand-800 text-white font-bold py-3 rounded-xl shadow-lg transition-transform hover:scale-[1.02] flex items-center justify-center gap-2">
-                                <i data-lucide="save" class="w-4 h-4"></i>
-                                Pubblica Evento
+                                <i data-lucide="save" class="w-4 h-4"></i> Pubblica Evento
                             </button>
                         </form>
                     </div>
                 </div>
 
-                <!-- Admin List Section -->
                 <div class="lg:col-span-2">
                     <div class="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
-                        <div class="p-4 bg-stone-50 border-b border-stone-200">
-                            <h3 class="font-bold text-stone-700" id="admin-list-title">Eventi Attivi</h3>
-                        </div>
-                        <div id="admin-events-list" class="divide-y divide-stone-100">
-                            <!-- Items injected via JS -->
-                        </div>
+                        <div class="p-4 bg-stone-50 border-b border-stone-200"><h3 class="font-bold text-stone-700">Eventi Locali Aggiunti</h3></div>
+                        <div id="admin-events-list" class="divide-y divide-stone-100"></div>
                     </div>
                 </div>
             </div>
@@ -220,29 +185,18 @@
     <!-- MAIN CONTENT -->
     <main class="flex-grow pt-20">
         
-        <!-- HERO SECTION -->
+        <!-- HERO SECTION (CMS IDs: hero-bg, hero-title, hero-desc, hero-btn) -->
         <div class="relative h-[60vh] min-h-[500px] w-full overflow-hidden flex items-center justify-center bg-stone-900">
-            <!-- BACKGROUND IMAGE (Dynamic CMS ID: hero-bg) -->
             <div data-content-id="hero-bg" class="absolute inset-0 z-0 bg-cover bg-center transition-all duration-1000" 
                  style="background-image: url('https://scontent.fbri2-1.fna.fbcdn.net/v/t39.30808-6/502622906_24128557276730363_1128000473065477802_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=833d8c&_nc_ohc=fSDHMgKfuL4Q7kNvwH-cU1X&_nc_oc=Adnr9jhXM5IY_QOUKSYZkPLRrRMRNrqXULkHgXcRrVGlHiIxB3TnijwwQmxlO64EVoE&_nc_zt=23&_nc_ht=scontent.fbri2-1.fna&_nc_gid=q2fLCb7j0NT9PRsPhKsHZg&oh=00_AfjCqig3UbjC9HBDpbbftJe3M_S0fEomfCgbEEtdxPAcrA&oe=69311124'); opacity: 0.9;">
             </div>
             
-            <!-- Overlay -->
             <div class="absolute inset-0 bg-gradient-to-t from-brand-900/95 via-brand-900/50 to-stone-900/40"></div>
             
             <div class="relative z-10 text-center px-4 max-w-4xl mx-auto text-white slide-up">
-                <span class="inline-block py-1 px-3 border border-brand-gold/50 text-brand-gold text-xs font-bold tracking-[0.2em] uppercase rounded-full mb-6 backdrop-blur-sm">
-                    Cultura e Territorio
-                </span>
-                <!-- HERO TITLE (CMS ID: hero-title) -->
-                <h1 data-content-id="hero-title" class="text-5xl md:text-7xl font-bold mb-6 drop-shadow-lg font-serif tracking-tight">
-                    Avigliano Umbro Eventi
-                </h1>
-                <!-- HERO DESC (CMS ID: hero-desc) -->
-                <p data-content-id="hero-desc" class="text-lg md:text-xl text-stone-100 max-w-2xl mx-auto mb-10 leading-relaxed font-light">
-                    Il calendario completo degli appuntamenti culturali, musicali e teatrali del nostro territorio.
-                </p>
-                <!-- HERO BTN (CMS ID: hero-btn) -->
+                <span class="inline-block py-1 px-3 border border-brand-gold/50 text-brand-gold text-xs font-bold tracking-[0.2em] uppercase rounded-full mb-6 backdrop-blur-sm">Cultura e Territorio</span>
+                <h1 data-content-id="hero-title" class="text-5xl md:text-7xl font-bold mb-6 drop-shadow-lg font-serif tracking-tight">Avigliano Umbro Eventi</h1>
+                <p data-content-id="hero-desc" class="text-lg md:text-xl text-stone-100 max-w-2xl mx-auto mb-10 leading-relaxed font-light">Il calendario completo degli appuntamenti culturali, musicali e teatrali del nostro territorio.</p>
                 <button onclick="scrollToEvents()" class="bg-brand-gold hover:bg-white hover:text-brand-900 text-brand-900 font-bold py-4 px-8 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center gap-2 mx-auto group">
                     <span data-content-id="hero-btn">Vedi Programma</span>
                     <i data-lucide="chevron-down" class="w-5 h-5 group-hover:translate-y-1 transition-transform"></i>
@@ -250,38 +204,20 @@
             </div>
         </div>
 
-        <!-- QUICK LINKS SECTION -->
+        <!-- QUICK LINKS SECTION (CMS IDs: link-terr-title, link-storia-title, link-contatti-title) -->
         <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 relative z-20 mb-12 slide-up" style="animation-delay: 0.1s;">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Card 1 -->
                 <a href="#territorio" class="bg-white rounded-xl shadow-xl p-6 flex items-center gap-4 hover:-translate-y-1 transition-transform border-b-4 border-brand-900 cursor-pointer group">
-                    <div class="w-12 h-12 rounded-full bg-brand-100 flex items-center justify-center text-brand-900 group-hover:bg-brand-900 group-hover:text-white transition-colors">
-                        <i data-lucide="map" class="w-6 h-6"></i>
-                    </div>
-                    <div>
-                        <h3 data-content-id="link-terr-title" class="font-bold text-lg text-stone-900 font-serif">Territorio & Borghi</h3>
-                        <p class="text-xs text-stone-500 uppercase tracking-wider font-semibold">Scopri la natura</p>
-                    </div>
+                    <div class="w-12 h-12 rounded-full bg-brand-100 flex items-center justify-center text-brand-900 group-hover:bg-brand-900 group-hover:text-white transition-colors"><i data-lucide="map" class="w-6 h-6"></i></div>
+                    <div><h3 data-content-id="link-terr-title" class="font-bold text-lg text-stone-900 font-serif">Territorio & Borghi</h3><p class="text-xs text-stone-500 uppercase tracking-wider font-semibold">Scopri la natura</p></div>
                 </a>
-                <!-- Card 2 -->
                 <a href="#storia" class="bg-white rounded-xl shadow-xl p-6 flex items-center gap-4 hover:-translate-y-1 transition-transform border-b-4 border-brand-gold cursor-pointer group">
-                    <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 group-hover:bg-brand-gold group-hover:text-white transition-colors">
-                        <i data-lucide="scroll" class="w-6 h-6"></i>
-                    </div>
-                    <div>
-                        <h3 data-content-id="link-storia-title" class="font-bold text-lg text-stone-900 font-serif">Storia & Cultura</h3>
-                        <p class="text-xs text-stone-500 uppercase tracking-wider font-semibold">Le nostre radici</p>
-                    </div>
+                    <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 group-hover:bg-brand-gold group-hover:text-white transition-colors"><i data-lucide="scroll" class="w-6 h-6"></i></div>
+                    <div><h3 data-content-id="link-storia-title" class="font-bold text-lg text-stone-900 font-serif">Storia & Cultura</h3><p class="text-xs text-stone-500 uppercase tracking-wider font-semibold">Le nostre radici</p></div>
                 </a>
-                <!-- Card 3 -->
                 <a href="#contatti" class="bg-white rounded-xl shadow-xl p-6 flex items-center gap-4 hover:-translate-y-1 transition-transform border-b-4 border-stone-600 cursor-pointer group">
-                    <div class="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center text-stone-600 group-hover:bg-stone-600 group-hover:text-white transition-colors">
-                        <i data-lucide="phone" class="w-6 h-6"></i>
-                    </div>
-                    <div>
-                        <h3 data-content-id="link-contatti-title" class="font-bold text-lg text-stone-900 font-serif">Contatti Utili</h3>
-                        <p class="text-xs text-stone-500 uppercase tracking-wider font-semibold">Resta informato</p>
-                    </div>
+                    <div class="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center text-stone-600 group-hover:bg-stone-600 group-hover:text-white transition-colors"><i data-lucide="phone" class="w-6 h-6"></i></div>
+                    <div><h3 data-content-id="link-contatti-title" class="font-bold text-lg text-stone-900 font-serif">Contatti Utili</h3><p class="text-xs text-stone-500 uppercase tracking-wider font-semibold">Resta informato</p></div>
                 </a>
             </div>
         </section>
@@ -292,18 +228,12 @@
                 <div class="flex flex-col lg:flex-row gap-4">
                     <div class="relative flex-grow lg:max-w-xs">
                         <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400 w-4 h-4"></i>
-                        <input id="search-input" type="text" placeholder="Cerca evento..." class="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:ring-2 focus:ring-brand-900/20 focus:border-brand-900 outline-none text-sm transition-all">
+                        <input id="search-input" type="text" placeholder="Cerca evento..." class="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg outline-none text-sm transition-all">
                     </div>
                     <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1 lg:pb-0 flex-1">
-                        <div class="relative min-w-[140px]">
-                            <select id="filter-month" class="w-full pl-3 pr-8 py-2.5 bg-white border border-stone-200 rounded-lg text-sm text-stone-700 font-medium cursor-pointer hover:bg-stone-50"></select>
-                        </div>
-                        <div class="relative min-w-[160px]">
-                            <select id="filter-category" class="w-full pl-3 pr-8 py-2.5 bg-white border border-stone-200 rounded-lg text-sm text-stone-700 font-medium cursor-pointer hover:bg-stone-50"></select>
-                        </div>
-                         <div class="relative min-w-[160px]">
-                            <select id="filter-location" class="w-full pl-3 pr-8 py-2.5 bg-white border border-stone-200 rounded-lg text-sm text-stone-700 font-medium cursor-pointer hover:bg-stone-50"></select>
-                        </div>
+                        <div class="relative min-w-[140px]"><select id="filter-month" class="w-full pl-3 pr-8 py-2.5 bg-white border border-stone-200 rounded-lg text-sm text-stone-700 font-medium cursor-pointer"></select></div>
+                        <div class="relative min-w-[160px]"><select id="filter-category" class="w-full pl-3 pr-8 py-2.5 bg-white border border-stone-200 rounded-lg text-sm text-stone-700 font-medium cursor-pointer"></select></div>
+                         <div class="relative min-w-[160px]"><select id="filter-location" class="w-full pl-3 pr-8 py-2.5 bg-white border border-stone-200 rounded-lg text-sm text-stone-700 font-medium cursor-pointer"></select></div>
                     </div>
                 </div>
             </div>
@@ -318,9 +248,7 @@
                 </div>
             </div>
 
-            <!-- Grid Container - Initiated with loader -->
             <div id="events-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                <!-- Loader Placeholder -->
                 <div class="col-span-full flex justify-center py-20">
                     <div class="flex flex-col items-center">
                         <i data-lucide="loader-2" class="w-10 h-10 animate-spin text-brand-900 mb-4"></i>
@@ -329,7 +257,6 @@
                 </div>
             </div>
 
-            <!-- Empty State -->
             <div id="empty-state" class="hidden flex flex-col items-center justify-center py-20 text-stone-400 bg-white rounded-xl border border-dashed border-stone-300">
                 <i data-lucide="calendar-off" class="w-12 h-12 mb-4 text-stone-300"></i>
                 <p class="text-lg font-medium">Nessun evento trovato</p>
@@ -337,123 +264,70 @@
             </div>
         </div>
 
-        <!-- TERRITORIO SECTION -->
+        <!-- TERRITORIO SECTION (CMS IDs: terr-img, terr-title, terr-desc, terr-btn) -->
         <section id="territorio" class="py-20 bg-stone-50 border-t border-stone-200 scroll-mt-20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col lg:flex-row items-center gap-12">
                     <div class="lg:w-1/2">
                         <div class="relative rounded-2xl overflow-hidden shadow-2xl">
-                             <!-- CMS ID: terr-img -->
-                             <img data-content-id="terr-img" src="https://loremflickr.com/800/600/umbria,landscape/all" alt="Territorio Avigliano" class="w-full h-auto object-cover transform hover:scale-105 transition-transform duration-700">
+                             <img data-content-id="terr-img" src="https://loremflickr.com/800/600/umbria,landscape/all" alt="Territorio" class="w-full h-auto object-cover transform hover:scale-105 transition-transform duration-700">
                         </div>
                     </div>
                     <div class="lg:w-1/2 space-y-6">
                         <span class="text-brand-900 font-bold text-sm tracking-widest uppercase">Il Nostro Patrimonio</span>
-                        <!-- CMS ID: terr-title -->
                         <h2 data-content-id="terr-title" class="text-4xl font-serif font-bold text-stone-900">Un Cuore Verde di Borghi e Natura</h2>
-                        <!-- CMS ID: terr-desc -->
-                        <p data-content-id="terr-desc" class="text-stone-600 leading-relaxed text-lg">
-                            Avigliano Umbro è un gioiello incastonato tra le colline, un territorio costellato di borghi storici che mantengono intatta la loro autenticità. Da Sismano a Dunarobba, ogni angolo racconta una storia di tradizioni e bellezza.
-                        </p>
-                        <button class="px-6 py-3 border border-brand-900 text-brand-900 font-bold rounded-lg hover:bg-brand-900 hover:text-white transition-colors">
-                            <span data-content-id="terr-btn">Esplora i Borghi</span>
-                        </button>
+                        <p data-content-id="terr-desc" class="text-stone-600 leading-relaxed text-lg">Avigliano Umbro è un gioiello incastonato tra le colline...</p>
+                        <button class="px-6 py-3 border border-brand-900 text-brand-900 font-bold rounded-lg hover:bg-brand-900 hover:text-white transition-colors"><span data-content-id="terr-btn">Esplora i Borghi</span></button>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- STORIA SECTION -->
+        <!-- STORIA SECTION (CMS IDs: storia-img, storia-title, storia-desc, storia-btn) -->
         <section id="storia" class="py-20 bg-white border-t border-stone-200 scroll-mt-20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col lg:flex-row-reverse items-center gap-12">
                      <div class="lg:w-1/2">
                         <div class="relative rounded-2xl overflow-hidden shadow-2xl">
-                             <!-- CMS ID: storia-img -->
-                             <img data-content-id="storia-img" src="https://loremflickr.com/800/600/medieval,castle/all" alt="Storia Avigliano" class="w-full h-auto object-cover transform hover:scale-105 transition-transform duration-700">
+                             <img data-content-id="storia-img" src="https://loremflickr.com/800/600/medieval,castle/all" alt="Storia" class="w-full h-auto object-cover transform hover:scale-105 transition-transform duration-700">
                         </div>
                     </div>
                     <div class="lg:w-1/2 space-y-6">
                         <span class="text-brand-gold font-bold text-sm tracking-widest uppercase">Radici Antiche</span>
-                        <!-- CMS ID: storia-title -->
                         <h2 data-content-id="storia-title" class="text-4xl font-serif font-bold text-stone-900">Dalla Foresta Fossile al Medioevo</h2>
-                        <!-- CMS ID: storia-desc -->
-                        <p data-content-id="storia-desc" class="text-stone-600 leading-relaxed text-lg">
-                            La storia di Avigliano Umbro affonda le radici in un passato millenario. Il territorio ospita la celebre Foresta Fossile di Dunarobba, un monumento naturale unico al mondo che ci riporta indietro di 3 milioni di anni.
-                        </p>
-                        <button class="px-6 py-3 bg-stone-900 text-white font-bold rounded-lg hover:bg-stone-800 transition-colors">
-                            <span data-content-id="storia-btn">Scopri la Storia</span>
-                        </button>
+                        <p data-content-id="storia-desc" class="text-stone-600 leading-relaxed text-lg">La storia di Avigliano Umbro affonda le radici in un passato millenario...</p>
+                        <button class="px-6 py-3 bg-stone-900 text-white font-bold rounded-lg hover:bg-stone-800 transition-colors"><span data-content-id="storia-btn">Scopri la Storia</span></button>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- CONTATTI SECTION -->
+        <!-- CONTATTI SECTION (CMS IDs: contatti-title, info-addr, info-tel, info-email) -->
         <section id="contatti" class="py-20 bg-brand-50 border-t border-stone-200 scroll-mt-20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-12">
                     <span class="text-brand-900 font-bold text-sm tracking-widest uppercase">Siamo qui per te</span>
-                    <!-- CMS ID: contatti-title -->
                     <h2 data-content-id="contatti-title" class="text-4xl font-serif font-bold text-stone-900 mt-2">Resta in Contatto</h2>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 bg-white rounded-2xl shadow-xl overflow-hidden">
-                    <!-- Info -->
                     <div class="p-10 bg-brand-900 text-white flex flex-col justify-between">
                         <div>
                             <h3 class="text-2xl font-serif font-bold mb-6">Comune di Avigliano Umbro</h3>
                             <div class="space-y-6">
-                                <div class="flex items-start gap-4">
-                                    <div class="bg-white/10 p-3 rounded-lg"><i data-lucide="map-pin" class="w-6 h-6 text-brand-gold"></i></div>
-                                    <div>
-                                        <p class="font-bold text-brand-gold uppercase text-xs tracking-wider mb-1">Indirizzo</p>
-                                        <!-- CMS ID: info-addr -->
-                                        <p data-content-id="info-addr" class="text-stone-200">Via F.lli Rosselli 14,<br>05020 Avigliano Umbro (TR)</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-start gap-4">
-                                    <div class="bg-white/10 p-3 rounded-lg"><i data-lucide="phone" class="w-6 h-6 text-brand-gold"></i></div>
-                                    <div>
-                                        <p class="font-bold text-brand-gold uppercase text-xs tracking-wider mb-1">Telefono</p>
-                                        <!-- CMS ID: info-tel -->
-                                        <p data-content-id="info-tel" class="text-stone-200">0744 933521</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-start gap-4">
-                                    <div class="bg-white/10 p-3 rounded-lg"><i data-lucide="mail" class="w-6 h-6 text-brand-gold"></i></div>
-                                    <div>
-                                        <p class="font-bold text-brand-gold uppercase text-xs tracking-wider mb-1">Email</p>
-                                        <!-- CMS ID: info-email -->
-                                        <p data-content-id="info-email" class="text-stone-200">info@comune.aviglianoumbro.tr.it</p>
-                                    </div>
-                                </div>
+                                <div class="flex items-start gap-4"><div class="bg-white/10 p-3 rounded-lg"><i data-lucide="map-pin" class="w-6 h-6 text-brand-gold"></i></div><div><p class="font-bold text-brand-gold uppercase text-xs tracking-wider mb-1">Indirizzo</p><p data-content-id="info-addr" class="text-stone-200">Via F.lli Rosselli 14</p></div></div>
+                                <div class="flex items-start gap-4"><div class="bg-white/10 p-3 rounded-lg"><i data-lucide="phone" class="w-6 h-6 text-brand-gold"></i></div><div><p class="font-bold text-brand-gold uppercase text-xs tracking-wider mb-1">Telefono</p><p data-content-id="info-tel" class="text-stone-200">0744 933521</p></div></div>
+                                <div class="flex items-start gap-4"><div class="bg-white/10 p-3 rounded-lg"><i data-lucide="mail" class="w-6 h-6 text-brand-gold"></i></div><div><p class="font-bold text-brand-gold uppercase text-xs tracking-wider mb-1">Email</p><p data-content-id="info-email" class="text-stone-200">info@comune.aviglianoumbro.tr.it</p></div></div>
                             </div>
                         </div>
-                        <div class="mt-12">
-                            <p class="text-sm text-brand-100 opacity-60">Siamo aperti dal Lunedì al Venerdì, dalle 9:00 alle 13:00.</p>
-                        </div>
                     </div>
-
-                    <!-- Form -->
                     <div class="p-10">
                         <h3 class="text-xl font-bold text-stone-800 mb-6">Scrivici un messaggio</h3>
                         <form id="contact-form" class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Nome e Cognome</label>
-                                <input type="text" required class="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-lg focus:ring-1 focus:ring-brand-900 outline-none transition-all">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Email</label>
-                                <input type="email" required class="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-lg focus:ring-1 focus:ring-brand-900 outline-none transition-all">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Messaggio</label>
-                                <textarea rows="4" required class="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-lg focus:ring-1 focus:ring-brand-900 outline-none transition-all"></textarea>
-                            </div>
-                            <button type="submit" class="w-full bg-brand-900 text-white font-bold py-3 rounded-lg hover:bg-brand-800 transition-colors shadow-lg mt-2">
-                                Invia Messaggio
-                            </button>
+                            <div><label class="block text-xs font-bold text-stone-500 uppercase mb-1">Nome</label><input type="text" required class="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-lg outline-none"></div>
+                            <div><label class="block text-xs font-bold text-stone-500 uppercase mb-1">Email</label><input type="email" required class="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-lg outline-none"></div>
+                            <div><label class="block text-xs font-bold text-stone-500 uppercase mb-1">Messaggio</label><textarea rows="4" required class="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-lg outline-none"></textarea></div>
+                            <button type="submit" class="w-full bg-brand-900 text-white font-bold py-3 rounded-lg hover:bg-brand-800 transition-colors shadow-lg mt-2">Invia Messaggio</button>
                         </form>
                     </div>
                 </div>
@@ -485,17 +359,10 @@
     <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
         <div id="chat-window" class="hidden mb-4 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col h-[450px] fade-in">
             <div class="bg-brand-900 p-4 flex justify-between items-center text-white">
-                <div class="flex items-center gap-2">
-                    <i data-lucide="sparkles" class="w-4 h-4 text-brand-gold"></i>
-                    <h3 class="font-bold">Assistente Virtuale</h3>
-                </div>
+                <div class="flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4 text-brand-gold"></i><h3 class="font-bold">Assistente Virtuale</h3></div>
                 <button onclick="toggleChat()" class="hover:bg-white/20 p-1 rounded transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
-            
-            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 bg-stone-50 space-y-3">
-                <!-- Messages -->
-            </div>
-
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 bg-stone-50 space-y-3"></div>
             <div class="p-3 bg-white border-t border-stone-200">
                 <div class="flex gap-2">
                     <input type="text" id="chat-input" class="flex-1 bg-stone-100 border-transparent focus:bg-white focus:border-brand-900 focus:ring-1 focus:ring-brand-900 rounded-lg px-4 py-2 text-sm outline-none transition-all" placeholder="Chiedi a Gemini..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
@@ -503,14 +370,11 @@
                 </div>
             </div>
         </div>
-
         <button id="chat-toggle" onclick="toggleChat()" class="shadow-lg transition-all duration-300 flex items-center gap-2 px-5 py-3 rounded-full font-bold bg-white text-brand-900 hover:bg-brand-50 border border-brand-100">
-            <i data-lucide="sparkles" class="w-5 h-5 text-brand-gold animate-pulse"></i>
-            <span>Chiedi a Gemini</span>
+            <i data-lucide="sparkles" class="w-5 h-5 text-brand-gold animate-pulse"></i><span>Chiedi a Gemini</span>
         </button>
     </div>
 
-    <!-- Application Script (Module) -->
     <script type="module" src="script.js"></script>
 </body>
 </html>

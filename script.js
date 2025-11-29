@@ -2,8 +2,9 @@
 import { GoogleGenAI } from "@google/genai";
 
 // --- CONFIGURATION ---
+// Incolla qui i link pubblici CSV dei tuoi Fogli Google
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=0&single=true&output=csv"; 
-const CONTENT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=643581002&single=true&output=csv"; // << INSERISCI QUI IL LINK DEL FOGLIO CONTENUTI
+const CONTENT_CSV_URL = "INSERISCI_QUI_URL_FOGLIO_CONTENUTI"; // << NUOVO FOGLIO PER IL CMS (Colonne: ID, Testo, Immagine)
 
 // --- DATA & CONSTANTS ---
 const EventCategory = {
@@ -42,6 +43,54 @@ let filters = { search: '', month: 'Tutti i mesi', category: 'Tutte le categorie
 
 // Get API Key safely
 const getApiKey = () => localStorage.getItem('GEMINI_API_KEY');
+
+// --- HELPER FUNCTIONS ---
+
+/**
+ * Converts Google Drive links to viewable direct links.
+ * Handles standard Google Drive sharing URLs.
+ */
+function formatImageUrl(url) {
+    if (!url) return 'https://picsum.photos/800/600'; // Default placeholder
+    
+    // Check if it's a Google Drive URL
+    if (url.includes('drive.google.com')) {
+        // Extract ID using Regex
+        const idMatch = url.match(/\/d\/(.+?)\/|id=(.+?)&|id=(.+?)$/);
+        const id = idMatch ? (idMatch[1] || idMatch[2] || idMatch[3]) : null;
+        
+        if (id) {
+            // Return high-res thumbnail URL
+            return `https://drive.google.com/thumbnail?id=${id}&sz=w1000`;
+        }
+    }
+    
+    return url;
+}
+
+/**
+ * Simple CSV Line Parser that respects quotes
+ * (Prevents breaking if descriptions contain commas)
+ */
+function parseCSVLine(text) {
+    const result = [];
+    let cell = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        if (char === '"') {
+            inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+            result.push(cell.trim());
+            cell = '';
+        } else {
+            cell += char;
+        }
+    }
+    result.push(cell.trim());
+    return result.map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"')); // Clean surrounding quotes
+}
 
 // --- FUNCTIONS EXPOSED TO WINDOW ---
 
@@ -112,7 +161,7 @@ window.sendChatMessage = async () => {
     if (apiKey) {
         try {
             const ai = new GoogleGenAI({ apiKey });
-            const systemPrompt = `Sei un assistente turistico per Avigliano Umbro. Ecco gli eventi attuali: ${JSON.stringify(events.map(e => `${e.title} il ${e.date}`))}. Sii breve.`;
+            const systemPrompt = `Sei un assistente turistico per Avigliano Umbro. Ecco gli eventi attuali: ${JSON.stringify(events.map(e => `${e.title} il ${e.date}`))}. Sii breve e amichevole.`;
             
             const response = await ai.models.generateContent({
                 model: 'gemini-2.5-flash',
@@ -132,65 +181,79 @@ window.sendChatMessage = async () => {
 
 // --- CORE LOGIC ---
 
-// New: Fetch CMS Content
+// 1. CMS CONTENT LOADER
 async function loadContentCMS() {
-    if (!CONTENT_CSV_URL || CONTENT_CSV_URL.includes("INCOLLA_QUI")) {
-        console.warn("CMS CSV URL non configurato.");
+    if (!CONTENT_CSV_URL || CONTENT_CSV_URL.includes("INSERISCI_QUI")) {
+        console.warn("CMS CSV URL non configurato o placeholder presente.");
         return;
     }
 
     try {
         const response = await fetch(CONTENT_CSV_URL);
         const text = await response.text();
-        // Simple CSV parser: ID, Text, Image
-        const rows = text.split('\n').slice(1); // Skip header
-
-        rows.forEach(row => {
-            const cols = row.split(',').map(c => c.trim().replace(/^"|"$/g, ''));
-            const id = cols[0];
-            const contentText = cols[1];
-            const imageUrl = cols[2];
+        
+        // Use Parse function to handle quotes
+        const rows = text.split('\n').filter(r => r.trim() !== '');
+        
+        // Skip header (row 0)
+        rows.slice(1).forEach(row => {
+            const cols = parseCSVLine(row);
+            const id = cols[0];       // Column A: ID
+            const contentText = cols[1]; // Column B: Text
+            const imageUrl = cols[2];    // Column C: Image URL
 
             if (id) {
-                const element = document.querySelector(`[data-content-id="${id}"]`);
-                if (element) {
-                    // Update Text
+                // Find all elements with this ID (in case used multiple times)
+                const elements = document.querySelectorAll(`[data-content-id="${id}"]`);
+                
+                elements.forEach(element => {
+                    // Update Text if provided
                     if (contentText) {
-                        element.innerText = contentText;
-                    }
-                    // Update Image
-                    if (imageUrl) {
-                        if (element.tagName === 'IMG') {
-                            element.src = imageUrl;
+                         // Check if it's an input/button or regular text
+                        if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                            element.placeholder = contentText;
                         } else {
-                            // Assume div/section background
-                            element.style.backgroundImage = `url('${imageUrl}')`;
+                            element.innerText = contentText;
                         }
                     }
-                }
+
+                    // Update Image if provided
+                    if (imageUrl) {
+                        const formattedUrl = formatImageUrl(imageUrl);
+                        
+                        if (element.tagName === 'IMG') {
+                            element.src = formattedUrl;
+                        } else {
+                            // Assume background image for Divs/Sections
+                            element.style.backgroundImage = `url('${formattedUrl}')`;
+                        }
+                    }
+                });
             }
         });
+        console.log("CMS Content Loaded Successfully");
     } catch (e) {
         console.error("Errore caricamento CMS:", e);
     }
 }
 
+// 2. EVENTS LOADER
 async function fetchEventsFromSheet() {
-    if (!SHEET_CSV_URL) {
-        console.warn("Nessun link al Foglio Google configurato in script.js");
-        return [];
-    }
+    if (!SHEET_CSV_URL) return [];
 
     try {
         const response = await fetch(SHEET_CSV_URL);
         const data = await response.text();
         
-        // Parse CSV
-        const rows = data.split('\n').map(row => row.trim()).filter(row => row);
+        const rows = data.split('\n').filter(r => r.trim() !== '');
         
         const sheetEvents = rows.slice(1).map((row, index) => {
-            const cleanCols = row.split(',').map(c => c.trim().replace(/^"|"$/g, '')); 
+            const cleanCols = parseCSVLine(row); 
             
+            // Apply Image Formatting
+            const rawImg = cleanCols[7] || '';
+            const formattedImg = formatImageUrl(rawImg);
+
             return {
                 id: `sheet-${index}`,
                 date: cleanCols[0] || new Date().toISOString().split('T')[0],
@@ -200,7 +263,7 @@ async function fetchEventsFromSheet() {
                 description: cleanCols[4] || '',
                 location: cleanCols[5] || 'Avigliano Umbro',
                 category: cleanCols[6] || 'Altro',
-                imageUrl: cleanCols[7] || 'https://picsum.photos/800/600',
+                imageUrl: formattedImg,
                 organizer: cleanCols[8] || '', 
                 tags: ['Live']
             };
@@ -208,7 +271,7 @@ async function fetchEventsFromSheet() {
         
         return sheetEvents;
     } catch (error) {
-        console.error("Errore nel caricamento del foglio:", error);
+        console.error("Errore nel caricamento eventi:", error);
         return [];
     }
 }
@@ -236,6 +299,9 @@ async function loadEvents() {
 }
 
 function saveLocalEvent(newEvent) {
+    // Ensure local image is also formatted if it's a drive link
+    newEvent.imageUrl = formatImageUrl(newEvent.imageUrl);
+
     const stored = JSON.parse(localStorage.getItem('visit_avigliano_events') || '[]');
     stored.unshift(newEvent);
     localStorage.setItem('visit_avigliano_events', JSON.stringify(stored));
@@ -456,9 +522,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     populateSelects();
     updateNotificationBadge();
     
-    // Initial load with Async fetch
-    loadContentCMS(); // <--- NEW CMS LOAD
-    await loadEvents();
+    // Initial load
+    await loadContentCMS(); // Load Text/Images from CMS Sheet
+    await loadEvents();     // Load Events
     renderEvents();
     
     renderChatMessages();

@@ -20,10 +20,10 @@
 {
   "imports": {
     "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
     "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0"
+    "react": "https://aistudiocdn.com/react@^19.2.0"
   }
 }
 </script>
@@ -86,7 +86,6 @@
                     <button onclick="scrollToEvents()" class="relative text-brand-900 font-semibold text-sm flex items-center gap-2 bg-brand-100 px-4 py-2 rounded-full hover:bg-brand-200 transition-all group">
                         <i data-lucide="calendar" class="w-4 h-4"></i>
                         Eventi
-                        <span id="nav-notification" class="hidden absolute -top-1 -right-1 h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] text-white font-bold ring-2 ring-white animate-pulse shadow-sm">0</span>
                     </button>
 
                     <a href="#contatti" class="text-stone-600 hover:text-brand-900 font-medium text-sm transition-colors">Contatti</a>
@@ -99,93 +98,37 @@
                         <span class="hidden lg:inline">Condividi</span>
                     </button>
                     
-                    <button id="admin-toggle-btn" class="p-2 rounded-full transition-colors text-stone-400 hover:text-brand-900" title="Area Riservata">
-                        <i data-lucide="lock" class="w-4 h-4"></i>
+                    <!-- Mobile Menu Button -->
+                    <button onclick="toggleMobileMenu()" class="p-2 text-stone-800 md:hidden hover:bg-stone-100 rounded-lg transition-colors">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
                     </button>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- ADMIN DASHBOARD MODAL -->
-    <div id="admin-dashboard" class="hidden fixed inset-0 z-[60] bg-stone-100 overflow-y-auto fade-in">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="flex justify-between items-center mb-8 bg-white p-6 rounded-xl shadow-sm border border-stone-200">
-                <div>
-                    <h2 class="text-3xl font-serif font-bold text-stone-900">Area Amministrativa</h2>
-                    <p class="text-stone-500">Gestisci gli eventi (salvataggio locale). I contenuti del sito si gestiscono via Google Sheets.</p>
-                </div>
-                <div class="flex gap-4">
-                     <button onclick="setApiKey()" class="text-sm text-brand-900 underline">Configura API Key</button>
-                     <button id="close-admin-btn" class="p-2 hover:bg-stone-100 rounded-full transition-colors">
-                        <i data-lucide="x" class="w-6 h-6 text-stone-600"></i>
-                    </button>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Upload Form -->
-                <div class="lg:col-span-1 space-y-6">
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
-                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-                            <i data-lucide="plus" class="w-5 h-5 text-brand-900"></i>
-                            Nuovo Evento
-                        </h3>
-
-                        <div id="upload-zone" class="border-2 border-dashed border-stone-300 hover:border-brand-900 hover:bg-stone-50 rounded-xl p-8 text-center cursor-pointer transition-all mb-6 group relative">
-                            <input type="file" id="poster-input" class="hidden" accept="image/*" />
-                            
-                            <div id="upload-placeholder">
-                                <i data-lucide="upload" class="w-8 h-8 mx-auto mb-2 text-stone-400 group-hover:scale-110 transition-transform"></i>
-                                <span class="font-medium text-sm text-stone-600 block">Carica Locandina (70x100)</span>
-                                <span class="text-xs text-stone-400 mt-1 block">L'AI compilerà i dati per te</span>
-                            </div>
-
-                            <div id="upload-loading" class="hidden flex flex-col items-center text-brand-900">
-                                <i data-lucide="loader-2" class="w-8 h-8 animate-spin mb-2"></i>
-                                <span class="font-medium text-sm">Analisi AI in corso...</span>
-                            </div>
-
-                            <div id="upload-preview-container" class="hidden relative">
-                                <div class="mx-auto rounded-lg shadow-sm overflow-hidden w-2/3 aspect-[7/10]">
-                                    <img id="upload-preview-img" src="" class="w-full h-full object-cover" />
-                                </div>
-                                <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-lg">
-                                    <span class="text-white text-xs font-bold">Cambia</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <form id="event-form" class="space-y-4">
-                            <div><label class="block text-xs font-bold text-stone-500 uppercase mb-1">Titolo</label><input type="text" id="input-title" required class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none"></div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div><label class="block text-xs font-bold text-stone-500 uppercase mb-1">Data</label><input type="date" id="input-date" required class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none"></div>
-                                <div><label class="block text-xs font-bold text-stone-500 uppercase mb-1">Ora</label><input type="time" id="input-time" required class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none"></div>
-                            </div>
-                            <div><label class="block text-xs font-bold text-stone-500 uppercase mb-1">Luogo</label><select id="input-location" class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none"></select></div>
-                            <div><label class="block text-xs font-bold text-stone-500 uppercase mb-1">Categoria</label><select id="input-category" class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none"></select></div>
-                            <div><label class="block text-xs font-bold text-stone-500 uppercase mb-1">Descrizione</label><textarea id="input-desc" rows="3" class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none text-sm"></textarea></div>
-                            <button type="submit" class="w-full bg-brand-900 hover:bg-brand-800 text-white font-bold py-3 rounded-xl shadow-lg transition-transform hover:scale-[1.02] flex items-center justify-center gap-2">
-                                <i data-lucide="save" class="w-4 h-4"></i> Pubblica Evento
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
-                <div class="lg:col-span-2">
-                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
-                        <div class="p-4 bg-stone-50 border-b border-stone-200"><h3 class="font-bold text-stone-700">Eventi Locali Aggiunti</h3></div>
-                        <div id="admin-events-list" class="divide-y divide-stone-100"></div>
-                    </div>
-                </div>
-            </div>
+    <!-- MOBILE MENU OVERLAY -->
+    <div id="mobile-menu-overlay" class="hidden fixed inset-0 z-[60] bg-white fade-in flex flex-col">
+        <div class="flex justify-end p-6">
+            <button onclick="toggleMobileMenu()" class="p-2 hover:bg-stone-100 rounded-full">
+                <i data-lucide="x" class="w-8 h-8 text-stone-800"></i>
+            </button>
+        </div>
+        <div class="flex flex-col items-center justify-center flex-1 gap-8 text-center px-6">
+            <a href="#territorio" onclick="toggleMobileMenu()" class="text-3xl font-serif font-bold text-stone-800 hover:text-brand-900">Territorio</a>
+            <a href="#storia" onclick="toggleMobileMenu()" class="text-3xl font-serif font-bold text-stone-800 hover:text-brand-900">Storia</a>
+            <button onclick="toggleMobileMenu(); scrollToEvents();" class="text-3xl font-serif font-bold text-brand-900">Eventi</button>
+            <a href="#contatti" onclick="toggleMobileMenu()" class="text-3xl font-serif font-bold text-stone-800 hover:text-brand-900">Contatti</a>
+        </div>
+        <div class="p-8 text-center bg-stone-50">
+            <p class="text-stone-500 text-sm">Visit Avigliano Umbro</p>
         </div>
     </div>
 
     <!-- MAIN CONTENT -->
     <main class="flex-grow pt-20">
         
-        <!-- HERO SECTION (CMS IDs: hero-bg, hero-title, hero-desc, hero-btn) -->
+        <!-- HERO SECTION -->
         <div class="relative h-[60vh] min-h-[500px] w-full overflow-hidden flex items-center justify-center bg-stone-900">
             <div data-content-id="hero-bg" class="absolute inset-0 z-0 bg-cover bg-center transition-all duration-1000" 
                  style="background-image: url('https://scontent.fbri2-1.fna.fbcdn.net/v/t39.30808-6/502622906_24128557276730363_1128000473065477802_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=833d8c&_nc_ohc=fSDHMgKfuL4Q7kNvwH-cU1X&_nc_oc=Adnr9jhXM5IY_QOUKSYZkPLRrRMRNrqXULkHgXcRrVGlHiIxB3TnijwwQmxlO64EVoE&_nc_zt=23&_nc_ht=scontent.fbri2-1.fna&_nc_gid=q2fLCb7j0NT9PRsPhKsHZg&oh=00_AfjCqig3UbjC9HBDpbbftJe3M_S0fEomfCgbEEtdxPAcrA&oe=69311124'); opacity: 0.9;">
@@ -222,8 +165,8 @@
             </div>
         </section>
 
-        <!-- FILTER BAR -->
-        <div class="sticky top-20 z-40 bg-white border-b border-stone-200 shadow-sm">
+        <!-- FILTER BAR (Not Sticky anymore) -->
+        <div class="bg-white border-b border-stone-200 shadow-sm z-40">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                 <div class="flex flex-col lg:flex-row gap-4">
                     <div class="relative flex-grow lg:max-w-xs">
@@ -263,22 +206,22 @@
                 <button onclick="resetFilters()" class="mt-4 text-brand-900 font-bold hover:underline">Resetta filtri</button>
             </div>
 
-            <!-- 1. MAIN GRID (Large Cards) -->
-            <div id="events-main-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-12">
-                <!-- Javascript populates this -->
+            <!-- 1. MAIN GRID (Top 4 Events) -->
+            <div id="events-main-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <!-- Javascript populates this with large cards -->
             </div>
 
             <!-- 2. LOAD MORE BUTTON -->
             <div id="load-more-container" class="hidden text-center py-8">
                 <button id="load-more-btn" class="bg-white border border-stone-300 text-stone-700 hover:text-brand-900 hover:border-brand-900 font-bold py-3 px-8 rounded-full shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-2 mx-auto">
-                    <span>Scopri gli eventi delle prossime settimane</span>
+                    <span>Scopri i prossimi appuntamenti</span>
                     <i data-lucide="chevron-down" class="w-4 h-4"></i>
                 </button>
             </div>
 
             <!-- 3. FUTURE LIST (Compact Cards) -->
             <div id="events-future-list" class="hidden space-y-4 max-w-4xl mx-auto">
-                <!-- Javascript populates this -->
+                <!-- Javascript populates this with compact rows -->
             </div>
         </div>
 
@@ -425,6 +368,6 @@
         </button>
     </div>
 
-<script type="module" src="script.js?v=4"></script>
+<script type="module" src="script.js?v=5"></script>
 </body>
 </html>

@@ -1,3 +1,4 @@
+
 import { GoogleGenAI } from "@google/genai";
 
 // --- CONFIGURATION ---
@@ -353,7 +354,7 @@ function renderEvents() {
             mainGrid.insertAdjacentHTML('beforeend', cardHtml);
         });
 
-        // RENDER COMPACT LIST (Rest)
+        // RENDER COMPACT LIST (Rest) - UPDATED FOR VERTICAL THUMBNAIL (7:10)
         if (futureEvents.length > 0) {
             // Re-add header
             futureList.insertAdjacentHTML('beforeend', `
@@ -370,7 +371,8 @@ function renderEvents() {
 
                 const compactHtml = `
                     <div class="flex items-center gap-4 bg-white p-4 rounded-lg border border-stone-200 shadow-sm hover:shadow-md transition-all group cursor-pointer hover:border-brand-200">
-                        <div class="w-16 h-16 rounded-md overflow-hidden flex-shrink-0 bg-stone-100">
+                        <!-- VERTICAL THUMBNAIL (7:10 ratio) -->
+                        <div class="w-20 aspect-[7/10] rounded-md overflow-hidden flex-shrink-0 bg-stone-100 shadow-sm border border-stone-100">
                             <img src="${event.imageUrl}" class="w-full h-full object-cover group-hover:scale-110 transition-transform" onerror="this.src='https://picsum.photos/100/100'">
                         </div>
                         <div class="flex-grow">

@@ -1,14 +1,11 @@
-
-import { GoogleGenAI } from "@google/genai";
-
 // --- CONFIGURATION ---
 // 1. LINK EVENTI (Struttura: Data, Ora, Titolo, Sottotitolo, Descrizione, Luogo, Categoria, Immagine, Organizzatore)
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=0&single=true&output=csv"; 
 
 // 2. LINK CONTENUTI CMS (Struttura: ID, Testo, Immagine)
-const CONTENT_CSV_URL = "INSERISCI_QUI_IL_LINK_DEL_FOGLIO_CONTENUTI"; 
+const CONTENT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=643581002&single=true&output=csv"; 
 
-// --- DATA & CONSTANTS ---
+// --- DATI E COSTANTI ---
 const EventCategory = {
     ALL: "Tutte le categorie",
     MUSIC: "Musica",

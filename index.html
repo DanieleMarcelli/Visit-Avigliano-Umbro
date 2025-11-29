@@ -19,10 +19,10 @@
 {
   "imports": {
     "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
     "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0"
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0"
   }
 }
 </script>
@@ -221,26 +221,29 @@
         
         <!-- HERO SECTION -->
         <div class="relative h-[60vh] min-h-[500px] w-full overflow-hidden flex items-center justify-center bg-stone-900">
-            <!-- BACKGROUND IMAGE -->
-            <div class="absolute inset-0 z-0 bg-cover bg-center transition-all duration-1000" 
+            <!-- BACKGROUND IMAGE (Dynamic CMS ID: hero-bg) -->
+            <div data-content-id="hero-bg" class="absolute inset-0 z-0 bg-cover bg-center transition-all duration-1000" 
                  style="background-image: url('https://scontent.fbri2-1.fna.fbcdn.net/v/t39.30808-6/502622906_24128557276730363_1128000473065477802_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=833d8c&_nc_ohc=fSDHMgKfuL4Q7kNvwH-cU1X&_nc_oc=Adnr9jhXM5IY_QOUKSYZkPLRrRMRNrqXULkHgXcRrVGlHiIxB3TnijwwQmxlO64EVoE&_nc_zt=23&_nc_ht=scontent.fbri2-1.fna&_nc_gid=q2fLCb7j0NT9PRsPhKsHZg&oh=00_AfjCqig3UbjC9HBDpbbftJe3M_S0fEomfCgbEEtdxPAcrA&oe=69311124'); opacity: 0.9;">
             </div>
             
-            <!-- Overlay to ensure text readability -->
+            <!-- Overlay -->
             <div class="absolute inset-0 bg-gradient-to-t from-brand-900/95 via-brand-900/50 to-stone-900/40"></div>
             
             <div class="relative z-10 text-center px-4 max-w-4xl mx-auto text-white slide-up">
                 <span class="inline-block py-1 px-3 border border-brand-gold/50 text-brand-gold text-xs font-bold tracking-[0.2em] uppercase rounded-full mb-6 backdrop-blur-sm">
                     Cultura e Territorio
                 </span>
-                <h1 class="text-5xl md:text-7xl font-bold mb-6 drop-shadow-lg font-serif tracking-tight">
+                <!-- HERO TITLE (CMS ID: hero-title) -->
+                <h1 data-content-id="hero-title" class="text-5xl md:text-7xl font-bold mb-6 drop-shadow-lg font-serif tracking-tight">
                     Avigliano Umbro Eventi
                 </h1>
-                <p class="text-lg md:text-xl text-stone-100 max-w-2xl mx-auto mb-10 leading-relaxed font-light">
+                <!-- HERO DESC (CMS ID: hero-desc) -->
+                <p data-content-id="hero-desc" class="text-lg md:text-xl text-stone-100 max-w-2xl mx-auto mb-10 leading-relaxed font-light">
                     Il calendario completo degli appuntamenti culturali, musicali e teatrali del nostro territorio.
                 </p>
+                <!-- HERO BTN (CMS ID: hero-btn) -->
                 <button onclick="scrollToEvents()" class="bg-brand-gold hover:bg-white hover:text-brand-900 text-brand-900 font-bold py-4 px-8 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center gap-2 mx-auto group">
-                    Vedi Programma
+                    <span data-content-id="hero-btn">Vedi Programma</span>
                     <i data-lucide="chevron-down" class="w-5 h-5 group-hover:translate-y-1 transition-transform"></i>
                 </button>
             </div>
@@ -255,7 +258,7 @@
                         <i data-lucide="map" class="w-6 h-6"></i>
                     </div>
                     <div>
-                        <h3 class="font-bold text-lg text-stone-900 font-serif">Territorio & Borghi</h3>
+                        <h3 data-content-id="link-terr-title" class="font-bold text-lg text-stone-900 font-serif">Territorio & Borghi</h3>
                         <p class="text-xs text-stone-500 uppercase tracking-wider font-semibold">Scopri la natura</p>
                     </div>
                 </a>
@@ -265,7 +268,7 @@
                         <i data-lucide="scroll" class="w-6 h-6"></i>
                     </div>
                     <div>
-                        <h3 class="font-bold text-lg text-stone-900 font-serif">Storia & Cultura</h3>
+                        <h3 data-content-id="link-storia-title" class="font-bold text-lg text-stone-900 font-serif">Storia & Cultura</h3>
                         <p class="text-xs text-stone-500 uppercase tracking-wider font-semibold">Le nostre radici</p>
                     </div>
                 </a>
@@ -275,7 +278,7 @@
                         <i data-lucide="phone" class="w-6 h-6"></i>
                     </div>
                     <div>
-                        <h3 class="font-bold text-lg text-stone-900 font-serif">Contatti Utili</h3>
+                        <h3 data-content-id="link-contatti-title" class="font-bold text-lg text-stone-900 font-serif">Contatti Utili</h3>
                         <p class="text-xs text-stone-500 uppercase tracking-wider font-semibold">Resta informato</p>
                     </div>
                 </a>
@@ -339,17 +342,20 @@
                 <div class="flex flex-col lg:flex-row items-center gap-12">
                     <div class="lg:w-1/2">
                         <div class="relative rounded-2xl overflow-hidden shadow-2xl">
-                             <img src="https://loremflickr.com/800/600/umbria,landscape/all" alt="Territorio Avigliano" class="w-full h-auto object-cover transform hover:scale-105 transition-transform duration-700">
+                             <!-- CMS ID: terr-img -->
+                             <img data-content-id="terr-img" src="https://loremflickr.com/800/600/umbria,landscape/all" alt="Territorio Avigliano" class="w-full h-auto object-cover transform hover:scale-105 transition-transform duration-700">
                         </div>
                     </div>
                     <div class="lg:w-1/2 space-y-6">
                         <span class="text-brand-900 font-bold text-sm tracking-widest uppercase">Il Nostro Patrimonio</span>
-                        <h2 class="text-4xl font-serif font-bold text-stone-900">Un Cuore Verde di Borghi e Natura</h2>
-                        <p class="text-stone-600 leading-relaxed text-lg">
-                            Avigliano Umbro è un gioiello incastonato tra le colline, un territorio costellato di borghi storici che mantengono intatta la loro autenticità. Da Sismano a Dunarobba, ogni angolo racconta una storia di tradizioni e bellezza. Il luogo ideale per chi cerca un turismo lento, tra i sentieri del Cammino dei Borghi Silenti e i paesaggi del Lago Tiberino.
+                        <!-- CMS ID: terr-title -->
+                        <h2 data-content-id="terr-title" class="text-4xl font-serif font-bold text-stone-900">Un Cuore Verde di Borghi e Natura</h2>
+                        <!-- CMS ID: terr-desc -->
+                        <p data-content-id="terr-desc" class="text-stone-600 leading-relaxed text-lg">
+                            Avigliano Umbro è un gioiello incastonato tra le colline, un territorio costellato di borghi storici che mantengono intatta la loro autenticità. Da Sismano a Dunarobba, ogni angolo racconta una storia di tradizioni e bellezza.
                         </p>
                         <button class="px-6 py-3 border border-brand-900 text-brand-900 font-bold rounded-lg hover:bg-brand-900 hover:text-white transition-colors">
-                            Esplora i Borghi
+                            <span data-content-id="terr-btn">Esplora i Borghi</span>
                         </button>
                     </div>
                 </div>
@@ -362,17 +368,20 @@
                 <div class="flex flex-col lg:flex-row-reverse items-center gap-12">
                      <div class="lg:w-1/2">
                         <div class="relative rounded-2xl overflow-hidden shadow-2xl">
-                             <img src="https://loremflickr.com/800/600/medieval,castle/all" alt="Storia Avigliano" class="w-full h-auto object-cover transform hover:scale-105 transition-transform duration-700">
+                             <!-- CMS ID: storia-img -->
+                             <img data-content-id="storia-img" src="https://loremflickr.com/800/600/medieval,castle/all" alt="Storia Avigliano" class="w-full h-auto object-cover transform hover:scale-105 transition-transform duration-700">
                         </div>
                     </div>
                     <div class="lg:w-1/2 space-y-6">
                         <span class="text-brand-gold font-bold text-sm tracking-widest uppercase">Radici Antiche</span>
-                        <h2 class="text-4xl font-serif font-bold text-stone-900">Dalla Foresta Fossile al Medioevo</h2>
-                        <p class="text-stone-600 leading-relaxed text-lg">
-                            La storia di Avigliano Umbro affonda le radici in un passato millenario. Il territorio ospita la celebre Foresta Fossile di Dunarobba, un monumento naturale unico al mondo che ci riporta indietro di 3 milioni di anni. Il borgo medievale, dominato dalla svettante torre civica, e il Teatro Comunale, gioiello architettonico, testimoniano la ricchezza culturale che ha attraversato i secoli fino ad oggi.
+                        <!-- CMS ID: storia-title -->
+                        <h2 data-content-id="storia-title" class="text-4xl font-serif font-bold text-stone-900">Dalla Foresta Fossile al Medioevo</h2>
+                        <!-- CMS ID: storia-desc -->
+                        <p data-content-id="storia-desc" class="text-stone-600 leading-relaxed text-lg">
+                            La storia di Avigliano Umbro affonda le radici in un passato millenario. Il territorio ospita la celebre Foresta Fossile di Dunarobba, un monumento naturale unico al mondo che ci riporta indietro di 3 milioni di anni.
                         </p>
                         <button class="px-6 py-3 bg-stone-900 text-white font-bold rounded-lg hover:bg-stone-800 transition-colors">
-                            Scopri la Storia
+                            <span data-content-id="storia-btn">Scopri la Storia</span>
                         </button>
                     </div>
                 </div>
@@ -384,7 +393,8 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-12">
                     <span class="text-brand-900 font-bold text-sm tracking-widest uppercase">Siamo qui per te</span>
-                    <h2 class="text-4xl font-serif font-bold text-stone-900 mt-2">Resta in Contatto</h2>
+                    <!-- CMS ID: contatti-title -->
+                    <h2 data-content-id="contatti-title" class="text-4xl font-serif font-bold text-stone-900 mt-2">Resta in Contatto</h2>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 bg-white rounded-2xl shadow-xl overflow-hidden">
@@ -397,21 +407,24 @@
                                     <div class="bg-white/10 p-3 rounded-lg"><i data-lucide="map-pin" class="w-6 h-6 text-brand-gold"></i></div>
                                     <div>
                                         <p class="font-bold text-brand-gold uppercase text-xs tracking-wider mb-1">Indirizzo</p>
-                                        <p class="text-stone-200">Via F.lli Rosselli 14,<br>05020 Avigliano Umbro (TR)</p>
+                                        <!-- CMS ID: info-addr -->
+                                        <p data-content-id="info-addr" class="text-stone-200">Via F.lli Rosselli 14,<br>05020 Avigliano Umbro (TR)</p>
                                     </div>
                                 </div>
                                 <div class="flex items-start gap-4">
                                     <div class="bg-white/10 p-3 rounded-lg"><i data-lucide="phone" class="w-6 h-6 text-brand-gold"></i></div>
                                     <div>
                                         <p class="font-bold text-brand-gold uppercase text-xs tracking-wider mb-1">Telefono</p>
-                                        <p class="text-stone-200">0744 933521</p>
+                                        <!-- CMS ID: info-tel -->
+                                        <p data-content-id="info-tel" class="text-stone-200">0744 933521</p>
                                     </div>
                                 </div>
                                 <div class="flex items-start gap-4">
                                     <div class="bg-white/10 p-3 rounded-lg"><i data-lucide="mail" class="w-6 h-6 text-brand-gold"></i></div>
                                     <div>
                                         <p class="font-bold text-brand-gold uppercase text-xs tracking-wider mb-1">Email</p>
-                                        <p class="text-stone-200">info@comune.aviglianoumbro.tr.it</p>
+                                        <!-- CMS ID: info-email -->
+                                        <p data-content-id="info-email" class="text-stone-200">info@comune.aviglianoumbro.tr.it</p>
                                     </div>
                                 </div>
                             </div>

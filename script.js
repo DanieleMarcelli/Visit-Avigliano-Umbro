@@ -1,9 +1,9 @@
+
 import { GoogleGenAI } from "@google/genai";
 
 // --- CONFIGURATION ---
-// Inserisci qui il link al tuo Google Sheet pubblicato come CSV
-// File -> Condividi -> Pubblica sul web -> Formato CSV
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=0&single=true&output=csv"; 
+const CONTENT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=643581002&single=true&output=csv"; // << INSERISCI QUI IL LINK DEL FOGLIO CONTENUTI
 
 // --- DATA & CONSTANTS ---
 const EventCategory = {
@@ -132,6 +132,49 @@ window.sendChatMessage = async () => {
 
 // --- CORE LOGIC ---
 
+// New: Fetch CMS Content
+async function loadContentCMS() {
+    if (!CONTENT_CSV_URL || CONTENT_CSV_URL.includes("INCOLLA_QUI")) {
+        console.warn("CMS CSV URL non configurato.");
+        return;
+    }
+
+    try {
+        const response = await fetch(CONTENT_CSV_URL);
+        const text = await response.text();
+        // Simple CSV parser: ID, Text, Image
+        const rows = text.split('\n').slice(1); // Skip header
+
+        rows.forEach(row => {
+            const cols = row.split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+            const id = cols[0];
+            const contentText = cols[1];
+            const imageUrl = cols[2];
+
+            if (id) {
+                const element = document.querySelector(`[data-content-id="${id}"]`);
+                if (element) {
+                    // Update Text
+                    if (contentText) {
+                        element.innerText = contentText;
+                    }
+                    // Update Image
+                    if (imageUrl) {
+                        if (element.tagName === 'IMG') {
+                            element.src = imageUrl;
+                        } else {
+                            // Assume div/section background
+                            element.style.backgroundImage = `url('${imageUrl}')`;
+                        }
+                    }
+                }
+            }
+        });
+    } catch (e) {
+        console.error("Errore caricamento CMS:", e);
+    }
+}
+
 async function fetchEventsFromSheet() {
     if (!SHEET_CSV_URL) {
         console.warn("Nessun link al Foglio Google configurato in script.js");
@@ -144,19 +187,9 @@ async function fetchEventsFromSheet() {
         
         // Parse CSV
         const rows = data.split('\n').map(row => row.trim()).filter(row => row);
-        // Assume first row is header
         
-        // Map CSV to Event objects
         const sheetEvents = rows.slice(1).map((row, index) => {
-            // Handle split better (naively splitting by comma for now, assume no commas in text or simple usage)
-            // A more robust CSV parser would be needed for complex descriptions with commas
-            // Using a regex to split by comma ONLY if not inside quotes is better:
-            // const cols = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
-            const cleanCols = row.split(',').map(c => c.trim().replace(/^"|"$/g, '')); // Simple split fallback
-
-            // Map columns based on index (assuming standard order if headers match or fixed order)
-            // Expected Order in Sheet: 
-            // 0: Data, 1: Ora, 2: Titolo, 3: Sottotitolo, 4: Descrizione, 5: Luogo, 6: Categoria, 7: Immagine, 8: Organizzatore
+            const cleanCols = row.split(',').map(c => c.trim().replace(/^"|"$/g, '')); 
             
             return {
                 id: `sheet-${index}`,
@@ -168,7 +201,7 @@ async function fetchEventsFromSheet() {
                 location: cleanCols[5] || 'Avigliano Umbro',
                 category: cleanCols[6] || 'Altro',
                 imageUrl: cleanCols[7] || 'https://picsum.photos/800/600',
-                organizer: cleanCols[8] || '', // NEW FIELD
+                organizer: cleanCols[8] || '', 
                 tags: ['Live']
             };
         });
@@ -424,6 +457,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateNotificationBadge();
     
     // Initial load with Async fetch
+    loadContentCMS(); // <--- NEW CMS LOAD
     await loadEvents();
     renderEvents();
     

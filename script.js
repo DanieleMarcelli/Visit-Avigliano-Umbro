@@ -1,7 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 
 // --- DATA & CONSTANTS ---
-
 const EventCategory = {
     ALL: "Tutte le categorie",
     MUSIC: "Musica",
@@ -27,7 +26,6 @@ const MONTHS = [
     "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"
 ];
 
-// Initial Static Data
 const INITIAL_EVENTS = [
     {
         id: '1', title: "Da Bach a Bernstein", subtitle: "Flautista G.L. Petrucci - Pianista P. Pisa",
@@ -85,34 +83,100 @@ const INITIAL_EVENTS = [
     }
 ];
 
-// --- STATE MANAGEMENT ---
-
+// --- STATE ---
 let events = [];
 let notificationCount = 0;
 let chatHistory = [{ role: 'bot', text: "Ciao! Sono il tuo assistente virtuale per Avigliano Umbro. Cerchi un concerto o un evento teatrale?" }];
-let filters = {
-    search: '',
-    month: 'Tutti i mesi',
-    category: 'Tutte le categorie',
-    location: 'Tutti i luoghi'
+let filters = { search: '', month: 'Tutti i mesi', category: 'Tutte le categorie', location: 'Tutti i luoghi' };
+
+// Get API Key safely
+const getApiKey = () => localStorage.getItem('GEMINI_API_KEY');
+
+// --- FUNCTIONS EXPOSED TO WINDOW ---
+
+window.setApiKey = () => {
+    const key = prompt("Inserisci la tua Google Gemini API Key per abilitare l'AI:");
+    if (key) {
+        localStorage.setItem('GEMINI_API_KEY', key);
+        alert("API Key salvata!");
+    }
 };
 
-// --- INITIALIZATION ---
+window.scrollToEvents = () => {
+    clearNotifications();
+    document.getElementById('eventi-section').scrollIntoView({ behavior: 'smooth' });
+};
 
-document.addEventListener('DOMContentLoaded', () => {
-    loadEvents();
-    populateSelects();
+window.toggleChat = () => {
+    const win = document.getElementById('chat-window');
+    const btn = document.getElementById('chat-toggle');
+    const isHidden = win.classList.contains('hidden');
+
+    if (isHidden) {
+        win.classList.remove('hidden');
+        btn.classList.add('bg-stone-800', 'text-white');
+        btn.innerHTML = '<span>Chiudi Chat</span>';
+    } else {
+        win.classList.add('hidden');
+        btn.classList.remove('bg-stone-800', 'text-white');
+        btn.classList.add('bg-white', 'text-brand-900');
+        btn.innerHTML = '<i data-lucide="sparkles" class="w-5 h-5 text-brand-gold"></i><span>Chiedi a Gemini</span>';
+    }
+    if (window.lucide) window.lucide.createIcons();
+};
+
+window.resetFilters = () => {
+    filters = { search: '', month: 'Tutti i mesi', category: 'Tutte le categorie', location: 'Tutti i luoghi' };
+    document.getElementById('search-input').value = '';
+    document.getElementById('filter-month').value = 'Tutti i mesi';
+    document.getElementById('filter-category').value = 'Tutte le categorie';
+    document.getElementById('filter-location').value = 'Tutti i luoghi';
     renderEvents();
+};
+
+window.deleteEvent = (id) => {
+    if(confirm('Eliminare evento?')) {
+        events = events.filter(e => e.id !== id);
+        saveEvents();
+        renderAdminList();
+        renderEvents();
+    }
+};
+
+window.sendChatMessage = async () => {
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if (!text) return;
+    
+    chatHistory.push({ role: 'user', text });
     renderChatMessages();
-    setupEventListeners();
-    lucide.createIcons();
-    updateNotificationBadge();
-});
+    input.value = '';
+
+    const apiKey = getApiKey();
+    if (apiKey) {
+        try {
+            const ai = new GoogleGenAI({ apiKey });
+            const systemPrompt = `Sei un assistente turistico per Avigliano Umbro. Ecco gli eventi attuali: ${JSON.stringify(events.map(e => `${e.title} il ${e.date}`))}. Sii breve.`;
+            
+            const response = await ai.models.generateContent({
+                model: 'gemini-2.5-flash',
+                contents: text,
+                config: { systemInstruction: systemPrompt }
+            });
+            chatHistory.push({ role: 'bot', text: response.text });
+        } catch (e) {
+            console.error(e);
+            chatHistory.push({ role: 'bot', text: "Errore di connessione (Verifica API Key)." });
+        }
+    } else {
+        chatHistory.push({ role: 'bot', text: "API Key non configurata. Clicca su 'Configura API Key' nel pannello Admin." });
+    }
+    renderChatMessages();
+};
 
 // --- CORE LOGIC ---
 
 function loadEvents() {
-    // Try to load from local storage (simulate persistence)
     const stored = localStorage.getItem('visit_avigliano_events');
     const storedNotif = localStorage.getItem('visit_avigliano_notif');
     
@@ -120,7 +184,7 @@ function loadEvents() {
         events = JSON.parse(stored);
     } else {
         events = [...INITIAL_EVENTS];
-        localStorage.setItem('visit_avigliano_events', JSON.stringify(events));
+        saveEvents();
     }
 
     if (storedNotif) {
@@ -160,14 +224,26 @@ function clearNotifications() {
     updateNotificationBadge();
 }
 
-// --- RENDERING ---
+function renderChatMessages() {
+    const container = document.getElementById('chat-messages');
+    container.innerHTML = '';
+    chatHistory.forEach(msg => {
+        const div = document.createElement('div');
+        div.className = `flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`;
+        div.innerHTML = `
+            <div class="max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm ${msg.role === 'user' ? 'bg-brand-900 text-white rounded-br-none' : 'bg-white text-stone-800 border border-stone-200 rounded-bl-none'}">
+                ${msg.text}
+            </div>
+        `;
+        container.appendChild(div);
+    });
+    container.scrollTop = container.scrollHeight;
+}
 
 function populateSelects() {
     const monthSelect = document.getElementById('filter-month');
     const catSelect = document.getElementById('filter-category');
     const locSelect = document.getElementById('filter-location');
-    
-    // Also Admin form selects
     const adminCatSelect = document.getElementById('input-category');
     const adminLocSelect = document.getElementById('input-location');
 
@@ -183,7 +259,6 @@ function populateSelects() {
         opt.value = c;
         opt.innerText = c;
         catSelect.appendChild(opt);
-        
         if (c !== EventCategory.ALL) {
             const adminOpt = document.createElement('option');
             adminOpt.value = c;
@@ -197,7 +272,6 @@ function populateSelects() {
         opt.value = l;
         opt.innerText = l;
         locSelect.appendChild(opt);
-        
         if (l !== EventLocation.ALL) {
              const adminOpt = document.createElement('option');
             adminOpt.value = l;
@@ -214,15 +288,10 @@ function renderEvents() {
     
     grid.innerHTML = '';
     
-    // Filter Logic
     const filtered = events.filter(e => {
-        const searchMatch = !filters.search || 
-            e.title.toLowerCase().includes(filters.search.toLowerCase()) || 
-            e.description.toLowerCase().includes(filters.search.toLowerCase());
-            
+        const searchMatch = !filters.search || e.title.toLowerCase().includes(filters.search.toLowerCase()) || e.description.toLowerCase().includes(filters.search.toLowerCase());
         const catMatch = filters.category === EventCategory.ALL || e.category === filters.category;
         const locMatch = filters.location === EventLocation.ALL || e.location === filters.location;
-        
         let monthMatch = true;
         if (filters.month !== MONTHS[0]) {
              const d = new Date(e.date);
@@ -230,7 +299,6 @@ function renderEvents() {
              const capMonth = mName.charAt(0).toUpperCase() + mName.slice(1);
              monthMatch = capMonth === filters.month;
         }
-        
         return searchMatch && catMatch && locMatch && monthMatch;
     }).sort((a,b) => new Date(a.date) - new Date(b.date));
 
@@ -245,10 +313,9 @@ function renderEvents() {
             const day = dateObj.getDate();
             const month = dateObj.toLocaleString('it-IT', { month: 'short' }).toUpperCase();
             
-            // Refined Card Design
             const cardHtml = `
-                <div class="group bg-white rounded-xl shadow-md hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 overflow-hidden border-2 border-stone-200 flex flex-col h-full relative fade-in cursor-pointer">
-                    <div class="relative aspect-[7/10] overflow-hidden bg-stone-100">
+                <div class="group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-stone-200 flex flex-col h-full relative fade-in cursor-pointer hover:scale-[1.02]">
+                    <div class="relative aspect-[7/10] overflow-hidden bg-stone-100 border-b border-stone-100">
                         <img src="${event.imageUrl}" alt="${event.title}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
                         <div class="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-brand-900 shadow-sm border border-stone-100">
@@ -270,10 +337,10 @@ function renderEvents() {
                         </div>
                         <p class="text-stone-600 text-sm line-clamp-3 mb-6 flex-1">${event.description}</p>
                         <div class="mt-auto pt-4 border-t border-stone-100 flex justify-between items-center">
-                            <div class="flex gap-2">
+                             <div class="flex gap-2">
                                 ${(event.tags || []).slice(0,2).map(t => `<span class="text-[10px] uppercase tracking-wide text-stone-500 bg-stone-100 px-2 py-1 rounded-md font-medium">${t}</span>`).join('')}
                             </div>
-                            <button class="text-brand-900 hover:text-brand-700 text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-colors">
+                             <button class="text-brand-900 hover:text-brand-700 text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-colors">
                                 <i data-lucide="info" class="w-4 h-4"></i>
                                 Dettagli
                             </button>
@@ -283,16 +350,13 @@ function renderEvents() {
             `;
             grid.insertAdjacentHTML('beforeend', cardHtml);
         });
-        lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons();
     }
 }
-
-// --- ADMIN LOGIC ---
 
 function toggleAdmin() {
     const dash = document.getElementById('admin-dashboard');
     const btn = document.getElementById('admin-toggle-btn');
-    
     if (dash.classList.contains('hidden')) {
         dash.classList.remove('hidden');
         btn.classList.add('bg-brand-900', 'text-white');
@@ -306,7 +370,6 @@ function toggleAdmin() {
 function renderAdminList() {
     const container = document.getElementById('admin-events-list');
     container.innerHTML = '';
-    
     events.forEach(e => {
         const item = `
             <div class="p-4 flex items-center gap-4 hover:bg-stone-50 transition-colors">
@@ -324,158 +387,32 @@ function renderAdminList() {
         `;
         container.insertAdjacentHTML('beforeend', item);
     });
-    lucide.createIcons();
+    if (window.lucide) window.lucide.createIcons();
 }
 
-window.deleteEvent = (id) => {
-    if(confirm('Eliminare evento?')) {
-        events = events.filter(e => e.id !== id);
-        saveEvents();
-        renderAdminList();
-        renderEvents();
-    }
-};
+// --- INIT ---
 
-// --- GEMINI AI & IMAGE ANALYSIS ---
-
-async function analyzePoster(base64Image) {
-    if (!process.env.API_KEY) {
-        alert("API Key mancante nel file metadata.json o env.");
-        return null;
-    }
-
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    const prompt = `
-    Analyze this event poster. Extract JSON only:
-    - title
-    - subtitle
-    - description (max 2 sentences)
-    - date (YYYY-MM-DD, assume next occurrence)
-    - time (HH:MM)
-    - location (best guess)
-    - category (Musica, Teatro, Mostra, Sagra, Musica Classica)
-    - tags (array of strings)
-    `;
-
-    try {
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: {
-                parts: [
-                    { inlineData: { mimeType: 'image/png', data: base64Image } },
-                    { text: prompt }
-                ]
-            },
-            config: { responseMimeType: "application/json" }
-        });
-        
-        return JSON.parse(response.text);
-    } catch (e) {
-        console.error(e);
-        return null;
-    }
-}
-
-// --- CHAT LOGIC ---
-
-function toggleChat() {
-    const win = document.getElementById('chat-window');
-    const btn = document.getElementById('chat-toggle');
-    
-    if (win.classList.contains('hidden')) {
-        win.classList.remove('hidden');
-        btn.classList.add('bg-stone-800', 'text-white');
-        btn.innerHTML = '<span>Chiudi Chat</span>';
-    } else {
-        win.classList.add('hidden');
-        btn.classList.remove('bg-stone-800', 'text-white');
-        btn.classList.add('bg-white', 'text-brand-900');
-        btn.innerHTML = '<i data-lucide="sparkles" class="w-5 h-5 text-brand-gold"></i><span>Chiedi a Gemini</span>';
-        lucide.createIcons();
-    }
-}
-
-function renderChatMessages() {
-    const container = document.getElementById('chat-messages');
-    container.innerHTML = '';
-    
-    chatHistory.forEach(msg => {
-        const div = document.createElement('div');
-        div.className = `flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`;
-        div.innerHTML = `
-            <div class="max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm ${msg.role === 'user' ? 'bg-brand-900 text-white rounded-br-none' : 'bg-white text-stone-800 border border-stone-200 rounded-bl-none'}">
-                ${msg.text}
-            </div>
-        `;
-        container.appendChild(div);
-    });
-    container.scrollTop = container.scrollHeight;
-}
-
-window.sendChatMessage = async () => {
-    const input = document.getElementById('chat-input');
-    const text = input.value.trim();
-    if (!text) return;
-    
-    chatHistory.push({ role: 'user', text });
+document.addEventListener('DOMContentLoaded', () => {
+    loadEvents();
+    populateSelects();
+    renderEvents();
     renderChatMessages();
-    input.value = '';
-
-    // Simple Gemini Chat Call
-    if (process.env.API_KEY) {
-        try {
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-            const systemPrompt = `Sei un assistente turistico per Avigliano Umbro. Ecco gli eventi attuali: ${JSON.stringify(events.map(e => `${e.title} il ${e.date}`))}. Sii breve.`;
-            
-            const response = await ai.models.generateContent({
-                model: 'gemini-2.5-flash',
-                contents: text,
-                config: { systemInstruction: systemPrompt }
-            });
-            chatHistory.push({ role: 'bot', text: response.text });
-        } catch (e) {
-            chatHistory.push({ role: 'bot', text: "Errore di connessione." });
-        }
-    } else {
-        chatHistory.push({ role: 'bot', text: "API Key non configurata." });
-    }
-    renderChatMessages();
-};
-
-// --- EVENT LISTENERS SETUP ---
-
-function setupEventListeners() {
-    // Admin Toggle
-    document.getElementById('admin-toggle-btn').addEventListener('click', toggleAdmin);
-    document.getElementById('close-admin-btn').addEventListener('click', toggleAdmin);
+    updateNotificationBadge();
     
-    // Filters
+    // Event Listeners for Filters
     ['search-input', 'filter-month', 'filter-category', 'filter-location'].forEach(id => {
         document.getElementById(id).addEventListener(id === 'search-input' ? 'input' : 'change', (e) => {
-            const key = id.replace('filter-', '').replace('-input', ''); // 'search', 'month', etc.
+            const key = id.replace('filter-', '').replace('-input', '');
             filters[key] = e.target.value;
             renderEvents();
         });
     });
 
-    // Reset
-    window.resetFilters = () => {
-        filters = { search: '', month: 'Tutti i mesi', category: 'Tutte le categorie', location: 'Tutti i luoghi' };
-        document.getElementById('search-input').value = '';
-        document.getElementById('filter-month').value = 'Tutti i mesi';
-        document.getElementById('filter-category').value = 'Tutte le categorie';
-        document.getElementById('filter-location').value = 'Tutti i luoghi';
-        renderEvents();
-    };
+    // Admin Toggles
+    document.getElementById('admin-toggle-btn').addEventListener('click', toggleAdmin);
+    document.getElementById('close-admin-btn').addEventListener('click', toggleAdmin);
 
-    window.scrollToEvents = () => {
-        clearNotifications();
-        document.getElementById('eventi-section').scrollIntoView({ behavior: 'smooth' });
-    };
-
-    window.toggleChat = toggleChat;
-
-    // Image Upload Logic
+    // Image Upload & AI
     const fileInput = document.getElementById('poster-input');
     const uploadZone = document.getElementById('upload-zone');
     
@@ -485,45 +422,56 @@ function setupEventListeners() {
         const file = e.target.files[0];
         if(!file) return;
         
-        // Show loading
         document.getElementById('upload-placeholder').classList.add('hidden');
         document.getElementById('upload-loading').classList.remove('hidden');
         
-        // Preview
         const reader = new FileReader();
         reader.onloadend = async () => {
             const base64 = reader.result.split(',')[1];
-            const url = reader.result;
+            document.getElementById('upload-preview-img').src = reader.result;
             
-            // Set preview image
-            document.getElementById('upload-preview-img').src = url;
-            
-            // AI Analyze
-            const data = await analyzePoster(base64);
-            
-            document.getElementById('upload-loading').classList.add('hidden');
-            document.getElementById('upload-preview-container').classList.remove('hidden');
-
-            if (data) {
-                document.getElementById('input-title').value = data.title || '';
-                document.getElementById('input-desc').value = data.description || '';
-                document.getElementById('input-date').value = data.date || '';
-                document.getElementById('input-time').value = data.time || '';
-                
-                if (Object.values(EventLocation).includes(data.location)) {
-                    document.getElementById('input-location').value = data.location;
-                }
-                if (Object.values(EventCategory).includes(data.category)) {
-                    document.getElementById('input-category').value = data.category;
+            const apiKey = getApiKey();
+            if (apiKey) {
+                try {
+                    const ai = new GoogleGenAI({ apiKey });
+                    const prompt = `Analyze this event poster. Return JSON: {title, subtitle, description, date(YYYY-MM-DD), time, location, category, tags}. Use these categories: ${Object.values(EventCategory).join(', ')}.`;
+                    
+                    const response = await ai.models.generateContent({
+                        model: 'gemini-2.5-flash',
+                        contents: {
+                            parts: [
+                                { inlineData: { mimeType: 'image/png', data: base64 } },
+                                { text: prompt }
+                            ]
+                        },
+                        config: { responseMimeType: "application/json" }
+                    });
+                    
+                    const data = JSON.parse(response.text);
+                    if (data) {
+                        document.getElementById('input-title').value = data.title || '';
+                        document.getElementById('input-desc').value = data.description || '';
+                        document.getElementById('input-date').value = data.date || '';
+                        document.getElementById('input-time').value = data.time || '';
+                        // Simple matches for location/category
+                        if (data.location) document.getElementById('input-location').value = data.location;
+                        if (data.category) document.getElementById('input-category').value = data.category;
+                    }
+                } catch (err) {
+                    console.error("AI Error", err);
+                    alert("Errore durante l'analisi AI. Verifica la console o l'API Key.");
                 }
             } else {
-                alert("Impossibile analizzare. Inserisci manualmente.");
+                alert("Per l'analisi automatica, imposta prima l'API Key.");
             }
+
+            document.getElementById('upload-loading').classList.add('hidden');
+            document.getElementById('upload-preview-container').classList.remove('hidden');
         };
         reader.readAsDataURL(file);
     });
 
-    // Form Submit
+    // Submit
     document.getElementById('event-form').addEventListener('submit', (e) => {
         e.preventDefault();
         const newEvt = {
@@ -538,10 +486,11 @@ function setupEventListeners() {
             tags: ["Nuovo"]
         };
         addEvent(newEvt);
-        // Reset UI
         document.getElementById('event-form').reset();
         document.getElementById('upload-preview-container').classList.add('hidden');
         document.getElementById('upload-placeholder').classList.remove('hidden');
         alert('Evento Pubblicato!');
     });
-}
+
+    if (window.lucide) window.lucide.createIcons();
+});

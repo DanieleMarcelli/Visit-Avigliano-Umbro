@@ -1,5 +1,10 @@
 import { GoogleGenAI } from "@google/genai";
 
+// --- CONFIGURATION ---
+// Inserisci qui il link al tuo Google Sheet pubblicato come CSV
+// File -> Condividi -> Pubblica sul web -> Formato CSV
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=0&single=true&output=csv"; 
+
 // --- DATA & CONSTANTS ---
 const EventCategory = {
     ALL: "Tutte le categorie",
@@ -26,62 +31,8 @@ const MONTHS = [
     "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"
 ];
 
-const INITIAL_EVENTS = [
-    {
-        id: '1', title: "Da Bach a Bernstein", subtitle: "Flautista G.L. Petrucci - Pianista P. Pisa",
-        description: "Un viaggio musicale straordinario. Esecuzione di brani classici rivisitati.",
-        date: '2025-12-06', time: "21:00", location: EventLocation.TEATRO_COMUNALE,
-        category: EventCategory.CLASSICAL, imageUrl: "https://images.unsplash.com/photo-1552422535-c45813c61732?q=80&w=800&auto=format&fit=crop", tags: ["Concerto", "Classica"]
-    },
-    {
-        id: '2', title: "Coro di Clarinetti", subtitle: "Chiesa di Santa Restituta",
-        description: "Suggestiva esibizione di ensemble di clarinetti.",
-        date: '2025-12-07', time: "17:00", location: EventLocation.CHIESA_SANTA_RESTA,
-        category: EventCategory.CLASSICAL, imageUrl: "https://images.unsplash.com/photo-1573871666450-427771765c87?q=80&w=800&auto=format&fit=crop", tags: ["Ensemble", "Fiati"]
-    },
-    {
-        id: '3', title: "Concerto Marea", subtitle: "Duo di Chitarre",
-        description: "Le armonie delle chitarre classiche risuonano a Dunarobba.",
-        date: '2025-12-13', time: "21:00", location: EventLocation.CHIESA_DUNAROBBA,
-        category: EventCategory.MUSIC, imageUrl: "https://images.unsplash.com/photo-1556449895-a33c9dba33dd?q=80&w=800&auto=format&fit=crop", tags: ["Chitarra"]
-    },
-    {
-        id: '4', title: "50° di Pasolini", subtitle: "Stefano De Majo",
-        description: "Tributo a Pier Paolo Pasolini interpretato dal maestro Stefano De Majo.",
-        date: '2025-12-14', time: "21:00", location: EventLocation.TEATRO_COMUNALE,
-        category: EventCategory.THEATER, imageUrl: "https://images.unsplash.com/photo-1503095392237-595977092e08?q=80&w=800&auto=format&fit=crop", tags: ["Teatro"]
-    },
-    {
-        id: '5', title: "New Time Sax Quartet", subtitle: "Quartetto",
-        description: "Quartetto di sassofoni che spazia dal classico al moderno.",
-        date: '2025-12-20', time: "21:00", location: EventLocation.TEATRO_COMUNALE,
-        category: EventCategory.MUSIC, imageUrl: "https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?q=80&w=800&auto=format&fit=crop", tags: ["Jazz", "Sax"]
-    },
-    {
-        id: '9', title: "Nicolò Lauteri", subtitle: "Recital",
-        description: "Recital solista di pianoforte.",
-        date: '2026-01-03', time: "21:00", location: EventLocation.CHIESA_SISMANO,
-        category: EventCategory.CLASSICAL, imageUrl: "https://images.unsplash.com/photo-1552422535-c45813c61732?q=80&w=800&auto=format&fit=crop", tags: ["Piano"]
-    },
-    {
-        id: '11', title: "La favola di Natale", subtitle: "Giovannino Guareschi",
-        description: "Con Pino Menzolini e Federico Gili. Racconto per l'Epifania.",
-        date: '2026-01-05', time: "17:30", location: EventLocation.TEATRO_COMUNALE,
-        category: EventCategory.THEATER, imageUrl: "https://images.unsplash.com/photo-1607627000458-217e7bb52382?q=80&w=800&auto=format&fit=crop", tags: ["Famiglia"]
-    },
-    {
-        id: '14', title: "Ottoni Amerini", subtitle: "Ensemble",
-        description: "Ensemble di ottoni con repertorio brillante.",
-        date: '2026-01-17', time: "21:00", location: EventLocation.TEATRO_COMUNALE,
-        category: EventCategory.CLASSICAL, imageUrl: "https://images.unsplash.com/photo-1576435728678-35d016118064?q=80&w=800&auto=format&fit=crop", tags: ["Brass"]
-    },
-    {
-        id: '17', title: "Smoothless 3", subtitle: "Jazz e Soul",
-        description: "Jazz, soul e contaminazioni moderne.",
-        date: '2026-01-31', time: "21:00", location: EventLocation.TEATRO_COMUNALE,
-        category: EventCategory.MUSIC, imageUrl: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=800&auto=format&fit=crop", tags: ["Jazz", "Soul"]
-    }
-];
+// Fallback events if sheet fails or is empty initially
+const INITIAL_EVENTS = [];
 
 // --- STATE ---
 let events = [];
@@ -135,11 +86,16 @@ window.resetFilters = () => {
 };
 
 window.deleteEvent = (id) => {
-    if(confirm('Eliminare evento?')) {
-        events = events.filter(e => e.id !== id);
-        saveEvents();
-        renderAdminList();
-        renderEvents();
+    if(confirm('Eliminare evento locale? (Gli eventi dal Foglio Google non possono essere eliminati da qui)')) {
+        let stored = JSON.parse(localStorage.getItem('visit_avigliano_events') || '[]');
+        stored = stored.filter(e => e.id !== id);
+        localStorage.setItem('visit_avigliano_events', JSON.stringify(stored));
+        
+        // Reload all
+        loadEvents().then(() => {
+             renderAdminList(); // Only admin events
+             renderEvents();
+        });
     }
 };
 
@@ -176,34 +132,89 @@ window.sendChatMessage = async () => {
 
 // --- CORE LOGIC ---
 
-function loadEvents() {
-    const stored = localStorage.getItem('visit_avigliano_events');
-    const storedNotif = localStorage.getItem('visit_avigliano_notif');
-    
-    if (stored) {
-        events = JSON.parse(stored);
-    } else {
-        events = [...INITIAL_EVENTS];
-        saveEvents();
+async function fetchEventsFromSheet() {
+    if (!SHEET_CSV_URL) {
+        console.warn("Nessun link al Foglio Google configurato in script.js");
+        return [];
     }
 
+    try {
+        const response = await fetch(SHEET_CSV_URL);
+        const data = await response.text();
+        
+        // Parse CSV
+        const rows = data.split('\n').map(row => row.trim()).filter(row => row);
+        // Assume first row is header
+        
+        // Map CSV to Event objects
+        const sheetEvents = rows.slice(1).map((row, index) => {
+            // Handle split better (naively splitting by comma for now, assume no commas in text or simple usage)
+            // A more robust CSV parser would be needed for complex descriptions with commas
+            // Using a regex to split by comma ONLY if not inside quotes is better:
+            // const cols = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
+            const cleanCols = row.split(',').map(c => c.trim().replace(/^"|"$/g, '')); // Simple split fallback
+
+            // Map columns based on index (assuming standard order if headers match or fixed order)
+            // Expected Order in Sheet: 
+            // 0: Data, 1: Ora, 2: Titolo, 3: Sottotitolo, 4: Descrizione, 5: Luogo, 6: Categoria, 7: Immagine, 8: Organizzatore
+            
+            return {
+                id: `sheet-${index}`,
+                date: cleanCols[0] || new Date().toISOString().split('T')[0],
+                time: cleanCols[1] || '21:00',
+                title: cleanCols[2] || 'Evento senza titolo',
+                subtitle: cleanCols[3] || '',
+                description: cleanCols[4] || '',
+                location: cleanCols[5] || 'Avigliano Umbro',
+                category: cleanCols[6] || 'Altro',
+                imageUrl: cleanCols[7] || 'https://picsum.photos/800/600',
+                organizer: cleanCols[8] || '', // NEW FIELD
+                tags: ['Live']
+            };
+        });
+        
+        return sheetEvents;
+    } catch (error) {
+        console.error("Errore nel caricamento del foglio:", error);
+        return [];
+    }
+}
+
+async function loadEvents() {
+    // 1. Get Google Sheet Events
+    const sheetEvents = await fetchEventsFromSheet();
+    
+    // 2. Get Local Storage Events (Admin added)
+    const stored = localStorage.getItem('visit_avigliano_events');
+    const localEvents = stored ? JSON.parse(stored) : [];
+
+    // 3. Combine them
+    events = [...sheetEvents, ...localEvents];
+    
+    // If absolutely empty, use initial constant fallback (optional)
+    if (events.length === 0 && INITIAL_EVENTS.length > 0) {
+        events = [...INITIAL_EVENTS];
+    }
+    
+    const storedNotif = localStorage.getItem('visit_avigliano_notif');
     if (storedNotif) {
         notificationCount = parseInt(storedNotif);
     }
 }
 
-function saveEvents() {
-    localStorage.setItem('visit_avigliano_events', JSON.stringify(events));
-}
-
-function addEvent(newEvent) {
-    events.unshift(newEvent);
-    saveEvents();
-    notificationCount++;
-    localStorage.setItem('visit_avigliano_notif', notificationCount.toString());
-    updateNotificationBadge();
-    renderEvents();
-    renderAdminList();
+function saveLocalEvent(newEvent) {
+    const stored = JSON.parse(localStorage.getItem('visit_avigliano_events') || '[]');
+    stored.unshift(newEvent);
+    localStorage.setItem('visit_avigliano_events', JSON.stringify(stored));
+    
+    // Reload logic to mix with sheet
+    loadEvents().then(() => {
+        notificationCount++;
+        localStorage.setItem('visit_avigliano_notif', notificationCount.toString());
+        updateNotificationBadge();
+        renderEvents();
+        renderAdminList();
+    });
 }
 
 function updateNotificationBadge() {
@@ -295,9 +306,11 @@ function renderEvents() {
         let monthMatch = true;
         if (filters.month !== MONTHS[0]) {
              const d = new Date(e.date);
-             const mName = d.toLocaleString('it-IT', { month: 'long' });
-             const capMonth = mName.charAt(0).toUpperCase() + mName.slice(1);
-             monthMatch = capMonth === filters.month;
+             if (!isNaN(d.getTime())) {
+                 const mName = d.toLocaleString('it-IT', { month: 'long' });
+                 const capMonth = mName.charAt(0).toUpperCase() + mName.slice(1);
+                 monthMatch = capMonth === filters.month;
+             }
         }
         return searchMatch && catMatch && locMatch && monthMatch;
     }).sort((a,b) => new Date(a.date) - new Date(b.date));
@@ -310,13 +323,18 @@ function renderEvents() {
         emptyState.classList.add('hidden');
         filtered.forEach(event => {
             const dateObj = new Date(event.date);
-            const day = dateObj.getDate();
-            const month = dateObj.toLocaleString('it-IT', { month: 'short' }).toUpperCase();
+            let day = "?";
+            let month = "???";
+            
+            if (!isNaN(dateObj.getTime())) {
+                day = dateObj.getDate();
+                month = dateObj.toLocaleString('it-IT', { month: 'short' }).toUpperCase();
+            }
             
             const cardHtml = `
                 <div class="group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-stone-200 flex flex-col h-full relative fade-in cursor-pointer hover:scale-[1.02]">
                     <div class="relative aspect-[7/10] overflow-hidden bg-stone-100 border-b border-stone-100">
-                        <img src="${event.imageUrl}" alt="${event.title}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
+                        <img src="${event.imageUrl}" alt="${event.title}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" onerror="this.src='https://picsum.photos/800/600'" />
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
                         <div class="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-brand-900 shadow-sm border border-stone-100">
                             ${event.category}
@@ -330,6 +348,7 @@ function renderEvents() {
                         <div class="mb-3">
                             <h3 class="text-xl font-bold text-stone-900 leading-tight group-hover:text-brand-800 transition-colors font-serif">${event.title}</h3>
                             ${event.subtitle ? `<p class="text-sm text-brand-800 font-medium mt-1">${event.subtitle}</p>` : ''}
+                            ${event.organizer ? `<p class="text-xs text-stone-400 mt-2 italic flex items-center gap-1"><i data-lucide="users" class="w-3 h-3"></i> A cura di: ${event.organizer}</p>` : ''}
                         </div>
                         <div class="flex flex-wrap gap-y-2 gap-x-4 text-xs text-stone-500 mb-4 items-center">
                             <div class="flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3 text-brand-gold"></i> <span class="truncate max-w-[150px]">${event.location}</span></div>
@@ -370,7 +389,14 @@ function toggleAdmin() {
 function renderAdminList() {
     const container = document.getElementById('admin-events-list');
     container.innerHTML = '';
-    events.forEach(e => {
+    // Show only local events in admin panel to allow deletion
+    const localEvents = JSON.parse(localStorage.getItem('visit_avigliano_events') || '[]');
+    
+    if (localEvents.length === 0) {
+        container.innerHTML = '<div class="p-4 text-sm text-stone-500 italic">Nessun evento locale aggiunto. Gli eventi del Foglio Google non appaiono qui.</div>';
+    }
+
+    localEvents.forEach(e => {
         const item = `
             <div class="p-4 flex items-center gap-4 hover:bg-stone-50 transition-colors">
                 <div class="w-16 h-24 overflow-hidden rounded-md shadow-sm bg-stone-200 flex-shrink-0">
@@ -379,6 +405,7 @@ function renderAdminList() {
                 <div class="flex-1">
                     <h4 class="font-bold text-stone-900">${e.title}</h4>
                     <p class="text-xs text-stone-500">${e.date} • ${e.time}</p>
+                    <span class="text-[10px] bg-stone-100 px-1 rounded">Locale</span>
                 </div>
                 <button onclick="deleteEvent('${e.id}')" class="p-2 text-stone-400 hover:text-red-600 transition-colors">
                     <i data-lucide="trash-2" class="w-4 h-4"></i>
@@ -392,12 +419,15 @@ function renderAdminList() {
 
 // --- INIT ---
 
-document.addEventListener('DOMContentLoaded', () => {
-    loadEvents();
+document.addEventListener('DOMContentLoaded', async () => {
     populateSelects();
-    renderEvents();
-    renderChatMessages();
     updateNotificationBadge();
+    
+    // Initial load with Async fetch
+    await loadEvents();
+    renderEvents();
+    
+    renderChatMessages();
     
     // Event Listeners for Filters
     ['search-input', 'filter-month', 'filter-category', 'filter-location'].forEach(id => {
@@ -453,7 +483,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         document.getElementById('input-desc').value = data.description || '';
                         document.getElementById('input-date').value = data.date || '';
                         document.getElementById('input-time').value = data.time || '';
-                        // Simple matches for location/category
                         if (data.location) document.getElementById('input-location').value = data.location;
                         if (data.category) document.getElementById('input-category').value = data.category;
                     }
@@ -485,7 +514,8 @@ document.addEventListener('DOMContentLoaded', () => {
             imageUrl: document.getElementById('upload-preview-img').src || 'https://picsum.photos/800/600',
             tags: ["Nuovo"]
         };
-        addEvent(newEvt);
+        saveLocalEvent(newEvt);
+        
         document.getElementById('event-form').reset();
         document.getElementById('upload-preview-container').classList.add('hidden');
         document.getElementById('upload-placeholder').classList.remove('hidden');

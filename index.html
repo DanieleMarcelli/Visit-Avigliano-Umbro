@@ -220,11 +220,12 @@
         
         <!-- HERO SECTION -->
         <div class="relative h-[60vh] min-h-[500px] w-full overflow-hidden flex items-center justify-center bg-stone-900">
-            <!-- Teatro Comunale Placeholder - Se hai il Base64 mettilo nel src qui sotto al posto di unsplash -->
+            <!-- BACKGROUND IMAGE UPDATED WITH FACEBOOK CDN LINK -->
             <div class="absolute inset-0 z-0 bg-cover bg-center transition-all duration-1000" 
-                 style="background-image: url('https://images.unsplash.com/photo-1514306191717-452245255e0c?q=80&w=1920&auto=format&fit=crop'); opacity: 0.6;">
+                 style="background-image: url('https://scontent.fbri2-1.fna.fbcdn.net/v/t39.30808-6/502622906_24128557276730363_1128000473065477802_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=833d8c&_nc_ohc=fSDHMgKfuL4Q7kNvwH-cU1X&_nc_oc=Adnr9jhXM5IY_QOUKSYZkPLRrRMRNrqXULkHgXcRrVGlHiIxB3TnijwwQmxlO64EVoE&_nc_zt=23&_nc_ht=scontent.fbri2-1.fna&_nc_gid=q2fLCb7j0NT9PRsPhKsHZg&oh=00_AfjCqig3UbjC9HBDpbbftJe3M_S0fEomfCgbEEtdxPAcrA&oe=69311124'); opacity: 0.9;">
             </div>
             
+            <!-- Overlay to ensure text readability -->
             <div class="absolute inset-0 bg-gradient-to-t from-brand-900/95 via-brand-900/50 to-stone-900/40"></div>
             
             <div class="relative z-10 text-center px-4 max-w-4xl mx-auto text-white slide-up">
@@ -276,9 +277,15 @@
                 </div>
             </div>
 
-            <!-- Grid Container -->
+            <!-- Grid Container - Initiated with loader -->
             <div id="events-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                <!-- Cards will be injected via JS -->
+                <!-- Loader Placeholder -->
+                <div class="col-span-full flex justify-center py-20">
+                    <div class="flex flex-col items-center">
+                        <i data-lucide="loader-2" class="w-10 h-10 animate-spin text-brand-900 mb-4"></i>
+                        <p class="text-stone-500 font-medium">Caricamento eventi dal foglio Google...</p>
+                    </div>
+                </div>
             </div>
 
             <!-- Empty State -->

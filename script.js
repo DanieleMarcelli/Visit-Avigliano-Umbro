@@ -245,15 +245,16 @@ function renderEvents() {
             const day = dateObj.getDate();
             const month = dateObj.toLocaleString('it-IT', { month: 'short' }).toUpperCase();
             
+            // Refined Card Design
             const cardHtml = `
-                <div class="group bg-white rounded-xl shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden border border-stone-100 flex flex-col h-full relative fade-in">
+                <div class="group bg-white rounded-xl shadow-md hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 overflow-hidden border-2 border-stone-200 flex flex-col h-full relative fade-in cursor-pointer">
                     <div class="relative aspect-[7/10] overflow-hidden bg-stone-100">
-                        <img src="${event.imageUrl}" alt="${event.title}" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" />
+                        <img src="${event.imageUrl}" alt="${event.title}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
-                        <div class="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-brand-900 shadow-sm">
+                        <div class="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-brand-900 shadow-sm border border-stone-100">
                             ${event.category}
                         </div>
-                        <div class="absolute bottom-4 left-4 flex flex-col items-center justify-center w-12 h-14 bg-white/95 backdrop-blur-sm rounded-lg text-brand-900 shadow-lg">
+                        <div class="absolute bottom-4 left-4 flex flex-col items-center justify-center w-12 h-14 bg-white/95 backdrop-blur-sm rounded-lg text-brand-900 shadow-lg border border-stone-100">
                             <span class="text-xl font-bold leading-none">${day}</span>
                             <span class="text-[10px] uppercase font-bold tracking-wider">${month}</span>
                         </div>
@@ -264,16 +265,17 @@ function renderEvents() {
                             ${event.subtitle ? `<p class="text-sm text-brand-800 font-medium mt-1">${event.subtitle}</p>` : ''}
                         </div>
                         <div class="flex flex-wrap gap-y-2 gap-x-4 text-xs text-stone-500 mb-4 items-center">
-                            <div class="flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> <span class="truncate max-w-[150px]">${event.location}</span></div>
-                            <div class="flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> <span>${event.time}</span></div>
+                            <div class="flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3 text-brand-gold"></i> <span class="truncate max-w-[150px]">${event.location}</span></div>
+                            <div class="flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3 text-brand-gold"></i> <span>${event.time}</span></div>
                         </div>
                         <p class="text-stone-600 text-sm line-clamp-3 mb-6 flex-1">${event.description}</p>
                         <div class="mt-auto pt-4 border-t border-stone-100 flex justify-between items-center">
                             <div class="flex gap-2">
-                                ${(event.tags || []).slice(0,2).map(t => `<span class="text-[10px] uppercase tracking-wide text-stone-400 bg-stone-50 px-2 py-1 rounded-md">${t}</span>`).join('')}
+                                ${(event.tags || []).slice(0,2).map(t => `<span class="text-[10px] uppercase tracking-wide text-stone-500 bg-stone-100 px-2 py-1 rounded-md font-medium">${t}</span>`).join('')}
                             </div>
-                            <button class="text-brand-900 text-xs font-bold uppercase tracking-wider flex items-center gap-1 hover:gap-2 transition-all">
-                                Dettagli <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                            <button class="text-brand-900 hover:text-brand-700 text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-colors">
+                                <i data-lucide="info" class="w-4 h-4"></i>
+                                Dettagli
                             </button>
                         </div>
                     </div>

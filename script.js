@@ -1,3 +1,4 @@
+
 // --- CONFIGURATION ---
 // 1. LINK EVENTI
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=0&single=true&output=csv"; 
@@ -196,7 +197,7 @@ async function loadContentCMS() {
         // Skip header (row 0), process data
         rows.slice(1).forEach(row => {
             const cols = parseCSVLine(row);
-            const id = cols[0];       // Column A: ID (e.g., "nav-logo", "hero-title")
+            const id = cols[0];       // Column A: ID
             const contentText = cols[1]; // Column B: Text
             const imageUrl = cols[2];    // Column C: Image URL
 
@@ -210,7 +211,6 @@ async function loadContentCMS() {
                         if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
                             element.placeholder = contentText;
                         } else {
-                            // Use innerHTML to allow simple formatting like <br>
                             element.innerHTML = contentText;
                         }
                     }
@@ -383,22 +383,48 @@ function populateSelects() {
     });
 }
 
+/**
+ * RENDERING LOGIC: "THIS WEEK" vs "FUTURE"
+ */
 function renderEvents() {
-    const grid = document.getElementById('events-grid');
+    const mainGrid = document.getElementById('events-main-grid');
+    const futureList = document.getElementById('events-future-list');
     const countLabel = document.getElementById('results-count');
     const emptyState = document.getElementById('empty-state');
+    const loader = document.getElementById('events-loader');
+    const loadMoreContainer = document.getElementById('load-more-container');
+    const loadMoreBtn = document.getElementById('load-more-btn');
     
-    grid.innerHTML = '';
-    
-    const filtered = events.filter(e => {
+    // Hide loader
+    if(loader) loader.classList.add('hidden');
+
+    mainGrid.innerHTML = '';
+    futureList.innerHTML = ''; // Clear previous
+
+    // Prepare Dates
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const nextWeek = new Date(today);
+    nextWeek.setDate(today.getDate() + 7);
+
+    // 1. Filter Logic
+    let filtered = events.filter(e => {
+        // A. FILTER PAST EVENTS
+        const eventDate = new Date(e.date);
+        // Use midnight comparison to include events happening today
+        const eventMidnight = new Date(eventDate);
+        eventMidnight.setHours(0,0,0,0);
+        
+        if (eventMidnight < today) return false;
+
+        // B. STANDARD FILTERS
         const searchMatch = !filters.search || e.title.toLowerCase().includes(filters.search.toLowerCase()) || e.description.toLowerCase().includes(filters.search.toLowerCase());
         const catMatch = filters.category === EventCategory.ALL || e.category === filters.category;
         const locMatch = filters.location === EventLocation.ALL || e.location === filters.location;
         let monthMatch = true;
         if (filters.month !== MONTHS[0]) {
-             const d = new Date(e.date);
-             if (!isNaN(d.getTime())) {
-                 const mName = d.toLocaleString('it-IT', { month: 'long' });
+             if (!isNaN(eventDate.getTime())) {
+                 const mName = eventDate.toLocaleString('it-IT', { month: 'long' });
                  const capMonth = mName.charAt(0).toUpperCase() + mName.slice(1);
                  monthMatch = capMonth === filters.month;
              }
@@ -406,13 +432,37 @@ function renderEvents() {
         return searchMatch && catMatch && locMatch && monthMatch;
     }).sort((a,b) => new Date(a.date) - new Date(b.date));
 
-    countLabel.innerText = `${filtered.length} eventi trovati`;
+    countLabel.innerText = `${filtered.length} eventi in programma`;
 
     if (filtered.length === 0) {
         emptyState.classList.remove('hidden');
+        loadMoreContainer.classList.add('hidden');
     } else {
         emptyState.classList.add('hidden');
-        filtered.forEach(event => {
+
+        // 2. SPLIT LOGIC
+        // "This Week" = Events happening in <= 7 days OR at least first 4 events.
+        let mainEvents = [];
+        let futureEvents = [];
+
+        filtered.forEach(e => {
+            const d = new Date(e.date);
+            if (d <= nextWeek) {
+                mainEvents.push(e);
+            } else {
+                futureEvents.push(e);
+            }
+        });
+
+        // Fallback: If less than 4 events in "This Week", steal from "Future"
+        if (mainEvents.length < 4 && futureEvents.length > 0) {
+            const needed = 4 - mainEvents.length;
+            const borrowed = futureEvents.splice(0, needed);
+            mainEvents = [...mainEvents, ...borrowed];
+        }
+
+        // 3. RENDER MAIN GRID (Large Cards)
+        mainEvents.forEach(event => {
             const dateObj = new Date(event.date);
             let day = "?";
             let month = "???";
@@ -458,8 +508,67 @@ function renderEvents() {
                     </div>
                 </div>
             `;
-            grid.insertAdjacentHTML('beforeend', cardHtml);
+            mainGrid.insertAdjacentHTML('beforeend', cardHtml);
         });
+
+        // 4. RENDER FUTURE LIST (Compact Cards)
+        if (futureEvents.length > 0) {
+            // Re-add header to list content
+            futureList.insertAdjacentHTML('beforeend', `
+                 <div class="flex items-center gap-4 mb-6">
+                    <div class="h-px bg-stone-200 flex-1"></div>
+                    <span class="text-sm font-bold text-stone-400 uppercase tracking-widest">Prossime Settimane</span>
+                    <div class="h-px bg-stone-200 flex-1"></div>
+                </div>
+            `);
+
+            futureEvents.forEach(event => {
+                const dateObj = new Date(event.date);
+                const fullDate = dateObj.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
+
+                const compactHtml = `
+                    <div class="flex items-center gap-4 bg-white p-4 rounded-lg border border-stone-200 shadow-sm hover:shadow-md transition-all group cursor-pointer hover:border-brand-200">
+                        <div class="w-16 h-16 rounded-md overflow-hidden flex-shrink-0 bg-stone-100">
+                            <img src="${event.imageUrl}" class="w-full h-full object-cover group-hover:scale-110 transition-transform" onerror="this.src='https://picsum.photos/100/100'">
+                        </div>
+                        <div class="flex-grow">
+                            <div class="text-[10px] text-brand-900 font-bold uppercase tracking-wider mb-0.5">${fullDate}</div>
+                            <h4 class="font-bold text-stone-900 text-lg leading-tight group-hover:text-brand-900">${event.title}</h4>
+                            <div class="text-xs text-stone-500 mt-1 flex items-center gap-2">
+                                <span>${event.time}</span>
+                                <span>•</span>
+                                <span class="truncate">${event.location}</span>
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                             <button class="w-10 h-10 rounded-full bg-stone-50 text-brand-900 flex items-center justify-center group-hover:bg-brand-900 group-hover:text-white transition-colors">
+                                <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                             </button>
+                        </div>
+                    </div>
+                `;
+                futureList.insertAdjacentHTML('beforeend', compactHtml);
+            });
+            
+            // Show Button, Hide List initially
+            loadMoreContainer.classList.remove('hidden');
+            loadMoreBtn.classList.remove('hidden');
+            futureList.classList.add('hidden');
+
+            // Handle Button Click (Remove old listener to prevent duplicates if re-rendered)
+            const newBtn = loadMoreBtn.cloneNode(true);
+            loadMoreBtn.parentNode.replaceChild(newBtn, loadMoreBtn);
+            
+            newBtn.addEventListener('click', () => {
+                futureList.classList.remove('hidden');
+                futureList.classList.add('fade-in'); // Add animation class
+                newBtn.parentElement.classList.add('hidden'); // Hide container
+            });
+
+        } else {
+            loadMoreContainer.classList.add('hidden');
+        }
+
         if (window.lucide) window.lucide.createIcons();
     }
 }

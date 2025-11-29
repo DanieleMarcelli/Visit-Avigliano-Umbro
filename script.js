@@ -522,5 +522,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         alert('Evento Pubblicato!');
     });
 
+    // Contact Form
+    document.getElementById('contact-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        alert('Grazie per averci contattato! Il tuo messaggio è stato inviato.');
+        document.getElementById('contact-form').reset();
+    });
+
     if (window.lucide) window.lucide.createIcons();
 });

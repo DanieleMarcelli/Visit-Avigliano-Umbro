@@ -73,24 +73,29 @@
         <div class="absolute inset-0 z-0">
             <img data-content-id="cammino-hero-desc" src="" 
                  onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1519681393798-3828fb4090bb?q=80&w=2670'"
-                 class="w-full h-full object-cover opacity-50" style="filter: contrast(1.1) saturate(1.1);">
-            
-            <div class="absolute inset-0 bg-gradient-to-b from-slate-900/80 via-slate-900/30 to-slate-900"></div>
+                 class="w-full h-full object-cover opacity-40">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-slate-900"></div>
         </div>
 
-        <div class="relative z-10 max-w-5xl mx-auto px-4 text-center pt-20">
+        <div class="absolute inset-0 z-10 flex items-center justify-center pointer-events-none mix-blend-screen opacity-60">
+             <img src="https://drive.google.com/thumbnail?id=1a6r3c0iV6JhZ2OoB0kLOCiMN-6SXR9vK&sz=w1000" 
+                  class="h-[80%] w-[90%] md:h-[120%] md:w-[100%] object-contain drop-shadow-[0_0_15px_rgba(0,240,255,0.3)]"
+                  style="filter: hue-rotate(170deg) saturate(1.5);">
+        </div>
+
+        <div class="relative z-20 max-w-5xl mx-auto px-4 text-center pt-10">
             
             <p class="text-neon-blue text-xs md:text-sm font-bold tracking-[0.5em] uppercase mb-4 drop-shadow-md animate-fade-in">Umbria, Pleistocene</p>
             
-            <h1 data-content-id="cammino-hero-title" class="text-6xl md:text-8xl lg:text-9xl font-display uppercase tracking-tighter leading-[0.85] mb-8 text-white mix-blend-overlay opacity-90 drop-shadow-2xl animate-fade-in" style="animation-delay: 0.2s">
+            <h1 data-content-id="cammino-hero-title" class="text-6xl md:text-8xl lg:text-9xl font-display uppercase tracking-tighter leading-[0.85] mb-8 text-white drop-shadow-2xl animate-fade-in" style="animation-delay: 0.s">
                 LAGO<br>TIBERINO
             </h1>
 
-            <p data-content-id="cammino-hero-desc" class="text-lg md:text-xl text-blue-100/90 max-w-2xl mx-auto font-light leading-relaxed mb-12 border-t border-white/20 pt-8 animate-fade-in" style="animation-delay: 0.4s">
+            <p data-content-id="cammino-hero-desc" class="text-lg md:text-xl text-blue-100/90 max-w-2xl mx-auto font-light leading-relaxed mb-12 border-t border-white/10 pt-8 animate-fade-in backdrop-blur-sm rounded-xl p-4 bg-slate-900/30" style="animation-delay: 0.s">
                 Caricamento dati...
             </p>
 
-            <div class="inline-flex flex-wrap justify-center gap-8 md:gap-16 border-y border-white/10 py-6 px-10 bg-black/20 backdrop-blur-sm rounded-xl animate-fade-in" style="animation-delay: 0.6s">
+            <div class="inline-flex flex-wrap justify-center gap-8 md:gap-16 border border-white/10 py-6 px-10 bg-slate-900/60 backdrop-blur-md rounded-2xl animate-fade-in shadow-2xl" style="animation-delay: 0.2s">
                 <div class="flex flex-col items-center">
                     <span data-content-id="cammino-tech-km" class="text-3xl font-display text-white">80 km</span>
                     <span class="text-[10px] uppercase text-neon-blue tracking-wider">Distanza</span>
@@ -109,7 +114,7 @@
 
         </div>
         
-        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/50 animate-bounce">
+        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/50 animate-bounce z-20">
             <i data-lucide="chevron-down" class="w-8 h-8"></i>
         </div>
     </section>

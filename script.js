@@ -15,7 +15,12 @@ const EventCategory = {
     THEATER: "Teatro",
     EXHIBITION: "Mostra",
     FESTIVAL: "Sagra",
-    CLASSICAL: "Musica Classica"
+    CLASSICAL: "Musica Classica",
+    CONFERENCE: "Conferenze",
+    BOOKS: "Presentazione Libri",
+    KIDS: "Bambini e Famiglie",
+    FOLK: "Feste Popolari",
+    CULTURE: "Cultura"
 };
 
 const EventLocation = {

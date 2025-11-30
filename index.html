@@ -64,13 +64,20 @@
 <body class="min-h-screen flex flex-col text-stone-800">
 
     <!-- HEADER -->
-    <header class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-stone-200 shadow-sm">
+    <header class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-stone-200 shadow-sm transition-all">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <!-- Logo (CMS ID: nav-logo) -->
-                <div class="flex items-center gap-3 cursor-pointer" onclick="window.location.href='/'">
-                    <div class="w-10 h-10 bg-brand-900 rounded-full flex items-center justify-center text-white overflow-hidden shadow-md">
-                        <img data-content-id="nav-logo" src="https://picsum.photos/50/50" alt="Logo" class="w-full h-full object-cover opacity-90" />
+                <div class="flex items-center gap-3 cursor-pointer group" onclick="window.location.href='/'">
+                    <!-- Updated Logo Container -->
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden shadow-sm border border-stone-100 bg-transparent transition-transform group-hover:scale-105">
+                        <img 
+                            data-content-id="nav-logo" 
+                            src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" 
+                            alt="Logo" 
+                            class="w-full h-full object-cover opacity-0 transition-opacity duration-700"
+                            onload="if(this.src.length > 100 || this.src.startsWith('http')) this.classList.remove('opacity-0')"
+                        />
                     </div>
                     <div class="flex flex-col">
                         <span class="text-xs uppercase tracking-widest text-brand-900 font-bold">Portale Turistico</span>

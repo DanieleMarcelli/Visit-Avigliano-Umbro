@@ -472,25 +472,61 @@
         </section>
 
         <!-- CAMMINO CTA BANNER -->
-        <section class="relative py-32 bg-stone-900 overflow-hidden border-t border-stone-800 group">
-            <div class="absolute inset-0 z-0">
-                <img src="https://loremflickr.com/1200/400/hiking,nature/all" class="w-full h-full object-cover opacity-30 group-hover:scale-105 transition-transform duration-[2s]">
-                <div class="absolute inset-0 bg-gradient-to-r from-stone-900 via-stone-900/80 to-stone-900/20"></div>
-            </div>
-            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-10">
-                <div class="text-white max-w-2xl">
-                    <span class="inline-block py-1 px-3 bg-brand-gold/10 border border-brand-gold/40 text-brand-gold text-xs font-bold tracking-[0.2em] uppercase rounded-full mb-6">Novità</span>
-                    <h2 class="text-4xl md:text-6xl font-serif font-bold mb-6 leading-tight">Il Cammino del <br/>Lago Tiberino</h2>
-                    <p class="text-stone-300 text-lg leading-relaxed">80km di natura incontaminata, storia e spiritualità. Un'esperienza unica da vivere a piedi o in bici nel cuore dell'Umbria.</p>
-                </div>
-                <div>
-                    <a href="cammino.html" class="inline-flex items-center gap-3 bg-white hover:bg-brand-gold text-stone-900 font-bold py-5 px-10 rounded-full transition-all duration-300 transform hover:scale-105 shadow-2xl text-lg group-hover:shadow-brand-gold/20">
-                        <i data-lucide="map" class="w-5 h-5"></i> Configura il tuo Viaggio
-                    </a>
-                </div>
-            </div>
-        </section>
+        <section class="relative py-28 md:py-36 flex items-center justify-center overflow-hidden">
+    
+    <div class="absolute inset-0 z-0">
+        <div data-content-id="home-cammino-bg" 
+             class="absolute inset-0 bg-cover bg-center bg-fixed transform scale-105" 
+             style="background-image: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2000&auto=format&fit=crop');">
+        </div>
+        <div class="absolute inset-0 bg-stone-900/80 backdrop-blur-[2px]"></div>
+    </div>
 
+    <div class="relative z-10 max-w-4xl mx-auto px-4 text-center">
+        
+        <span class="inline-flex items-center gap-2 py-1.5 px-4 border border-brand-gold/30 bg-brand-gold/10 text-brand-gold text-xs font-bold tracking-[0.2em] uppercase rounded-full mb-8">
+            <i data-lucide="compass" class="w-4 h-4"></i>
+            Nuovo Itinerario
+        </span>
+
+        <h2 data-content-id="home-cammino-title" class="text-5xl md:text-7xl font-serif font-bold text-white mb-6 tracking-tight">
+            Il Cammino del<br/>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 to-emerald-500">Lago Tiberino</span>
+        </h2>
+
+        <p data-content-id="home-cammino-desc" class="text-lg md:text-xl text-stone-300 leading-relaxed max-w-2xl mx-auto mb-10 font-light">
+            Un percorso ad anello di 80km attraverso la storia. <br class="hidden md:block">
+            Vivi l'Umbria autentica tra borghi, boschi e spiritualità.
+        </p>
+
+        <div class="flex flex-wrap justify-center gap-6 md:gap-12 mb-12 text-stone-400">
+            <div class="flex flex-col items-center gap-2">
+                <i data-lucide="footprints" class="w-6 h-6 text-emerald-400"></i>
+                <span data-content-id="home-cammino-km" class="text-xs font-bold uppercase tracking-widest">80 Km</span>
+            </div>
+            <div class="border-r border-stone-700 h-10 hidden md:block"></div>
+            <div class="flex flex-col items-center gap-2">
+                <i data-lucide="mountain" class="w-6 h-6 text-emerald-400"></i>
+                <span data-content-id="home-cammino-disl" class="text-xs font-bold uppercase tracking-widest">+2400m Dislivello</span>
+            </div>
+            <div class="border-r border-stone-700 h-10 hidden md:block"></div>
+            <div class="flex flex-col items-center gap-2">
+                <i data-lucide="map" class="w-6 h-6 text-emerald-400"></i>
+                <span data-content-id="home-cammino-tappe" class="text-xs font-bold uppercase tracking-widest">3-4 Tappe</span>
+            </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="cammino.html" class="group bg-white text-stone-900 hover:bg-emerald-500 hover:text-white font-bold py-4 px-10 rounded-full transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_30px_rgba(16,185,129,0.4)] flex items-center gap-3">
+                <span>Configura il Viaggio</span>
+                <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+            </a>
+            <a href="cammino.html" class="text-stone-400 hover:text-white font-medium text-sm transition-colors border-b border-transparent hover:border-white pb-0.5">
+                Scarica traccia GPX
+            </a>
+        </div>
+    </div>
+</section>
         <!-- SEZIONE STORIA (Amber Theme) -->
         <section id="storia" class="bg-white border-t border-stone-200 scroll-mt-20">
             <!-- Mini Hero -->

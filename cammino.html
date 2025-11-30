@@ -4,9 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Il Cammino del Lago Tiberino | Experience</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    
     <script src="https://unpkg.com/lucide@latest"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -22,27 +26,17 @@
                         'brand': { 900: '#4a0404', 800: '#701a1a', gold: '#d4af37' }
                     },
                     animation: {
-                        'water-rise': 'waterRise 4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
-                        'float': 'float 8s ease-in-out infinite',
-                        'fade-in': 'fadeIn 2s ease-out forwards',
                         'marquee': 'marquee 30s linear infinite',
+                        'fade-in': 'fadeIn 1s ease-out forwards',
                     },
                     keyframes: {
-                        waterRise: {
-                            '0%': { clipPath: 'inset(100% 0 0 0)', filter: 'brightness(0.5) grayscale(1)' },
-                            '100%': { clipPath: 'inset(0 0 0 0)', filter: 'brightness(1.2) grayscale(0)' }
-                        },
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-15px)' },
-                        },
-                        fadeIn: {
-                            '0%': { opacity: '0' },
-                            '100%': { opacity: '1' }
-                        },
                         marquee: {
                             '0%': { transform: 'translateX(0)' },
                             '100%': { transform: 'translateX(-50%)' }
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
                         }
                     }
                 }
@@ -51,13 +45,12 @@
     </script>
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        /* Filtro per rendere la mappa "olografica" */
-        .hologram-map { filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.5)); }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-slate-900 text-white font-body selection:bg-neon-blue selection:text-black overflow-x-hidden min-h-screen">
+<body class="bg-stone-50 text-stone-800 font-body selection:bg-brand-gold selection:text-white">
 
-    <nav class="fixed top-0 left-0 w-full z-50 px-6 py-4 bg-slate-900/80 backdrop-blur-md border-b border-white/10 transition-all duration-300">
+    <nav class="fixed top-0 left-0 w-full z-50 px-6 py-4 bg-slate-900/90 backdrop-blur-md border-b border-white/10 transition-all duration-300">
         <div class="flex justify-between items-center max-w-7xl mx-auto">
             <a href="index.html" class="flex items-center gap-3 group">
                 <div class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center overflow-hidden border border-white/20 group-hover:border-neon-blue transition-colors">
@@ -75,73 +68,83 @@
         </div>
     </nav>
 
-    <section class="relative h-screen flex items-center justify-center overflow-hidden">
+    <section class="relative h-[85vh] min-h-[600px] flex items-center justify-center overflow-hidden bg-slate-900">
         
         <div class="absolute inset-0 z-0">
             <img data-content-id="cammino-hero-desc" src="" 
-                 onerror="this.src='https://images.unsplash.com/photo-1519681393798-3828fb4090bb?q=80&w=2670'"
-                 class="w-full h-full object-cover opacity-30 animate-float mix-blend-overlay">
-            <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-slate-900"></div>
+                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1519681393798-3828fb4090bb?q=80&w=2670'"
+                 class="w-full h-full object-cover opacity-50" style="filter: contrast(1.1) saturate(1.1);">
+            
+            <div class="absolute inset-0 bg-gradient-to-b from-slate-900/80 via-slate-900/30 to-slate-900"></div>
         </div>
 
-        <div class="relative w-full max-w-7xl mx-auto h-full flex flex-col items-center justify-center z-10 pt-20">
+        <div class="relative z-10 max-w-5xl mx-auto px-4 text-center pt-20">
             
-            <p class="text-neon-blue text-xs md:text-sm font-bold tracking-[0.5em] uppercase mb-4 animate-fade-in drop-shadow-lg">Umbria, Pleistocene</p>
+            <p class="text-neon-blue text-xs md:text-sm font-bold tracking-[0.5em] uppercase mb-4 drop-shadow-md animate-fade-in">Umbria, Pleistocene</p>
             
-            <h1 data-content-id="cammino-hero-title" class="text-6xl md:text-8xl lg:text-9xl font-display uppercase tracking-tighter leading-[0.9] text-transparent bg-clip-text bg-gradient-to-b from-white via-blue-100 to-slate-600 drop-shadow-2xl text-center relative z-20">
+            <h1 data-content-id="cammino-hero-title" class="text-6xl md:text-8xl lg:text-9xl font-display uppercase tracking-tighter leading-[0.85] mb-8 text-white mix-blend-overlay opacity-90 drop-shadow-2xl animate-fade-in" style="animation-delay: 0.2s">
                 LAGO<br>TIBERINO
             </h1>
 
-            <div class="absolute inset-0 z-10 flex items-center justify-center pointer-events-none mix-blend-screen opacity-70">
-                 <img src="https://drive.google.com/thumbnail?id=1a6r3c0iV6JhZ2OoB0kLOCiMN-6SXR9vK&sz=w1000" 
-                      class="h-[80%] w-[80%] md:h-[100%] md:w-[100%] object-contain animate-water-rise hologram-map"
-                      onerror="this.style.display='none'">
-            </div>
-
-            <p data-content-id="cammino-hero-desc" class="relative z-30 mt-8 max-w-2xl text-center text-blue-100/80 text-lg md:text-xl font-light leading-relaxed border-t border-white/10 pt-6 animate-fade-in" style="animation-delay: 0.5s">
+            <p data-content-id="cammino-hero-desc" class="text-lg md:text-xl text-blue-100/90 max-w-2xl mx-auto font-light leading-relaxed mb-12 border-t border-white/20 pt-8 animate-fade-in" style="animation-delay: 0.4s">
                 Caricamento dati...
             </p>
+
+            <div class="inline-flex flex-wrap justify-center gap-8 md:gap-16 border-y border-white/10 py-6 px-10 bg-black/20 backdrop-blur-sm rounded-xl animate-fade-in" style="animation-delay: 0.6s">
+                <div class="flex flex-col items-center">
+                    <span data-content-id="cammino-tech-km" class="text-3xl font-display text-white">80 km</span>
+                    <span class="text-[10px] uppercase text-neon-blue tracking-wider">Distanza</span>
+                </div>
+                <div class="w-px bg-white/20 h-10 hidden md:block"></div>
+                <div class="flex flex-col items-center">
+                    <span data-content-id="cammino-tech-dislivello" class="text-3xl font-display text-white">2.200 m</span>
+                    <span class="text-[10px] uppercase text-neon-blue tracking-wider">Dislivello</span>
+                </div>
+                <div class="w-px bg-white/20 h-10 hidden md:block"></div>
+                <div class="flex flex-col items-center">
+                    <span data-content-id="cammino-tech-diff" class="text-3xl font-display text-white">Livello E</span>
+                    <span class="text-[10px] uppercase text-neon-blue tracking-wider">Difficoltà</span>
+                </div>
+            </div>
+
         </div>
         
-        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 opacity-50">
-            <div class="w-[1px] h-16 bg-gradient-to-b from-transparent via-neon-blue to-transparent overflow-hidden">
-                <div class="absolute top-0 left-0 w-full h-1/2 bg-white animate-[slideDown_1.5s_infinite]"></div>
-            </div>
+        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/50 animate-bounce">
+            <i data-lucide="chevron-down" class="w-8 h-8"></i>
         </div>
     </section>
 
-    <div class="bg-slate-950/50 backdrop-blur border-y border-white/5 py-3 overflow-hidden relative z-20">
+    <div class="bg-slate-950 border-y border-white/5 py-3 overflow-hidden relative z-20">
         <div class="whitespace-nowrap flex gap-16 animate-marquee font-display text-4xl text-blue-400/20 uppercase tracking-tight hover:text-neon-blue transition-colors duration-500 cursor-default">
-            <span data-content-id="cammino-tech-km">80 KM</span> • 
-            <span data-content-id="cammino-tech-dislivello">2.200M D+</span> • 
             <span>FORESTA FOSSILE</span> • 
             <span>400.000 ANNI FA</span> • 
             <span>GROTTA BELLA</span> • 
-            <span data-content-id="cammino-tech-diff">LIVELLO E</span> •
             <span>SLOW TOURISM</span> •
-            <span>UMBRIA</span>
+            <span>AVIGLIANO UMBRO</span> •
+            <span>NATURA INCONTAMINATA</span>
         </div>
     </div>
 
-    <section id="configuratore" class="py-24 px-4 bg-slate-900 relative">
+    <section id="configuratore" class="py-24 px-4 bg-slate-50 relative">
         <div class="max-w-6xl mx-auto">
             <div class="text-center mb-16">
-                <span class="text-neon-blue font-bold text-sm tracking-widest uppercase">Pianifica</span>
-                <h2 class="text-4xl md:text-5xl font-display uppercase text-white mt-2">Configura il tuo Viaggio</h2>
+                <span class="text-brand-900 font-bold text-sm tracking-widest uppercase">Pianifica</span>
+                <h2 class="text-4xl md:text-5xl font-display uppercase text-slate-900 mt-2">Configura il tuo Viaggio</h2>
+                <p class="text-slate-500 mt-4 max-w-xl mx-auto">Scegli come vuoi affrontare il percorso. Il sistema calcolerà automaticamente le tappe ideali per te.</p>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="bg-white/5 backdrop-blur-md p-8 rounded-3xl border border-white/10">
-                    <h3 class="font-bold text-xl mb-8 flex items-center gap-3 text-white"><i data-lucide="sliders" class="text-neon-blue"></i> Preferenze</h3>
+                <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 h-fit">
+                    <h3 class="font-bold text-xl mb-8 flex items-center gap-3 text-slate-900"><i data-lucide="sliders" class="text-brand-gold"></i> Preferenze</h3>
                     
                     <div class="space-y-8">
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-3">Modalità</label>
                             <div class="grid grid-cols-2 gap-3">
-                                <button onclick="selectMode(this)" class="mode-btn active px-4 py-4 rounded-xl border border-neon-blue bg-neon-blue/10 text-white font-bold text-sm flex items-center justify-center gap-2 transition-all">
+                                <button onclick="selectMode(this, 'piedi')" class="mode-btn active px-4 py-4 rounded-xl border-2 border-brand-900 bg-brand-50 text-brand-900 font-bold text-sm flex items-center justify-center gap-2 transition-all">
                                     <i data-lucide="footprints"></i> A Piedi
                                 </button>
-                                <button onclick="selectMode(this)" class="mode-btn px-4 py-4 rounded-xl border border-white/10 text-slate-400 hover:border-white/30 font-bold text-sm flex items-center justify-center gap-2 transition-all">
+                                <button onclick="selectMode(this, 'bici')" class="mode-btn px-4 py-4 rounded-xl border-2 border-slate-100 text-slate-400 hover:border-slate-300 font-bold text-sm flex items-center justify-center gap-2 transition-all">
                                     <i data-lucide="bike"></i> In Bici
                                 </button>
                             </div>
@@ -149,7 +152,7 @@
 
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-3">Ritmo</label>
-                            <select id="duration-select" class="w-full px-4 py-4 bg-slate-800 border border-white/10 rounded-xl text-white outline-none focus:border-neon-blue transition-colors" onchange="updateTimeline()">
+                            <select id="duration-select" class="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 outline-none focus:border-brand-900 transition-colors" onchange="updateTimeline()">
                                 <option value="3">Classico (3 Giorni)</option>
                                 <option value="4">Lento & Relax (4 Giorni)</option>
                                 <option value="2">Sportivo (2 Giorni)</option>
@@ -159,9 +162,9 @@
                 </div>
 
                 <div class="lg:col-span-2">
-                    <div class="bg-white/5 backdrop-blur-md p-8 rounded-3xl border border-white/10 h-full">
-                        <h3 class="font-bold text-xl mb-8 flex items-center gap-3 text-white"><i data-lucide="map-pin" class="text-neon-blue"></i> Itinerario</h3>
-                        <div id="timeline-container" class="relative pl-8 border-l border-white/10 space-y-8">
+                    <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 h-full min-h-[400px]">
+                        <h3 class="font-bold text-xl mb-8 flex items-center gap-3 text-slate-900"><i data-lucide="map-pin" class="text-brand-gold"></i> Itinerario</h3>
+                        <div id="timeline-container" class="relative pl-8 border-l-2 border-slate-100 space-y-8">
                             </div>
                     </div>
                 </div>
@@ -169,16 +172,39 @@
         </div>
     </section>
 
-    <section class="py-0 bg-slate-950">
-         <iframe frameBorder="0" scrolling="no" src="https://it.wikiloc.com/wikiloc/spatialArtifacts.do?event=view&id=201301484&measures=on&title=on&near=on&images=on&maptype=H" width="100%" height="500px" class="grayscale hover:grayscale-0 transition-all duration-700"></iframe>
+    <section class="w-full h-[500px] bg-slate-200">
+        <iframe frameBorder="0" scrolling="no" src="https://it.wikiloc.com/wikiloc/spatialArtifacts.do?event=view&id=201301484&measures=on&title=on&near=on&images=on&maptype=H" width="100%" height="100%"></iframe>
     </section>
 
-    <footer class="bg-slate-950 py-8 border-t border-white/5 text-center text-slate-600 text-xs uppercase tracking-widest">
-        © 2025 Visit Avigliano Umbro
+    <section class="py-24 bg-brand-900 text-white">
+        <div class="max-w-3xl mx-auto px-4 text-center">
+            <h2 data-content-id="cammino-form-title" class="text-3xl font-serif font-bold mb-4">Richiedi la Credenziale</h2>
+            <p data-content-id="cammino-form-desc" class="text-brand-100/80 mb-10">Compila il modulo per ricevere il passaporto del pellegrino.</p>
+
+            <form class="bg-white/5 backdrop-blur-sm p-8 rounded-3xl border border-white/10 text-left space-y-6 shadow-2xl">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold text-brand-gold uppercase mb-2">Nome</label>
+                        <input type="text" class="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-xl text-white focus:border-brand-gold outline-none" placeholder="Mario Rossi">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-brand-gold uppercase mb-2">Email</label>
+                        <input type="email" class="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-xl text-white focus:border-brand-gold outline-none" placeholder="mario@email.com">
+                    </div>
+                </div>
+                <button type="button" onclick="alert('Grazie! La tua richiesta è stata inviata.')" class="w-full mt-4 bg-brand-gold hover:bg-white hover:text-brand-900 text-brand-900 font-bold py-4 rounded-xl transition-all shadow-lg uppercase tracking-widest text-sm">
+                    Invia Richiesta
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <footer class="bg-slate-950 py-12 border-t border-white/5 text-center text-slate-500 text-sm">
+        © 2025 Visit Avigliano Umbro - Cammino del Lago Tiberino
     </footer>
 
     <script>
-        // Configurazione
+        // CONFIGURAZIONE CMS
         const CONTENT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=643581002&single=true&output=csv";
 
         // 1. CARICAMENTO DATI CMS
@@ -187,25 +213,24 @@
                 const response = await fetch(CONTENT_CSV_URL);
                 const data = await response.text();
                 
-                // Parser CSV semplice
+                // Parser CSV
                 const rows = data.split('\n').map(row => {
-                    // Regex per gestire virgole dentro le virgolette
                     const parts = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
                     return parts.map(p => p.replace(/^"|"$/g, '').trim());
                 });
 
                 rows.forEach(row => {
-                    const id = row[0]; // Colonna A: ID
-                    const text = row[1]; // Colonna B: Testo
-                    const img = row[2]; // Colonna C: Immagine
+                    const id = row[0];
+                    const text = row[1];
+                    const img = row[2];
                     
                     if(!id) return;
 
-                    // Aggiorna TESTI
+                    // Testi
                     const textEl = document.querySelector(`[data-content-id="${id}"]`);
                     if(textEl && text) textEl.innerHTML = text;
 
-                    // Aggiorna IMMAGINI (con fix Drive)
+                    // Immagini
                     const imgEl = document.querySelector(`img[data-content-id="${id}"]`);
                     if(imgEl && img) {
                         let src = img;
@@ -216,7 +241,6 @@
                         imgEl.src = src;
                     }
                 });
-                console.log("Dati CMS caricati.");
             } catch (e) {
                 console.error("Errore caricamento CMS:", e);
             }
@@ -249,13 +273,13 @@
             let html = '';
             stages.forEach((stage, index) => {
                 html += `
-                    <div class="relative pl-8 pb-8 transition-all duration-500 opacity-0 animate-[fadeIn_0.5s_ease-out_forwards]" style="animation-delay: ${index * 100}ms">
-                        <div class="absolute -left-[5px] top-2 w-2 h-2 rounded-full bg-neon-blue shadow-[0_0_10px_#00f0ff]"></div>
-                        <h4 class="font-bold text-white text-lg">${stage.title}</h4>
-                        <div class="flex items-center gap-3 mt-2 mb-2">
-                            <span class="text-xs font-bold px-2 py-1 bg-white/10 text-neon-blue rounded border border-white/10">${stage.km}</span>
+                    <div class="relative pl-8 pb-8 opacity-0 animate-fade-in" style="animation-delay: ${index * 100}ms">
+                        <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-white border-4 border-brand-900 shadow-sm"></div>
+                        <h4 class="font-bold text-slate-900 text-lg">${stage.title}</h4>
+                        <div class="flex items-center gap-3 mt-1 mb-2">
+                            <span class="text-xs font-bold px-2 py-0.5 bg-brand-100 text-brand-800 rounded border border-brand-200">${stage.km}</span>
                         </div>
-                        <p class="text-sm text-slate-400">${stage.desc}</p>
+                        <p class="text-sm text-slate-500">${stage.desc}</p>
                     </div>
                 `;
             });
@@ -264,28 +288,24 @@
 
         function selectMode(btn) {
             document.querySelectorAll('.mode-btn').forEach(b => {
-                b.classList.remove('border-neon-blue', 'bg-neon-blue/10', 'text-white');
-                b.classList.add('border-white/10', 'text-slate-400');
+                b.classList.remove('border-brand-900', 'bg-brand-50', 'text-brand-900');
+                b.classList.add('border-slate-200', 'text-slate-400');
             });
-            btn.classList.remove('border-white/10', 'text-slate-400');
-            btn.classList.add('border-neon-blue', 'bg-neon-blue/10', 'text-white');
+            btn.classList.remove('border-slate-200', 'text-slate-400');
+            btn.classList.add('border-brand-900', 'bg-brand-50', 'text-brand-900');
             updateTimeline(); 
         }
 
-        // 3. INIZIALIZZAZIONE
+        // 3. INIZIO
         document.addEventListener('DOMContentLoaded', () => {
             loadContent();
             updateTimeline();
             if(window.lucide) window.lucide.createIcons();
-            
-            // Stile dinamico per animazioni
-            const style = document.createElement('style');
-            style.innerHTML = `
-                @keyframes slideDown { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
-                @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-            `;
-            document.head.appendChild(style);
         });
+        
+        // Esposizione funzioni
+        window.selectMode = selectMode;
+        window.updateTimeline = updateTimeline;
     </script>
 </body>
 </html>

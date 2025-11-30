@@ -1,14 +1,10 @@
-
 import { GoogleGenAI } from "@google/genai";
 
 // --- CONFIGURATION ---
-// 1. LINK EVENTI
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=0&single=true&output=csv"; 
-
-// 2. LINK CONTENUTI CMS
 const CONTENT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=643581002&single=true&output=csv";
 
-// --- DATI E COSTANTI ---
+// --- DATA CONSTANTS ---
 const EventCategory = {
     ALL: "Tutte le categorie",
     MUSIC: "Musica",
@@ -39,7 +35,7 @@ const MONTHS = [
     "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"
 ];
 
-// Dati statici per il configuratore Cammino
+// Cammino Configurator Data
 const CAMMINO_STAGES = {
     "3": [
         { title: "Tappa 1: Avigliano - Sismano", km: "15 km", diff: "+450m", desc: "Partenza dal borgo, attraversando i boschi fino al castello di Sismano." },
@@ -60,20 +56,18 @@ const CAMMINO_STAGES = {
 
 // --- STATE ---
 let events = [];
-let cmsData = {}; // Store CMS data globally to access full descriptions later
-let chatHistory = [{ role: 'bot', text: "Ciao! Sono il tuo assistente virtuale per Avigliano Umbro. Cerchi un concerto o un evento teatrale?" }];
+let cmsData = {}; 
+let chatHistory = [{ role: 'bot', text: "Ciao! Sono il tuo assistente virtuale. Cerchi un evento o info sul territorio?" }];
 let filters = { search: '', month: 'Tutti i mesi', category: 'Tutte le categorie', location: 'Tutti i luoghi' };
 
-// --- HELPER FUNCTIONS ---
+// --- HELPERS ---
 
 function formatImageUrl(url) {
     if (!url) return ''; 
     if (url.includes('drive.google.com')) {
         const idMatch = url.match(/\/d\/(.+?)\/|id=(.+?)&|id=(.+?)$/);
         const id = idMatch ? (idMatch[1] || idMatch[2] || idMatch[3]) : null;
-        if (id) {
-            return `https://drive.google.com/thumbnail?id=${id}&sz=w1000`;
-        }
+        if (id) return `https://drive.google.com/thumbnail?id=${id}&sz=w1000`;
     }
     return url;
 }
@@ -94,33 +88,41 @@ function parseCSVLine(text) {
     return result.map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"'));
 }
 
-// --- FUNCTIONS EXPOSED TO WINDOW ---
+// --- GLOBAL FUNCTIONS ---
 
 window.toggleMobileMenu = () => {
     const menu = document.getElementById('mobile-menu-overlay');
-    if(menu) menu.classList.toggle('hidden');
+    if (!menu) return;
+    
+    // Toggle Hidden Class with Transition Logic
+    if (menu.classList.contains('hidden')) {
+        menu.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden'); // Scroll Lock
+    } else {
+        menu.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden'); // Unlock
+    }
 };
 
 window.scrollToEvents = () => {
-    // Check if we are on index.html
     const eventsSection = document.getElementById('eventi-section');
     if (eventsSection) {
         eventsSection.scrollIntoView({ behavior: 'smooth' });
     } else {
-        // We are on another page, redirect home
-        window.location.href = '/#eventi-section';
+        window.location.href = 'index.html#eventi-section';
     }
 };
 
 window.toggleChat = () => {
     const win = document.getElementById('chat-window');
     const btn = document.getElementById('chat-toggle');
-    const isHidden = win.classList.contains('hidden');
+    if (!win || !btn) return;
 
-    if (isHidden) {
+    if (win.classList.contains('hidden')) {
         win.classList.remove('hidden');
         btn.classList.add('bg-stone-800', 'text-white');
-        btn.innerHTML = '<span>Chiudi Chat</span>';
+        btn.classList.remove('bg-white', 'text-brand-900');
+        btn.innerHTML = '<span>Chiudi</span>';
     } else {
         win.classList.add('hidden');
         btn.classList.remove('bg-stone-800', 'text-white');
@@ -142,7 +144,7 @@ window.resetFilters = () => {
 
 window.updateCamminoTimeline = () => {
     const container = document.getElementById('cammino-timeline');
-    if (!container) return; // Not on cammino page
+    if (!container) return;
 
     const durationInput = document.querySelector('input[name="duration"]:checked');
     const modeInput = document.querySelector('input[name="mode"]:checked');
@@ -158,32 +160,29 @@ window.updateCamminoTimeline = () => {
         const isLast = index === stages.length - 1;
         const html = `
             <div class="relative pl-8 pb-10 ${isLast ? '' : 'border-l-2 border-emerald-200'} ml-2 fade-in" style="animation-delay: ${index * 0.1}s">
-                <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-emerald-500 border-4 border-white shadow-sm"></div>
+                <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-emerald-500 border-4 border-white shadow-md"></div>
                 
                 <h4 class="text-xl font-serif font-bold text-stone-900 mb-1">${stage.title}</h4>
                 <div class="flex items-center gap-4 text-xs font-bold text-emerald-700 uppercase tracking-wider mb-3">
-                    <span class="bg-emerald-50 px-2 py-1 rounded">${stage.km}</span>
-                    <span class="bg-emerald-50 px-2 py-1 rounded">${stage.diff}</span>
-                    ${mode === 'bike' ? '<span class="bg-emerald-50 px-2 py-1 rounded"><i data-lucide="bike" class="w-3 h-3 inline"></i> Ciclabile al 90%</span>' : ''}
+                    <span class="bg-emerald-50 border border-emerald-100 px-2 py-1 rounded">${stage.km}</span>
+                    <span class="bg-emerald-50 border border-emerald-100 px-2 py-1 rounded">${stage.diff}</span>
+                    ${mode === 'bike' ? '<span class="bg-emerald-50 border border-emerald-100 px-2 py-1 rounded"><i data-lucide="bike" class="w-3 h-3 inline"></i> Ciclabile</span>' : ''}
                 </div>
                 <p class="text-stone-600 text-sm leading-relaxed">${stage.desc}</p>
             </div>
         `;
         container.insertAdjacentHTML('beforeend', html);
     });
-
     if (window.lucide) window.lucide.createIcons();
 };
 
-// --- MODAL LOGIC (EVENTS) ---
+// --- MODAL HANDLING ---
 
 window.openModal = (eventId) => {
     const event = events.find(e => e.id === eventId);
     if (!event) return;
 
     const modal = document.getElementById('event-modal');
-    
-    // Switch to "Event Mode" (show date/time fields)
     document.getElementById('modal-event-details').classList.remove('hidden');
 
     document.getElementById('modal-img').src = event.imageUrl;
@@ -201,51 +200,44 @@ window.openModal = (eventId) => {
 
     const orgContainer = document.getElementById('modal-organizer-container');
     if (event.organizer) {
-        document.getElementById('modal-organizer').innerText = `A cura di: ${event.organizer}`;
+        document.getElementById('modal-organizer').innerText = event.organizer;
         orgContainer.classList.remove('hidden');
     } else {
         orgContainer.classList.add('hidden');
     }
 
     modal.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
 };
 
-// --- MODAL LOGIC (CMS CONTENT: BORGHI / NATURA) ---
 window.openContentModal = (baseId) => {
     const modal = document.getElementById('event-modal');
-    
-    // Switch to "Content Mode" (hide date/time fields)
     const detailsBlock = document.getElementById('modal-event-details');
     if(detailsBlock) detailsBlock.classList.add('hidden');
 
-    // Retrieve data from global cmsData or fallback to DOM
-    // For title/img we can grab from DOM to be fast, but for Description FULL we need cmsData
-    
-    // 1. Image
+    // Fetch Content
     const imgEl = document.querySelector(`[data-content-id="${baseId}-img"]`);
     const imgSrc = imgEl ? (imgEl.tagName === 'IMG' ? imgEl.src : imgEl.style.backgroundImage.slice(5, -2)) : 'https://picsum.photos/800/600';
     document.getElementById('modal-img').src = imgSrc;
 
-    // 2. Title
     const titleEl = document.querySelector(`[data-content-id="${baseId}-titolo"]`);
-    document.getElementById('modal-title').innerText = titleEl ? titleEl.innerText : 'Titolo';
+    document.getElementById('modal-title').innerText = titleEl ? titleEl.innerText : 'Dettaglio';
 
-    // 3. Category (Hardcoded or based on section)
     document.getElementById('modal-category').innerText = baseId.includes('foresta') || baseId.includes('grotta') ? 'Natura' : 'Borgo';
-    document.getElementById('modal-subtitle').innerText = ''; // No subtitle for places
+    document.getElementById('modal-subtitle').innerText = ''; 
 
-    // 4. Description (The important part: fetch FULL text if available, else short)
-    // We look for a key like "dunarobba-full" in cmsData
+    // Description Fallback Logic
     const fullDesc = cmsData[`${baseId}-full`];
     const shortDescEl = document.querySelector(`[data-content-id="${baseId}-desc"]`);
-    
     document.getElementById('modal-desc').innerText = fullDesc || (shortDescEl ? shortDescEl.innerText : 'Descrizione non disponibile.');
 
     modal.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
 };
 
 window.closeModal = () => {
     document.getElementById('event-modal').classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
 };
 
 window.sendChatMessage = async () => {
@@ -260,7 +252,7 @@ window.sendChatMessage = async () => {
     try {
         const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
         const eventContext = events.map(e => `${e.title} (${e.date})`).join(", ");
-        const systemPrompt = `Sei l'assistente turistico di Avigliano Umbro. Ecco gli eventi in programma: ${eventContext}. Rispondi brevemente.`;
+        const systemPrompt = `Sei l'assistente turistico amichevole di Visit Avigliano Umbro. Ecco gli eventi: ${eventContext}. Sii breve e accogliente.`;
         
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
@@ -270,16 +262,15 @@ window.sendChatMessage = async () => {
         chatHistory.push({ role: 'bot', text: response.text });
     } catch (e) {
         console.error(e);
-        chatHistory.push({ role: 'bot', text: "Errore di connessione o API Key mancante." });
+        chatHistory.push({ role: 'bot', text: "Non riesco a connettermi al momento." });
     }
     renderChatMessages();
 };
 
-// --- CORE LOGIC ---
+// --- CORE LOADING ---
 
 async function loadContentCMS() {
     if (!CONTENT_CSV_URL) return;
-
     try {
         const response = await fetch(CONTENT_CSV_URL);
         const text = await response.text();
@@ -292,11 +283,9 @@ async function loadContentCMS() {
             const imageUrl = cols[2];    
 
             if (id) {
-                // Save to Global Data Store for Modals
                 if (contentText) cmsData[id] = contentText;
                 if (imageUrl) cmsData[`${id}-img`] = formatImageUrl(imageUrl);
 
-                // Update DOM elements if present
                 const elements = document.querySelectorAll(`[data-content-id="${id}"]`);
                 elements.forEach(element => {
                     if (contentText) {
@@ -309,10 +298,7 @@ async function loadContentCMS() {
                 });
             }
         });
-        console.log("CMS Loaded");
-    } catch (e) {
-        console.error("CMS Error:", e);
-    }
+    } catch (e) { console.error("CMS Error:", e); }
 }
 
 async function fetchEventsFromSheet() {
@@ -322,11 +308,9 @@ async function fetchEventsFromSheet() {
         const data = await response.text();
         const rows = data.split('\n').filter(r => r.trim() !== '');
         
-        const sheetEvents = rows.slice(1).map((row, index) => {
+        return rows.slice(1).map((row, index) => {
             const cols = parseCSVLine(row); 
-            const rawImg = cols[7] || '';
-            const formattedImg = formatImageUrl(rawImg) || 'https://picsum.photos/800/600';
-
+            const formattedImg = formatImageUrl(cols[7]) || 'https://picsum.photos/800/600';
             return {
                 id: `evt-${index}`,
                 date: cols[0] || new Date().toISOString().split('T')[0],
@@ -337,11 +321,9 @@ async function fetchEventsFromSheet() {
                 location: cols[5] || 'Avigliano Umbro',
                 category: cols[6] || 'Altro',
                 imageUrl: formattedImg,
-                organizer: cols[8] || '', 
-                tags: ['Live']
+                organizer: cols[8] || ''
             };
         });
-        return sheetEvents;
     } catch (error) {
         console.error("Event Fetch Error:", error);
         return [];
@@ -360,7 +342,7 @@ function renderChatMessages() {
         const div = document.createElement('div');
         div.className = `flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`;
         div.innerHTML = `
-            <div class="max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm ${msg.role === 'user' ? 'bg-brand-900 text-white rounded-br-none' : 'bg-white text-stone-800 border border-stone-200 rounded-bl-none'}">
+            <div class="max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm ${msg.role === 'user' ? 'bg-brand-900 text-white rounded-br-none' : 'bg-white text-stone-800 border border-stone-200 rounded-bl-none'}">
                 ${msg.text}
             </div>
         `;
@@ -372,35 +354,20 @@ function renderChatMessages() {
 function populateSelects() {
     const monthSelect = document.getElementById('filter-month');
     if(!monthSelect) return;
+    
+    // Clear first to prevent duplication on re-runs
+    monthSelect.innerHTML = '';
+    const catSelect = document.getElementById('filter-category'); catSelect.innerHTML = '';
+    const locSelect = document.getElementById('filter-location'); locSelect.innerHTML = '';
 
-    const catSelect = document.getElementById('filter-category');
-    const locSelect = document.getElementById('filter-location');
-
-    MONTHS.forEach(m => {
-        const opt = document.createElement('option');
-        opt.value = m;
-        opt.innerText = m;
-        monthSelect.appendChild(opt);
-    });
-
-    Object.values(EventCategory).forEach(c => {
-        const opt = document.createElement('option');
-        opt.value = c;
-        opt.innerText = c;
-        catSelect.appendChild(opt);
-    });
-
-    Object.values(EventLocation).forEach(l => {
-        const opt = document.createElement('option');
-        opt.value = l;
-        opt.innerText = l;
-        locSelect.appendChild(opt);
-    });
+    MONTHS.forEach(m => { const opt = new Option(m, m); monthSelect.appendChild(opt); });
+    Object.values(EventCategory).forEach(c => { const opt = new Option(c, c); catSelect.appendChild(opt); });
+    Object.values(EventLocation).forEach(l => { const opt = new Option(l, l); locSelect.appendChild(opt); });
 }
 
 function renderEvents() {
     const mainGrid = document.getElementById('events-main-grid');
-    if(!mainGrid) return; // Not on home page
+    if(!mainGrid) return; 
 
     const futureList = document.getElementById('events-future-list');
     const countLabel = document.getElementById('results-count');
@@ -409,19 +376,14 @@ function renderEvents() {
     const loadMoreContainer = document.getElementById('load-more-container');
     const loadMoreBtn = document.getElementById('load-more-btn');
     
-    if(loader) loader.classList.add('hidden');
+    loader.classList.add('hidden');
+    mainGrid.innerHTML = ''; futureList.innerHTML = ''; 
 
-    mainGrid.innerHTML = '';
-    futureList.innerHTML = ''; 
-
-    const today = new Date();
-    today.setHours(0,0,0,0);
+    const today = new Date(); today.setHours(0,0,0,0);
 
     let filtered = events.filter(e => {
         const eventDate = new Date(e.date);
-        const eventMidnight = new Date(eventDate);
-        eventMidnight.setHours(0,0,0,0);
-        
+        const eventMidnight = new Date(eventDate); eventMidnight.setHours(0,0,0,0);
         if (eventMidnight < today) return false;
 
         const searchMatch = !filters.search || e.title.toLowerCase().includes(filters.search.toLowerCase()) || e.description.toLowerCase().includes(filters.search.toLowerCase());
@@ -431,8 +393,7 @@ function renderEvents() {
         if (filters.month !== MONTHS[0]) {
              if (!isNaN(eventDate.getTime())) {
                  const mName = eventDate.toLocaleString('it-IT', { month: 'long' });
-                 const capMonth = mName.charAt(0).toUpperCase() + mName.slice(1);
-                 monthMatch = capMonth === filters.month;
+                 monthMatch = (mName.charAt(0).toUpperCase() + mName.slice(1)) === filters.month;
              }
         }
         return searchMatch && catMatch && locMatch && monthMatch;
@@ -445,7 +406,6 @@ function renderEvents() {
         loadMoreContainer.classList.add('hidden');
     } else {
         emptyState.classList.add('hidden');
-
         const mainEvents = filtered.slice(0, 4);
         const futureEvents = filtered.slice(4);
 
@@ -455,29 +415,28 @@ function renderEvents() {
             const month = !isNaN(dateObj) ? dateObj.toLocaleString('it-IT', { month: 'short' }).toUpperCase() : "???";
             
             const cardHtml = `
-                <div class="group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-stone-200 flex flex-col h-full relative fade-in cursor-pointer hover:scale-[1.02] btn-open-modal" data-id="${event.id}">
+                <div class="group bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden border border-stone-100 flex flex-col h-full relative fade-in cursor-pointer hover:-translate-y-1 btn-open-modal" data-id="${event.id}">
                     <div class="relative aspect-[7/10] overflow-hidden bg-stone-100 border-b border-stone-100">
                         <img src="${event.imageUrl}" alt="${event.title}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" onerror="this.src='https://picsum.photos/800/600'" />
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
-                        <div class="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-brand-900 shadow-sm border border-stone-100">${event.category}</div>
-                        <div class="absolute bottom-4 left-4 flex flex-col items-center justify-center w-12 h-14 bg-white/95 backdrop-blur-sm rounded-lg text-brand-900 shadow-lg border border-stone-100">
-                            <span class="text-xl font-bold leading-none">${day}</span>
-                            <span class="text-[10px] uppercase font-bold tracking-wider">${month}</span>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
+                        <div class="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-brand-900 shadow-sm border border-stone-100 uppercase tracking-widest">${event.category}</div>
+                        <div class="absolute bottom-4 left-4 flex flex-col items-center justify-center w-14 h-16 bg-white/95 backdrop-blur-sm rounded-xl text-brand-900 shadow-lg border border-stone-100">
+                            <span class="text-2xl font-serif font-bold leading-none">${day}</span>
+                            <span class="text-[10px] uppercase font-bold tracking-widest">${month}</span>
                         </div>
                     </div>
-                    <div class="p-5 flex-1 flex flex-col">
-                        <div class="mb-3">
-                            <h3 class="text-xl font-bold text-stone-900 leading-tight group-hover:text-brand-800 transition-colors font-serif">${event.title}</h3>
-                            ${event.subtitle ? `<p class="text-sm text-brand-800 font-medium mt-1">${event.subtitle}</p>` : ''}
-                            ${event.organizer ? `<p class="text-xs text-stone-400 mt-2 italic flex items-center gap-1"><i data-lucide="users" class="w-3 h-3"></i> A cura di: ${event.organizer}</p>` : ''}
+                    <div class="p-6 flex-1 flex flex-col">
+                        <div class="mb-4">
+                            <h3 class="text-xl font-bold text-stone-900 leading-tight group-hover:text-brand-900 transition-colors font-serif">${event.title}</h3>
+                            ${event.subtitle ? `<p class="text-sm text-stone-500 font-medium mt-1">${event.subtitle}</p>` : ''}
                         </div>
-                        <div class="flex flex-wrap gap-y-2 gap-x-4 text-xs text-stone-500 mb-4 items-center">
-                            <div class="flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3 text-brand-gold"></i> <span class="truncate max-w-[150px]">${event.location}</span></div>
-                            <div class="flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3 text-brand-gold"></i> <span>${event.time}</span></div>
+                        <div class="flex flex-wrap gap-y-2 gap-x-4 text-xs text-stone-500 mb-6 items-center">
+                            <div class="flex items-center gap-1.5"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-brand-gold"></i> <span class="truncate max-w-[150px] font-medium">${event.location}</span></div>
+                            <div class="flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5 text-brand-gold"></i> <span class="font-medium">${event.time}</span></div>
                         </div>
                         <div class="mt-auto pt-4 border-t border-stone-100 flex justify-between items-center">
-                             <button class="text-brand-900 hover:text-brand-700 text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-colors">
-                                <i data-lucide="info" class="w-4 h-4"></i> Dettagli
+                             <button class="text-brand-900 text-xs font-bold uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
+                                Dettagli <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i> 
                             </button>
                         </div>
                     </div>
@@ -488,9 +447,9 @@ function renderEvents() {
 
         if (futureEvents.length > 0) {
             futureList.insertAdjacentHTML('beforeend', `
-                 <div class="flex items-center gap-4 mb-6 mt-4">
+                 <div class="flex items-center gap-4 mb-8 mt-6">
                     <div class="h-px bg-stone-200 flex-1"></div>
-                    <span class="text-sm font-bold text-stone-400 uppercase tracking-widest">Prossimi Appuntamenti</span>
+                    <span class="text-xs font-bold text-stone-400 uppercase tracking-[0.2em]">Prossimamente</span>
                     <div class="h-px bg-stone-200 flex-1"></div>
                 </div>
             `);
@@ -500,20 +459,21 @@ function renderEvents() {
                 const fullDate = dateObj.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
 
                 const compactHtml = `
-                    <div class="flex items-center gap-4 bg-white p-4 rounded-lg border border-stone-200 shadow-sm hover:shadow-md transition-all group cursor-pointer hover:border-brand-200 btn-open-modal" data-id="${event.id}">
-                        <div class="w-20 aspect-[7/10] rounded-md overflow-hidden flex-shrink-0 bg-stone-100 shadow-sm border border-stone-100">
+                    <div class="flex items-center gap-5 bg-white p-4 rounded-xl border border-stone-200 shadow-sm hover:shadow-md transition-all group cursor-pointer hover:border-brand-200 btn-open-modal" data-id="${event.id}">
+                        <div class="w-16 aspect-[7/10] rounded-lg overflow-hidden flex-shrink-0 bg-stone-100 shadow-sm border border-stone-100">
                             <img src="${event.imageUrl}" class="w-full h-full object-cover group-hover:scale-110 transition-transform" onerror="this.src='https://picsum.photos/100/100'">
                         </div>
                         <div class="flex-grow">
-                            <div class="text-[10px] text-brand-900 font-bold uppercase tracking-wider mb-0.5">${fullDate}</div>
-                            <h4 class="font-bold text-stone-900 text-lg leading-tight group-hover:text-brand-900">${event.title}</h4>
-                            <div class="text-xs text-stone-500 mt-1 flex items-center gap-2">
-                                <span>${event.time}</span> • <span class="truncate">${event.location}</span>
+                            <div class="text-[10px] text-brand-900 font-bold uppercase tracking-widest mb-1 opacity-80">${fullDate}</div>
+                            <h4 class="font-bold text-stone-900 text-lg leading-tight group-hover:text-brand-900 font-serif">${event.title}</h4>
+                            <div class="text-xs text-stone-500 mt-1 flex items-center gap-3">
+                                <span class="flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> ${event.time}</span> 
+                                <span class="truncate flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> ${event.location}</span>
                             </div>
                         </div>
-                        <div class="flex-shrink-0">
-                             <button class="w-10 h-10 rounded-full bg-stone-50 text-brand-900 flex items-center justify-center group-hover:bg-brand-900 group-hover:text-white transition-colors">
-                                <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        <div class="flex-shrink-0 pr-2">
+                             <button class="w-10 h-10 rounded-full bg-stone-50 text-stone-400 flex items-center justify-center group-hover:bg-brand-900 group-hover:text-white transition-all">
+                                <i data-lucide="chevron-right" class="w-5 h-5"></i>
                              </button>
                         </div>
                     </div>
@@ -533,11 +493,9 @@ function renderEvents() {
                 futureList.classList.add('fade-in'); 
                 newBtn.parentElement.classList.add('hidden'); 
             });
-
         } else {
             loadMoreContainer.classList.add('hidden');
         }
-
         if (window.lucide) window.lucide.createIcons();
     }
 }
@@ -547,10 +505,9 @@ function renderEvents() {
 document.addEventListener('DOMContentLoaded', async () => {
     populateSelects();
     
-    // Configurator Init (if on Cammino page)
+    // Configurator Init
     if (document.getElementById('cammino-timeline')) {
         window.updateCamminoTimeline();
-        
         const form = document.getElementById('cammino-form');
         if(form) {
              form.addEventListener('submit', (e) => {
@@ -565,8 +522,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.addEventListener('click', (e) => {
         const trigger = e.target.closest('.btn-open-modal');
         if (trigger) {
-            const id = trigger.dataset.id;
-            window.openModal(id);
+            window.openModal(trigger.dataset.id);
         }
     });
 
@@ -579,7 +535,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderEvents();
     renderChatMessages();
     
-    // Filters (Only on Home)
     const searchInput = document.getElementById('search-input');
     if (searchInput) {
         ['search-input', 'filter-month', 'filter-category', 'filter-location'].forEach(id => {

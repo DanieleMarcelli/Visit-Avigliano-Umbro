@@ -168,9 +168,12 @@ window.resetFilters = () => {
     filters = { search: '', month: 'Tutti i mesi', category: 'Tutte le categorie', location: 'Tutti i luoghi' };
     const searchInput = document.getElementById('search-input');
     if(searchInput) searchInput.value = '';
+    
+    // Update Secondary Selects
     document.getElementById('filter-month').value = 'Tutti i mesi';
-    document.getElementById('filter-category').value = 'Tutte le categorie';
     document.getElementById('filter-location').value = 'Tutti i luoghi';
+    
+    renderCategoryChips(); // Re-render chips to reset active state
     renderEvents();
 };
 
@@ -282,7 +285,7 @@ window.sendChatMessage = async () => {
     input.value = '';
 
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        const ai = new GoogleGenAI({ apiKey: "YOUR_API_KEY_PLACEHOLDER" }); // In production use a proxy or handle keys securely
         const eventContext = events.map(e => `${e.title} (${e.date})`).join(", ");
         const systemPrompt = `Sei l'assistente turistico amichevole di Visit Avigliano Umbro. Ecco gli eventi: ${eventContext}. Sii breve e accogliente.`;
         
@@ -320,6 +323,7 @@ async function loadContentCMS() {
 
                 const elements = document.querySelectorAll(`[data-content-id="${id}"]`);
                 elements.forEach(element => {
+                    // Prevent flash: update text, then remove opacity-0
                     if (contentText) {
                         element.tagName === 'INPUT' ? element.placeholder = contentText : element.innerHTML = contentText;
                     }
@@ -327,6 +331,8 @@ async function loadContentCMS() {
                         const formattedUrl = formatImageUrl(imageUrl);
                         element.tagName === 'IMG' ? element.src = formattedUrl : element.style.backgroundImage = `url('${formattedUrl}')`;
                     }
+                    // Animation reveal
+                    element.classList.remove('opacity-0');
                 });
             }
         });
@@ -383,18 +389,42 @@ function renderChatMessages() {
     container.scrollTop = container.scrollHeight;
 }
 
-function populateSelects() {
+// Replaces old populateSelects
+function renderCategoryChips() {
+    const container = document.getElementById('category-chips-container');
     const monthSelect = document.getElementById('filter-month');
-    if(!monthSelect) return;
+    const locSelect = document.getElementById('filter-location');
     
-    // Clear first to prevent duplication on re-runs
-    monthSelect.innerHTML = '';
-    const catSelect = document.getElementById('filter-category'); catSelect.innerHTML = '';
-    const locSelect = document.getElementById('filter-location'); locSelect.innerHTML = '';
+    if(!container) return;
+    
+    // 1. Render Chips
+    container.innerHTML = '';
+    Object.values(EventCategory).forEach(cat => {
+        const btn = document.createElement('button');
+        btn.innerText = cat;
+        // Styles: Active vs Inactive
+        const isActive = filters.category === cat;
+        btn.className = `whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider border transition-all duration-300 ${
+            isActive 
+            ? 'bg-brand-900 text-white border-brand-900 shadow-md transform scale-105' 
+            : 'bg-white text-stone-500 border-stone-200 hover:border-brand-900 hover:text-brand-900'
+        }`;
+        
+        btn.onclick = () => {
+            filters.category = cat;
+            renderCategoryChips(); // Re-render to update visual state
+            renderEvents();
+        };
+        container.appendChild(btn);
+    });
 
-    MONTHS.forEach(m => { const opt = new Option(m, m); monthSelect.appendChild(opt); });
-    Object.values(EventCategory).forEach(c => { const opt = new Option(c, c); catSelect.appendChild(opt); });
-    Object.values(EventLocation).forEach(l => { const opt = new Option(l, l); locSelect.appendChild(opt); });
+    // 2. Render Secondary Selects (Months/Locations) if empty
+    if(monthSelect && monthSelect.options.length === 0) {
+         MONTHS.forEach(m => { const opt = new Option(m, m); monthSelect.appendChild(opt); });
+    }
+    if(locSelect && locSelect.options.length === 0) {
+        Object.values(EventLocation).forEach(l => { const opt = new Option(l, l); locSelect.appendChild(opt); });
+    }
 }
 
 function renderEvents() {
@@ -538,7 +568,7 @@ function renderEvents() {
 // --- INIT ---
 
 document.addEventListener('DOMContentLoaded', async () => {
-    populateSelects();
+    renderCategoryChips(); // New function for chips
     
     // Configurator Init
     if (document.getElementById('cammino-timeline')) {
@@ -546,9 +576,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const form = document.getElementById('cammino-form');
         if(form) {
              form.addEventListener('submit', (e) => {
-                e.preventDefault();
-                alert('Grazie! La tua richiesta per il Cammino è stata inviata. Ti contatteremo a breve.');
-                form.reset();
+                // FormSubmit handles the submission, this is just for immediate feedback if needed before redirect
+                // But generally FormSubmit redirects to the _next URL
             });
         }
     }
@@ -564,20 +593,41 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.addEventListener('keydown', (e) => {
         if(e.key === "Escape") window.closeModal();
     });
+    
+    // Check for FormSubmit success
+    if (window.location.search.includes('success=1')) {
+        document.getElementById('contact-success').classList.remove('hidden');
+        window.history.replaceState({}, document.title, window.location.pathname + '#contatti');
+    }
+    
+    // Set FormSubmit redirect URL dynamically
+    const nextUrlInput = document.getElementById('form-next-url');
+    if (nextUrlInput) {
+        nextUrlInput.value = window.location.href.split('#')[0].split('?')[0] + '?success=1';
+    }
 
     await loadContentCMS();
     await loadEvents();
     renderEvents();
     renderChatMessages();
     
+    // Search & Secondary Filter Listeners
     const searchInput = document.getElementById('search-input');
     if (searchInput) {
-        ['search-input', 'filter-month', 'filter-category', 'filter-location'].forEach(id => {
-            document.getElementById(id).addEventListener(id === 'search-input' ? 'input' : 'change', (e) => {
-                const key = id.replace('filter-', '').replace('-input', '');
-                filters[key] = e.target.value;
-                renderEvents();
-            });
+        searchInput.addEventListener('input', (e) => {
+            filters.search = e.target.value;
+            renderEvents();
+        });
+        
+        ['filter-month', 'filter-location'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) {
+                el.addEventListener('change', (e) => {
+                    const key = id.replace('filter-', '');
+                    filters[key] = e.target.value;
+                    renderEvents();
+                });
+            }
         });
     }
 

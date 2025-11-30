@@ -1,62 +1,68 @@
-<!DOCTYPE html>
-<html lang="it" class="scroll-smooth">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Il Cammino del Lago Tiberino | Visit Avigliano Umbro</title>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+<nav class="fixed top-0 left-0 w-full z-50 px-6 py-4 bg-slate-900/80 backdrop-blur-md border-b border-white/10 transition-all duration-300">
+        <div class="flex justify-between items-center max-w-7xl mx-auto">
+            <a href="index.html" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center overflow-hidden border border-white/20 group-hover:border-neon-blue transition-colors">
+                    <img data-content-id="nav-logo" src="" alt="Logo" class="w-full h-full object-cover opacity-90" />
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] uppercase tracking-[0.2em] text-neon-blue font-bold">Portale Turistico</span>
+                    <span class="text-lg font-serif font-bold text-white">Visit Avigliano</span>
+                </div>
+            </a>
+            
+            <a href="#configuratore" class="hidden md:block border border-neon-blue text-neon-blue px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-neon-blue hover:text-black transition duration-300 shadow-[0_0_15px_rgba(0,240,255,0.2)]">
+                Inizia l'avventura
+            </a>
+        </div>
+    </nav>
 
-    <!-- Google GenAI SDK -->
-    <script type="importmap">
-    {
-      "imports": {
-        "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
-        "react": "https://aistudiocdn.com/react@^19.2.0",
-        "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-        "react/": "https://aistudiocdn.com/react@^19.2.0/",
-        "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0"
-      }
-    }
-    </script>
+    <section class="relative h-screen flex items-center justify-center overflow-hidden bg-slate-900">
+        
+        <div class="absolute inset-0 z-0">
+            <img data-content-id="cammino-hero-desc" src="" 
+                 onerror="this.src='https://images.unsplash.com/photo-1519681393798-3828fb4090bb?q=80&w=2670'"
+                 class="w-full h-full object-cover opacity-30 animate-float mix-blend-overlay">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-slate-900"></div>
+        </div>
 
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              brand: {
-                950: '#2a0202',
-                900: '#4a0404', 
-                800: '#701a1a',
-                700: '#9b2c2c',
-                100: '#fdf2f2',
-                50:  '#fffafa',
-                gold: '#d4af37',
-                goldlight: '#f3e5ab',
-              },
-              stone: {
-                850: '#1c1917',
-              }
-            },
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-              serif: ['Playfair Display', 'serif'],
-            }
-          }
-        }
-      }
-    </script>
-    <style>
+        <div class="relative w-full max-w-7xl mx-auto h-full flex flex-col items-center justify-center z-10 pt-20">
+            
+            <p class="text-neon-blue text-xs md:text-sm font-bold tracking-[0.5em] uppercase mb-4 animate-fade-in drop-shadow-lg">Umbria, Pleistocene</p>
+            
+            <h1 data-content-id="cammino-hero-title" class="text-6xl md:text-8xl lg:text-9xl font-display uppercase tracking-tighter leading-[0.9] text-transparent bg-clip-text bg-gradient-to-b from-white via-blue-100 to-slate-600 drop-shadow-2xl text-center relative z-20">
+                LAGO<br>TIBERINO
+            </h1>
+
+            <div class="absolute inset-0 z-10 flex items-center justify-center pointer-events-none mix-blend-screen opacity-70">
+                 <img src="https://drive.google.com/thumbnail?id=1a6r3c0iV6JhZ2OoB0kLOCiMN-6SXR9vK&sz=w1000" 
+                      class="h-[80%] w-[80%] md:h-[100%] md:w-[100%] object-contain animate-water-rise hologram-map"
+                      onerror="this.style.display='none'">
+            </div>
+
+            <p data-content-id="cammino-hero-desc" class="relative z-30 mt-8 max-w-2xl text-center text-blue-100/80 text-lg md:text-xl font-light leading-relaxed border-t border-white/10 pt-6 animate-fade-in" style="animation-delay: 0.5s">
+                Caricamento dati...
+            </p>
+        </div>
+        
+        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 opacity-50">
+            <div class="w-[1px] h-16 bg-gradient-to-b from-transparent via-neon-blue to-transparent overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1/2 bg-white animate-[slideDown_1.5s_infinite]"></div>
+            </div>
+        </div>
+    </section>
+
+    <div class="bg-slate-950/50 backdrop-blur border-y border-white/5 py-3 overflow-hidden relative z-20">
+        <div class="whitespace-nowrap flex gap-16 animate-marquee font-display text-4xl text-blue-400/20 uppercase tracking-tight hover:text-neon-blue transition-colors duration-500 cursor-default">
+            <span data-content-id="cammino-tech-km">80 KM</span> • 
+            <span data-content-id="cammino-tech-dislivello">2.200M D+</span> • 
+            <span>FORESTA FOSSILE</span> • 
+            <span>400.000 ANNI FA</span> • 
+            <span>GROTTA BELLA</span> • 
+            <span data-content-id="cammino-tech-diff">LIVELLO E</span> •
+            <span>SLOW TOURISM</span> •
+            <span>UMBRIA</span>
+        </div>
+    </div>
       body { font-family: 'Inter', sans-serif; background-color: #faf9f6; color: #1c1917; }
       .fade-in { animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
       @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }

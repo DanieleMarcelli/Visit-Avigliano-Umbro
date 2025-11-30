@@ -448,76 +448,24 @@
         </section>
 
         <!-- CAMMINO CTA BANNER -->
-        <section id="cammino-home" class="relative py-20 bg-stone-950 overflow-hidden border-t border-stone-800">
-  <!-- Sfondo immagine + gradiente -->
-  <div class="absolute inset-0 z-0">
-    <img 
-      src="https://loremflickr.com/1200/400/hiking,nature/all" 
-      alt="Panorama lungo il Cammino del Lago Tiberino"
-      class="w-full h-full object-cover"
-    >
-    <div class="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-brand-900/85"></div>
-  </div>
-
-  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10">
-    <!-- Testo -->
-    <div class="text-white max-w-2xl space-y-5">
-      <span class="inline-flex items-center gap-2 py-1 px-3 border border-amber-400/70 text-[11px] tracking-[0.18em] font-semibold uppercase rounded-full bg-black/30">
-        <span class="h-1.5 w-1.5 rounded-full bg-amber-400"></span>
-        Cammino del Lago Tiberino
-      </span>
-
-      <h2 class="text-3xl sm:text-4xl md:text-5xl font-serif font-bold leading-tight">
-        80 km tra borghi, natura<br class="hidden sm:block" /> e Foresta Fossile
-      </h2>
-
-      <p class="text-stone-100/90 text-base sm:text-lg leading-relaxed">
-        Un anello che parte da Avigliano Umbro e tocca Toscolano, Sismano e la
-        Foresta Fossile di Dunarobba, da percorrere a piedi o in bici tra colline, storia
-        e spiritualità.
-      </p>
-
-      <!-- Statistiche chiave -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-        <div class="rounded-xl bg-white/5 border border-white/10 px-3 py-2.5">
-          <div class="text-[11px] uppercase tracking-wide text-stone-300">Distanza</div>
-          <div class="text-lg font-semibold">80 km</div>
-        </div>
-        <div class="rounded-xl bg-white/5 border border-white/10 px-3 py-2.5">
-          <div class="text-[11px] uppercase tracking-wide text-stone-300">Durata</div>
-          <div class="text-lg font-semibold">3–4 giorni</div>
-        </div>
-        <div class="rounded-xl bg-white/5 border border-white/10 px-3 py-2.5">
-          <div class="text-[11px] uppercase tracking-wide text-stone-300">Borghi</div>
-          <div class="text-lg font-semibold">4 borghi</div>
-        </div>
-        <div class="rounded-xl bg-white/5 border border-white/10 px-3 py-2.5">
-          <div class="text-[11px] uppercase tracking-wide text-stone-300">Percorso</div>
-          <div class="text-lg font-semibold">Anello</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CTA -->
-    <div class="w-full lg:w-auto flex flex-col items-start lg:items-end gap-3">
-      <a 
-        href="cammino.html"
-        class="inline-flex items-center gap-3 bg-white text-brand-900 px-7 py-3.5 rounded-full font-semibold shadow-xl hover:shadow-2xl hover:-translate-y-[1px] transition-all text-base lg:text-lg"
-      >
-        <span class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-brand-900/20">
-          <i data-lucide="map" class="w-4 h-4"></i>
-        </span>
-        <span>Vai alla pagina del Cammino</span>
-      </a>
-
-      <p class="text-xs text-stone-100/80 max-w-xs lg:text-right leading-relaxed">
-        Nella pagina dedicata trovi tracce GPX, tappe giorno per giorno e il modulo
-        per richiedere la credenziale del Cammino.
-      </p>
-    </div>
-  </div>
-</section>
-
+        <section class="relative py-32 bg-stone-900 overflow-hidden border-t border-stone-800 group">
+            <div class="absolute inset-0 z-0">
+                <img src="https://loremflickr.com/1200/400/hiking,nature/all" class="w-full h-full object-cover opacity-30 group-hover:scale-105 transition-transform duration-[2s]">
+                <div class="absolute inset-0 bg-gradient-to-r from-stone-900 via-stone-900/80 to-stone-900/20"></div>
+            </div>
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-10">
+                <div class="text-white max-w-2xl">
+                    <span class="inline-block py-1 px-3 bg-brand-gold/10 border border-brand-gold/40 text-brand-gold text-xs font-bold tracking-[0.2em] uppercase rounded-full mb-6">Novità</span>
+                    <h2 class="text-4xl md:text-6xl font-serif font-bold mb-6 leading-tight">Il Cammino del <br/>Lago Tiberino</h2>
+                    <p class="text-stone-300 text-lg leading-relaxed">80km di natura incontaminata, storia e spiritualità. Un'esperienza unica da vivere a piedi o in bici nel cuore dell'Umbria.</p>
+                </div>
+                <div>
+                    <a href="cammino.html" class="inline-flex items-center gap-3 bg-white hover:bg-brand-gold text-stone-900 font-bold py-5 px-10 rounded-full transition-all duration-300 transform hover:scale-105 shadow-2xl text-lg group-hover:shadow-brand-gold/20">
+                        <i data-lucide="map" class="w-5 h-5"></i> Configura il tuo Viaggio
+                    </a>
+                </div>
+            </div>
+        </section>
 
         <!-- SEZIONE STORIA (Amber Theme) -->
         <section id="storia" class="bg-white border-t border-stone-200 scroll-mt-20">
@@ -660,38 +608,10 @@
                     </div>
                     <div class="p-8 md:p-12">
                         <h3 class="text-2xl font-bold text-white mb-6">Scrivici un messaggio</h3>
-                        
-                        <!-- Success Message (Hidden by default) -->
-                        <div id="contact-success-message" class="hidden mb-6 bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3 animate-in fade-in slide-in-from-bottom-2">
-                            <div class="bg-emerald-100 p-2 rounded-full text-emerald-600">
-                                <i data-lucide="check" class="w-5 h-5"></i>
-                            </div>
-                            <div>
-                                <h4 class="text-emerald-900 font-bold text-sm uppercase tracking-wide">Messaggio Inviato!</h4>
-                                <p class="text-emerald-700 text-sm mt-1">Grazie per averci contattato. Ti risponderemo il prima possibile.</p>
-                            </div>
-                        </div>
-
-                        <!-- Form -->
-                        <form action="https://formsubmit.co/comunediaviglianoumbro@gmail.com" method="POST" id="contact-form" class="space-y-5">
-                            <!-- FormSubmit Configuration -->
-                            <input type="hidden" name="_subject" value="Nuovo messaggio da Visit Avigliano Umbro">
-                            <input type="hidden" name="_template" value="table">
-                            <input type="hidden" name="_captcha" value="false">
-                            <input type="hidden" name="_next" id="form-next-url" value="">
-                            
-                            <div>
-                                <label class="block text-xs font-bold text-stone-400 uppercase mb-2 ml-1">Nome</label>
-                                <input type="text" name="nome" required class="w-full px-5 py-3.5 bg-stone-900 border border-stone-700 rounded-xl outline-none focus:border-brand-gold text-white transition-all placeholder-stone-600" placeholder="Il tuo nome">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-stone-400 uppercase mb-2 ml-1">Email</label>
-                                <input type="email" name="email" required class="w-full px-5 py-3.5 bg-stone-900 border border-stone-700 rounded-xl outline-none focus:border-brand-gold text-white transition-all placeholder-stone-600" placeholder="tua@email.com">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-stone-400 uppercase mb-2 ml-1">Messaggio</label>
-                                <textarea name="messaggio" rows="4" required class="w-full px-5 py-3.5 bg-stone-900 border border-stone-700 rounded-xl outline-none focus:border-brand-gold text-white transition-all placeholder-stone-600" placeholder="Come possiamo aiutarti?"></textarea>
-                            </div>
+                        <form id="contact-form" class="space-y-5">
+                            <div><label class="block text-xs font-bold text-stone-400 uppercase mb-2 ml-1">Nome</label><input type="text" required class="w-full px-5 py-3.5 bg-stone-900 border border-stone-700 rounded-xl outline-none focus:border-brand-gold text-white transition-all placeholder-stone-600" placeholder="Il tuo nome"></div>
+                            <div><label class="block text-xs font-bold text-stone-400 uppercase mb-2 ml-1">Email</label><input type="email" required class="w-full px-5 py-3.5 bg-stone-900 border border-stone-700 rounded-xl outline-none focus:border-brand-gold text-white transition-all placeholder-stone-600" placeholder="tua@email.com"></div>
+                            <div><label class="block text-xs font-bold text-stone-400 uppercase mb-2 ml-1">Messaggio</label><textarea rows="4" required class="w-full px-5 py-3.5 bg-stone-900 border border-stone-700 rounded-xl outline-none focus:border-brand-gold text-white transition-all placeholder-stone-600" placeholder="Come possiamo aiutarti?"></textarea></div>
                             <button type="submit" class="w-full bg-white text-brand-950 font-bold py-4 rounded-xl hover:bg-brand-gold transition-colors shadow-lg mt-4 text-sm uppercase tracking-widest">Invia Messaggio</button>
                         </form>
                     </div>

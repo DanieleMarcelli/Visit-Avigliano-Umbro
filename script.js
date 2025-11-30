@@ -181,6 +181,7 @@ window.updateCamminoTimeline = () => {
     const container = document.getElementById('cammino-timeline');
     if (!container) return;
 
+    // Correctly query the checked radio button
     const durationInput = document.querySelector('input[name="duration"]:checked');
     const modeInput = document.querySelector('input[name="mode"]:checked');
     

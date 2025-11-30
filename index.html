@@ -57,30 +57,38 @@
       }
     </script>
     <style>
-        /* Custom Scrollbar for horizontal scrolling */
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* Glass Effect Utility */
         .glass {
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
     </style>
-<script type="importmap">
+    <script type="importmap">
 {
   "imports": {
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
     "react": "https://aistudiocdn.com/react@^19.2.0",
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
     "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0"
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0"
   }
 }
 </script>
 </head>
 <body class="bg-deep-950 text-slate-300 font-sans selection:bg-gold-500 selection:text-white overflow-x-hidden">
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu-overlay" class="fixed inset-0 z-[60] bg-deep-950/95 backdrop-blur-xl hidden flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-300">
+        <button onclick="toggleMobileMenu()" class="absolute top-6 right-6 text-white p-2">
+            <i data-lucide="x" class="w-8 h-8"></i>
+        </button>
+        <a href="#lago" onclick="toggleMobileMenu()" class="text-2xl font-serif text-white hover:text-gold-400 transition">Il Lago</a>
+        <a href="#territorio" onclick="toggleMobileMenu()" class="text-2xl font-serif text-white hover:text-gold-400 transition">Borghi</a>
+        <a href="#eventi-section" onclick="toggleMobileMenu()" class="text-2xl font-serif text-white hover:text-gold-400 transition">Eventi</a>
+        <a href="cammino.html" class="px-8 py-3 rounded-full border border-gold-500 text-gold-400 text-lg font-bold uppercase hover:bg-gold-500 hover:text-white transition">Il Cammino</a>
+    </div>
 
     <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-deep-950/80 backdrop-blur-md border-b border-white/5">
         <div class="max-w-7xl mx-auto px-6">
@@ -98,6 +106,10 @@
                     <a href="#eventi-section" class="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-white transition">Eventi</a>
                     <a href="cammino.html" class="px-6 py-2 rounded-full border border-gold-500/50 text-gold-400 text-xs font-bold uppercase hover:bg-gold-500 hover:text-white transition">Il Cammino</a>
                 </nav>
+
+                <button class="lg:hidden text-white p-2" onclick="toggleMobileMenu()">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
             </div>
         </div>
     </header>
@@ -271,14 +283,14 @@
                 </span>
                 <button onclick="toggleChat()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
-            <div class="p-4 h-64 overflow-y-auto text-sm text-slate-300 space-y-3">
+            <div id="chat-messages" class="p-4 h-64 overflow-y-auto text-sm text-slate-300 space-y-3">
                 <div class="bg-white/5 p-3 rounded-lg rounded-tl-none border border-white/5">
                     Ciao! Sono l'intelligenza artificiale di Avigliano. Posso consigliarti eventi, ristoranti o info sul Cammino. Chiedimi pure!
                 </div>
             </div>
             <div class="p-3 bg-black/50 border-t border-white/5 flex gap-2">
-                <input type="text" placeholder="Scrivi qui..." class="w-full bg-white/5 border border-white/10 rounded-lg text-white text-xs px-3 py-2 outline-none focus:border-gold-500 transition-colors">
-                <button class="bg-gold-500 text-deep-950 p-2 rounded-lg hover:bg-gold-400"><i data-lucide="send" class="w-4 h-4"></i></button>
+                <input id="chat-input" type="text" placeholder="Scrivi qui..." class="w-full bg-white/5 border border-white/10 rounded-lg text-white text-xs px-3 py-2 outline-none focus:border-gold-500 transition-colors" onkeydown="if(event.key === 'Enter') sendChatMessage()">
+                <button onclick="sendChatMessage()" class="bg-gold-500 text-deep-950 p-2 rounded-lg hover:bg-gold-400"><i data-lucide="send" class="w-4 h-4"></i></button>
             </div>
         </div>
 
@@ -299,10 +311,12 @@
         </div>
     </footer>
 
-    <script>
+    <script type="module">
+        import { GoogleGenAI } from "@google/genai";
+
         lucide.createIcons();
 
-        // CSV URLS (Non toccare)
+        // CSV URLS
         const EVENTS_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=0&single=true&output=csv';
         const CONTENT_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=643581002&single=true&output=csv';
 
@@ -445,25 +459,55 @@
 
         window.showAllEvents = () => renderEvents(-1);
         
-        function toggleChat() {
+        window.toggleChat = () => {
             document.getElementById('gemini-chat').classList.toggle('hidden');
-        }
+        };
+
+        window.toggleMobileMenu = () => {
+            const menu = document.getElementById('mobile-menu-overlay');
+            menu.classList.toggle('hidden');
+        };
+
+        // CHAT LOGIC
+        window.sendChatMessage = async () => {
+            const input = document.getElementById('chat-input');
+            const msgContainer = document.getElementById('chat-messages');
+            const userMsg = input.value.trim();
+            if(!userMsg) return;
+
+            // User UI
+            msgContainer.innerHTML += `<div class="bg-gold-500/10 text-right p-3 rounded-lg rounded-tr-none border border-gold-500/20 text-white">${userMsg}</div>`;
+            input.value = '';
+            msgContainer.scrollTop = msgContainer.scrollHeight;
+
+            if (!process.env.API_KEY) {
+                msgContainer.innerHTML += `<div class="bg-white/5 p-3 rounded-lg border border-white/5 text-red-400">API Key mancante.</div>`;
+                return;
+            }
+
+            try {
+                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const contextString = `Events: ${JSON.stringify(allEvents.slice(0,5))}`;
+                const response = await ai.models.generateContent({
+                  model: 'gemini-2.5-flash',
+                  contents: `Sei l'assistente turistico di Avigliano Umbro. Rispondi brevemente. ${contextString}\nUser: ${userMsg}`,
+                });
+
+                const botReply = response.text || "Non ho capito.";
+                msgContainer.innerHTML += `<div class="bg-white/5 p-3 rounded-lg rounded-tl-none border border-white/5 text-slate-300">${botReply}</div>`;
+                msgContainer.scrollTop = msgContainer.scrollHeight;
+
+            } catch (error) {
+                console.error(error);
+                msgContainer.innerHTML += `<div class="bg-white/5 p-3 rounded-lg border border-white/5 text-red-400">Errore di connessione.</div>`;
+            }
+        };
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             loadContent();
             loadEvents();
-            
-            // Mobile Menu
-            window.toggleMobileMenu = () => {
-                const menu = document.getElementById('mobile-menu-overlay');
-                menu.classList.toggle('hidden');
-            };
         });
-    </script>
-</body>
-</html>
-        };
     </script>
 </body>
 </html>

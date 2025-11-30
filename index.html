@@ -79,8 +79,11 @@
                 </div>
 
                 <!-- Desktop Nav -->
-                <nav class="hidden md:flex items-center gap-8">
+                <nav class="hidden md:flex items-center gap-6 lg:gap-8">
                     <a href="#territorio" class="text-stone-600 hover:text-brand-900 font-medium text-sm transition-colors">Territorio</a>
+                    <a href="cammino.html" class="text-brand-900 hover:text-brand-800 font-bold text-sm transition-colors flex items-center gap-1">
+                        <i data-lucide="footprints" class="w-4 h-4 text-brand-gold"></i> Il Cammino
+                    </a>
                     <a href="#storia" class="text-stone-600 hover:text-brand-900 font-medium text-sm transition-colors">Storia</a>
                     <a href="#ospitalita" class="text-stone-600 hover:text-brand-900 font-medium text-sm transition-colors">Ospitalità</a>
                     
@@ -115,8 +118,11 @@
                 <i data-lucide="x" class="w-8 h-8 text-stone-800"></i>
             </button>
         </div>
-        <div class="flex flex-col items-center justify-center flex-1 gap-8 text-center px-6">
+        <div class="flex flex-col items-center justify-center flex-1 gap-6 text-center px-6">
             <a href="#territorio" onclick="toggleMobileMenu()" class="text-3xl font-serif font-bold text-stone-800 hover:text-brand-900">Territorio</a>
+            <a href="cammino.html" class="text-3xl font-serif font-bold text-brand-gold hover:text-brand-900 flex items-center gap-2">
+                <i data-lucide="footprints" class="w-8 h-8"></i> Il Cammino
+            </a>
             <a href="#storia" onclick="toggleMobileMenu()" class="text-3xl font-serif font-bold text-stone-800 hover:text-brand-900">Storia</a>
             <a href="#ospitalita" onclick="toggleMobileMenu()" class="text-3xl font-serif font-bold text-stone-800 hover:text-brand-900">Ospitalità</a>
             <button onclick="toggleMobileMenu(); scrollToEvents();" class="text-3xl font-serif font-bold text-brand-900">Eventi</button>
@@ -291,6 +297,26 @@
                         </div>
                     </div>
 
+                </div>
+            </div>
+        </section>
+
+        <!-- CAMMINO CTA BANNER (NUOVO) -->
+        <section class="relative py-24 bg-stone-900 overflow-hidden border-t border-stone-800">
+            <div class="absolute inset-0 z-0">
+                <img src="https://loremflickr.com/1200/400/hiking,nature/all" class="w-full h-full object-cover opacity-40">
+                <div class="absolute inset-0 bg-gradient-to-r from-brand-900/90 to-transparent"></div>
+            </div>
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-8">
+                <div class="text-white max-w-2xl">
+                    <span class="inline-block py-1 px-3 border border-brand-gold/50 text-brand-gold text-xs font-bold tracking-[0.2em] uppercase rounded-full mb-4">Novità</span>
+                    <h2 class="text-4xl md:text-5xl font-serif font-bold mb-4">Il Cammino del Lago Tiberino</h2>
+                    <p class="text-stone-200 text-lg leading-relaxed">80km di natura incontaminata, storia e spiritualità. Configura il tuo itinerario a piedi o in bici.</p>
+                </div>
+                <div>
+                    <a href="cammino.html" class="inline-flex items-center gap-2 bg-brand-gold hover:bg-white hover:text-brand-900 text-brand-900 font-bold py-4 px-8 rounded-full transition-all duration-300 transform hover:scale-105 shadow-xl text-lg">
+                        <i data-lucide="map" class="w-5 h-5"></i> Configura il tuo Viaggio
+                    </a>
                 </div>
             </div>
         </section>

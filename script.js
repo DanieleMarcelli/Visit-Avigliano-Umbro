@@ -552,6 +552,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
     }
+    
+    // --- CONTACT FORM LOGIC (FORMSUBMIT) ---
+    // Check if URL has success=1
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('success') === '1') {
+        const successMsg = document.getElementById('contact-success-message');
+        if (successMsg) successMsg.classList.remove('hidden');
+        // Clean URL without refresh
+        window.history.replaceState({}, document.title, window.location.pathname + "#contatti");
+    }
+
+    // Set dynamic redirect URL for FormSubmit to work on GitHub Pages
+    const nextInput = document.getElementById('form-next-url');
+    if (nextInput) {
+        // Redirects to same page with ?success=1 appended
+        nextInput.value = window.location.origin + window.location.pathname + "?success=1#contatti";
+    }
+    // ----------------------------------------
 
     // Modal Events
     document.addEventListener('click', (e) => {

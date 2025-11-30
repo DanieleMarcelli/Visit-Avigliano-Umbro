@@ -22,10 +22,10 @@
 {
   "imports": {
     "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "react": "https://aistudiocdn.com/react@^19.2.0",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0"
   }
 }
 </script>
@@ -83,12 +83,39 @@
       
       /* Smooth transitions */
       .transition-custom { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+
+      /* Primary Button Style Reusable Class */
+      .btn-primary {
+        background-color: #d4af37; /* brand-gold */
+        color: #2a0202; /* brand-950 */
+        font-weight: 700;
+        padding: 1rem 2.5rem;
+        border-radius: 9999px;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .btn-primary:hover {
+        background-color: #ffffff;
+        color: #4a0404; /* brand-900 */
+        transform: scale(1.05);
+      }
     </style>
+    <!-- JSON-LD Placeholder for Events -->
+    <script type="application/ld+json" id="events-json-ld">
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "itemListElement": []
+    }
+    </script>
 </head>
 <body class="min-h-screen flex flex-col antialiased selection:bg-brand-900 selection:text-white">
 
     <!-- HEADER -->
-    <header class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-stone-200/60 shadow-sm transition-all duration-300" id="main-header">
+    <header class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-stone-200/60 shadow-sm transition-all duration-300" id="main-header">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 
@@ -128,7 +155,7 @@
 
                 <!-- Mobile Actions -->
                 <div class="flex items-center gap-3 md:hidden">
-                    <button onclick="toggleMobileMenu()" class="p-2.5 text-stone-800 hover:bg-stone-100 rounded-xl transition-colors active:scale-95">
+                    <button onclick="toggleMobileMenu()" class="p-2.5 text-stone-800 hover:bg-stone-100 rounded-xl transition-colors active:scale-95 z-[70] relative" aria-label="Menu">
                         <i data-lucide="menu" class="w-6 h-6"></i>
                     </button>
                 </div>
@@ -138,11 +165,10 @@
 
     <!-- MOBILE MENU OVERLAY -->
     <div id="mobile-menu-overlay" class="hidden fixed inset-0 z-[60] bg-white/98 backdrop-blur-xl flex flex-col transition-opacity duration-300">
-        <div class="flex justify-between items-center p-4 border-b border-stone-100">
+        <div class="flex justify-between items-center p-4 border-b border-stone-100 h-20">
              <span class="text-sm font-bold text-stone-400 uppercase tracking-widest px-2">Menu</span>
-            <button onclick="toggleMobileMenu()" class="p-2 hover:bg-stone-100 rounded-full transition-colors transform hover:rotate-90 duration-300">
-                <i data-lucide="x" class="w-8 h-8 text-stone-800"></i>
-            </button>
+             <!-- Close button is handled by the main toggle button z-index, but we keep this for visual structure -->
+             <div class="w-10"></div> 
         </div>
         <div class="flex flex-col items-center justify-center flex-1 gap-8 text-center px-6 animate-in slide-in-from-bottom-5 duration-500">
             <a href="#territorio" onclick="toggleMobileMenu()" class="text-3xl font-serif font-bold text-stone-800 hover:text-brand-900 transition-colors">Territorio</a>
@@ -164,13 +190,13 @@
         
         <!-- HERO SECTION -->
         <div class="relative h-[65vh] min-h-[550px] w-full overflow-hidden flex items-center justify-center bg-stone-900">
-            <!-- Background with Parallax effect simulation (fixed) -->
+            <!-- Background with Parallax effect simulation -->
             <div data-content-id="hero-bg" class="absolute inset-0 z-0 bg-cover bg-center transition-all duration-1000 transform scale-105" 
                  style="background-image: url('https://scontent.fbri2-1.fna.fbcdn.net/v/t39.30808-6/502622906_24128557276730363_1128000473065477802_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=833d8c&_nc_ohc=fSDHMgKfuL4Q7kNvwH-cU1X&_nc_oc=Adnr9jhXM5IY_QOUKSYZkPLRrRMRNrqXULkHgXcRrVGlHiIxB3TnijwwQmxlO64EVoE&_nc_zt=23&_nc_ht=scontent.fbri2-1.fna&_nc_gid=q2fLCb7j0NT9PRsPhKsHZg&oh=00_AfjCqig3UbjC9HBDpbbftJe3M_S0fEomfCgbEEtdxPAcrA&oe=69311124');">
             </div>
             
-            <!-- Modern Gradient Overlay -->
-            <div class="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-900/60 to-stone-900/30"></div>
+            <!-- Improved Gradient Overlay: Lighter at top, darker at bottom for text readability -->
+            <div class="absolute inset-0 bg-gradient-to-b from-stone-900/40 via-transparent to-stone-900/90"></div>
             
             <div class="relative z-10 text-center px-4 max-w-5xl mx-auto text-white slide-up">
                 <div class="inline-flex items-center gap-2 py-1.5 px-4 border border-white/20 bg-white/5 backdrop-blur-md text-brand-goldlight text-xs font-bold tracking-[0.2em] uppercase rounded-full mb-8 shadow-lg">
@@ -184,8 +210,8 @@
                     Il calendario completo degli appuntamenti culturali, musicali e teatrali. Vivi la bellezza delle nostre tradizioni.
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                    <button onclick="scrollToEvents()" class="bg-brand-gold hover:bg-white hover:text-brand-900 text-brand-950 font-bold py-4 px-10 rounded-full transition-all duration-300 transform hover:scale-105 shadow-[0_0_20px_rgba(212,175,55,0.3)] flex items-center gap-2 group">
-                        <span data-content-id="hero-btn">Vedi Programma</span>
+                    <button onclick="scrollToEvents()" class="btn-primary group">
+                        <span data-content-id="hero-btn">Gli Eventi</span>
                         <i data-lucide="arrow-down" class="w-5 h-5 group-hover:translate-y-1 transition-transform"></i>
                     </button>
                 </div>
@@ -238,7 +264,7 @@
         </section>
 
         <!-- FILTER BAR -->
-        <div class="bg-white border-b border-stone-200 shadow-sm z-40 relative sticky top-0 md:static">
+        <div class="bg-white border-b border-stone-200 shadow-sm z-40 relative md:static">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                 <div class="flex flex-col lg:flex-row gap-4">
                     <div class="relative flex-grow lg:max-w-xs group">
@@ -490,46 +516,56 @@
                 </div>
             </div>
 
-            <!-- Content Grid -->
+            <!-- Content Grid - Structured for potential future dynamic loading -->
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
                     
-                    <!-- Dove Mangiare -->
-                    <div class="bg-white p-8 rounded-3xl shadow-xl border border-stone-100 flex flex-col h-full hover:shadow-2xl transition-shadow duration-300">
-                         <div class="mb-6 flex items-start gap-4">
-                            <div class="w-14 h-14 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-700 flex-shrink-0">
-                                <i data-lucide="utensils" class="w-7 h-7"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-2xl font-serif font-bold text-stone-900 mb-2">Sapori del Territorio</h3>
-                                <p class="text-stone-500 text-sm leading-relaxed">Scopri i ristoranti e le trattorie dove gustare i prodotti tipici: castagne, olio EVO e vini locali.</p>
-                            </div>
+                    <!-- Dove Mangiare Card -->
+                    <div class="bg-white p-0 rounded-3xl shadow-xl border border-stone-100 flex flex-col h-full hover:shadow-2xl transition-shadow duration-300 overflow-hidden">
+                         <div class="p-8 pb-0">
+                             <div class="mb-6 flex items-start gap-4">
+                                <div class="w-14 h-14 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-700 flex-shrink-0">
+                                    <i data-lucide="utensils" class="w-7 h-7"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-2xl font-serif font-bold text-stone-900 mb-2">Sapori del Territorio</h3>
+                                    <p class="text-stone-500 text-sm leading-relaxed">Scopri i ristoranti e le trattorie dove gustare i prodotti tipici: castagne, olio EVO e vini locali.</p>
+                                </div>
+                             </div>
                          </div>
-                         <div class="flex-grow aspect-video w-full bg-stone-100 rounded-xl overflow-hidden mb-6 border border-stone-200 relative group">
+                         <!-- Map Container -->
+                         <div class="flex-grow bg-stone-100 border-t border-stone-100 relative group min-h-[300px]">
                              <iframe src="https://maps.google.com/maps?q=Ristoranti+Avigliano+Umbro&t=&z=13&ie=UTF8&iwloc=&output=embed" width="100%" height="100%" frameborder="0" style="border:0" allowfullscreen class="grayscale group-hover:grayscale-0 transition-all duration-500"></iframe>
                          </div>
-                         <a href="https://www.google.com/maps/search/Ristoranti+Avigliano+Umbro" target="_blank" class="inline-flex items-center justify-center w-full py-3 bg-stone-50 text-rose-900 font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-rose-50 transition-colors gap-2 border border-stone-200 hover:border-rose-200">
-                            Apri su Google Maps <i data-lucide="external-link" class="w-4 h-4"></i>
-                         </a>
+                         <div class="p-4 bg-stone-50 border-t border-stone-200">
+                             <a href="https://www.google.com/maps/search/Ristoranti+Avigliano+Umbro" target="_blank" class="flex items-center justify-center w-full py-3 bg-white text-rose-900 font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-rose-50 transition-colors gap-2 border border-stone-200 hover:border-rose-200">
+                                Apri su Google Maps <i data-lucide="external-link" class="w-4 h-4"></i>
+                             </a>
+                         </div>
                     </div>
 
-                    <!-- Dove Dormire -->
-                    <div class="bg-white p-8 rounded-3xl shadow-xl border border-stone-100 flex flex-col h-full hover:shadow-2xl transition-shadow duration-300">
-                         <div class="mb-6 flex items-start gap-4">
-                             <div class="w-14 h-14 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-700 flex-shrink-0">
-                                <i data-lucide="bed-double" class="w-7 h-7"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-2xl font-serif font-bold text-stone-900 mb-2">Accoglienza e Relax</h3>
-                                <p class="text-stone-500 text-sm leading-relaxed">Agriturismi e strutture immerse nella natura per un soggiorno di pace e relax tra le colline.</p>
-                            </div>
+                    <!-- Dove Dormire Card -->
+                    <div class="bg-white p-0 rounded-3xl shadow-xl border border-stone-100 flex flex-col h-full hover:shadow-2xl transition-shadow duration-300 overflow-hidden">
+                         <div class="p-8 pb-0">
+                             <div class="mb-6 flex items-start gap-4">
+                                 <div class="w-14 h-14 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-700 flex-shrink-0">
+                                    <i data-lucide="bed-double" class="w-7 h-7"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-2xl font-serif font-bold text-stone-900 mb-2">Accoglienza e Relax</h3>
+                                    <p class="text-stone-500 text-sm leading-relaxed">Agriturismi e strutture immerse nella natura per un soggiorno di pace e relax tra le colline.</p>
+                                </div>
+                             </div>
                          </div>
-                         <div class="flex-grow aspect-video w-full bg-stone-100 rounded-xl overflow-hidden mb-6 border border-stone-200 relative group">
+                         <!-- Map Container -->
+                         <div class="flex-grow bg-stone-100 border-t border-stone-100 relative group min-h-[300px]">
                             <iframe src="https://maps.google.com/maps?q=Agriturismo+Hotel+Avigliano+Umbro&t=&z=12&ie=UTF8&iwloc=&output=embed" width="100%" height="100%" frameborder="0" style="border:0" allowfullscreen class="grayscale group-hover:grayscale-0 transition-all duration-500"></iframe>
                          </div>
-                         <a href="https://www.google.com/maps/search/Agriturismo+Hotel+Avigliano+Umbro" target="_blank" class="inline-flex items-center justify-center w-full py-3 bg-stone-50 text-rose-900 font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-rose-50 transition-colors gap-2 border border-stone-200 hover:border-rose-200">
-                            Apri su Google Maps <i data-lucide="external-link" class="w-4 h-4"></i>
-                         </a>
+                         <div class="p-4 bg-stone-50 border-t border-stone-200">
+                             <a href="https://www.google.com/maps/search/Agriturismo+Hotel+Avigliano+Umbro" target="_blank" class="flex items-center justify-center w-full py-3 bg-white text-rose-900 font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-rose-50 transition-colors gap-2 border border-stone-200 hover:border-rose-200">
+                                Apri su Google Maps <i data-lucide="external-link" class="w-4 h-4"></i>
+                             </a>
+                         </div>
                     </div>
 
                 </div>
@@ -628,8 +664,8 @@
     </footer>
 
     <!-- AI CHAT WIDGET -->
-    <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
-        <div id="chat-window" class="hidden mb-4 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col h-[480px] fade-in origin-bottom-right transition-all">
+    <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end pointer-events-none">
+        <div id="chat-window" class="hidden mb-4 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col h-[480px] fade-in origin-bottom-right transition-all pointer-events-auto">
             <div class="bg-brand-900 p-4 flex justify-between items-center text-white">
                 <div class="flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4 text-brand-gold"></i><h3 class="font-bold text-sm uppercase tracking-wide">Assistente Virtuale</h3></div>
                 <button onclick="toggleChat()" class="hover:bg-white/10 p-1.5 rounded-full transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
@@ -642,7 +678,7 @@
                 </div>
             </div>
         </div>
-        <button id="chat-toggle" onclick="toggleChat()" class="shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center gap-2 px-6 py-3.5 rounded-full font-bold bg-white text-brand-900 hover:bg-brand-50 border border-brand-100 group">
+        <button id="chat-toggle" onclick="toggleChat()" class="pointer-events-auto shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center gap-2 px-6 py-3.5 rounded-full font-bold bg-white text-brand-900 hover:bg-brand-50 border border-brand-100 group">
             <i data-lucide="sparkles" class="w-5 h-5 text-brand-gold animate-pulse group-hover:scale-110 transition-transform"></i><span>Chiedi a Gemini</span>
         </button>
     </div>
@@ -655,7 +691,7 @@
         <!-- Modal Content -->
         <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto flex flex-col md:flex-row animate-in zoom-in-95 duration-300">
             <!-- Close Button -->
-            <button onclick="closeModal()" class="absolute top-4 right-4 z-20 p-2 bg-white/50 backdrop-blur text-stone-800 rounded-full hover:bg-white transition-colors shadow-sm">
+            <button onclick="closeModal()" class="absolute top-4 right-4 z-20 p-2 bg-white/50 backdrop-blur text-stone-800 rounded-full hover:bg-white transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-900">
                 <i data-lucide="x" class="w-6 h-6"></i>
             </button>
 
@@ -688,6 +724,6 @@
         </div>
     </div>
 
-<script type="module" src="script.js?v=10"></script>
+<script type="module" src="script.js?v=11"></script>
 </body>
 </html>

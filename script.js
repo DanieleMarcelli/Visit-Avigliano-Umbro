@@ -35,22 +35,22 @@ const MONTHS = [
     "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"
 ];
 
-// Cammino Configurator Data
+// Cammino Configurator Data - Improved Text
 const CAMMINO_STAGES = {
     "3": [
-        { title: "Tappa 1: Avigliano - Sismano", km: "15 km", diff: "+450m", desc: "Partenza dal borgo, attraversando i boschi fino al castello di Sismano." },
-        { title: "Tappa 2: Sismano - Dunarobba", km: "22 km", diff: "+600m", desc: "Passaggio panoramico e arrivo alla Foresta Fossile." },
-        { title: "Tappa 3: Dunarobba - Avigliano", km: "18 km", diff: "+350m", desc: "Rientro ad anello passando per Santa Restituta e la Grotta Bella." }
+        { title: "Tappa 1: Avigliano - Sismano", km: "15 km", diff: "+450m", desc: "Partenza dalla Piazza del Municipio, salendo tra oliveti secolari fino alla rocca medievale di Sismano." },
+        { title: "Tappa 2: Sismano - Dunarobba", km: "22 km", diff: "+600m", desc: "Attraversamento dei boschi di castagno con arrivo suggestivo alla Foresta Fossile millenaria." },
+        { title: "Tappa 3: Dunarobba - Avigliano", km: "18 km", diff: "+350m", desc: "Chiusura dell'anello passando per la Grotta Bella e i panorami sui Monti Amerini." }
     ],
     "2": [
-        { title: "Tappa 1: Avigliano - Dunarobba (Via Lunga)", km: "35 km", diff: "+1100m", desc: "Una sfida intensa che unisce le prime due tappe classiche." },
-        { title: "Tappa 2: Dunarobba - Avigliano", km: "25 km", diff: "+600m", desc: "Rientro panoramico attraverso i crinali." }
+        { title: "Tappa 1: Avigliano - Dunarobba (Via Alta)", km: "35 km", diff: "+1100m", desc: "Tappa sfidante che unisce storia e natura selvaggia, toccando Sismano e Toscolano in un giorno." },
+        { title: "Tappa 2: Dunarobba - Avigliano", km: "25 km", diff: "+600m", desc: "Rientro panoramico attraverso crinali ventosi e piccoli borghi rurali dimenticati dal tempo." }
     ],
     "4": [
-        { title: "Tappa 1: Avigliano - Toscolano", km: "12 km", diff: "+300m", desc: "Inizio dolce verso il borgo circolare." },
-        { title: "Tappa 2: Toscolano - Sismano", km: "14 km", diff: "+400m", desc: "Attraverso le colline e i vigneti." },
-        { title: "Tappa 3: Sismano - Dunarobba", km: "15 km", diff: "+350m", desc: "Visita alla Foresta Fossile." },
-        { title: "Tappa 4: Dunarobba - Avigliano", km: "14 km", diff: "+250m", desc: "Rientro rilassante." }
+        { title: "Tappa 1: Avigliano - Toscolano", km: "12 km", diff: "+300m", desc: "Inizio dolce verso il borgo circolare, ideale per acclimatarsi e visitare le chiese locali." },
+        { title: "Tappa 2: Toscolano - Sismano", km: "14 km", diff: "+400m", desc: "Immersione nella macchia mediterranea, tra silenzi profondi e antichi sentieri di pastori." },
+        { title: "Tappa 3: Sismano - Dunarobba", km: "15 km", diff: "+350m", desc: "Giornata dedicata alla geologia e alla storia, con visita approfondita al sito paleontologico." },
+        { title: "Tappa 4: Dunarobba - Avigliano", km: "14 km", diff: "+250m", desc: "Rientro rilassante su strade bianche con vista sulla valle del Tevere." }
     ]
 };
 
@@ -88,6 +88,38 @@ function parseCSVLine(text) {
     return result.map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"'));
 }
 
+function generateEventSchema(eventsList) {
+    const schemaScript = document.getElementById('events-json-ld');
+    if (!schemaScript) return;
+
+    const schemaData = {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "itemListElement": eventsList.map((e, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "item": {
+                "@type": "Event",
+                "name": e.title,
+                "startDate": `${e.date}T${e.time}`,
+                "location": {
+                    "@type": "Place",
+                    "name": e.location,
+                    "address": {
+                        "@type": "PostalAddress",
+                        "addressLocality": "Avigliano Umbro",
+                        "addressRegion": "TR",
+                        "addressCountry": "IT"
+                    }
+                },
+                "image": e.imageUrl,
+                "description": e.description
+            }
+        }))
+    };
+    schemaScript.textContent = JSON.stringify(schemaData);
+}
+
 // --- GLOBAL FUNCTIONS ---
 
 window.toggleMobileMenu = () => {
@@ -97,10 +129,10 @@ window.toggleMobileMenu = () => {
     // Toggle Hidden Class with Transition Logic
     if (menu.classList.contains('hidden')) {
         menu.classList.remove('hidden');
-        document.body.classList.add('overflow-hidden'); // Scroll Lock
+        document.body.style.overflow = 'hidden'; // Ensure lock
     } else {
         menu.classList.add('hidden');
-        document.body.classList.remove('overflow-hidden'); // Unlock
+        document.body.style.overflow = ''; // Release lock
     }
 };
 
@@ -164,8 +196,8 @@ window.updateCamminoTimeline = () => {
                 
                 <h4 class="text-xl font-serif font-bold text-stone-900 mb-1">${stage.title}</h4>
                 <div class="flex items-center gap-4 text-xs font-bold text-emerald-700 uppercase tracking-wider mb-3">
-                    <span class="bg-emerald-50 border border-emerald-100 px-2 py-1 rounded">${stage.km}</span>
-                    <span class="bg-emerald-50 border border-emerald-100 px-2 py-1 rounded">${stage.diff}</span>
+                    <span class="bg-emerald-50 border border-emerald-100 px-2 py-1 rounded shadow-sm">${stage.km}</span>
+                    <span class="bg-emerald-50 border border-emerald-100 px-2 py-1 rounded shadow-sm">${stage.diff}</span>
                     ${mode === 'bike' ? '<span class="bg-emerald-50 border border-emerald-100 px-2 py-1 rounded"><i data-lucide="bike" class="w-3 h-3 inline"></i> Ciclabile</span>' : ''}
                 </div>
                 <p class="text-stone-600 text-sm leading-relaxed">${stage.desc}</p>
@@ -207,7 +239,7 @@ window.openModal = (eventId) => {
     }
 
     modal.classList.remove('hidden');
-    document.body.classList.add('overflow-hidden');
+    document.body.style.overflow = 'hidden';
 };
 
 window.openContentModal = (baseId) => {
@@ -232,12 +264,12 @@ window.openContentModal = (baseId) => {
     document.getElementById('modal-desc').innerText = fullDesc || (shortDescEl ? shortDescEl.innerText : 'Descrizione non disponibile.');
 
     modal.classList.remove('hidden');
-    document.body.classList.add('overflow-hidden');
+    document.body.style.overflow = 'hidden';
 };
 
 window.closeModal = () => {
     document.getElementById('event-modal').classList.add('hidden');
-    document.body.classList.remove('overflow-hidden');
+    document.body.style.overflow = '';
 };
 
 window.sendChatMessage = async () => {
@@ -398,6 +430,9 @@ function renderEvents() {
         }
         return searchMatch && catMatch && locMatch && monthMatch;
     }).sort((a,b) => new Date(a.date) - new Date(b.date));
+    
+    // Generate SEO Schema for filtered events
+    generateEventSchema(filtered.slice(0, 10)); // Top 10 for SEO
 
     countLabel.innerText = `${filtered.length} eventi in programma`;
 
@@ -415,7 +450,7 @@ function renderEvents() {
             const month = !isNaN(dateObj) ? dateObj.toLocaleString('it-IT', { month: 'short' }).toUpperCase() : "???";
             
             const cardHtml = `
-                <div class="group bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden border border-stone-100 flex flex-col h-full relative fade-in cursor-pointer hover:-translate-y-1 btn-open-modal" data-id="${event.id}">
+                <div role="button" tabindex="0" class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-stone-100 flex flex-col h-full relative fade-in cursor-pointer hover:-translate-y-1 btn-open-modal focus:ring-2 focus:ring-brand-900 focus:outline-none" data-id="${event.id}" onkeydown="if(event.key === 'Enter') window.openModal('${event.id}')">
                     <div class="relative aspect-[7/10] overflow-hidden bg-stone-100 border-b border-stone-100">
                         <img src="${event.imageUrl}" alt="${event.title}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" onerror="this.src='https://picsum.photos/800/600'" />
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
@@ -435,9 +470,9 @@ function renderEvents() {
                             <div class="flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5 text-brand-gold"></i> <span class="font-medium">${event.time}</span></div>
                         </div>
                         <div class="mt-auto pt-4 border-t border-stone-100 flex justify-between items-center">
-                             <button class="text-brand-900 text-xs font-bold uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
+                             <span class="text-brand-900 text-xs font-bold uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
                                 Dettagli <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i> 
-                            </button>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -459,7 +494,7 @@ function renderEvents() {
                 const fullDate = dateObj.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
 
                 const compactHtml = `
-                    <div class="flex items-center gap-5 bg-white p-4 rounded-xl border border-stone-200 shadow-sm hover:shadow-md transition-all group cursor-pointer hover:border-brand-200 btn-open-modal" data-id="${event.id}">
+                    <div role="button" tabindex="0" class="flex items-center gap-5 bg-white p-4 rounded-xl border border-stone-200 shadow-sm hover:shadow-md transition-all group cursor-pointer hover:border-brand-200 btn-open-modal focus:ring-2 focus:ring-brand-900 focus:outline-none" data-id="${event.id}" onkeydown="if(event.key === 'Enter') window.openModal('${event.id}')">
                         <div class="w-16 aspect-[7/10] rounded-lg overflow-hidden flex-shrink-0 bg-stone-100 shadow-sm border border-stone-100">
                             <img src="${event.imageUrl}" class="w-full h-full object-cover group-hover:scale-110 transition-transform" onerror="this.src='https://picsum.photos/100/100'">
                         </div>
@@ -472,9 +507,9 @@ function renderEvents() {
                             </div>
                         </div>
                         <div class="flex-shrink-0 pr-2">
-                             <button class="w-10 h-10 rounded-full bg-stone-50 text-stone-400 flex items-center justify-center group-hover:bg-brand-900 group-hover:text-white transition-all">
+                             <div class="w-10 h-10 rounded-full bg-stone-50 text-stone-400 flex items-center justify-center group-hover:bg-brand-900 group-hover:text-white transition-all">
                                 <i data-lucide="chevron-right" class="w-5 h-5"></i>
-                             </button>
+                             </div>
                         </div>
                     </div>
                 `;

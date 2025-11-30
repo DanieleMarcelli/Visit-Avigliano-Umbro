@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Prenota il Cammino del Lago Tiberino | Visit Avigliano Umbro</title>
-    <meta name="description" content="Configura il tuo itinerario per il Cammino del Lago Tiberino. 80km tra borghi, foreste fossili e spiritualità. Richiedi la credenziale.">
+    <title>Prenota il Cammino | Visit Avigliano Umbro</title>
+    <meta name="description" content="Configura il tuo itinerario per il Cammino del Lago Tiberino. 80km tra borghi, foreste fossili e spiritualità.">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -12,7 +12,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -21,11 +21,7 @@
     <script type="importmap">
     {
       "imports": {
-        "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
-        "react": "https://aistudiocdn.com/react@^19.2.0",
-        "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-        "react/": "https://aistudiocdn.com/react@^19.2.0/",
-        "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0"
+        "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0"
       }
     }
     </script>
@@ -35,125 +31,72 @@
         theme: {
           extend: {
             colors: {
-              brand: {
-                950: '#2a0202',
-                900: '#4a0404', 
-                800: '#701a1a',
-                700: '#9b2c2c',
-                100: '#fdf2f2',
-                50:  '#fffafa',
-                gold: '#d4af37',
-                goldlight: '#f3e5ab',
-              },
-              stone: {
-                850: '#1c1917',
-              }
+              abyss: '#0a0f1c',
+              neon: '#00f0ff',
+              gold: '#ffd700',
+              glass: 'rgba(255, 255, 255, 0.05)',
             },
             fontFamily: {
               sans: ['Inter', 'sans-serif'],
               serif: ['Playfair Display', 'serif'],
-            }
+              display: ['Anton', 'sans-serif'],
+            },
           }
         }
       }
     </script>
     <style>
-      body { font-family: 'Inter', sans-serif; background-color: #faf9f6; color: #1c1917; }
-      .fade-in { animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-      
-      /* Sticky Sidebar Logic */
+      body { background-color: #0a0f1c; color: #e2e8f0; }
+      .glass-panel {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
       .sticky-sidebar {
         position: -webkit-sticky;
         position: sticky;
-        top: 100px; /* Adjust based on header height */
+        top: 100px;
         height: fit-content;
       }
     </style>
 </head>
-<body class="min-h-screen flex flex-col antialiased selection:bg-brand-900 selection:text-white">
+<body class="min-h-screen flex flex-col antialiased selection:bg-neon selection:text-abyss">
 
-    <!-- HEADER -->
-    <header class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-stone-200/60 shadow-sm transition-all">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-20">
-                <a href="index.html" class="flex items-center gap-3 cursor-pointer group">
-                    <div class="w-11 h-11 rounded-full flex items-center justify-center overflow-hidden shadow-sm border border-stone-100 bg-white transition-transform duration-500 group-hover:scale-105">
-                        <img 
-                            data-content-id="nav-logo" 
-                            src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" 
-                            alt="Logo" 
-                            class="w-full h-full object-cover opacity-0 transition-opacity duration-700"
-                            onload="if(this.src.length > 100 || this.src.startsWith('http')) this.classList.remove('opacity-0')"
-                        />
-                    </div>
-                    <div class="flex flex-col">
-                        <span class="text-[10px] uppercase tracking-[0.2em] text-brand-800 font-bold opacity-80">Portale Turistico</span>
-                        <span class="text-xl font-bold font-serif leading-none text-stone-900 tracking-tight group-hover:text-brand-900 transition-colors">Visit Avigliano Umbro</span>
-                    </div>
-                </a>
-
-                <nav class="hidden md:flex items-center gap-6 lg:gap-8">
-                    <a href="index.html#territorio" class="text-stone-600 hover:text-brand-900 font-medium text-sm transition-colors py-2">Territorio</a>
-                    <a href="cammino.html" class="text-brand-900 hover:text-brand-700 font-bold text-sm transition-colors flex items-center gap-1.5 py-2 border-b-2 border-brand-gold">
-                        <i data-lucide="footprints" class="w-4 h-4 text-brand-gold"></i> Il Cammino
-                    </a>
-                    <a href="index.html#storia" class="text-stone-600 hover:text-brand-900 font-medium text-sm transition-colors py-2">Storia</a>
-                    <a href="index.html#ospitalita" class="text-stone-600 hover:text-brand-900 font-medium text-sm transition-colors py-2">Ospitalità</a>
-                    <button onclick="window.location.href='index.html#eventi-section'" class="text-brand-900 font-semibold text-sm flex items-center gap-2 bg-brand-50 px-5 py-2.5 rounded-full hover:bg-brand-100 transition-all border border-brand-100/50">
-                        <i data-lucide="calendar" class="w-4 h-4"></i> Eventi
-                    </button>
-                    <a href="index.html#contatti" class="text-stone-600 hover:text-brand-900 font-medium text-sm transition-colors py-2">Contatti</a>
-                </nav>
-
-                <div class="flex items-center gap-3 md:hidden">
-                    <button onclick="toggleMobileMenu()" class="p-2.5 text-stone-800 hover:bg-stone-100 rounded-xl transition-colors">
-                        <i data-lucide="menu" class="w-6 h-6"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- MOBILE MENU OVERLAY -->
-    <div id="mobile-menu-overlay" class="hidden fixed inset-0 z-[60] bg-white/98 backdrop-blur-xl flex flex-col transition-opacity duration-300">
-        <div class="flex justify-between items-center p-4 h-20 border-b border-stone-100">
-             <span class="text-sm font-bold text-stone-400 uppercase tracking-widest px-2">Menu</span>
-             <button onclick="toggleMobileMenu()" class="p-2 text-stone-600"><i data-lucide="x" class="w-6 h-6"></i></button>
-        </div>
-        <div class="flex flex-col items-center justify-center flex-1 gap-8 text-center px-6">
-            <a href="index.html#territorio" class="text-3xl font-serif font-bold text-stone-800">Territorio</a>
-            <a href="cammino.html" class="text-3xl font-serif font-bold text-brand-900 flex items-center gap-3 bg-brand-50/50 px-6 py-2 rounded-full">
-                <i data-lucide="footprints" class="w-6 h-6 text-brand-gold"></i> Il Cammino
+    <!-- NAVBAR (Same as Home) -->
+    <nav class="fixed top-0 w-full z-50 transition-all duration-300 glass-panel border-b-0">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+             <a href="index.html" class="text-2xl font-display tracking-wider text-white group">
+                VISIT <span class="text-neon group-hover:text-white transition-colors">AVIGLIANO</span>
             </a>
-            <a href="index.html#storia" class="text-3xl font-serif font-bold text-stone-800">Storia</a>
-            <a href="index.html#eventi-section" class="text-3xl font-serif font-bold text-stone-800">Eventi</a>
-            <a href="index.html#contatti" class="text-3xl font-serif font-bold text-stone-800">Contatti</a>
+            
+            <div class="hidden md:flex gap-8 text-sm font-bold tracking-widest uppercase text-slate-400">
+                <a href="index.html#territorio" class="hover:text-neon transition-colors">Territorio</a>
+                <a href="index.html#events" class="hover:text-neon transition-colors">Eventi</a>
+            </div>
+
+            <!-- Mobile Menu Toggle -->
+             <button class="md:hidden text-white text-xl" onclick="window.location.href='index.html'">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
         </div>
-    </div>
+    </nav>
 
     <main class="flex-grow pt-20">
         
         <!-- COMPACT HERO SECTION -->
-        <div class="relative h-[50vh] min-h-[400px] w-full overflow-hidden flex items-center justify-center bg-stone-900">
+        <div class="relative h-[40vh] min-h-[300px] w-full overflow-hidden flex items-center justify-center bg-stone-900">
             <div 
                 data-content-id="cammino-hero-bg"
                 class="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-[3s] hover:scale-105" 
-                style="background-image: url('https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=1920&auto=format&fit=crop');"
+                style="background-image: url('https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=1920&auto=format&fit=crop'); opacity: 0.6;"
             ></div>
-            <div class="absolute inset-0 bg-stone-900/50 mix-blend-multiply"></div>
-            <div class="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-900/20 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-abyss via-abyss/20 to-transparent"></div>
             
-            <div class="relative z-10 text-center px-4 max-w-4xl mx-auto text-white slide-up">
-                <span class="inline-flex items-center gap-2 py-1.5 px-4 border border-white/30 bg-white/10 backdrop-blur-md text-white text-xs font-bold tracking-[0.2em] uppercase rounded-full mb-6">
-                    <i data-lucide="compass" class="w-4 h-4 text-brand-gold"></i> Itinerario Ufficiale
+            <div class="relative z-10 text-center px-4 max-w-4xl mx-auto text-white">
+                <span class="inline-flex items-center gap-2 py-1.5 px-4 border border-neon/30 bg-neon/10 backdrop-blur-md text-neon text-xs font-bold tracking-[0.2em] uppercase rounded-full mb-6">
+                    <i data-lucide="compass" class="w-4 h-4"></i> Itinerario Ufficiale
                 </span>
-                <h1 data-content-id="cammino-hero-title" class="text-4xl md:text-6xl font-bold mb-4 drop-shadow-xl serif tracking-tight">Il Cammino del Lago Tiberino</h1>
-                <div class="flex items-center justify-center gap-6 text-sm md:text-base font-medium text-stone-200">
-                    <span class="flex items-center gap-2"><i data-lucide="map" class="w-4 h-4 text-brand-gold"></i> 80 km</span>
-                    <span class="flex items-center gap-2"><i data-lucide="mountain" class="w-4 h-4 text-brand-gold"></i> +2400m</span>
-                    <span class="flex items-center gap-2"><i data-lucide="calendar-days" class="w-4 h-4 text-brand-gold"></i> 3-4 Tappe</span>
-                </div>
+                <h1 data-content-id="cammino-hero-title" class="text-4xl md:text-6xl font-display text-white mb-4 drop-shadow-xl tracking-wide">IL CAMMINO DEL LAGO</h1>
             </div>
         </div>
 
@@ -166,58 +109,50 @@
                     
                     <!-- Intro -->
                     <div>
-                        <h2 data-content-id="cammino-intro-title" class="text-3xl font-serif font-bold text-stone-900 mb-6 leading-tight">Esplora l'Umbria profonda,<br>dove il tempo si è fermato.</h2>
-                        <p data-content-id="cammino-intro-desc" class="text-stone-600 text-lg leading-relaxed mb-6">
+                        <h2 data-content-id="cammino-intro-title" class="text-3xl font-display text-white mb-6 leading-tight">Esplora l'Umbria profonda.</h2>
+                        <p data-content-id="cammino-intro-desc" class="text-slate-400 text-lg leading-relaxed mb-6 font-light">
                             Il Cammino del Lago Tiberino non è solo un percorso trekking: è un viaggio nel tempo geologico. 
-                            Camminerai sul fondo di un antico lago preistorico, attraversando la celebre Foresta Fossile di Dunarobba, 
-                            scendendo nelle profondità della Grotta Bella e risalendo verso i borghi fortificati che dominano le colline.
-                            Un'esperienza che unisce spiritualità, natura selvaggia e accoglienza autentica.
+                            Camminerai sul fondo di un antico lago preistorico, attraversando la celebre Foresta Fossile di Dunarobba.
                         </p>
                         
                         <!-- Highlights Grid -->
                         <div class="grid grid-cols-2 gap-4 mt-8">
-                            <div class="bg-stone-50 p-4 rounded-xl border border-stone-100">
-                                <i data-lucide="tree-deciduous" class="w-6 h-6 text-brand-900 mb-2"></i>
-                                <h4 class="font-bold text-stone-800 text-sm">Foresta Fossile</h4>
-                                <p class="text-xs text-stone-500">Unica al mondo</p>
+                            <div class="glass-panel p-4 rounded-xl">
+                                <i data-lucide="tree-deciduous" class="w-6 h-6 text-neon mb-2"></i>
+                                <h4 class="font-bold text-white text-sm">Foresta Fossile</h4>
+                                <p class="text-xs text-slate-500">Unica al mondo</p>
                             </div>
-                            <div class="bg-stone-50 p-4 rounded-xl border border-stone-100">
-                                <i data-lucide="castle" class="w-6 h-6 text-brand-900 mb-2"></i>
-                                <h4 class="font-bold text-stone-800 text-sm">Borghi Silenti</h4>
-                                <p class="text-xs text-stone-500">Sismano, Toscolano</p>
+                            <div class="glass-panel p-4 rounded-xl">
+                                <i data-lucide="castle" class="w-6 h-6 text-neon mb-2"></i>
+                                <h4 class="font-bold text-white text-sm">Borghi Silenti</h4>
+                                <p class="text-xs text-slate-500">Sismano, Toscolano</p>
                             </div>
                         </div>
                     </div>
 
                     <!-- Interactive Map Section -->
                     <div id="mappa">
-                        <h3 class="text-2xl font-serif font-bold text-stone-900 mb-6 flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-full bg-brand-900 text-white flex items-center justify-center text-sm font-sans">1</span>
+                        <h3 class="text-2xl font-display text-white mb-6 flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-full bg-neon text-abyss flex items-center justify-center text-sm font-sans font-bold">1</span>
                             La Traccia
                         </h3>
-                        <div class="w-full h-[450px] rounded-2xl overflow-hidden border border-stone-200 shadow-lg bg-stone-100">
+                        <div class="w-full h-[450px] rounded-2xl overflow-hidden border border-white/10 shadow-lg bg-stone-900 grayscale hover:grayscale-0 transition-all">
                              <iframe frameBorder="0" scrolling="no" src="https://it.wikiloc.com/wikiloc/spatialArtifacts.do?event=view&id=201301484&measures=on&title=on&near=on&images=on&maptype=H" width="100%" height="100%"></iframe>
-                        </div>
-                        <div class="mt-4 flex justify-end">
-                            <a href="https://it.wikiloc.com/percorsi-escursionismo/cammino-dei-borghi-silenti-201301484" target="_blank" class="text-sm font-bold text-brand-900 hover:underline flex items-center gap-1">
-                                Scarica GPX su Wikiloc <i data-lucide="external-link" class="w-4 h-4"></i>
-                            </a>
                         </div>
                     </div>
 
                     <!-- Timeline Section -->
                     <div id="tappe">
-                        <h3 class="text-2xl font-serif font-bold text-stone-900 mb-8 flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-full bg-brand-900 text-white flex items-center justify-center text-sm font-sans">2</span>
+                        <h3 class="text-2xl font-display text-white mb-8 flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-full bg-neon text-abyss flex items-center justify-center text-sm font-sans font-bold">2</span>
                             Le Tappe
                         </h3>
                         
-                        <div class="bg-white rounded-3xl p-8 border border-stone-200 shadow-sm">
-                            <!-- Controls inserted dynamically via JS or static below -->
+                        <div class="glass-panel rounded-3xl p-8">
                              <div id="cammino-timeline" class="relative">
                                 <!-- JS Injects Content Here -->
-                                <div class="flex items-center justify-center h-40 text-stone-400">
-                                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-900 mr-3"></div>
+                                <div class="flex items-center justify-center h-40 text-slate-500">
+                                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-neon mr-3"></div>
                                     Caricamento itinerario...
                                 </div>
                             </div>
@@ -231,27 +166,27 @@
                     <div class="sticky-sidebar space-y-6">
                         
                         <!-- Configuration Card -->
-                        <div class="bg-white rounded-2xl shadow-xl border border-stone-200 overflow-hidden">
-                            <div class="bg-brand-900 p-6 text-white text-center">
-                                <h3 class="font-serif font-bold text-xl">Configura il tuo Viaggio</h3>
-                                <p class="text-brand-100 text-xs mt-1">Personalizza l'esperienza</p>
+                        <div class="glass-panel rounded-2xl overflow-hidden shadow-2xl">
+                            <div class="bg-gradient-to-r from-neon/10 to-transparent p-6 border-b border-white/10">
+                                <h3 class="font-display text-xl text-white">Configura Viaggio</h3>
+                                <p class="text-neon text-xs mt-1 font-bold tracking-widest uppercase">Personalizza l'esperienza</p>
                             </div>
                             
                             <div class="p-6 space-y-6">
                                 <!-- Mode -->
                                 <div>
-                                    <label class="block text-xs font-bold text-stone-500 uppercase mb-3">Come vuoi viaggiare?</label>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-3">Modalità</label>
                                     <div class="flex gap-2">
                                         <label class="flex-1 cursor-pointer">
-                                            <input type="radio" name="mode" value="foot" class="peer hidden" checked onchange="updateCamminoTimeline()">
-                                            <div class="py-3 px-2 rounded-lg border border-stone-200 text-center peer-checked:border-brand-900 peer-checked:bg-brand-50 peer-checked:text-brand-900 transition-all hover:bg-stone-50">
+                                            <input type="radio" name="mode" value="foot" class="peer hidden" checked onchange="window.updateCamminoTimeline()">
+                                            <div class="py-3 px-2 rounded-lg border border-white/10 text-center peer-checked:border-neon peer-checked:bg-neon/10 peer-checked:text-white text-slate-400 transition-all hover:bg-white/5">
                                                 <i data-lucide="footprints" class="w-5 h-5 mx-auto mb-1"></i>
                                                 <span class="text-xs font-bold">A Piedi</span>
                                             </div>
                                         </label>
                                         <label class="flex-1 cursor-pointer">
-                                            <input type="radio" name="mode" value="bike" class="peer hidden" onchange="updateCamminoTimeline()">
-                                            <div class="py-3 px-2 rounded-lg border border-stone-200 text-center peer-checked:border-brand-900 peer-checked:bg-brand-50 peer-checked:text-brand-900 transition-all hover:bg-stone-50">
+                                            <input type="radio" name="mode" value="bike" class="peer hidden" onchange="window.updateCamminoTimeline()">
+                                            <div class="py-3 px-2 rounded-lg border border-white/10 text-center peer-checked:border-neon peer-checked:bg-neon/10 peer-checked:text-white text-slate-400 transition-all hover:bg-white/5">
                                                 <i data-lucide="bike" class="w-5 h-5 mx-auto mb-1"></i>
                                                 <span class="text-xs font-bold">In Bici</span>
                                             </div>
@@ -261,67 +196,45 @@
 
                                 <!-- Duration -->
                                 <div>
-                                    <label class="block text-xs font-bold text-stone-500 uppercase mb-3">Ritmo di viaggio</label>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-3">Durata</label>
                                     <div class="space-y-2">
-                                        <label class="cursor-pointer flex items-center p-3 rounded-lg border border-stone-200 hover:bg-stone-50 peer-checked:border-brand-900 peer-checked:bg-brand-50 transition-all">
-                                            <input type="radio" name="duration" value="2" class="peer hidden" onchange="updateCamminoTimeline()">
+                                        <label class="cursor-pointer flex items-center p-3 rounded-lg border border-white/10 hover:bg-white/5 peer-checked:border-neon peer-checked:bg-neon/10 transition-all">
+                                            <input type="radio" name="duration" value="3" class="peer hidden" checked onchange="window.updateCamminoTimeline()">
                                             <div class="flex-1">
-                                                <span class="font-bold text-sm text-stone-800 block">Sportivo (2 Giorni)</span>
-                                                <span class="text-xs text-stone-500">Per escursionisti esperti</span>
+                                                <span class="font-bold text-sm text-white block">Classico (3 Giorni)</span>
                                             </div>
-                                            <div class="w-4 h-4 rounded-full border border-stone-300 peer-checked:border-brand-900 peer-checked:bg-brand-900"></div>
+                                            <div class="w-3 h-3 rounded-full border border-slate-600 peer-checked:bg-neon peer-checked:border-neon"></div>
                                         </label>
-                                        
-                                        <label class="cursor-pointer flex items-center p-3 rounded-lg border border-stone-200 hover:bg-stone-50 peer-checked:border-brand-900 peer-checked:bg-brand-50 transition-all bg-brand-50/30 border-brand-200">
-                                            <input type="radio" name="duration" value="3" class="peer hidden" checked onchange="updateCamminoTimeline()">
+                                         <label class="cursor-pointer flex items-center p-3 rounded-lg border border-white/10 hover:bg-white/5 peer-checked:border-neon peer-checked:bg-neon/10 transition-all">
+                                            <input type="radio" name="duration" value="4" class="peer hidden" onchange="window.updateCamminoTimeline()">
                                             <div class="flex-1">
-                                                <span class="font-bold text-sm text-stone-800 block">Classico (3 Giorni)</span>
-                                                <span class="text-xs text-stone-500">L'esperienza consigliata</span>
+                                                <span class="font-bold text-sm text-white block">Lento (4 Giorni)</span>
                                             </div>
-                                            <div class="w-4 h-4 rounded-full border border-stone-300 peer-checked:border-brand-900 peer-checked:bg-brand-900"></div>
-                                        </label>
-
-                                        <label class="cursor-pointer flex items-center p-3 rounded-lg border border-stone-200 hover:bg-stone-50 peer-checked:border-brand-900 peer-checked:bg-brand-50 transition-all">
-                                            <input type="radio" name="duration" value="4" class="peer hidden" onchange="updateCamminoTimeline()">
-                                            <div class="flex-1">
-                                                <span class="font-bold text-sm text-stone-800 block">Lento (4 Giorni)</span>
-                                                <span class="text-xs text-stone-500">Per godersi ogni borgo</span>
-                                            </div>
-                                            <div class="w-4 h-4 rounded-full border border-stone-300 peer-checked:border-brand-900 peer-checked:bg-brand-900"></div>
+                                            <div class="w-3 h-3 rounded-full border border-slate-600 peer-checked:bg-neon peer-checked:border-neon"></div>
                                         </label>
                                     </div>
                                 </div>
                                 
-                                <div class="pt-4 border-t border-stone-100">
-                                    <button onclick="document.getElementById('booking-modal').classList.remove('hidden')" class="w-full bg-brand-gold hover:bg-brand-900 hover:text-white text-brand-950 font-bold py-4 rounded-xl shadow-lg transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 uppercase tracking-widest text-sm">
+                                <div class="pt-4 border-t border-white/10">
+                                    <button onclick="document.getElementById('booking-modal').classList.remove('hidden')" class="w-full bg-neon hover:bg-white text-abyss font-bold py-4 rounded-xl shadow-lg transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 uppercase tracking-widest text-sm neon-glow">
                                         Prenota Ora
                                     </button>
-                                    <p class="text-center text-xs text-stone-400 mt-3 flex items-center justify-center gap-1">
-                                        <i data-lucide="shield-check" class="w-3 h-3"></i> Nessun pagamento online richiesto
-                                    </p>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Info Box -->
-                        <div class="bg-stone-100 rounded-xl p-6 text-stone-600 text-sm leading-relaxed border border-stone-200">
-                            <strong>Hai bisogno di una guida?</strong><br>
-                            Possiamo metterti in contatto con guide escursionistiche certificate AIGAE per accompagnare te o il tuo gruppo.
-                        </div>
-
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- BOOKING MODAL (Hidden by default) -->
+    <!-- BOOKING MODAL -->
     <div id="booking-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-stone-900/90 backdrop-blur-sm transition-opacity" onclick="document.getElementById('booking-modal').classList.add('hidden')"></div>
-        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-300">
-            <div class="bg-stone-50 px-6 py-4 border-b border-stone-100 flex justify-between items-center">
-                <h3 class="font-serif font-bold text-lg text-stone-900">Richiesta Credenziali</h3>
-                <button onclick="document.getElementById('booking-modal').classList.add('hidden')" class="text-stone-400 hover:text-stone-800"><i data-lucide="x" class="w-6 h-6"></i></button>
+        <div class="absolute inset-0 bg-abyss/90 backdrop-blur-sm transition-opacity" onclick="document.getElementById('booking-modal').classList.add('hidden')"></div>
+        <div class="relative bg-[#1a1f2e] border border-white/10 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-300">
+            <div class="bg-black/20 px-6 py-4 border-b border-white/10 flex justify-between items-center">
+                <h3 class="font-display font-bold text-lg text-white">Richiesta Credenziali</h3>
+                <button onclick="document.getElementById('booking-modal').classList.add('hidden')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
             
             <div class="p-6 md:p-8 max-h-[80vh] overflow-y-auto">
@@ -331,50 +244,13 @@
                     <input type="hidden" name="_next" id="cammino-next-url" value="">
                     
                     <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Nome</label>
-                            <input type="text" name="nome" required class="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-lg outline-none focus:border-brand-900" placeholder="Mario">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Cognome</label>
-                            <input type="text" name="cognome" required class="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-lg outline-none focus:border-brand-900" placeholder="Rossi">
-                        </div>
+                        <input type="text" name="nome" required class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg outline-none focus:border-neon text-white placeholder-slate-500" placeholder="Nome">
+                        <input type="text" name="cognome" required class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg outline-none focus:border-neon text-white placeholder-slate-500" placeholder="Cognome">
                     </div>
 
-                    <div>
-                        <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Email</label>
-                        <input type="email" name="email" required class="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-lg outline-none focus:border-brand-900" placeholder="email@esempio.com">
-                    </div>
+                    <input type="email" name="email" required class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg outline-none focus:border-neon text-white placeholder-slate-500" placeholder="Email">
 
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Data Arrivo</label>
-                            <input type="date" name="data_arrivo" required class="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-lg outline-none focus:border-brand-900">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Partecipanti</label>
-                            <input type="number" name="partecipanti" min="1" value="1" class="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-lg outline-none focus:border-brand-900">
-                        </div>
-                    </div>
-                    
-                    <div>
-                         <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Provenienza</label>
-                         <input type="text" name="provenienza" class="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-lg outline-none focus:border-brand-900" placeholder="Città / Nazione">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Richieste Speciali</label>
-                        <textarea name="note" rows="2" class="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-lg outline-none focus:border-brand-900 text-sm" placeholder="Cerco alloggio, guida, ecc..."></textarea>
-                    </div>
-
-                    <div class="flex items-start gap-3 pt-2">
-                        <input type="checkbox" name="privacy" required id="privacy-check" class="mt-1 w-4 h-4 text-brand-900 rounded border-stone-300 focus:ring-brand-900">
-                        <label for="privacy-check" class="text-xs text-stone-500 leading-relaxed">
-                            Ho letto e accetto la Privacy Policy. I miei dati saranno usati solo per gestire la richiesta.
-                        </label>
-                    </div>
-
-                    <button type="submit" class="w-full bg-brand-900 text-white font-bold py-4 rounded-xl hover:bg-brand-800 transition-colors shadow-lg mt-2 uppercase tracking-widest text-sm">
+                    <button type="submit" class="w-full bg-neon text-abyss font-bold py-4 rounded-xl hover:bg-white transition-colors shadow-lg mt-2 uppercase tracking-widest text-sm">
                         Invia Richiesta
                     </button>
                 </form>
@@ -382,45 +258,19 @@
         </div>
     </div>
 
-    <!-- FOOTER (Identico a index.html) -->
-    <footer class="bg-stone-900 text-white py-12 border-t border-stone-800 mt-auto">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-          <div>
-            <h4 class="text-xl font-serif font-bold mb-4 text-brand-gold">Visit Avigliano Umbro</h4>
-            <p class="text-stone-400 text-sm leading-relaxed mb-4">
-              La guida ufficiale agli eventi, alla cultura e alle tradizioni del cuore verde dell'Umbria.
-            </p>
-            <div className="text-xs text-stone-500">© 2025 Visit Avigliano Umbro.</div>
-          </div>
-          <div>
-            <h4 class="text-lg font-bold mb-4">Contatti</h4>
-             <ul className="space-y-2 text-sm text-stone-400">
-              <li>Piazza del Municipio, 1<br/>05020 Avigliano Umbro (TR)</li>
-              <li>Tel: +39 0744 933521</li>
-            </ul>
-          </div>
-          <div>
-            <h4 class="text-lg font-bold mb-4">Link Utili</h4>
-            <ul className="space-y-2 text-sm">
-              <li><a href="index.html" class="text-stone-400 hover:text-brand-gold">Home</a></li>
-              <li><a href="https://it.wikiloc.com/percorsi-escursionismo/cammino-dei-borghi-silenti-201301484" target="_blank" class="text-stone-400 hover:text-brand-gold">Traccia GPX</a></li>
-            </ul>
-          </div>
-        </div>
+    <!-- FOOTER -->
+    <footer class="bg-black/40 text-white py-12 border-t border-white/5 mt-auto">
+      <div class="max-w-7xl mx-auto px-6 text-center text-slate-500 text-sm">
+          &copy; 2025 Visit Avigliano Umbro.
       </div>
     </footer>
 
     <!-- Script Import -->
-    <script type="module" src="script.js?v=14"></script>
+    <script type="module" src="script.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
              const nextInput = document.getElementById('cammino-next-url');
              if(nextInput) nextInput.value = window.location.href.split('?')[0] + '?success=1';
-             
-             if(window.location.search.includes('success=1')) {
-                 alert("Richiesta inviata con successo! Ti risponderemo presto con il kit del pellegrino.");
-             }
         });
     </script>
 </body>

@@ -17,6 +17,22 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Google GenAI SDK -->
+    <script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0"
+  }
+}
+</script>
+
     <script>
       tailwind.config = {
         theme: {
@@ -83,17 +99,6 @@
             animation: pulse-dark 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
     </style>
-<script type="importmap">
-{
-  "imports": {
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
-  }
-}
-</script>
 </head>
 <body class="antialiased selection:bg-neon selection:text-abyss overflow-x-hidden">
 
@@ -115,16 +120,23 @@
             </a>
 
             <!-- Mobile Menu Toggle -->
-            <button class="md:hidden text-white text-xl" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+            <button class="md:hidden text-white text-xl" onclick="window.toggleMobileMenu()">
                 <i class="fa-solid fa-bars"></i>
             </button>
         </div>
         
         <!-- Mobile Menu Overlay -->
-        <div id="mobile-menu" class="hidden absolute top-20 left-0 w-full bg-abyss border-b border-white/10 p-6 flex flex-col gap-6 text-center z-40">
-            <a href="#events" class="text-xl font-display text-white">Eventi</a>
-            <a href="#territorio" class="text-xl font-display text-white">Territorio</a>
-            <a href="cammino.html" class="text-neon font-bold uppercase tracking-widest border border-neon/50 py-3 rounded-lg">Il Cammino</a>
+        <div id="mobile-menu-overlay" class="hidden fixed inset-0 z-[60] bg-abyss/98 backdrop-blur-xl flex flex-col transition-opacity duration-300">
+            <div class="flex justify-between items-center p-6 border-b border-white/10">
+                 <span class="text-sm font-bold text-slate-400 uppercase tracking-widest">Menu</span>
+                 <button onclick="window.toggleMobileMenu()" class="text-white"><i data-lucide="x" class="w-8 h-8"></i></button>
+            </div>
+            <div class="flex flex-col items-center justify-center flex-1 gap-8 text-center px-6">
+                <a href="#territorio" onclick="window.toggleMobileMenu()" class="text-4xl font-display text-white hover:text-neon transition-colors">Territorio</a>
+                <a href="cammino.html" class="text-3xl font-display text-neon border border-neon/30 px-8 py-3 rounded-full bg-neon/5">Il Cammino</a>
+                <a href="#events" onclick="window.toggleMobileMenu()" class="text-4xl font-display text-white hover:text-neon transition-colors">Eventi</a>
+                <a href="#hospitality" onclick="window.toggleMobileMenu()" class="text-4xl font-display text-white hover:text-neon transition-colors">Ospitalità</a>
+            </div>
         </div>
     </nav>
 
@@ -141,7 +153,7 @@
             <h1 class="text-7xl md:text-9xl font-display text-white mb-6 leading-none tracking-tight drop-shadow-2xl">
                 AVIGLIANO <span class="text-outline">UMBRO</span>
             </h1>
-            <p data-cms-id="home_hero_text" class="text-xl md:text-2xl text-slate-300 font-serif italic max-w-2xl mx-auto mb-10">
+            <p data-cms-id="home_hero_text" class="text-xl md:text-2xl text-slate-300 font-serif italic max-w-2xl mx-auto mb-10 opacity-0 transition-opacity duration-700">
                 Dove la storia incontra il silenzio. Scopri il cuore verde dell'Italia.
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
@@ -160,8 +172,8 @@
         </div>
     </header>
 
-    <!-- FEATURED: IL CAMMINO DEL LAGO -->
-    <section class="relative py-24 bg-abyss overflow-hidden">
+    <!-- FEATURED: IL CAMMINO DEL LAGO (Inserted Here) -->
+    <section class="relative py-24 bg-abyss overflow-hidden border-b border-white/5">
         <!-- Background Elements -->
         <div data-cms-id="home_lago_bg" class="absolute inset-0 bg-cover bg-center opacity-10 pointer-events-none" style="background-image: url('https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2000');"></div>
         
@@ -175,9 +187,8 @@
                 <h2 class="text-5xl md:text-7xl font-display text-white mb-8">
                     IL CAMMINO <br/><span class="text-slate-600">DEL LAGO</span>
                 </h2>
-                <div data-cms-id="home_lago_desc" class="text-slate-400 text-lg leading-relaxed mb-10 font-light space-y-4">
+                <div data-cms-id="home_lago_desc" class="text-slate-400 text-lg leading-relaxed mb-10 font-light space-y-4 opacity-0 transition-opacity duration-700">
                     <p>Un anello di 80km che attraversa la storia geologica dell'Umbria. Dalla Foresta Fossile di Dunarobba ai borghi silenti di Sismano e Toscolano.</p>
-                    <p>Un viaggio per chi cerca non solo una meta, ma un nuovo modo di sentire il tempo.</p>
                 </div>
                 <a href="cammino.html" class="inline-flex items-center gap-3 text-white border-b border-neon pb-1 hover:text-neon transition-colors uppercase tracking-widest text-sm font-bold">
                     Esplora l'Itinerario <i class="fa-solid fa-arrow-right-long"></i>
@@ -204,13 +215,17 @@
                     <span class="text-gold text-xs font-bold uppercase tracking-[0.2em] mb-2 block">Live Culture</span>
                     <h2 class="text-4xl md:text-6xl font-display text-white">EVENTI</h2>
                 </div>
+                <!-- Desktop Arrows -->
                 <div class="hidden md:flex gap-2">
                     <button class="w-10 h-10 border border-white/10 rounded-full text-white hover:bg-white/10 flex items-center justify-center"><i class="fa-solid fa-arrow-left"></i></button>
                     <button class="w-10 h-10 border border-white/10 rounded-full text-white hover:bg-white/10 flex items-center justify-center"><i class="fa-solid fa-arrow-right"></i></button>
                 </div>
             </div>
 
-            <!-- EVENTS CONTAINER -->
+            <!-- EVENTS CONTAINER 
+                 Mobile: Overflow-x-auto + Snap
+                 Desktop: Grid Cols 4
+            -->
             <div id="events-container" class="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 hide-scrollbar md:grid md:grid-cols-4 md:gap-6 md:pb-0">
                 <!-- Skeleton Loader (Initially Visible) -->
                 <div class="min-w-[280px] snap-center aspect-[7/10] bg-white/5 rounded-lg skeleton relative overflow-hidden"></div>
@@ -221,7 +236,7 @@
 
             <!-- Load More -->
             <div id="load-more-container" class="mt-12 text-center hidden">
-                <button onclick="loadMoreEvents()" class="px-8 py-3 border border-white/10 text-slate-400 hover:text-white hover:border-white transition-all uppercase tracking-widest text-xs font-bold rounded-full">
+                <button onclick="window.loadMoreEvents()" class="px-8 py-3 border border-white/10 text-slate-400 hover:text-white hover:border-white transition-all uppercase tracking-widest text-xs font-bold rounded-full">
                     Mostra Tutta la Programmazione
                 </button>
             </div>
@@ -245,7 +260,7 @@
                     <div class="absolute bottom-0 left-0 p-8 md:p-12">
                         <span class="text-neon text-xs font-bold uppercase tracking-widest mb-2 block">Meraviglia Unica</span>
                         <h3 data-cms-id="borgo_dunarobba_title" class="text-4xl md:text-5xl font-display text-white mb-4">DUNAROBBA</h3>
-                        <p data-cms-id="borgo_dunarobba_desc" class="text-slate-300 line-clamp-2 max-w-md text-sm font-light">Foresta Fossile di 3 milioni di anni.</p>
+                        <p data-cms-id="borgo_dunarobba_desc" class="text-slate-300 line-clamp-2 max-w-md text-sm font-light opacity-0 transition-opacity duration-700">Foresta Fossile di 3 milioni di anni.</p>
                     </div>
                 </div>
 
@@ -280,7 +295,7 @@
         </div>
     </section>
 
-    <!-- HOSPITALITY -->
+    <!-- HOSPITALITY (Restored Glass Cards with Direct Links) -->
     <section id="hospitality" class="py-24 bg-[#0d1221] border-t border-white/5">
         <div class="max-w-7xl mx-auto px-6">
             <div class="mb-12 flex items-center justify-between">
@@ -358,159 +373,58 @@
         </div>
     </footer>
 
-    <!-- LOGIC SCRIPT -->
-    <script type="module">
-        const EVENTS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=0&single=true&output=csv";
-        const CONTENT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=643581002&single=true&output=csv";
+    <!-- GEMINI CHAT WIDGET -->
+    <div class="fixed bottom-6 right-6 z-[60]">
+        <!-- Chat Toggle Button -->
+        <button id="chat-toggle" onclick="window.toggleChat()" class="flex items-center gap-2 bg-neon text-abyss px-5 py-3 rounded-full font-bold shadow-lg hover:bg-white transition-all transform hover:scale-105 neon-glow">
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
+            <span>Chiedi a Gemini</span>
+        </button>
 
-        let allEvents = [];
-        let pendingEvents = [];
-
-        // Helper: Convert Google Drive Links
-        function fixDriveLink(url) {
-            if (!url) return '';
-            if (url.includes('drive.google.com')) {
-                const idMatch = url.match(/\/d\/(.+?)\/|id=(.+?)&|id=(.+?)$/);
-                const id = idMatch ? (idMatch[1] || idMatch[2] || idMatch[3]) : null;
-                if (id) return `https://drive.google.com/thumbnail?id=${id}&sz=w1000`;
-            }
-            return url;
-        }
-
-        // Helper: CSV Parser
-        function parseCSV(text) {
-            const lines = text.split('\n').filter(l => l.trim() !== '');
-            return lines.map(line => {
-                const result = [];
-                let cell = '';
-                let inQuotes = false;
-                for (let i = 0; i < line.length; i++) {
-                    const char = line[i];
-                    if (char === '"') inQuotes = !inQuotes;
-                    else if (char === ',' && !inQuotes) {
-                        result.push(cell.trim());
-                        cell = '';
-                    } else cell += char;
-                }
-                result.push(cell.trim());
-                return result.map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"'));
-            });
-        }
-
-        // 1. CMS ENGINE
-        async function initCMS() {
-            try {
-                const response = await fetch(CONTENT_CSV_URL);
-                const text = await response.text();
-                const rows = parseCSV(text);
-                
-                rows.slice(1).forEach(row => {
-                    const id = row[0];
-                    const contentText = row[1];
-                    const imageUrl = row[2];
-                    
-                    if (id) {
-                        const elements = document.querySelectorAll(`[data-cms-id="${id}"]`);
-                        elements.forEach(el => {
-                            if (contentText) el.innerText = contentText;
-                            if (imageUrl) {
-                                const url = fixDriveLink(imageUrl);
-                                if (el.tagName === 'IMG') el.src = url;
-                                else el.style.backgroundImage = `url('${url}')`;
-                            }
-                        });
-                    }
-                });
-            } catch (e) { console.error("CMS Error", e); }
-        }
-
-        // 2. EVENTS ENGINE
-        async function initEvents() {
-            try {
-                const response = await fetch(EVENTS_CSV_URL);
-                const text = await response.text();
-                const rows = parseCSV(text).slice(1);
-                
-                const today = new Date();
-                today.setHours(0,0,0,0);
-
-                allEvents = rows.map((cols, idx) => ({
-                    id: idx,
-                    date: cols[0],
-                    time: cols[1],
-                    title: cols[2],
-                    location: cols[5],
-                    category: cols[6],
-                    img: fixDriveLink(cols[7]) || 'https://loremflickr.com/600/800/music'
-                })).filter(e => {
-                    const d = new Date(e.date);
-                    return !isNaN(d) && d >= today;
-                }).sort((a,b) => new Date(a.date) - new Date(b.date));
-
-                renderEvents(allEvents.slice(0, 4));
-                pendingEvents = allEvents.slice(4);
-
-                if (pendingEvents.length > 0) {
-                    document.getElementById('load-more-container').classList.remove('hidden');
-                } else {
-                     document.getElementById('load-more-container').classList.add('hidden');
-                }
-
-            } catch (e) { 
-                console.error("Events Error", e);
-                document.getElementById('events-container').innerHTML = `<p class="text-slate-500 p-4">Impossibile caricare gli eventi al momento.</p>`;
-            }
-        }
-
-        function renderEventCard(e) {
-            const d = new Date(e.date);
-            const day = d.getDate();
-            const month = d.toLocaleString('it-IT', { month: 'short' }).toUpperCase();
+        <!-- Chat Window -->
+        <div id="chat-window" class="hidden absolute bottom-16 right-0 w-80 md:w-96 bg-abyss border border-white/10 rounded-2xl shadow-2xl overflow-hidden glass-panel flex flex-col h-[500px] animate-in slide-in-from-bottom-5">
+            <div class="bg-white/5 p-4 border-b border-white/10 flex justify-between items-center">
+                <div class="flex items-center gap-2 text-white">
+                    <i data-lucide="bot" class="text-neon"></i>
+                    <span class="font-bold text-sm">Concierge Virtuale</span>
+                </div>
+                <button onclick="window.toggleChat()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
             
-            return `
-                <div class="min-w-[280px] snap-center relative aspect-[7/10] bg-abyss rounded-lg overflow-hidden group cursor-pointer border border-white/5 hover:border-neon/50 transition-all duration-300">
-                    <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style="background-image: url('${e.img}')"></div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-abyss via-abyss/40 to-transparent"></div>
-                    
-                    <div class="absolute top-4 right-4 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-white border border-white/10">
-                        ${e.category}
-                    </div>
-
-                    <div class="absolute bottom-0 left-0 p-6 w-full">
-                        <div class="flex items-end gap-4 mb-2">
-                            <div class="text-neon font-display text-5xl leading-none">${day}</div>
-                            <div class="text-slate-400 font-bold text-xs uppercase tracking-widest mb-1 border-l border-slate-600 pl-2">${month}</div>
-                        </div>
-                        <h3 class="text-xl font-display text-white leading-tight mb-2 group-hover:text-neon transition-colors line-clamp-2">${e.title}</h3>
-                        <p class="text-slate-400 text-xs flex items-center gap-2">
-                            <i class="fa-solid fa-location-dot"></i> ${e.location}
-                        </p>
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4">
+                <!-- Default Message -->
+                <div class="flex justify-start">
+                    <div class="bg-white/10 text-slate-200 p-3 rounded-2xl rounded-bl-none text-sm border border-white/5">
+                        Ciao! Sono l'intelligenza artificiale di Visit Avigliano. Posso aiutarti a trovare eventi o info sul territorio. Chiedimi pure!
                     </div>
                 </div>
-            `;
-        }
+            </div>
 
-        function renderEvents(list) {
-            const container = document.getElementById('events-container');
-            // Clear skeletons only on first render
-            if (container.querySelector('.skeleton')) container.innerHTML = '';
-            
-            list.forEach(e => {
-                container.insertAdjacentHTML('beforeend', renderEventCard(e));
-            });
-        }
+            <div class="p-4 border-t border-white/10 bg-black/20">
+                <div class="flex gap-2">
+                    <input id="chat-input" type="text" placeholder="Scrivi qui..." class="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-neon outline-none" onkeydown="if(event.key === 'Enter') window.sendChatMessage()">
+                    <button onclick="window.sendChatMessage()" class="bg-neon text-abyss p-2 rounded-lg hover:bg-white transition-colors"><i data-lucide="send" class="w-4 h-4"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        window.loadMoreEvents = () => {
-            renderEvents(pendingEvents);
-            document.getElementById('load-more-container').style.display = 'none';
-        }
-
-        // Init
-        document.addEventListener('DOMContentLoaded', () => {
-            initCMS();
-            initEvents();
-        });
-
+    <!-- MAIN SCRIPT -->
+    <script type="module" src="script.js"></script>
+    <script>
+        // Inline Mobile Menu Toggle (fallback)
+        window.toggleMobileMenu = () => {
+            const menu = document.getElementById('mobile-menu-overlay');
+            if (menu) {
+                if(menu.classList.contains('hidden')) {
+                    menu.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    menu.classList.add('hidden');
+                    document.body.style.overflow = '';
+                }
+            }
+        };
     </script>
 </body>
 </html>

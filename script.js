@@ -39,17 +39,33 @@ const MONTHS = [
     "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"
 ];
 
+// Dati statici per il configuratore Cammino
+const CAMMINO_STAGES = {
+    "3": [
+        { title: "Tappa 1: Avigliano - Sismano", km: "15 km", diff: "+450m", desc: "Partenza dal borgo, attraversando i boschi fino al castello di Sismano." },
+        { title: "Tappa 2: Sismano - Dunarobba", km: "22 km", diff: "+600m", desc: "Passaggio panoramico e arrivo alla Foresta Fossile." },
+        { title: "Tappa 3: Dunarobba - Avigliano", km: "18 km", diff: "+350m", desc: "Rientro ad anello passando per Santa Restituta e la Grotta Bella." }
+    ],
+    "2": [
+        { title: "Tappa 1: Avigliano - Dunarobba (Via Lunga)", km: "35 km", diff: "+1100m", desc: "Una sfida intensa che unisce le prime due tappe classiche." },
+        { title: "Tappa 2: Dunarobba - Avigliano", km: "25 km", diff: "+600m", desc: "Rientro panoramico attraverso i crinali." }
+    ],
+    "4": [
+        { title: "Tappa 1: Avigliano - Toscolano", km: "12 km", diff: "+300m", desc: "Inizio dolce verso il borgo circolare." },
+        { title: "Tappa 2: Toscolano - Sismano", km: "14 km", diff: "+400m", desc: "Attraverso le colline e i vigneti." },
+        { title: "Tappa 3: Sismano - Dunarobba", km: "15 km", diff: "+350m", desc: "Visita alla Foresta Fossile." },
+        { title: "Tappa 4: Dunarobba - Avigliano", km: "14 km", diff: "+250m", desc: "Rientro rilassante." }
+    ]
+};
+
 // --- STATE ---
 let events = [];
+let cmsData = {}; // Store CMS data globally to access full descriptions later
 let chatHistory = [{ role: 'bot', text: "Ciao! Sono il tuo assistente virtuale per Avigliano Umbro. Cerchi un concerto o un evento teatrale?" }];
 let filters = { search: '', month: 'Tutti i mesi', category: 'Tutte le categorie', location: 'Tutti i luoghi' };
 
 // --- HELPER FUNCTIONS ---
 
-/**
- * ROBUST GOOGLE DRIVE IMAGE FORMATTER
- * Detects Drive links and converts them to high-res thumbnails.
- */
 function formatImageUrl(url) {
     if (!url) return ''; 
     if (url.includes('drive.google.com')) {
@@ -62,9 +78,6 @@ function formatImageUrl(url) {
     return url;
 }
 
-/**
- * Simple CSV Line Parser
- */
 function parseCSVLine(text) {
     const result = [];
     let cell = '';
@@ -85,11 +98,18 @@ function parseCSVLine(text) {
 
 window.toggleMobileMenu = () => {
     const menu = document.getElementById('mobile-menu-overlay');
-    menu.classList.toggle('hidden');
+    if(menu) menu.classList.toggle('hidden');
 };
 
 window.scrollToEvents = () => {
-    document.getElementById('eventi-section').scrollIntoView({ behavior: 'smooth' });
+    // Check if we are on index.html
+    const eventsSection = document.getElementById('eventi-section');
+    if (eventsSection) {
+        eventsSection.scrollIntoView({ behavior: 'smooth' });
+    } else {
+        // We are on another page, redirect home
+        window.location.href = '/#eventi-section';
+    }
 };
 
 window.toggleChat = () => {
@@ -112,14 +132,50 @@ window.toggleChat = () => {
 
 window.resetFilters = () => {
     filters = { search: '', month: 'Tutti i mesi', category: 'Tutte le categorie', location: 'Tutti i luoghi' };
-    document.getElementById('search-input').value = '';
+    const searchInput = document.getElementById('search-input');
+    if(searchInput) searchInput.value = '';
     document.getElementById('filter-month').value = 'Tutti i mesi';
     document.getElementById('filter-category').value = 'Tutte le categorie';
     document.getElementById('filter-location').value = 'Tutti i luoghi';
     renderEvents();
 };
 
-// --- MODAL LOGIC ---
+window.updateCamminoTimeline = () => {
+    const container = document.getElementById('cammino-timeline');
+    if (!container) return; // Not on cammino page
+
+    const durationInput = document.querySelector('input[name="duration"]:checked');
+    const modeInput = document.querySelector('input[name="mode"]:checked');
+    
+    const duration = durationInput ? durationInput.value : "3";
+    const mode = modeInput ? modeInput.value : "foot";
+
+    const stages = CAMMINO_STAGES[duration] || CAMMINO_STAGES["3"];
+    
+    container.innerHTML = '';
+
+    stages.forEach((stage, index) => {
+        const isLast = index === stages.length - 1;
+        const html = `
+            <div class="relative pl-8 pb-10 ${isLast ? '' : 'border-l-2 border-emerald-200'} ml-2 fade-in" style="animation-delay: ${index * 0.1}s">
+                <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-emerald-500 border-4 border-white shadow-sm"></div>
+                
+                <h4 class="text-xl font-serif font-bold text-stone-900 mb-1">${stage.title}</h4>
+                <div class="flex items-center gap-4 text-xs font-bold text-emerald-700 uppercase tracking-wider mb-3">
+                    <span class="bg-emerald-50 px-2 py-1 rounded">${stage.km}</span>
+                    <span class="bg-emerald-50 px-2 py-1 rounded">${stage.diff}</span>
+                    ${mode === 'bike' ? '<span class="bg-emerald-50 px-2 py-1 rounded"><i data-lucide="bike" class="w-3 h-3 inline"></i> Ciclabile al 90%</span>' : ''}
+                </div>
+                <p class="text-stone-600 text-sm leading-relaxed">${stage.desc}</p>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', html);
+    });
+
+    if (window.lucide) window.lucide.createIcons();
+};
+
+// --- MODAL LOGIC (EVENTS) ---
 
 window.openModal = (eventId) => {
     const event = events.find(e => e.id === eventId);
@@ -127,13 +183,14 @@ window.openModal = (eventId) => {
 
     const modal = document.getElementById('event-modal');
     
-    // Populate Data
+    // Switch to "Event Mode" (show date/time fields)
+    document.getElementById('modal-event-details').classList.remove('hidden');
+
     document.getElementById('modal-img').src = event.imageUrl;
     document.getElementById('modal-category').innerText = event.category;
     document.getElementById('modal-title').innerText = event.title;
     document.getElementById('modal-subtitle').innerText = event.subtitle || '';
     
-    // Date formatting
     const dateObj = new Date(event.date);
     const fullDate = dateObj.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     document.getElementById('modal-date').innerText = fullDate;
@@ -142,7 +199,6 @@ window.openModal = (eventId) => {
     document.getElementById('modal-location').innerText = event.location;
     document.getElementById('modal-desc').innerText = event.description;
 
-    // Organizer
     const orgContainer = document.getElementById('modal-organizer-container');
     if (event.organizer) {
         document.getElementById('modal-organizer').innerText = `A cura di: ${event.organizer}`;
@@ -151,7 +207,40 @@ window.openModal = (eventId) => {
         orgContainer.classList.add('hidden');
     }
 
-    // Show Modal
+    modal.classList.remove('hidden');
+};
+
+// --- MODAL LOGIC (CMS CONTENT: BORGHI / NATURA) ---
+window.openContentModal = (baseId) => {
+    const modal = document.getElementById('event-modal');
+    
+    // Switch to "Content Mode" (hide date/time fields)
+    const detailsBlock = document.getElementById('modal-event-details');
+    if(detailsBlock) detailsBlock.classList.add('hidden');
+
+    // Retrieve data from global cmsData or fallback to DOM
+    // For title/img we can grab from DOM to be fast, but for Description FULL we need cmsData
+    
+    // 1. Image
+    const imgEl = document.querySelector(`[data-content-id="${baseId}-img"]`);
+    const imgSrc = imgEl ? (imgEl.tagName === 'IMG' ? imgEl.src : imgEl.style.backgroundImage.slice(5, -2)) : 'https://picsum.photos/800/600';
+    document.getElementById('modal-img').src = imgSrc;
+
+    // 2. Title
+    const titleEl = document.querySelector(`[data-content-id="${baseId}-titolo"]`);
+    document.getElementById('modal-title').innerText = titleEl ? titleEl.innerText : 'Titolo';
+
+    // 3. Category (Hardcoded or based on section)
+    document.getElementById('modal-category').innerText = baseId.includes('foresta') || baseId.includes('grotta') ? 'Natura' : 'Borgo';
+    document.getElementById('modal-subtitle').innerText = ''; // No subtitle for places
+
+    // 4. Description (The important part: fetch FULL text if available, else short)
+    // We look for a key like "dunarobba-full" in cmsData
+    const fullDesc = cmsData[`${baseId}-full`];
+    const shortDescEl = document.querySelector(`[data-content-id="${baseId}-desc"]`);
+    
+    document.getElementById('modal-desc').innerText = fullDesc || (shortDescEl ? shortDescEl.innerText : 'Descrizione non disponibile.');
+
     modal.classList.remove('hidden');
 };
 
@@ -170,7 +259,6 @@ window.sendChatMessage = async () => {
 
     try {
         const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-        // Simplified prompt context with current event titles
         const eventContext = events.map(e => `${e.title} (${e.date})`).join(", ");
         const systemPrompt = `Sei l'assistente turistico di Avigliano Umbro. Ecco gli eventi in programma: ${eventContext}. Rispondi brevemente.`;
         
@@ -189,7 +277,6 @@ window.sendChatMessage = async () => {
 
 // --- CORE LOGIC ---
 
-// 1. CMS CONTENT LOADER
 async function loadContentCMS() {
     if (!CONTENT_CSV_URL) return;
 
@@ -205,6 +292,11 @@ async function loadContentCMS() {
             const imageUrl = cols[2];    
 
             if (id) {
+                // Save to Global Data Store for Modals
+                if (contentText) cmsData[id] = contentText;
+                if (imageUrl) cmsData[`${id}-img`] = formatImageUrl(imageUrl);
+
+                // Update DOM elements if present
                 const elements = document.querySelectorAll(`[data-content-id="${id}"]`);
                 elements.forEach(element => {
                     if (contentText) {
@@ -223,7 +315,6 @@ async function loadContentCMS() {
     }
 }
 
-// 2. EVENTS LOADER (Strictly CSV)
 async function fetchEventsFromSheet() {
     if (!SHEET_CSV_URL) return [];
     try {
@@ -263,6 +354,7 @@ async function loadEvents() {
 
 function renderChatMessages() {
     const container = document.getElementById('chat-messages');
+    if(!container) return;
     container.innerHTML = '';
     chatHistory.forEach(msg => {
         const div = document.createElement('div');
@@ -279,6 +371,8 @@ function renderChatMessages() {
 
 function populateSelects() {
     const monthSelect = document.getElementById('filter-month');
+    if(!monthSelect) return;
+
     const catSelect = document.getElementById('filter-category');
     const locSelect = document.getElementById('filter-location');
 
@@ -304,11 +398,10 @@ function populateSelects() {
     });
 }
 
-/**
- * SMART RENDER: TOP 4 GRID + REST COMPACT
- */
 function renderEvents() {
     const mainGrid = document.getElementById('events-main-grid');
+    if(!mainGrid) return; // Not on home page
+
     const futureList = document.getElementById('events-future-list');
     const countLabel = document.getElementById('results-count');
     const emptyState = document.getElementById('empty-state');
@@ -321,20 +414,16 @@ function renderEvents() {
     mainGrid.innerHTML = '';
     futureList.innerHTML = ''; 
 
-    // Date Logic
     const today = new Date();
     today.setHours(0,0,0,0);
 
-    // Filter Logic
     let filtered = events.filter(e => {
-        // A. REMOVE PAST EVENTS
         const eventDate = new Date(e.date);
         const eventMidnight = new Date(eventDate);
         eventMidnight.setHours(0,0,0,0);
         
         if (eventMidnight < today) return false;
 
-        // B. STANDARD FILTERS
         const searchMatch = !filters.search || e.title.toLowerCase().includes(filters.search.toLowerCase()) || e.description.toLowerCase().includes(filters.search.toLowerCase());
         const catMatch = filters.category === EventCategory.ALL || e.category === filters.category;
         const locMatch = filters.location === EventLocation.ALL || e.location === filters.location;
@@ -357,11 +446,9 @@ function renderEvents() {
     } else {
         emptyState.classList.add('hidden');
 
-        // SPLIT: Top 4 vs Rest
         const mainEvents = filtered.slice(0, 4);
         const futureEvents = filtered.slice(4);
 
-        // RENDER GRID (Main 4)
         mainEvents.forEach(event => {
             const dateObj = new Date(event.date);
             const day = !isNaN(dateObj) ? dateObj.getDate() : "?";
@@ -399,9 +486,7 @@ function renderEvents() {
             mainGrid.insertAdjacentHTML('beforeend', cardHtml);
         });
 
-        // RENDER COMPACT LIST (Rest) - UPDATED FOR VERTICAL THUMBNAIL (7:10)
         if (futureEvents.length > 0) {
-            // Re-add header
             futureList.insertAdjacentHTML('beforeend', `
                  <div class="flex items-center gap-4 mb-6 mt-4">
                     <div class="h-px bg-stone-200 flex-1"></div>
@@ -416,7 +501,6 @@ function renderEvents() {
 
                 const compactHtml = `
                     <div class="flex items-center gap-4 bg-white p-4 rounded-lg border border-stone-200 shadow-sm hover:shadow-md transition-all group cursor-pointer hover:border-brand-200 btn-open-modal" data-id="${event.id}">
-                        <!-- VERTICAL THUMBNAIL (7:10 ratio) -->
                         <div class="w-20 aspect-[7/10] rounded-md overflow-hidden flex-shrink-0 bg-stone-100 shadow-sm border border-stone-100">
                             <img src="${event.imageUrl}" class="w-full h-full object-cover group-hover:scale-110 transition-transform" onerror="this.src='https://picsum.photos/100/100'">
                         </div>
@@ -437,7 +521,6 @@ function renderEvents() {
                 futureList.insertAdjacentHTML('beforeend', compactHtml);
             });
             
-            // Logic for Load More
             loadMoreContainer.classList.remove('hidden');
             loadMoreBtn.classList.remove('hidden');
             futureList.classList.add('hidden');
@@ -464,7 +547,21 @@ function renderEvents() {
 document.addEventListener('DOMContentLoaded', async () => {
     populateSelects();
     
-    // Add Event Delegation for Modals
+    // Configurator Init (if on Cammino page)
+    if (document.getElementById('cammino-timeline')) {
+        window.updateCamminoTimeline();
+        
+        const form = document.getElementById('cammino-form');
+        if(form) {
+             form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                alert('Grazie! La tua richiesta per il Cammino è stata inviata. Ti contatteremo a breve.');
+                form.reset();
+            });
+        }
+    }
+
+    // Modal Events
     document.addEventListener('click', (e) => {
         const trigger = e.target.closest('.btn-open-modal');
         if (trigger) {
@@ -482,19 +579,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderEvents();
     renderChatMessages();
     
-    ['search-input', 'filter-month', 'filter-category', 'filter-location'].forEach(id => {
-        document.getElementById(id).addEventListener(id === 'search-input' ? 'input' : 'change', (e) => {
-            const key = id.replace('filter-', '').replace('-input', '');
-            filters[key] = e.target.value;
-            renderEvents();
+    // Filters (Only on Home)
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        ['search-input', 'filter-month', 'filter-category', 'filter-location'].forEach(id => {
+            document.getElementById(id).addEventListener(id === 'search-input' ? 'input' : 'change', (e) => {
+                const key = id.replace('filter-', '').replace('-input', '');
+                filters[key] = e.target.value;
+                renderEvents();
+            });
         });
-    });
-
-    document.getElementById('contact-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        alert('Grazie per averci contattato!');
-        document.getElementById('contact-form').reset();
-    });
+    }
 
     if (window.lucide) window.lucide.createIcons();
 });

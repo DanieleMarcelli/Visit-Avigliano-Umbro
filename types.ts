@@ -37,3 +37,24 @@ export interface FilterState {
   category: EventCategory | string;
   location: EventLocation | string;
 }
+
+export interface HeaderContent {
+  logoUrl: string;
+  title: string;
+  subtitle: string;
+  navLake: string;
+  navVillages: string;
+  navEvents: string;
+  navTrail: string;
+  shareLabel: string;
+  languageLabel: string;
+}
+
+export interface HeroContent {
+  backgroundUrl: string;
+  eyebrow: string;
+  title: string;
+  description: string;
+  primaryCta: string;
+  secondaryCta: string;
+}

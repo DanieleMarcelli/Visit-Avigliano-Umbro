@@ -83,6 +83,10 @@ async function loadContentCMS() {
                         element.tagName === 'IMG' ? element.src = formattedUrl : element.style.backgroundImage = `url('${formattedUrl}')`;
                     }
                     element.classList.remove('opacity-0');
+                    // If it's the hero opacity animation, trigger it
+                    if(element.classList.contains('animate-fade-in-up')) {
+                        element.style.opacity = '1';
+                    }
                 });
             }
         });
@@ -98,6 +102,7 @@ async function fetchEventsFromSheet() {
         
         return rows.slice(1).map((row, index) => {
             const cols = parseCSVLine(row); 
+            // CSV Columns based on typical structure: Date, Time, Title, Subtitle, Desc, Location, Category, Image
             return {
                 id: `evt-${index}`,
                 date: cols[0],
@@ -108,26 +113,82 @@ async function fetchEventsFromSheet() {
                 imageUrl: formatImageUrl(cols[7]) || 'https://picsum.photos/800/600',
             };
         });
-    } catch (error) { return []; }
+    } catch (error) { console.error(error); return []; }
+}
+
+// --- RENDERING ---
+
+function renderEventCard(e) {
+    const d = new Date(e.date);
+    const day = !isNaN(d) ? d.getDate() : "?";
+    const month = !isNaN(d) ? d.toLocaleString('it-IT', { month: 'short' }).toUpperCase() : "";
+
+    return `
+        <div class="min-w-[280px] snap-center relative aspect-[7/10] bg-deep-900 rounded-2xl overflow-hidden group cursor-pointer border border-white/5 hover:border-neon-400/50 transition-all duration-300">
+            <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style="background-image: url('${e.imageUrl}')"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-deep-950 via-deep-950/40 to-transparent"></div>
+            
+            <div class="absolute top-4 right-4 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-white border border-white/10">
+                ${e.category}
+            </div>
+
+            <div class="absolute bottom-0 left-0 p-6 w-full">
+                <div class="flex items-end gap-4 mb-2">
+                    <div class="text-neon-400 font-serif text-5xl leading-none font-bold">${day}</div>
+                    <div class="text-slate-400 font-bold text-xs uppercase tracking-widest mb-1 border-l border-slate-600 pl-2">${month}</div>
+                </div>
+                <h3 class="text-xl font-serif text-white leading-tight mb-2 group-hover:text-neon-400 transition-colors line-clamp-2">${e.title}</h3>
+                <p class="text-slate-400 text-xs flex items-center gap-2">
+                    <i data-lucide="map-pin" class="w-3 h-3"></i> ${e.location}
+                </p>
+            </div>
+        </div>
+    `;
+}
+
+function renderCompactEvent(e) {
+    const d = new Date(e.date);
+    const dateStr = !isNaN(d) ? d.toLocaleDateString('it-IT', { day: 'numeric', month: 'long' }) : e.date;
+
+    return `
+        <div class="flex gap-4 p-4 bg-white/5 border border-white/5 rounded-xl hover:bg-white/10 transition-colors cursor-pointer group">
+            <div class="w-16 h-20 rounded-lg bg-deep-900 overflow-hidden shrink-0">
+                <img src="${e.imageUrl}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+            </div>
+            <div class="flex flex-col justify-center">
+                <span class="text-neon-400 text-xs font-bold uppercase tracking-widest mb-1">${dateStr}</span>
+                <h4 class="text-white font-serif text-lg leading-tight group-hover:text-gold-400 transition-colors">${e.title}</h4>
+                <span class="text-slate-500 text-xs mt-1 flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> ${e.location}</span>
+            </div>
+        </div>
+    `;
 }
 
 // --- GLOBAL EXPORTS ---
 
-window.loadMoreEvents = () => {
-    const container = document.getElementById('events-container');
+window.showAllEvents = () => {
+    const listContainer = document.getElementById('events-hidden-list');
     const btnContainer = document.getElementById('load-more-container');
     
+    listContainer.innerHTML = '';
     pendingEvents.forEach(e => {
-        container.insertAdjacentHTML('beforeend', renderEventCard(e));
+        listContainer.insertAdjacentHTML('beforeend', renderCompactEvent(e));
     });
     
-    if (window.lucide) window.lucide.createIcons();
+    listContainer.classList.remove('hidden');
     btnContainer.style.display = 'none';
+    if (window.lucide) window.lucide.createIcons();
 };
 
 window.toggleChat = () => {
-    const win = document.getElementById('chat-window');
+    const win = document.getElementById('gemini-chat');
     if(win) win.classList.toggle('hidden');
+};
+
+window.toggleMobileMenu = () => {
+    const menu = document.getElementById('mobile-menu-overlay');
+    if (menu) menu.classList.toggle('hidden');
+    document.body.classList.toggle('overflow-hidden');
 };
 
 window.updateCamminoTimeline = () => {
@@ -143,11 +204,11 @@ window.updateCamminoTimeline = () => {
         const isLast = index === stages.length - 1;
         const html = `
             <div class="relative pl-8 pb-10 ${isLast ? '' : 'border-l-2 border-white/10'} ml-2 fade-in" style="animation-delay: ${index * 0.1}s">
-                <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-neon border-4 border-abyss shadow-md"></div>
+                <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-neon-400 border-4 border-deep-900 shadow-md"></div>
                 <h4 class="text-xl font-serif font-bold text-white mb-1">${stage.title}</h4>
-                <div class="flex items-center gap-4 text-xs font-bold text-neon uppercase tracking-wider mb-3">
-                    <span class="bg-neon/10 border border-neon/20 px-2 py-1 rounded">${stage.km}</span>
-                    <span class="bg-neon/10 border border-neon/20 px-2 py-1 rounded">${stage.diff}</span>
+                <div class="flex items-center gap-4 text-xs font-bold text-neon-400 uppercase tracking-wider mb-3">
+                    <span class="bg-neon-400/10 border border-neon-400/20 px-2 py-1 rounded">${stage.km}</span>
+                    <span class="bg-neon-400/10 border border-neon-400/20 px-2 py-1 rounded">${stage.diff}</span>
                 </div>
                 <p class="text-slate-400 text-sm leading-relaxed">${stage.desc}</p>
             </div>
@@ -155,34 +216,6 @@ window.updateCamminoTimeline = () => {
         container.insertAdjacentHTML('beforeend', html);
     });
 };
-
-function renderEventCard(e) {
-    const d = new Date(e.date);
-    const day = !isNaN(d) ? d.getDate() : "?";
-    const month = !isNaN(d) ? d.toLocaleString('it-IT', { month: 'short' }).toUpperCase() : "";
-
-    return `
-        <div class="min-w-[280px] snap-center relative aspect-[7/10] bg-abyss rounded-lg overflow-hidden group cursor-pointer border border-white/5 hover:border-neon/50 transition-all duration-300">
-            <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style="background-image: url('${e.imageUrl}')"></div>
-            <div class="absolute inset-0 bg-gradient-to-t from-abyss via-abyss/40 to-transparent"></div>
-            
-            <div class="absolute top-4 right-4 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-white border border-white/10">
-                ${e.category}
-            </div>
-
-            <div class="absolute bottom-0 left-0 p-6 w-full">
-                <div class="flex items-end gap-4 mb-2">
-                    <div class="text-neon font-display text-5xl leading-none">${day}</div>
-                    <div class="text-slate-400 font-bold text-xs uppercase tracking-widest mb-1 border-l border-slate-600 pl-2">${month}</div>
-                </div>
-                <h3 class="text-xl font-display text-white leading-tight mb-2 group-hover:text-neon transition-colors line-clamp-2">${e.title}</h3>
-                <p class="text-slate-400 text-xs flex items-center gap-2">
-                    <i class="fa-solid fa-location-dot"></i> ${e.location}
-                </p>
-            </div>
-        </div>
-    `;
-}
 
 // --- INIT ---
 
@@ -196,23 +229,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     const rawEvents = await fetchEventsFromSheet();
     const today = new Date(); today.setHours(0,0,0,0);
     
+    // Filter past events
     events = rawEvents.filter(e => {
+        // Simple date parsing assuming YYYY-MM-DD
         const d = new Date(e.date);
         return !isNaN(d) && d >= today;
     }).sort((a,b) => new Date(a.date) - new Date(b.date));
 
-    const container = document.getElementById('events-container');
-    if(container) {
+    // Render Events
+    const container = document.getElementById('events-main-grid');
+    if(container && events.length > 0) {
         container.innerHTML = ''; // Clear skeletons
+        
+        // Render Top 4
         events.slice(0, 4).forEach(e => {
             container.insertAdjacentHTML('beforeend', renderEventCard(e));
         });
+
+        // Handle Remaining Events
         pendingEvents = events.slice(4);
-        
         const btnContainer = document.getElementById('load-more-container');
+        
         if (pendingEvents.length > 0 && btnContainer) {
             btnContainer.classList.remove('hidden');
+        } else if (btnContainer) {
+            btnContainer.classList.add('hidden');
         }
+    } else if (container) {
+         container.innerHTML = '<div class="col-span-4 text-center text-slate-500 py-10">Nessun evento in programma al momento.</div>';
     }
     
     if (window.lucide) window.lucide.createIcons();

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="it" class="scroll-smooth">
 <head>
@@ -75,10 +74,10 @@
 {
   "imports": {
     "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
     "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0"
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0"
   }
 }
 </script>
@@ -90,9 +89,9 @@
         <button onclick="toggleMobileMenu()" class="absolute top-6 right-6 text-white p-2">
             <i data-lucide="x" class="w-8 h-8"></i>
         </button>
+        <a href="#eventi-section" onclick="toggleMobileMenu()" class="text-3xl font-serif text-white hover:text-gold-400 transition">Eventi</a>
         <a href="#lago" onclick="toggleMobileMenu()" class="text-3xl font-serif text-white hover:text-gold-400 transition">Il Lago</a>
         <a href="#territorio" onclick="toggleMobileMenu()" class="text-3xl font-serif text-white hover:text-gold-400 transition">Borghi</a>
-        <a href="#eventi-section" onclick="toggleMobileMenu()" class="text-3xl font-serif text-white hover:text-gold-400 transition">Eventi</a>
         <a href="#ospitalita" onclick="toggleMobileMenu()" class="text-3xl font-serif text-white hover:text-gold-400 transition">Ospitalità</a>
         <a href="cammino.html" class="px-8 py-3 rounded-full border border-gold-500 text-gold-400 text-xl font-bold uppercase hover:bg-gold-500 hover:text-white transition">Il Cammino</a>
     </div>
@@ -103,15 +102,16 @@
             <div class="flex justify-between items-center h-20">
                 <a href="index.html" class="flex items-center gap-3 group">
                     <div class="flex flex-col">
-                        <span class="text-[10px] uppercase tracking-[0.3em] text-gold-400 font-bold">Portale Turistico</span>
-                        <span class="text-xl font-serif text-white tracking-wide group-hover:text-gold-400 transition-colors">Visit Avigliano</span>
+                        <span data-content-id="nav_subtitle" class="text-[10px] uppercase tracking-[0.3em] text-gold-400 font-bold">Portale Turistico</span>
+                        <span data-content-id="nav_title" class="text-xl font-serif text-white tracking-wide group-hover:text-gold-400 transition-colors">Visit Avigliano</span>
                     </div>
                 </a>
 
                 <nav class="hidden lg:flex items-center gap-8">
+                    <a href="#eventi-section" class="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-white transition">Eventi</a>
                     <a href="#lago" class="text-xs font-bold uppercase tracking-widest text-gold-400 hover:text-white transition">Il Lago</a>
                     <a href="#territorio" class="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-white transition">Borghi</a>
-                    <a href="#eventi-section" class="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-white transition">Eventi</a>
+                    <a href="#ospitalita" class="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-white transition">Ospitalità</a>
                     <a href="cammino.html" class="px-6 py-2 rounded-full border border-gold-500/50 text-gold-400 text-xs font-bold uppercase hover:bg-gold-500 hover:text-white transition shadow-[0_0_15px_rgba(217,119,6,0.2)]">Il Cammino</a>
                 </nav>
 
@@ -131,7 +131,7 @@
         <div class="absolute inset-0 bg-gradient-to-t from-deep-950 via-deep-950/40 to-deep-950/60 z-10"></div>
 
         <div class="relative z-20 text-center px-4 max-w-5xl mx-auto mt-10">
-            <span data-content-id="home_hero_subtitle" class="block text-gold-400 text-xs md:text-sm font-bold tracking-[0.4em] uppercase mb-6 animate-fade-in-up">
+            <span data-content-id="home_hero_subtitle" class="block text-gold-400 text-xs md:text-sm font-bold tracking-[0.4em] uppercase mb-6 animate-fade-in-up opacity-0">
                 Umbria, Cuore Verde
             </span>
             <h1 data-content-id="home_hero_text" class="text-6xl md:text-8xl lg:text-9xl font-serif font-black text-white mb-8 tracking-tight leading-none drop-shadow-2xl animate-fade-in-up opacity-0" style="animation-delay: 0.2s">
@@ -144,14 +144,49 @@
             </div>
         </div>
         
-        <!-- Scroll Indicator -->
         <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-20 animate-bounce text-slate-500">
             <i data-lucide="chevron-down" class="w-6 h-6"></i>
         </div>
     </section>
 
-    <!-- SECTION: IL LAGO TIBERINO (Storytelling) -->
-    <section id="lago" class="relative py-32 border-y border-white/5 bg-deep-900 overflow-hidden">
+    <!-- EVENTS SECTION (Mobile Scroll / Desktop Grid) + HIDDEN COMPACT LIST -->
+    <section id="eventi-section" class="py-24 bg-deep-950 relative border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-6 mb-12 flex justify-between items-end">
+            <div>
+                <span class="text-gold-400 text-xs font-bold tracking-[0.2em] uppercase mb-2 block">Agenda Culturale</span>
+                <h2 class="text-4xl md:text-5xl font-serif text-white">Eventi in Programma</h2>
+            </div>
+            
+            <div class="hidden md:flex gap-2">
+                <button onclick="document.getElementById('events-main-grid').scrollBy({left: -300, behavior: 'smooth'})" class="p-3 rounded-full border border-white/10 hover:bg-white/10 text-white transition"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
+                <button onclick="document.getElementById('events-main-grid').scrollBy({left: 300, behavior: 'smooth'})" class="p-3 rounded-full border border-white/10 hover:bg-white/10 text-white transition"><i data-lucide="arrow-right" class="w-5 h-5"></i></button>
+            </div>
+        </div>
+
+        <!-- 1. MAIN GRID (Top 4 Events) -->
+        <div id="events-main-grid" class="flex md:grid md:grid-cols-4 gap-6 overflow-x-auto md:overflow-visible snap-x snap-mandatory hide-scroll pb-8 px-6 md:px-0">
+            <!-- Skeleton Loaders (Removed by JS) -->
+            <div class="snap-center shrink-0 min-w-[280px] md:min-w-0 w-[280px] md:w-auto aspect-poster bg-deep-900 rounded-2xl animate-pulse border border-white/5"></div>
+            <div class="snap-center shrink-0 min-w-[280px] md:min-w-0 w-[280px] md:w-auto aspect-poster bg-deep-900 rounded-2xl animate-pulse border border-white/5"></div>
+            <div class="snap-center shrink-0 min-w-[280px] md:min-w-0 w-[280px] md:w-auto aspect-poster bg-deep-900 rounded-2xl animate-pulse border border-white/5"></div>
+            <div class="snap-center shrink-0 min-w-[280px] md:min-w-0 w-[280px] md:w-auto aspect-poster bg-deep-900 rounded-2xl animate-pulse border border-white/5"></div>
+        </div>
+
+        <!-- 2. LOAD MORE BUTTON -->
+        <div id="load-more-container" class="text-center mt-4 hidden">
+            <button onclick="showAllEvents()" class="px-8 py-3 border border-white/20 rounded-full text-white hover:bg-white hover:text-black transition uppercase text-xs font-bold tracking-widest flex items-center gap-2 mx-auto">
+                Visualizza l'intero calendario <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            </button>
+        </div>
+
+        <!-- 3. COMPACT LIST (Future Events - Hidden by default) -->
+        <div id="events-hidden-list" class="hidden mt-12 space-y-4 px-6 md:px-0 max-w-4xl mx-auto animate-in fade-in slide-in-from-top-4 duration-500">
+            <!-- Populated by JS -->
+        </div>
+    </section>
+
+    <!-- SECTION: IL LAGO TIBERINO (Now below Events) -->
+    <section id="lago" class="relative py-32 bg-deep-900 overflow-hidden">
         <div data-content-id="home_lago_bg" class="absolute inset-0 opacity-10 bg-cover bg-center pointer-events-none" style="background-image: url('https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80');"></div>
         
         <div class="relative z-10 max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
@@ -160,9 +195,9 @@
                     <div class="h-[1px] w-12 bg-neon-400"></div>
                     <span class="text-neon-400 uppercase tracking-widest text-xs font-bold">L'Antico Oceano</span>
                 </div>
-                <h2 class="text-5xl md:text-6xl font-serif text-white mb-6 leading-tight">Il Segreto del <br><span class="italic text-slate-500">Lago Tiberino</span></h2>
+                <h2 data-content-id="home_lago_title" class="text-5xl md:text-6xl font-serif text-white mb-6 leading-tight">Il Segreto del <br><span class="italic text-slate-500">Lago Tiberino</span></h2>
                 <p data-content-id="home_lago_desc" class="text-lg text-slate-400 leading-relaxed font-light mb-8">
-                    Tre milioni di anni fa, queste valli erano un fondale marino. Oggi puoi camminare su conchiglie fossili e ammirare la Foresta Pietrificata di Dunarobba, testimone silenziosa di un'era geologica dimenticata. Un percorso ad anello di 80km ti aspetta.
+                    Tre milioni di anni fa, queste valli erano un antico bacino lacustre. Oggi puoi camminare su conchiglie fossili e ammirare la Foresta Pietrificata di Dunarobba, testimone silenziosa di un'era geologica dimenticata. Un percorso ad anello di 80km ti aspetta.
                 </p>
                 
                 <div class="grid grid-cols-2 gap-6 mb-8">
@@ -193,44 +228,13 @@
         </div>
     </section>
 
-    <!-- EVENTS SECTION (Mobile Scroll / Desktop Grid) -->
-    <section id="eventi-section" class="py-24 bg-deep-950 relative">
-        <div class="max-w-7xl mx-auto px-6 mb-12 flex justify-between items-end">
-            <div>
-                <span class="text-gold-400 text-xs font-bold tracking-[0.2em] uppercase mb-2 block">Agenda Culturale</span>
-                <h2 class="text-4xl md:text-5xl font-serif text-white">Eventi in Programma</h2>
-            </div>
-            
-            <!-- Desktop Navigation Arrows -->
-            <div class="hidden md:flex gap-2">
-                <button onclick="document.getElementById('events-main-grid').scrollBy({left: -300, behavior: 'smooth'})" class="p-3 rounded-full border border-white/10 hover:bg-white/10 text-white transition"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
-                <button onclick="document.getElementById('events-main-grid').scrollBy({left: 300, behavior: 'smooth'})" class="p-3 rounded-full border border-white/10 hover:bg-white/10 text-white transition"><i data-lucide="arrow-right" class="w-5 h-5"></i></button>
-            </div>
-        </div>
-
-        <!-- Events Container -->
-        <div id="events-main-grid" class="flex md:grid md:grid-cols-4 gap-6 overflow-x-auto md:overflow-visible snap-x snap-mandatory hide-scroll pb-8 px-6 md:px-0">
-            <!-- Skeleton Loaders -->
-            <div class="snap-center shrink-0 min-w-[280px] md:min-w-0 w-[280px] md:w-auto aspect-poster bg-deep-900 rounded-2xl animate-pulse border border-white/5"></div>
-            <div class="snap-center shrink-0 min-w-[280px] md:min-w-0 w-[280px] md:w-auto aspect-poster bg-deep-900 rounded-2xl animate-pulse border border-white/5"></div>
-            <div class="snap-center shrink-0 min-w-[280px] md:min-w-0 w-[280px] md:w-auto aspect-poster bg-deep-900 rounded-2xl animate-pulse border border-white/5"></div>
-            <div class="snap-center shrink-0 min-w-[280px] md:min-w-0 w-[280px] md:w-auto aspect-poster bg-deep-900 rounded-2xl animate-pulse border border-white/5"></div>
-        </div>
-
-        <div id="load-more-container" class="text-center mt-8 hidden">
-            <button onclick="showAllEvents()" class="px-8 py-3 border border-white/20 rounded-full text-white hover:bg-white hover:text-black transition uppercase text-xs font-bold tracking-widest">
-                Visualizza l'intero calendario
-            </button>
-        </div>
-    </section>
-
     <!-- TERRITORY BENTO GRID -->
-    <section id="territorio" class="py-24 bg-deep-900 px-6 border-t border-white/5">
+    <section id="territorio" class="py-24 bg-deep-950 px-6 border-t border-white/5">
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-16">
                 <span class="text-gold-400 text-xs font-bold tracking-[0.2em] uppercase mb-2 block">Il Territorio</span>
-                <h2 class="text-4xl md:text-6xl font-serif text-white mb-4">Borghi & Meraviglie</h2>
-                <p class="text-slate-400 max-w-2xl mx-auto">Quattro gemme incastonate nel paesaggio umbro, ognuna con un'anima antica e segreti da svelare.</p>
+                <h2 data-content-id="borghi_main_title" class="text-4xl md:text-6xl font-serif text-white mb-4">Borghi & Meraviglie</h2>
+                <p data-content-id="borghi_main_desc" class="text-slate-400 max-w-2xl mx-auto">Quattro gemme incastonate nel paesaggio umbro, ognuna con un'anima antica e segreti da svelare.</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-6 h-auto md:h-[800px]">
@@ -255,8 +259,8 @@
                      <img data-content-id="borgo_toscolano_img" src="https://images.unsplash.com/photo-1595841696677-6489ff3f8cd1?q=80&w=600" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110 grayscale group-hover:grayscale-0">
                     <div class="absolute inset-0 bg-black/50 group-hover:bg-black/30 transition-colors"></div>
                     <div class="absolute bottom-6 left-6">
-                        <h3 class="text-2xl font-serif text-white mb-1">Toscolano</h3>
-                        <p class="text-xs text-slate-400 uppercase tracking-widest">La Sentinella Circolare</p>
+                        <h3 data-content-id="borgo_toscolano_title" class="text-2xl font-serif text-white mb-1">Toscolano</h3>
+                        <p data-content-id="borgo_toscolano_desc" class="text-xs text-slate-400 uppercase tracking-widest">La Sentinella Circolare</p>
                     </div>
                 </div>
 
@@ -265,8 +269,8 @@
                     <img data-content-id="borgo_sismano_img" src="https://images.unsplash.com/photo-1533154683836-84ea7a0bc310?q=80&w=600" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110 grayscale group-hover:grayscale-0">
                     <div class="absolute inset-0 bg-black/50 group-hover:bg-black/30 transition-colors"></div>
                     <div class="absolute bottom-6 left-6">
-                        <h3 class="text-2xl font-serif text-white mb-1">Sismano</h3>
-                        <p class="text-xs text-slate-400 uppercase tracking-widest">Il Castello Medievale</p>
+                        <h3 data-content-id="borgo_sismano_title" class="text-2xl font-serif text-white mb-1">Sismano</h3>
+                        <p data-content-id="borgo_sismano_desc" class="text-xs text-slate-400 uppercase tracking-widest">Il Castello Medievale</p>
                     </div>
                 </div>
 
@@ -275,9 +279,9 @@
                      <img data-content-id="borgo_santa_img" src="https://images.unsplash.com/photo-1516934024742-b461fba47600?q=80&w=800" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110 grayscale group-hover:grayscale-0">
                     <div class="absolute inset-0 bg-gradient-to-r from-black/90 to-transparent"></div>
                     <div class="absolute bottom-0 left-0 p-8">
-                        <h3 class="text-3xl font-serif text-white mb-2">Santa Restituta</h3>
+                        <h3 data-content-id="borgo_santa_title" class="text-3xl font-serif text-white mb-2">Santa Restituta</h3>
                         <p class="text-gold-400 text-xs uppercase font-bold tracking-widest mb-2">La Grotta Bella</p>
-                        <p class="text-slate-400 text-sm max-w-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                        <p data-content-id="borgo_santa_desc" class="text-slate-400 text-sm max-w-xs opacity-0 group-hover:opacity-100 transition-opacity">
                             Tra castagneti secolari e grotte carsiche, un borgo dal fascino mistico.
                         </p>
                     </div>
@@ -287,52 +291,38 @@
         </div>
     </section>
 
-    <!-- HOSPITALITY -->
-    <section id="ospitalita" class="py-24 bg-deep-950 px-6 border-t border-white/5">
+    <!-- HOSPITALITY with IFRAMES -->
+    <section id="ospitalita" class="py-24 bg-deep-900 px-6 border-t border-white/5">
         <div class="max-w-7xl mx-auto">
             <h2 class="text-4xl font-serif text-white mb-16 text-center">Ospitalità</h2>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 
-                <div class="glass p-8 rounded-2xl group hover:bg-white/5 transition-all relative overflow-hidden">
-                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <i data-lucide="utensils" class="w-24 h-24 text-white"></i>
+                <!-- Mangiare -->
+                <div class="glass p-6 rounded-2xl group hover:bg-white/5 transition-all">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="p-3 bg-brand-900 rounded-full text-gold-400"><i data-lucide="utensils" class="w-6 h-6"></i></div>
+                        <div>
+                            <h3 class="text-2xl font-serif text-white">Mangiare</h3>
+                            <p class="text-slate-400 text-sm">Sapori autentici del territorio</p>
+                        </div>
                     </div>
-                    <div class="relative z-10">
-                        <i data-lucide="utensils" class="w-8 h-8 text-gold-400 mb-6"></i>
-                        <h3 class="text-2xl font-serif text-white mb-2">Mangiare</h3>
-                        <p class="text-slate-400 text-sm mb-8 leading-relaxed">Scopri le trattorie tipiche dove gustare la fava cottòra, l'olio EVO e i vini locali.</p>
-                        <a href="https://www.google.com/maps/search/Ristoranti+Avigliano+Umbro" target="_blank" class="text-xs font-bold uppercase tracking-widest text-white flex items-center gap-2 group-hover:text-gold-400 transition-colors">
-                            Vedi Mappa <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <div class="glass p-8 rounded-2xl group hover:bg-white/5 transition-all relative overflow-hidden">
-                     <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <i data-lucide="bed-double" class="w-24 h-24 text-white"></i>
-                    </div>
-                    <div class="relative z-10">
-                        <i data-lucide="bed-double" class="w-8 h-8 text-gold-400 mb-6"></i>
-                        <h3 class="text-2xl font-serif text-white mb-2">Dormire</h3>
-                        <p class="text-slate-400 text-sm mb-8 leading-relaxed">Agriturismi immersi nel verde, casali storici e relax assoluto nella natura.</p>
-                        <a href="https://www.google.com/maps/search/Agriturismo+Hotel+Avigliano+Umbro" target="_blank" class="text-xs font-bold uppercase tracking-widest text-white flex items-center gap-2 group-hover:text-gold-400 transition-colors">
-                            Vedi Mappa <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
-                        </a>
+                    <div class="w-full h-64 rounded-xl overflow-hidden border border-white/10 bg-black">
+                         <iframe src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d11749.19794562495!2d12.4283944!3d42.6416667!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1sRistoranti%20Avigliano%20Umbro!5e0!3m2!1sit!2sit!4v1700000000000!5m2!1sit!2sit" width="100%" height="100%" style="border:0; filter: invert(90%) hue-rotate(180deg);" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                     </div>
                 </div>
 
-                <div class="glass p-8 rounded-2xl group hover:bg-white/5 transition-all relative overflow-hidden">
-                     <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <i data-lucide="compass" class="w-24 h-24 text-white"></i>
+                <!-- Dormire -->
+                <div class="glass p-6 rounded-2xl group hover:bg-white/5 transition-all">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="p-3 bg-brand-900 rounded-full text-gold-400"><i data-lucide="bed-double" class="w-6 h-6"></i></div>
+                        <div>
+                            <h3 class="text-2xl font-serif text-white">Dormire</h3>
+                            <p class="text-slate-400 text-sm">Relax tra natura e storia</p>
+                        </div>
                     </div>
-                    <div class="relative z-10">
-                        <i data-lucide="compass" class="w-8 h-8 text-gold-400 mb-6"></i>
-                        <h3 class="text-2xl font-serif text-white mb-2">Esperienze</h3>
-                        <p class="text-slate-400 text-sm mb-8 leading-relaxed">Trekking guidati, visite alla Foresta Fossile e percorsi in E-Bike.</p>
-                        <a href="cammino.html" class="text-xs font-bold uppercase tracking-widest text-white flex items-center gap-2 group-hover:text-gold-400 transition-colors">
-                            Scopri il Cammino <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                        </a>
+                    <div class="w-full h-64 rounded-xl overflow-hidden border border-white/10 bg-black">
+                         <iframe src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d11749.19794562495!2d12.4283944!3d42.6416667!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1sAgriturismo%20Hotel%20Avigliano%20Umbro!5e0!3m2!1sit!2sit!4v1700000000000!5m2!1sit!2sit" width="100%" height="100%" style="border:0; filter: invert(90%) hue-rotate(180deg);" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                     </div>
                 </div>
 

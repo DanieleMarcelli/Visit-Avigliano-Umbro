@@ -33,46 +33,29 @@
           extend: {
             colors: {
               deep: {
-                950: '#0a0f1c',
+                950: '#0a0f1c', // Darkest Night
                 900: '#111827',
                 800: '#1f2937',
               },
               gold: {
                 400: '#fbbf24',
                 500: '#d97706',
-                600: '#b45309',
               },
-              cyan: {
-                400: '#00f0ff',
+              neon: {
+                400: '#22d3ee',
+                500: '#06b6d4',
               }
             },
             fontFamily: {
               sans: ['DM Sans', 'sans-serif'],
               serif: ['Playfair Display', 'serif'],
             },
-            aspectRatio: {
-              'poster': '7 / 10',
-            },
-            animation: {
-              'fade-in-up': 'fadeInUp 1s ease-out forwards',
-              'float': 'float 6s ease-in-out infinite',
-            },
-            keyframes: {
-              fadeInUp: {
-                '0%': { opacity: '0', transform: 'translateY(20px)' },
-                '100%': { opacity: '1', transform: 'translateY(0)' },
-              },
-              float: {
-                '0%, 100%': { transform: 'translateY(0)' },
-                '50%': { transform: 'translateY(-8px)' },
-              }
-            }
           }
         }
       }
     </script>
     <style>
-      body { background-color: #0a0f1c; }
+      body { background-color: #0a0f1c; color: #e2e8f0; }
       .glass {
         background: rgba(255, 255, 255, 0.03);
         backdrop-filter: blur(10px);
@@ -89,7 +72,7 @@
       }
     </style>
 </head>
-<body class="min-h-screen flex flex-col antialiased bg-deep-950 text-slate-300 font-sans selection:bg-gold-500 selection:text-white overflow-x-hidden">
+<body class="min-h-screen flex flex-col antialiased selection:bg-neon-500 selection:text-white">
 
     <!-- NAVBAR (Consistent with Index) -->
     <nav class="fixed top-0 w-full z-50 transition-all duration-300 glass border-b-0">
@@ -116,23 +99,19 @@
     <main class="flex-grow pt-20">
         
         <!-- COMPACT HERO SECTION -->
-        <div class="relative h-[45vh] min-h-[340px] w-full overflow-hidden flex items-center justify-center bg-deep-900 border-b border-white/5">
-            <div
+        <div class="relative h-[40vh] min-h-[300px] w-full overflow-hidden flex items-center justify-center bg-deep-900 border-b border-white/5">
+            <div 
                 data-content-id="cammino-hero-bg"
-                class="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-[20s] hover:scale-105 opacity-70"
+                class="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-[20s] hover:scale-105 opacity-60" 
                 style="background-image: url('https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=1920&auto=format&fit=crop');"
             ></div>
-            <div class="absolute inset-0 bg-gradient-to-t from-deep-950 via-deep-950/60 to-transparent"></div>
-
-            <div class="relative z-10 text-center px-4 max-w-5xl mx-auto text-white space-y-4">
-                <span class="inline-flex items-center gap-2 py-1.5 px-5 border border-gold-400/40 bg-white/10 backdrop-blur-md text-gold-400 text-xs font-bold tracking-[0.2em] uppercase rounded-full">
-                    <i data-lucide="compass" class="w-4 h-4"></i> Itinerario ufficiale
+            <div class="absolute inset-0 bg-gradient-to-t from-deep-950 via-deep-950/40 to-transparent"></div>
+            
+            <div class="relative z-10 text-center px-4 max-w-4xl mx-auto text-white">
+                <span class="inline-flex items-center gap-2 py-1.5 px-4 border border-neon-400/30 bg-neon-400/10 backdrop-blur-md text-neon-400 text-xs font-bold tracking-[0.2em] uppercase rounded-full mb-6">
+                    <i data-lucide="compass" class="w-4 h-4"></i> Itinerario Ufficiale
                 </span>
-                <h1 data-content-id="cammino-hero-title" class="text-4xl md:text-6xl font-serif text-white drop-shadow-xl tracking-wide">Il Cammino del Lago</h1>
-                <p class="text-base md:text-lg text-slate-200 max-w-3xl mx-auto" data-content-id="cammino-hero-subtitle">Un anello tra borghi, geologia e spiritualità, pronto da percorrere con tappe curate.</p>
-                <div id="cammino-summary" class="hidden inline-flex items-center justify-center gap-3 text-sm font-bold uppercase tracking-[0.25em] text-white bg-white/10 border border-white/10 rounded-full px-5 py-2 mx-auto">
-                    <i data-lucide="map" class="w-4 h-4 text-gold-400"></i>
-                </div>
+                <h1 data-content-id="cammino-hero-title" class="text-4xl md:text-6xl font-serif text-white mb-4 drop-shadow-xl tracking-wide">Il Cammino del Lago</h1>
             </div>
         </div>
 
@@ -188,13 +167,15 @@
                              <div class="w-10 h-10 rounded-full bg-deep-800 border border-white/10 flex items-center justify-center text-gold-400 font-bold font-serif">2</div>
                              <h3 class="text-2xl font-serif text-white">Le Tappe</h3>
                         </div>
-
+                        
                         <div class="glass rounded-3xl p-8 border border-white/5 relative overflow-hidden">
-                             <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-gold-400 to-transparent opacity-30"></div>
-
-                             <div id="cammino-timeline" class="relative grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div class="flex items-center justify-center h-40 text-slate-500 gap-3 col-span-full">
-                                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-gold-400"></div>
+                             <!-- Decorative neon line -->
+                             <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-neon-400 to-transparent opacity-20"></div>
+                             
+                             <div id="cammino-timeline" class="relative">
+                                <!-- JS Injects Content Here -->
+                                <div class="flex items-center justify-center h-40 text-slate-500 gap-3">
+                                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-neon-400"></div>
                                     <span class="text-sm uppercase tracking-widest">Caricamento itinerario...</span>
                                 </div>
                             </div>
@@ -328,7 +309,7 @@
     </footer>
 
     <!-- Script Import -->
-    <script type="module" src="script.ts"></script>
+    <script type="module" src="script.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
              // Init Lucide

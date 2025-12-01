@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="it" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
@@ -20,11 +20,11 @@
                 extend: {
                     colors: {
                         brand: {
-                            dark: '#050b14', 
-                            navy: '#0f172a', 
-                            gold: '#d4af37', 
-                            cyan: '#06b6d4', 
-                            text: '#94a3b8', 
+                            dark: '#050b14', // Midnight Blue scuro (Sfondo principale)
+                            navy: '#0f172a', // Blu per le card
+                            gold: '#d4af37', // Oro per accenti e titoli
+                            cyan: '#06b6d4', // Ciano per elementi tech (GPS)
+                            text: '#94a3b8', // Grigio chiaro per i testi
                             white: '#f8fafc',
                         }
                     },
@@ -33,7 +33,12 @@
                         serif: ['Playfair Display', 'serif'],
                     },
                     backgroundImage: {
-                        'hero-gradient': 'linear-gradient(to right, #050b14 0%, #050b14 30%, rgba(5,11,20,0.6) 100%)',
+                        // Gradiente Hero: Sfumatura da colore solido (sx) a trasparente (dx) per leggere il testo sopra l'immagine
+                        'hero-overlay': 'linear-gradient(to right, #050b14 0%, #050b14 45%, rgba(5,11,20,0.2) 100%)',
+                        'card-gradient': 'linear-gradient(to top, rgba(5,11,20,0.95) 0%, rgba(5,11,20,0.1) 100%)'
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     }
                 }
             }
@@ -41,6 +46,7 @@
     </script>
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
+        /* Linea temporale verticale */
         .timeline-line {
             position: absolute;
             left: 11px;
@@ -50,26 +56,20 @@
             background-color: #334155; 
             z-index: 0;
         }
-        .step-circle {
-            z-index: 10;
-        }
+        /* Effetto bagliore per il bottone GPS */
         .gps-glow {
             box-shadow: 0 0 15px rgba(6, 182, 212, 0.3);
-        }
-        /* Overlay gradiente per le immagini delle card */
-        .card-image-overlay {
-            background: linear-gradient(to bottom, rgba(15, 23, 42, 0.2), rgba(15, 23, 42, 0.9));
         }
     </style>
 </head>
 <body class="bg-brand-dark text-brand-text font-sans flex flex-col min-h-screen selection:bg-brand-gold selection:text-brand-dark">
 
     <!-- HEADER -->
-    <header class="fixed top-0 left-0 right-0 z-50 bg-brand-dark/90 backdrop-blur-md border-b border-white/5 transition-all duration-300">
+    <header class="fixed top-0 left-0 right-0 z-50 bg-brand-dark/80 backdrop-blur-md border-b border-white/5 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <a href="index.html" class="flex items-center gap-3 group">
-                    <div class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-brand-gold overflow-hidden border border-white/10 group-hover:border-brand-gold transition-colors">
+                    <div class="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-brand-gold overflow-hidden border border-white/10 group-hover:border-brand-gold transition-colors">
                         <i data-lucide="mountain" class="w-5 h-5"></i>
                     </div>
                     <div class="flex flex-col">
@@ -94,17 +94,20 @@
 
     <!-- HERO SECTION -->
     <div class="relative min-h-[85vh] flex items-center pt-20 overflow-hidden">
-        <!-- Background Image -->
+        
+        <!-- Background Image & Gradient Overlay -->
         <div class="absolute inset-0 z-0">
-            <img src="https://images.unsplash.com/photo-1516972087570-5b7194f1c9c0?q=80&w=2070" 
-                 class="w-full h-full object-cover opacity-30 transform scale-105 motion-safe:animate-pulse-slow">
-            <div class="absolute inset-0 bg-hero-gradient"></div>
+            <!-- Immagine di sfondo (Paesaggio Umbro suggestivo) -->
+            <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070" 
+                 class="w-full h-full object-cover opacity-60"> <!-- Opacity aumentata leggermente -->
+            <!-- Overlay gradiente per sfumare l'immagine verso il nero a sinistra -->
+            <div class="absolute inset-0 bg-hero-overlay"></div>
         </div>
 
         <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             
-            <!-- Left Content -->
-            <div class="space-y-8">
+            <!-- Left Content (Testi e Titoli) -->
+            <div class="space-y-8 py-10">
                 <div class="flex items-center gap-4">
                     <div class="h-[1px] w-12 bg-brand-gold"></div>
                     <span class="text-brand-gold text-xs font-bold tracking-[0.2em] uppercase">Unicum Geologico</span>
@@ -112,15 +115,15 @@
                 
                 <h1 class="text-5xl md:text-7xl font-serif font-bold text-white leading-[1.1]">
                     Il Segreto del <br>
-                    <span class="italic text-brand-gold/90">Lago Tiberino</span>
+                    <span class="italic text-brand-gold">Lago Tiberino</span>
                 </h1>
                 
                 <p class="text-lg text-brand-text font-light max-w-xl leading-relaxed">
                     Tre milioni di anni fa, queste valli erano un antico bacino lacustre. Oggi puoi camminare su conchiglie fossili e ammirare la Foresta Pietrificata di Dunarobba, testimone silenziosa di un'era geologica dimenticata.
                 </p>
 
-                <!-- Stats Row -->
-                <div class="grid grid-cols-3 gap-8 pt-8 border-t border-white/10">
+                <!-- Stats Row (Integrata nel design) -->
+                <div class="grid grid-cols-3 gap-8 pt-10 border-t border-white/10">
                     <div>
                         <div class="flex items-center gap-2 mb-1">
                             <i data-lucide="footprints" class="w-4 h-4 text-brand-gold"></i>
@@ -145,24 +148,26 @@
                 </div>
             </div>
 
-            <!-- Right Visual (Map Silhouette) -->
-            <div class="relative hidden lg:flex justify-center items-center h-full min-h-[500px]">
-                <img src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?q=80&w=800" class="absolute inset-0 w-full h-full object-cover rounded-3xl opacity-10 mix-blend-overlay">
+            <!-- Right Visual (Map Silhouette & GPS Button) -->
+            <div class="relative hidden lg:flex justify-end items-center h-full min-h-[500px]">
                 
-                <!-- Abstract Map Representation -->
-                <svg viewBox="0 0 200 400" class="w-full max-w-sm h-auto relative z-10 drop-shadow-2xl opacity-90" style="filter: drop-shadow(0 0 25px rgba(212, 175, 55, 0.15));">
-                    <path d="M60,20 C70,10 90,5 100,20 C110,35 120,80 110,100 C100,120 90,140 120,160 C140,175 160,200 150,230 C140,260 160,300 150,350 C140,380 120,390 100,380 C80,370 60,350 70,300 C80,250 50,220 40,200 C30,180 50,150 70,120 C80,90 50,40 60,20 Z" 
-                          fill="none" stroke="#d4af37" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                     <circle cx="90" cy="320" r="3" fill="#06b6d4" class="animate-pulse">
-                         <animate attributeName="r" values="3;6;3" dur="2s" repeatCount="indefinite" />
+                <!-- Silhouette Astratta del Lago/Percorso -->
+                <svg viewBox="0 0 200 400" class="w-full max-w-xs h-auto relative z-10 drop-shadow-2xl opacity-80" style="filter: drop-shadow(0 0 20px rgba(6, 182, 212, 0.2));">
+                     <!-- Tracciato stilizzato del percorso ad anello -->
+                    <path d="M60,20 C80,10 110,5 120,30 C130,55 110,100 100,120 C90,140 80,160 110,190 C130,210 160,240 150,280 C140,320 120,380 90,380 C60,380 40,350 50,300 C60,250 30,220 20,180 C10,140 40,80 60,20 Z" 
+                          fill="none" stroke="#06b6d4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    
+                    <!-- Pulsante Località Animato -->
+                     <circle cx="90" cy="350" r="4" fill="#ffffff" class="animate-pulse">
+                         <animate attributeName="r" values="4;8;4" dur="2s" repeatCount="indefinite" />
                          <animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite" />
                     </circle>
                 </svg>
 
-                <div class="absolute bottom-20 right-10">
-                    <button class="bg-brand-navy border border-brand-cyan/30 text-brand-cyan px-6 py-3 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center gap-3 hover:bg-brand-cyan/10 transition-all gps-glow">
+                <div class="absolute bottom-10 right-0">
+                    <button class="bg-brand-navy/80 backdrop-blur border border-brand-cyan/30 text-brand-cyan px-6 py-3 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center gap-3 hover:bg-brand-cyan/10 transition-all gps-glow">
                         <div class="w-2 h-2 bg-brand-cyan rounded-full animate-ping"></div>
-                        Mappa Live
+                        GPS Active
                     </button>
                 </div>
             </div>
@@ -174,7 +179,7 @@
         
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-16 items-start">
             
-            <!-- COLONNA SINISTRA -->
+            <!-- COLONNA SINISTRA: Contenuti Dinamici -->
             <div class="lg:col-span-2 space-y-20">
                 
                 <!-- Intro Storica -->
@@ -184,59 +189,63 @@
                     </h2>
                     <div class="prose prose-invert prose-lg max-w-none text-brand-text font-light">
                         <p>
-                            La valle umbra del Tevere ospitava un vasto lago salato, il <span class="text-white font-medium">Lago Tiberino</span>. Studi dell'Università di Perugia confermano che questo antico bacino ha modellato l'attuale conformazione del territorio.
+                            La valle umbra del Tevere ospitava un vasto lago salato, il <span class="text-white font-medium">Lago Tiberino</span>, profondo oltre 1000 metri. Studi dell'Università di Perugia confermano che questo antico bacino ha modellato l'attuale conformazione del territorio, lasciando un'eredità di argille e fossili unici.
                         </p>
                     </div>
                 </section>
 
-                <!-- Punti di Interesse (Con Immagini) -->
+                <!-- Punti di Interesse (Cards) -->
                 <section>
                     <div class="flex items-center justify-between mb-8">
-                        <h3 class="text-2xl font-serif text-white">Cosa Vedrai</h3>
+                        <h3 class="text-2xl font-serif text-white">Tesori del Percorso</h3>
                         <div class="h-[1px] bg-white/10 flex-grow ml-6"></div>
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Card 1 -->
                         <div class="group relative bg-brand-navy rounded-xl overflow-hidden h-64 border border-white/5 hover:border-brand-gold/50 transition-all">
-                            <img src="https://images.unsplash.com/photo-1448375240586-dfd8d3f208ce?q=80&w=800" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                            <div class="absolute inset-0 card-image-overlay"></div>
+                            <!-- Immagine Foresta Fossile -->
+                            <img src="https://images.unsplash.com/photo-1448375240586-dfd8d3f208ce?q=80&w=800" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-60 group-hover:opacity-80">
+                            <div class="absolute inset-0 bg-card-gradient"></div>
                             <div class="absolute bottom-0 left-0 p-6 z-10">
-                                <div class="w-8 h-8 bg-brand-gold/90 rounded flex items-center justify-center text-brand-dark mb-3">
+                                <div class="w-8 h-8 bg-brand-gold/90 rounded flex items-center justify-center text-brand-dark mb-3 shadow-lg">
                                     <i data-lucide="trees" class="w-4 h-4"></i>
                                 </div>
                                 <h4 class="text-lg font-serif text-white mb-1">Foresta Fossile</h4>
-                                <p class="text-xs text-brand-text/90 leading-relaxed">Tronchi fossili di Dunarobba, unici al mondo.</p>
+                                <p class="text-xs text-brand-text/90 leading-relaxed">Tronchi giganti pietrificati di 2 milioni di anni fa a Dunarobba.</p>
                             </div>
                         </div>
 
                         <!-- Card 2 -->
                         <div class="group relative bg-brand-navy rounded-xl overflow-hidden h-64 border border-white/5 hover:border-brand-gold/50 transition-all">
-                            <img src="https://images.unsplash.com/photo-1519810755548-39211615a025?q=80&w=800" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                            <div class="absolute inset-0 card-image-overlay"></div>
+                            <!-- Immagine Borgo/Castello -->
+                            <img src="https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?q=80&w=800" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-60 group-hover:opacity-80">
+                            <div class="absolute inset-0 bg-card-gradient"></div>
                             <div class="absolute bottom-0 left-0 p-6 z-10">
-                                <div class="w-8 h-8 bg-brand-gold/90 rounded flex items-center justify-center text-brand-dark mb-3">
+                                <div class="w-8 h-8 bg-brand-gold/90 rounded flex items-center justify-center text-brand-dark mb-3 shadow-lg">
                                     <i data-lucide="castle" class="w-4 h-4"></i>
                                 </div>
                                 <h4 class="text-lg font-serif text-white mb-1">Castelli e Borghi</h4>
-                                <p class="text-xs text-brand-text/90 leading-relaxed">Da Sismano a Forte Cesare, sentinelle di pietra.</p>
+                                <p class="text-xs text-brand-text/90 leading-relaxed">Da Sismano a Forte Cesare, antiche sentinelle di pietra.</p>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- Tappe Section (Dinamica) -->
+                <!-- Tappe Section (Dinamica da CSV) -->
                 <section>
                     <div class="flex items-center justify-between mb-8">
                         <h3 class="text-2xl font-serif text-white">Itinerario e Tappe</h3>
-                        <div id="loading-indicator" class="hidden text-brand-cyan text-xs font-bold animate-pulse">Caricamento da Sheet...</div>
+                        <div id="loading-indicator" class="hidden text-brand-cyan text-xs font-bold animate-pulse flex items-center gap-2">
+                            <i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Caricamento...
+                        </div>
                     </div>
                     
                     <div class="relative pl-4">
                         <div class="timeline-line"></div>
                         <div id="timeline-container" class="space-y-10 relative z-10">
-                            <!-- Populated via JS -->
-                            <p class="text-brand-text/50 italic pl-10">Seleziona una durata per vedere le tappe...</p>
+                            <!-- Qui verranno inserite le tappe dal JavaScript -->
+                            <p class="text-brand-text/50 italic pl-10">Seleziona una durata per visualizzare il percorso...</p>
                         </div>
                     </div>
                 </section>
@@ -247,14 +256,14 @@
             <div class="lg:col-span-1 relative h-full">
                 <div class="sticky top-28 space-y-8">
                     
-                    <!-- Configurator Card -->
+                    <!-- Card Configurazione -->
                     <div class="bg-brand-navy rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
                         <div class="bg-white/5 p-6 border-b border-white/5">
                             <h3 class="font-serif font-bold text-xl text-white">Configura Viaggio</h3>
                         </div>
                         
                         <div class="p-6 space-y-8">
-                            <!-- Duration Selector -->
+                            <!-- Selettore Durata -->
                             <div>
                                 <label class="block text-xs font-bold text-brand-gold uppercase tracking-widest mb-4">Giorni a Disposizione</label>
                                 <div class="relative">
@@ -268,17 +277,37 @@
 
                             <hr class="border-white/10">
 
-                            <!-- Request Form -->
+                            <!-- Form Richiesta -->
                             <div class="space-y-4">
                                 <p class="text-sm font-bold text-white flex items-center gap-2">
+                                    <i data-lucide="scroll-text" class="w-4 h-4 text-brand-gold"></i>
                                     Richiedi Credenziale
                                 </p>
-                                <input type="text" placeholder="Nome e Cognome" class="w-full p-3 bg-brand-dark border border-white/10 rounded-lg text-sm text-white focus:border-brand-gold outline-none transition-colors">
-                                <input type="email" placeholder="La tua Email" class="w-full p-3 bg-brand-dark border border-white/10 rounded-lg text-sm text-white focus:border-brand-gold outline-none transition-colors">
+                                <input type="text" placeholder="Nome e Cognome" class="w-full p-3 bg-brand-dark border border-white/10 rounded-lg text-sm text-white focus:border-brand-gold outline-none transition-colors placeholder:text-white/20">
+                                <input type="email" placeholder="La tua Email" class="w-full p-3 bg-brand-dark border border-white/10 rounded-lg text-sm text-white focus:border-brand-gold outline-none transition-colors placeholder:text-white/20">
                             </div>
 
-                            <button class="w-full bg-brand-gold text-brand-dark font-bold py-4 rounded-lg shadow-lg hover:bg-white transition-all uppercase tracking-widest text-xs">
+                            <button onclick="alert('Richiesta inviata! Controlla la tua email.')" class="w-full bg-brand-gold text-brand-dark font-bold py-4 rounded-lg shadow-lg hover:bg-white transition-all uppercase tracking-widest text-xs flex justify-center items-center gap-2">
                                 Invia Richiesta
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Box Download -->
+                    <div class="bg-brand-navy/50 rounded-2xl p-6 border border-white/5 backdrop-blur-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="font-serif font-bold text-white">Area Download</h4>
+                            <i data-lucide="download-cloud" class="text-brand-cyan w-5 h-5"></i>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <button class="w-full bg-brand-dark border border-white/10 text-brand-text py-3 px-4 rounded-lg text-sm font-medium flex items-center justify-between hover:border-brand-cyan hover:text-brand-cyan transition-colors group">
+                                <span>Traccia GPX</span>
+                                <i data-lucide="map" class="w-4 h-4 opacity-50 group-hover:opacity-100"></i>
+                            </button>
+                            <button class="w-full bg-brand-dark border border-white/10 text-brand-text py-3 px-4 rounded-lg text-sm font-medium flex items-center justify-between hover:border-brand-gold hover:text-brand-gold transition-colors group">
+                                <span>Guida PDF</span>
+                                <i data-lucide="file-text" class="w-4 h-4 opacity-50 group-hover:opacity-100"></i>
                             </button>
                         </div>
                     </div>
@@ -291,7 +320,7 @@
     <footer class="bg-black text-brand-text py-16 border-t border-white/5 mt-20">
         <div class="max-w-7xl mx-auto px-4 text-center">
              <span class="text-brand-gold font-bold uppercase tracking-widest text-xs">Avigliano nel Cuore</span>
-             <p class="mt-4 text-sm font-light">Progetto di valorizzazione territoriale.</p>
+             <p class="mt-4 text-sm font-light">Progetto di valorizzazione territoriale e turismo lento.</p>
         </div>
     </footer>
 
@@ -299,12 +328,12 @@
     <script>
         lucide.createIcons();
 
-        // URL del tuo Google Sheet (CSV Pubblicato)
+        // URL del Google Sheet CSV
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=663441141&single=true&output=csv';
         
         let allStages = [];
 
-        // Fetch Data on Load
+        // Caricamento Dati all'avvio
         window.onload = function() {
             const loading = document.getElementById('loading-indicator');
             loading.classList.remove('hidden');
@@ -316,30 +345,71 @@
                     allStages = results.data;
                     console.log("Dati caricati:", allStages);
                     loading.classList.add('hidden');
-                    filterStages(); // Initial render
+                    filterStages(); // Render iniziale
                 },
                 error: function(err) {
                     console.error("Errore CSV:", err);
                     document.getElementById('timeline-container').innerHTML = '<p class="text-red-400 pl-10">Errore nel caricamento dei dati.</p>';
+                    loading.classList.add('hidden');
                 }
             });
         };
 
+        // Funzione per filtrare le tappe in base ai giorni selezionati
         function filterStages() {
             const days = document.getElementById('duration-select').value;
             const container = document.getElementById('timeline-container');
             
-            // Filtra e Ordina
+            // Filtra per giorni e Ordina per numero tappa
             const filtered = allStages
                 .filter(s => s.giorni === days)
                 .sort((a, b) => parseInt(a.ordine) - parseInt(b.ordine));
 
-            document.getElementById('days-display-hero').innerHTML = `${days} <span class="text-lg font-sans font-light text-brand-text">gg</span>`;
+            // Aggiorna display durata nella Hero
+            const heroDisplay = document.getElementById('days-display-hero');
+            if(heroDisplay) heroDisplay.innerHTML = `${days} <span class="text-lg font-sans font-light text-brand-text">gg</span>`;
 
             if (filtered.length === 0) {
                 container.innerHTML = '<p class="text-brand-text/50 pl-10">Nessuna tappa trovata per questa selezione.</p>';
                 return;
             }
+
+            let html = '';
+            filtered.forEach((stage) => {
+                // Gestione robusta per evitare errori se mancano campi nel CSV
+                const numeroTappa = stage.ordine || '?';
+                const titolo = stage.titolo || 'Tappa senza titolo';
+                const km = stage.km || '';
+                const difficolta = stage.difficolta || '';
+                const desc = stage.descrizione || '';
+
+                html += `
+                <div class="relative pl-10 group cursor-default transition-all duration-500 ease-in-out">
+                    <!-- Dot sulla linea temporale -->
+                    <div class="absolute left-[-4px] top-0 w-3 h-3 rounded-full bg-brand-dark border border-brand-text group-hover:border-brand-gold group-hover:bg-brand-gold transition-colors z-10"></div>
+                    
+                    <!-- Contenuto Tappa -->
+                    <div class="pb-2 border-b border-white/5 hover:border-white/20 transition-colors">
+                        <div class="flex flex-col md:flex-row md:justify-between md:items-baseline mb-2">
+                            <h4 class="font-serif text-xl text-white group-hover:text-brand-gold transition-colors">
+                                <span class="text-xs font-sans text-brand-gold/50 font-bold uppercase tracking-widest mr-2">Tappa 0${numeroTappa}</span>
+                                ${titolo}
+                            </h4>
+                            <div class="text-xs font-bold uppercase tracking-wider text-brand-text mt-1 md:mt-0">
+                                ${km} <span class="text-brand-gold mx-1">•</span> ${difficolta}
+                            </div>
+                        </div>
+                        <p class="text-brand-text/80 text-sm font-light leading-relaxed">${desc}</p>
+                    </div>
+                </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
 
             let html = '';
             filtered.forEach((stage) => {

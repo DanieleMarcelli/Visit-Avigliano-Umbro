@@ -3,49 +3,34 @@ const CSV_EVENTS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5
 const CSV_CONTENT = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=643581002&single=true&output=csv";
 
 // STATE
-let cmsData = {}; // Stores content by ID
+let cmsData = {}; 
 let allEvents = [];
 let pendingEvents = [];
 
 /**
- * ROBUST CSV PARSER
- * Iterates character by character to correctly handle empty fields like "id,,url"
+ * PARSER CSV
  */
 function parseCSV(text) {
     const lines = text.split('\n').filter(l => l.trim() !== '');
     const result = [];
-    
-    // Skip header (i=1)
     for (let i = 1; i < lines.length; i++) {
         const line = lines[i];
         const row = [];
         let currentCell = '';
         let insideQuotes = false;
-        
         for (let j = 0; j < line.length; j++) {
             const char = line[j];
-            
-            if (char === '"') {
-                insideQuotes = !insideQuotes;
-            } else if (char === ',' && !insideQuotes) {
-                row.push(currentCell.trim());
-                currentCell = '';
-            } else {
-                currentCell += char;
-            }
+            if (char === '"') { insideQuotes = !insideQuotes; } 
+            else if (char === ',' && !insideQuotes) { row.push(currentCell.trim()); currentCell = ''; } 
+            else { currentCell += char; }
         }
-        row.push(currentCell.trim()); // Push last cell
-        
-        // Clean quotes from cells
+        row.push(currentCell.trim());
         const cleanedRow = row.map(cell => cell.replace(/^"|"$/g, '').replace(/""/g, '"'));
         result.push(cleanedRow);
     }
     return result;
 }
 
-/**
- * Format Google Drive URLs to be usable as images
- */
 function formatUrl(url) {
     if (!url) return '';
     if (url.includes('drive.google.com') || url.includes('/d/')) {
@@ -57,8 +42,7 @@ function formatUrl(url) {
 }
 
 /**
- * LOAD CONTENT (CMS)
- * Maps CSV rows to HTML elements by data-content-id
+ * CARICAMENTO CONTENUTI (TESTI E IMMAGINI)
  */
 async function initCMS() {
     try {
@@ -66,7 +50,6 @@ async function initCMS() {
         const text = await resp.text();
         const rows = parseCSV(text);
 
-        // CSV Structure: ID (0), TEXT (1), IMAGE (2)
         rows.forEach(row => {
             const id = row[0];
             const textContent = row[1];
@@ -74,27 +57,25 @@ async function initCMS() {
             
             if (!id) return;
             
-            // Store for Modals
+            // Salva per i Modali
             cmsData[id] = { text: textContent, img: imgUrl };
             
-            // Update HTML Elements
             const els = document.querySelectorAll(`[data-content-id="${id}"]`);
             els.forEach(el => {
-                // Image handling
+                // Gestione Immagini
                 if (imgUrl) {
                     if (el.tagName === 'IMG') {
                         el.src = imgUrl;
-                        el.onload = () => el.classList.remove('opacity-0');
+                        el.onload = () => el.classList.remove('opacity-0'); // Fade in
                     } else {
+                        // Per i background (Hero, Bento Cards)
                         el.style.backgroundImage = `url('${imgUrl}')`;
                         el.classList.remove('opacity-0');
                     }
                 }
-                
-                // Text handling
+                // Gestione Testo
                 if (textContent && !imgUrl) {
                     el.innerHTML = textContent;
-                    el.classList.remove('opacity-0'); // In case it was hidden
                 }
             });
         });
@@ -104,15 +85,13 @@ async function initCMS() {
 }
 
 /**
- * LOAD EVENTS
+ * CARICAMENTO EVENTI (Invariato ma ottimizzato per il nuovo design)
  */
 async function initEvents() {
     try {
         const resp = await fetch(CSV_EVENTS);
         const text = await resp.text();
         const rows = parseCSV(text);
-        
-        // CSV Structure: Date(0), Time(1), Title(2), Subtitle(3), Desc(4), Loc(5), Cat(6), Img(7)
         const today = new Date();
         today.setHours(0,0,0,0);
         
@@ -130,7 +109,6 @@ async function initEvents() {
             };
         })
         .filter(e => {
-            // Filter valid dates and future events
             const d = new Date(e.dateStr);
             return !isNaN(d) && d >= today;
         })
@@ -140,7 +118,7 @@ async function initEvents() {
         
     } catch (err) {
         console.error("Events Load Error:", err);
-        document.getElementById('events-slider').innerHTML = '<div class="text-white px-6">Errore caricamento eventi.</div>';
+        document.getElementById('events-slider').innerHTML = '<div class="text-stone-400 py-10">Nessun evento in programma.</div>';
     }
 }
 
@@ -148,12 +126,11 @@ function renderEvents() {
     const slider = document.getElementById('events-slider');
     slider.innerHTML = '';
     
-    // Take first 5 events for slider
-    const featured = allEvents.slice(0, 5);
-    pendingEvents = allEvents.slice(5);
+    const featured = allEvents.slice(0, 6); // Mostra primi 6
+    pendingEvents = allEvents.slice(6);
     
     if (featured.length === 0) {
-        slider.innerHTML = '<div class="text-slate-500 italic">Nessun evento in programma.</div>';
+        slider.innerHTML = '<div class="w-full text-center text-stone-400 py-10">Nessun evento trovato.</div>';
         return;
     }
 
@@ -162,24 +139,29 @@ function renderEvents() {
         const day = d.getDate();
         const month = d.toLocaleString('it-IT', { month: 'short' }).toUpperCase();
         
+        // Card Design "Luxury Light"
         const card = `
-        <div class="snap-center shrink-0 w-[280px] h-[400px] relative bg-deep-800 rounded-2xl overflow-hidden group cursor-pointer border border-white/5 hover:border-gold-500/50 transition-all shadow-xl">
-            <img src="${e.img}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-70 group-hover:opacity-100" loading="lazy">
-            <div class="absolute inset-0 bg-gradient-to-t from-deep-950 via-deep-950/40 to-transparent"></div>
-            
-            <div class="absolute top-4 right-4 bg-deep-950/80 backdrop-blur px-2 py-1 rounded text-[10px] font-bold uppercase text-white border border-white/10">
-                ${e.cat}
+        <div class="snap-center shrink-0 w-[300px] h-[420px] relative bg-white rounded-[2rem] overflow-hidden group cursor-pointer shadow-card hover:shadow-soft transition-all border border-stone-100" onclick="openModal('${e.id}')">
+            <div class="h-3/5 relative overflow-hidden">
+                <img src="${e.img}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                <div class="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold uppercase text-stone-800 shadow-sm">
+                    ${e.cat}
+                </div>
             </div>
             
-            <div class="absolute bottom-0 left-0 p-6 w-full z-10">
-                <div class="flex items-end gap-3 mb-2">
-                    <span class="text-gold-400 font-serif text-4xl leading-none font-bold">${day}</span>
-                    <span class="text-slate-300 font-bold text-xs uppercase tracking-widest mb-1 border-l border-white/20 pl-2">${month}</span>
+            <div class="p-6 relative">
+                <div class="absolute -top-6 left-6 bg-bronze-500 text-white p-3 rounded-xl text-center shadow-lg w-14">
+                    <span class="block text-lg font-serif font-bold leading-none">${day}</span>
+                    <span class="block text-[9px] uppercase tracking-widest leading-none mt-1">${month}</span>
                 </div>
-                <h3 class="text-xl font-serif text-white leading-tight mb-2 group-hover:text-gold-400 transition-colors line-clamp-2">${e.title}</h3>
-                <p class="text-slate-400 text-xs flex items-center gap-2 line-clamp-1">
-                    <i data-lucide="map-pin" class="w-3 h-3 text-gold-500"></i> ${e.loc}
-                </p>
+
+                <div class="mt-4">
+                    <h3 class="text-xl font-serif text-stone-900 leading-tight mb-2 line-clamp-2 group-hover:text-bronze-600 transition-colors">${e.title}</h3>
+                    <p class="text-stone-500 text-xs flex items-center gap-2 line-clamp-1 mb-3">
+                        <i data-lucide="map-pin" class="w-3 h-3 text-bronze-400"></i> ${e.loc}
+                    </p>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-bronze-600 border-b border-bronze-200 pb-0.5 group-hover:border-bronze-500 transition-all">Dettagli</span>
+                </div>
             </div>
         </div>
         `;
@@ -191,43 +173,12 @@ function renderEvents() {
     }
     
     if(window.lucide) window.lucide.createIcons();
+    
+    // Add data to cmsData for modal usage
+    allEvents.forEach(e => {
+        cmsData[e.id] = { text: e.desc, img: e.img, title: e.title, subtitle: e.dateStr + ' - ' + e.loc };
+    });
 }
-
-/**
- * MODAL LOGIC
- */
-window.openModal = (baseId) => {
-    // Construct keys: prefix_title, prefix_desc, prefix_img
-    const titleKey = baseId + "_title";
-    const descKey = baseId + "_desc";
-    const imgKey = baseId + "_img";
-    
-    // Default Fallbacks
-    let title = "Dettaglio";
-    let desc = "Descrizione non disponibile.";
-    let img = "";
-    
-    // Try to find in CMS Data
-    if (cmsData[titleKey]?.text) title = cmsData[titleKey].text;
-    if (cmsData[descKey]?.text) desc = cmsData[descKey].text;
-    if (cmsData[imgKey]?.img) img = cmsData[imgKey].img;
-    
-    // Fallback: Check if baseId itself has data
-    if (title === "Dettaglio" && cmsData[baseId]?.text) title = cmsData[baseId].text;
-
-    const modal = document.getElementById('info-modal');
-    document.getElementById('modal-title').innerHTML = title;
-    document.getElementById('modal-desc').innerHTML = desc;
-    document.getElementById('modal-img').src = img || 'https://via.placeholder.com/800x600?text=No+Image';
-    
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-};
-
-window.closeModal = () => {
-    document.getElementById('info-modal').classList.add('hidden');
-    document.body.style.overflow = '';
-};
 
 window.showAllEvents = () => {
     const grid = document.getElementById('all-events-grid');
@@ -238,14 +189,14 @@ window.showAllEvents = () => {
         const dateStr = d.toLocaleDateString('it-IT');
         
         const item = `
-        <div class="flex gap-4 p-4 bg-deep-800 border border-white/5 rounded-xl hover:border-gold-500/30 transition-colors cursor-pointer group items-center">
-            <div class="w-20 h-20 rounded-lg bg-deep-950 overflow-hidden shrink-0 relative">
+        <div class="flex gap-4 p-4 bg-white border border-stone-100 rounded-2xl hover:border-bronze-300 transition-colors cursor-pointer group items-center shadow-sm" onclick="openModal('${e.id}')">
+            <div class="w-20 h-20 rounded-xl bg-stone-100 overflow-hidden shrink-0 relative">
                 <img src="${e.img}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
             </div>
             <div class="flex flex-col">
-                <span class="text-gold-400 text-[10px] font-bold uppercase tracking-widest mb-1">${dateStr}</span>
-                <h4 class="text-white font-serif text-lg leading-tight group-hover:text-gold-400 transition-colors line-clamp-1">${e.title}</h4>
-                <span class="text-slate-500 text-xs mt-1 flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> ${e.loc}</span>
+                <span class="text-bronze-500 text-[10px] font-bold uppercase tracking-widest mb-1">${dateStr}</span>
+                <h4 class="text-stone-800 font-serif text-lg leading-tight group-hover:text-bronze-600 transition-colors line-clamp-1">${e.title}</h4>
+                <span class="text-stone-500 text-xs mt-1 flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> ${e.loc}</span>
             </div>
         </div>
         `;
@@ -255,6 +206,57 @@ window.showAllEvents = () => {
     grid.classList.remove('hidden');
     document.getElementById('load-more-btn').style.display = 'none';
     if(window.lucide) window.lucide.createIcons();
+};
+
+/**
+ * MODAL LOGIC
+ */
+window.openModal = (baseId) => {
+    // Keys logic
+    const titleKey = baseId + "_title";
+    const descKey = baseId + "_desc";
+    const imgKey = baseId + "_img";
+    
+    let title = "Dettaglio";
+    let desc = "Descrizione non disponibile.";
+    let img = "";
+    let subtitle = "Experience"; // Default subtitle
+    
+    // Check direct content (for Events)
+    if (cmsData[baseId] && cmsData[baseId].title) {
+        title = cmsData[baseId].title;
+        desc = cmsData[baseId].text;
+        img = cmsData[baseId].img;
+        if(cmsData[baseId].subtitle) subtitle = cmsData[baseId].subtitle;
+    } 
+    // Check composed content (for CMS sections)
+    else {
+        if (cmsData[titleKey]?.text) title = cmsData[titleKey].text;
+        if (cmsData[descKey]?.text) desc = cmsData[descKey].text;
+        if (cmsData[imgKey]?.img) img = cmsData[imgKey].img;
+    }
+
+    const modal = document.getElementById('info-modal');
+    document.getElementById('modal-title').innerHTML = title;
+    document.getElementById('modal-subtitle').innerHTML = subtitle;
+    document.getElementById('modal-desc').innerHTML = desc;
+    
+    const modalImg = document.getElementById('modal-img');
+    if(img) {
+        modalImg.src = img;
+        modalImg.classList.remove('hidden');
+    } else {
+        // Fallback or hide image
+        modalImg.src = 'https://via.placeholder.com/800x600?text=Avigliano+Umbro';
+    }
+    
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+};
+
+window.closeModal = () => {
+    document.getElementById('info-modal').classList.add('hidden');
+    document.body.style.overflow = '';
 };
 
 // INITIALIZE

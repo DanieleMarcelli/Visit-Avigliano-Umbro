@@ -7,9 +7,7 @@ let cmsData = {};
 let allEvents = [];
 let pendingEvents = [];
 
-/**
- * PARSER CSV
- */
+// --- PARSER CSV ---
 function parseCSV(text) {
     const lines = text.split('\n').filter(l => l.trim() !== '');
     const result = [];
@@ -41,9 +39,7 @@ function formatUrl(url) {
     return url;
 }
 
-/**
- * CARICAMENTO CONTENUTI (TESTI E IMMAGINI)
- */
+// --- CMS LOADER ---
 async function initCMS() {
     try {
         const resp = await fetch(CSV_CONTENT);
@@ -54,39 +50,28 @@ async function initCMS() {
             const id = row[0];
             const textContent = row[1];
             const imgUrl = formatUrl(row[2]);
-            
             if (!id) return;
             
-            // Salva per i Modali
             cmsData[id] = { text: textContent, img: imgUrl };
             
             const els = document.querySelectorAll(`[data-content-id="${id}"]`);
             els.forEach(el => {
-                // Gestione Immagini
                 if (imgUrl) {
                     if (el.tagName === 'IMG') {
                         el.src = imgUrl;
-                        el.onload = () => el.classList.remove('opacity-0'); // Fade in
+                        el.onload = () => el.classList.remove('opacity-0');
                     } else {
-                        // Per i background (Hero, Bento Cards)
                         el.style.backgroundImage = `url('${imgUrl}')`;
                         el.classList.remove('opacity-0');
                     }
                 }
-                // Gestione Testo
-                if (textContent && !imgUrl) {
-                    el.innerHTML = textContent;
-                }
+                if (textContent && !imgUrl) el.innerHTML = textContent;
             });
         });
-    } catch (err) {
-        console.error("CMS Load Error:", err);
-    }
+    } catch (err) { console.error("CMS Error:", err); }
 }
 
-/**
- * CARICAMENTO EVENTI (Invariato ma ottimizzato per il nuovo design)
- */
+// --- EVENTS LOADER ---
 async function initEvents() {
     try {
         const resp = await fetch(CSV_EVENTS);
@@ -95,16 +80,17 @@ async function initEvents() {
         const today = new Date();
         today.setHours(0,0,0,0);
         
+        // CSV: Date(0), Time(1), Title(2), Subtitle(3), Desc(4), Loc(5), Cat(6), Img(7)
         allEvents = rows.map((row, idx) => {
             return {
                 id: `evt-${idx}`,
                 dateStr: row[0],
-                time: row[1],
+                time: row[1] || 'Orario da definire',
                 title: row[2],
                 subtitle: row[3],
                 desc: row[4],
                 loc: row[5],
-                cat: row[6],
+                cat: row[6] || 'Evento',
                 img: formatUrl(row[7]) || 'https://images.unsplash.com/photo-1514525253440-b393452e8d26?q=80&w=800'
             };
         })
@@ -117,8 +103,8 @@ async function initEvents() {
         renderEvents();
         
     } catch (err) {
-        console.error("Events Load Error:", err);
-        document.getElementById('events-slider').innerHTML = '<div class="text-stone-400 py-10">Nessun evento in programma.</div>';
+        console.error("Events Error:", err);
+        document.getElementById('events-slider').innerHTML = '<div class="w-full text-center text-stone-400 py-10">Caricamento eventi non riuscito.</div>';
     }
 }
 
@@ -126,11 +112,11 @@ function renderEvents() {
     const slider = document.getElementById('events-slider');
     slider.innerHTML = '';
     
-    const featured = allEvents.slice(0, 6); // Mostra primi 6
+    const featured = allEvents.slice(0, 6);
     pendingEvents = allEvents.slice(6);
     
     if (featured.length === 0) {
-        slider.innerHTML = '<div class="w-full text-center text-stone-400 py-10">Nessun evento trovato.</div>';
+        slider.innerHTML = '<div class="w-full text-center text-stone-400 py-10 font-serif italic">Nessun evento in programma prossimamente.</div>';
         return;
     }
 
@@ -139,28 +125,36 @@ function renderEvents() {
         const day = d.getDate();
         const month = d.toLocaleString('it-IT', { month: 'short' }).toUpperCase();
         
-        // Card Design "Luxury Light"
+        // --- MODIFICA QUI: RAPPORTO 7:10 ---
+        // Width: 280px / Height: 400px (280/400 = 0.7 esatto)
         const card = `
-        <div class="snap-center shrink-0 w-[300px] h-[420px] relative bg-white rounded-[2rem] overflow-hidden group cursor-pointer shadow-card hover:shadow-soft transition-all border border-stone-100" onclick="openModal('${e.id}')">
-            <div class="h-3/5 relative overflow-hidden">
-                <img src="${e.img}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                <div class="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold uppercase text-stone-800 shadow-sm">
-                    ${e.cat}
-                </div>
-            </div>
+        <div class="snap-center shrink-0 w-[280px] h-[400px] relative rounded-2xl overflow-hidden group cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-500 bg-stone-900 border border-stone-200" onclick="openModal('${e.id}')">
             
-            <div class="p-6 relative">
-                <div class="absolute -top-6 left-6 bg-bronze-500 text-white p-3 rounded-xl text-center shadow-lg w-14">
-                    <span class="block text-lg font-serif font-bold leading-none">${day}</span>
-                    <span class="block text-[9px] uppercase tracking-widest leading-none mt-1">${month}</span>
+            <img src="${e.img}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-95 group-hover:opacity-100">
+            
+            <div class="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/20 to-transparent opacity-80 hover:opacity-70 transition-opacity"></div>
+            
+            <div class="absolute top-4 right-4 bg-white/20 backdrop-blur border border-white/20 px-3 py-1 rounded-full text-[9px] font-bold uppercase text-white tracking-widest shadow-sm">
+                ${e.cat}
+            </div>
+
+            <div class="absolute bottom-0 left-0 w-full p-6 text-white translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+                
+                <div class="flex items-center gap-3 mb-2 text-bronze-200">
+                    <div class="flex flex-col items-center leading-none border-r border-white/30 pr-3">
+                        <span class="text-xl font-serif font-bold text-white">${day}</span>
+                        <span class="text-[9px] uppercase tracking-widest text-white/80">${month}</span>
+                    </div>
+                    <div class="flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold">
+                        <i data-lucide="clock" class="w-3 h-3"></i> ${e.time}
+                    </div>
                 </div>
 
-                <div class="mt-4">
-                    <h3 class="text-xl font-serif text-stone-900 leading-tight mb-2 line-clamp-2 group-hover:text-bronze-600 transition-colors">${e.title}</h3>
-                    <p class="text-stone-500 text-xs flex items-center gap-2 line-clamp-1 mb-3">
-                        <i data-lucide="map-pin" class="w-3 h-3 text-bronze-400"></i> ${e.loc}
-                    </p>
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-bronze-600 border-b border-bronze-200 pb-0.5 group-hover:border-bronze-500 transition-all">Dettagli</span>
+                <h3 class="text-xl font-serif leading-tight mb-1 group-hover:text-bronze-300 transition-colors line-clamp-2 drop-shadow-md">${e.title}</h3>
+                ${e.subtitle ? `<p class="text-xs text-stone-200 font-light mb-3 line-clamp-1 italic drop-shadow">${e.subtitle}</p>` : '<div class="mb-3"></div>'}
+                
+                <div class="flex items-center gap-2 text-[10px] text-stone-300 uppercase tracking-widest border-t border-white/20 pt-3">
+                    <i data-lucide="map-pin" class="w-3 h-3 text-bronze-400"></i> ${e.loc}
                 </div>
             </div>
         </div>
@@ -174,9 +168,14 @@ function renderEvents() {
     
     if(window.lucide) window.lucide.createIcons();
     
-    // Add data to cmsData for modal usage
+    // Popola i dati per il modale
     allEvents.forEach(e => {
-        cmsData[e.id] = { text: e.desc, img: e.img, title: e.title, subtitle: e.dateStr + ' - ' + e.loc };
+        cmsData[e.id] = { 
+            text: e.desc, 
+            img: e.img, 
+            title: e.title, 
+            subtitle: `${e.dateStr} | Ore ${e.time} | ${e.loc}` 
+        };
     });
 }
 
@@ -188,15 +187,20 @@ window.showAllEvents = () => {
         const d = new Date(e.dateStr);
         const dateStr = d.toLocaleDateString('it-IT');
         
+        // Card orizzontale per la lista "Vedi tutti"
         const item = `
-        <div class="flex gap-4 p-4 bg-white border border-stone-100 rounded-2xl hover:border-bronze-300 transition-colors cursor-pointer group items-center shadow-sm" onclick="openModal('${e.id}')">
-            <div class="w-20 h-20 rounded-xl bg-stone-100 overflow-hidden shrink-0 relative">
+        <div class="flex gap-5 p-5 bg-white border border-stone-100 rounded-2xl hover:border-bronze-300 transition-all cursor-pointer group items-center shadow-sm hover:shadow-md" onclick="openModal('${e.id}')">
+            <div class="w-[70px] h-[100px] rounded-lg bg-stone-100 overflow-hidden shrink-0 relative shadow-inner">
                 <img src="${e.img}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
             </div>
-            <div class="flex flex-col">
-                <span class="text-bronze-500 text-[10px] font-bold uppercase tracking-widest mb-1">${dateStr}</span>
-                <h4 class="text-stone-800 font-serif text-lg leading-tight group-hover:text-bronze-600 transition-colors line-clamp-1">${e.title}</h4>
-                <span class="text-stone-500 text-xs mt-1 flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> ${e.loc}</span>
+            <div class="flex flex-col justify-center">
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="bg-bronze-100 text-bronze-700 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider">${e.cat}</span>
+                    <span class="text-stone-400 text-[10px] font-bold uppercase tracking-widest">${dateStr}</span>
+                </div>
+                <h4 class="text-stone-800 font-serif text-lg leading-tight group-hover:text-bronze-600 transition-colors line-clamp-1 mb-1">${e.title}</h4>
+                <p class="text-xs text-stone-500 italic line-clamp-1 mb-2">${e.subtitle || ''}</p>
+                <span class="text-stone-400 text-xs flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> ${e.loc}</span>
             </div>
         </div>
         `;
@@ -208,11 +212,8 @@ window.showAllEvents = () => {
     if(window.lucide) window.lucide.createIcons();
 };
 
-/**
- * MODAL LOGIC
- */
+// --- MODAL SYSTEM ---
 window.openModal = (baseId) => {
-    // Keys logic
     const titleKey = baseId + "_title";
     const descKey = baseId + "_desc";
     const imgKey = baseId + "_img";
@@ -220,17 +221,14 @@ window.openModal = (baseId) => {
     let title = "Dettaglio";
     let desc = "Descrizione non disponibile.";
     let img = "";
-    let subtitle = "Experience"; // Default subtitle
+    let subtitle = "Experience"; 
     
-    // Check direct content (for Events)
-    if (cmsData[baseId] && cmsData[baseId].title) {
+    if (cmsData[baseId] && cmsData[baseId].title) { // Evento
         title = cmsData[baseId].title;
         desc = cmsData[baseId].text;
         img = cmsData[baseId].img;
         if(cmsData[baseId].subtitle) subtitle = cmsData[baseId].subtitle;
-    } 
-    // Check composed content (for CMS sections)
-    else {
+    } else { // Sezione CMS
         if (cmsData[titleKey]?.text) title = cmsData[titleKey].text;
         if (cmsData[descKey]?.text) desc = cmsData[descKey].text;
         if (cmsData[imgKey]?.img) img = cmsData[imgKey].img;
@@ -244,9 +242,7 @@ window.openModal = (baseId) => {
     const modalImg = document.getElementById('modal-img');
     if(img) {
         modalImg.src = img;
-        modalImg.classList.remove('hidden');
     } else {
-        // Fallback or hide image
         modalImg.src = 'https://via.placeholder.com/800x600?text=Avigliano+Umbro';
     }
     
@@ -259,9 +255,7 @@ window.closeModal = () => {
     document.body.style.overflow = '';
 };
 
-// INITIALIZE
 document.addEventListener('DOMContentLoaded', () => {
     initCMS();
     initEvents();
-    if(window.lucide) window.lucide.createIcons();
 });

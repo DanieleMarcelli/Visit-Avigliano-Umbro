@@ -145,7 +145,204 @@
         <a href="#eventi-section" data-content-id="nav_eventi" onclick="toggleMobileMenu()" class="text-3xl font-serif text-white hover:text-gold-400">Eventi</a>
         <a href="cammino.html" class="text-3xl font-serif text-gold-400 italic"><span data-content-id="nav_cammino">Il Cammino</span></a>
     </div>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 
+<section id="hero-section" class="hero-container">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <h2 id="hero-subtitle" class="fade-in">...</h2> 
+        <h1 id="hero-title" class="fade-in">Caricamento...</h1>
+        
+        <div class="hero-buttons fade-in">
+            <a id="btn-1" href="#" class="btn btn-gold"></a>
+            <a id="btn-2" href="#" class="btn btn-outline"></a>
+            <a id="btn-3" href="#" class="btn btn-outline"></a>
+        </div>
+    </div>
+</section>
+
+<style>
+    /* STILE HERO - Deep Experience Theme */
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Montserrat', sans-serif; /* Font base */
+    }
+
+    .hero-container {
+        position: relative;
+        height: 100vh; /* Tutta l'altezza dello schermo */
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #0b0d17; /* Colore di sfondo scuro di base */
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        overflow: hidden;
+    }
+
+    /* Overlay scuro per leggere meglio il testo sopra l'immagine */
+    .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(11, 13, 23, 0.4), rgba(11, 13, 23, 0.8));
+        z-index: 1;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        padding: 20px;
+        max-width: 1200px;
+        width: 100%;
+    }
+
+    /* Titoli */
+    #hero-title {
+        font-family: 'Playfair Display', serif; /* Font elegante */
+        font-size: 4.5rem;
+        color: #ffffff;
+        margin: 0 0 40px 0;
+        font-weight: 700;
+        line-height: 1.1;
+        text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+    }
+
+    #hero-subtitle {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        letter-spacing: 5px;
+        color: #e6a324; /* Colore Oro */
+        margin-bottom: 20px;
+        font-weight: 600;
+        text-shadow: 1px 1px 5px rgba(0,0,0,0.5);
+    }
+
+    /* Pulsanti */
+    .hero-buttons {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: 14px 35px;
+        text-decoration: none;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+    }
+
+    /* Bottone Primario (Oro) */
+    .btn-gold {
+        background-color: #e6a324;
+        color: #0b0d17;
+        border: 2px solid #e6a324;
+    }
+    .btn-gold:hover {
+        background-color: transparent;
+        color: #e6a324;
+        transform: translateY(-3px);
+    }
+
+    /* Bottoni Secondari (Outline bianco) */
+    .btn-outline {
+        background-color: transparent;
+        color: #ffffff;
+        border: 2px solid rgba(255, 255, 255, 0.4);
+    }
+    .btn-outline:hover {
+        border-color: #e6a324;
+        color: #e6a324;
+        transform: translateY(-3px);
+    }
+
+    /* Animazione di entrata */
+    .fade-in {
+        animation: fadeIn Up 1s ease-out forwards;
+        opacity: 0;
+    }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive per cellulari */
+    @media (max-width: 768px) {
+        #hero-title { font-size: 2.8rem; }
+        .hero-buttons { flex-direction: column; gap: 15px; }
+        .btn { width: 80%; text-align: center; }
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        // --- IMPORTANTE: INCOLLA QUI SOTTO IL TUO LINK GOOGLE ---
+        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=643581002&single=true&output=csv'; 
+        // --------------------------------------------------------
+
+        if (csvUrl === 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=643581002&single=true&output=csv') {
+            console.error("Ricordati di incollare il link del CSV nel codice JavaScript!");
+            return;
+        }
+
+        fetch(csvUrl)
+            .then(response => response.text())
+            .then(data => {
+                const rows = data.split('\n');
+                rows.forEach(row => {
+                    // Divide la riga gestendo le virgole
+                    const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); 
+                    
+                    // Cerca la riga identificata come "hero"
+                    if (cols[0] && cols[0].trim() === 'hero') {
+                        
+                        const clean = (text) => text ? text.replace(/"/g, '').trim() : '';
+
+                        // 1. Immagine di Sfondo
+                        const bgImage = clean(cols[3]);
+                        if(bgImage) {
+                            document.getElementById('hero-section').style.backgroundImage = `url('${bgImage}')`;
+                        }
+
+                        // 2. Testi
+                        document.getElementById('hero-title').textContent = clean(cols[1]);
+                        document.getElementById('hero-subtitle').textContent = clean(cols[2]);
+
+                        // 3. Bottoni
+                        const btn1 = document.getElementById('btn-1');
+                        btn1.textContent = clean(cols[4]);
+                        btn1.href = clean(cols[5]);
+
+                        const btn2 = document.getElementById('btn-2');
+                        btn2.textContent = clean(cols[6]);
+                        btn2.href = clean(cols[7]);
+
+                        const btn3 = document.getElementById('btn-3');
+                        btn3.textContent = clean(cols[8]);
+                        btn3.href = clean(cols[9]);
+                    }
+                });
+            })
+            .catch(error => console.error('Errore caricamento CSV:', error));
+    });
+</script>
     <!-- EVENTI SECTION (moved directly under header) -->
     <section id="eventi-section" class="pt-28 pb-24 bg-deep-950 relative border-b border-white/5">
         <div class="max-w-7xl mx-auto px-6 mb-12 flex justify-between items-end">

@@ -4,15 +4,19 @@ import { MapPin, Calendar, ArrowRight } from 'lucide-react';
 
 interface EventCardProps {
   event: EventItem;
+  onSelect?: (event: EventItem) => void;
 }
 
-export const EventCard: React.FC<EventCardProps> = ({ event }) => {
+export const EventCard: React.FC<EventCardProps> = ({ event, onSelect }) => {
   const dateOptions: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' };
   const dateStr = new Date(event.date).toLocaleDateString('it-IT', dateOptions).toUpperCase();
   const [day, month] = dateStr.split(' ');
 
   return (
-    <div className="group bg-white rounded-xl shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden border border-stone-100 flex flex-col h-full relative">
+    <div
+      className="group bg-white rounded-xl shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden border border-stone-100 flex flex-col h-full relative cursor-pointer"
+      onClick={() => onSelect?.(event)}
+    >
       {/* Image Container - Adjusted to Vertical Poster Aspect Ratio (70x100 approx) */}
       <div className="relative aspect-[7/10] overflow-hidden bg-stone-100">
         <img 
@@ -72,9 +76,15 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
                     </span>
                 ))}
             </div>
-            <button className="text-brand-900 text-xs font-bold uppercase tracking-wider flex items-center gap-1 hover:gap-2 transition-all">
-                Dettagli
-                <ArrowRight size={14} />
+            <button
+              className="text-brand-900 text-xs font-bold uppercase tracking-wider flex items-center gap-1 hover:gap-2 transition-all"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelect?.(event);
+              }}
+            >
+              Dettagli
+              <ArrowRight size={14} />
             </button>
         </div>
       </div>

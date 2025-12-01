@@ -114,18 +114,18 @@
                         <img id="nav_logo_img" data-content-id="nav_logo" src="" class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500">
                     </div>
                     <div class="flex flex-col">
-                        <span class="text-[10px] uppercase tracking-[0.3em] text-gold-400 font-bold">Portale Turistico</span>
-                        <span class="text-xl font-serif text-white tracking-wide group-hover:text-gold-400 transition-colors">Visit Avigliano</span>
+                        <span data-content-id="nav_subtitle" class="text-[10px] uppercase tracking-[0.3em] text-gold-400 font-bold">Portale Turistico</span>
+                        <span data-content-id="nav_title" class="text-xl font-serif text-white tracking-wide group-hover:text-gold-400 transition-colors">Visit Avigliano</span>
                     </div>
                 </a>
 
                 <!-- Desktop Nav -->
                 <nav class="hidden lg:flex items-center gap-8">
-                    <a href="#lago" class="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-white transition">Il Lago</a>
-                    <a href="#territorio" class="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-white transition">Borghi</a>
-                    <a href="#eventi-section" class="text-xs font-bold uppercase tracking-widest text-gold-400 hover:text-white transition">Eventi</a>
+                    <a href="#lago" data-content-id="nav_lago" class="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-white transition">Il Lago</a>
+                    <a href="#territorio" data-content-id="nav_borghi" class="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-white transition">Borghi</a>
+                    <a href="#eventi-section" data-content-id="nav_eventi" class="text-xs font-bold uppercase tracking-widest text-gold-400 hover:text-white transition">Eventi</a>
                     <a href="cammino.html" class="px-6 py-2 rounded-full border border-gold-500/50 text-gold-400 text-xs font-bold uppercase hover:bg-gold-500 hover:text-white transition shadow-[0_0_15px_rgba(217,119,6,0.1)] hover:shadow-[0_0_20px_rgba(217,119,6,0.3)]">
-                        Il Cammino
+                        <span data-content-id="nav_cammino">Il Cammino</span>
                     </a>
                 </nav>
 
@@ -140,11 +140,45 @@
     <!-- MOBILE MENU OVERLAY -->
     <div id="mobile-menu-overlay" class="hidden fixed inset-0 z-[60] bg-deep-950/98 backdrop-blur-xl flex flex-col justify-center items-center gap-8 transition-opacity duration-300">
         <button onclick="toggleMobileMenu()" class="absolute top-8 right-8 text-white/50 hover:text-white"><i data-lucide="x" class="w-8 h-8"></i></button>
-        <a href="#lago" onclick="toggleMobileMenu()" class="text-3xl font-serif text-white hover:text-gold-400">Il Lago</a>
-        <a href="#territorio" onclick="toggleMobileMenu()" class="text-3xl font-serif text-white hover:text-gold-400">Borghi</a>
-        <a href="#eventi-section" onclick="toggleMobileMenu()" class="text-3xl font-serif text-white hover:text-gold-400">Eventi</a>
-        <a href="cammino.html" class="text-3xl font-serif text-gold-400 italic">Il Cammino</a>
+        <a href="#lago" data-content-id="nav_lago" onclick="toggleMobileMenu()" class="text-3xl font-serif text-white hover:text-gold-400">Il Lago</a>
+        <a href="#territorio" data-content-id="nav_borghi" onclick="toggleMobileMenu()" class="text-3xl font-serif text-white hover:text-gold-400">Borghi</a>
+        <a href="#eventi-section" data-content-id="nav_eventi" onclick="toggleMobileMenu()" class="text-3xl font-serif text-white hover:text-gold-400">Eventi</a>
+        <a href="cammino.html" class="text-3xl font-serif text-gold-400 italic"><span data-content-id="nav_cammino">Il Cammino</span></a>
     </div>
+
+    <!-- EVENTI SECTION (moved directly under header) -->
+    <section id="eventi-section" class="pt-28 pb-24 bg-deep-950 relative border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-6 mb-12 flex justify-between items-end">
+            <div>
+                <span class="text-gold-400 text-xs font-bold tracking-[0.2em] uppercase mb-2 block">Agenda</span>
+                <h2 class="text-4xl md:text-5xl font-serif text-white">Eventi Live</h2>
+            </div>
+            <div class="hidden md:flex gap-2">
+                <button onclick="document.getElementById('events-main-grid').scrollBy({left: -300, behavior: 'smooth'})" class="p-3 rounded-full border border-white/10 hover:bg-white/10 text-white transition"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
+                <button onclick="document.getElementById('events-main-grid').scrollBy({left: 300, behavior: 'smooth'})" class="p-3 rounded-full border border-white/10 hover:bg-white/10 text-white transition"><i data-lucide="arrow-right" class="w-5 h-5"></i></button>
+            </div>
+        </div>
+
+        <!-- Main Events Grid -->
+        <div id="events-main-grid" class="flex md:grid md:grid-cols-4 gap-6 overflow-x-auto md:overflow-visible snap-x snap-mandatory hide-scroll pb-8 px-6 md:px-0">
+            <!-- Populated by JS -->
+            <div class="min-w-[280px] aspect-poster bg-deep-900 rounded-xl animate-pulse border border-white/5"></div>
+            <div class="min-w-[280px] aspect-poster bg-deep-900 rounded-xl animate-pulse border border-white/5"></div>
+            <div class="min-w-[280px] aspect-poster bg-deep-900 rounded-xl animate-pulse border border-white/5"></div>
+            <div class="min-w-[280px] aspect-poster bg-deep-900 rounded-xl animate-pulse border border-white/5"></div>
+        </div>
+
+        <div id="load-more-container" class="text-center mt-8 hidden">
+            <button onclick="showAllEvents()" class="px-8 py-3 border border-white/20 rounded-full text-white hover:bg-white hover:text-black transition uppercase text-xs font-bold tracking-widest flex items-center gap-2 mx-auto">
+                Tutti gli Eventi <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            </button>
+        </div>
+
+        <!-- Hidden List -->
+        <div id="events-hidden-list" class="hidden mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-6 md:px-0 max-w-7xl mx-auto animate-fade-in-up">
+            <!-- Populated by JS -->
+        </div>
+    </section>
 
     <!-- HERO SECTION -->
     <section class="relative h-screen w-full overflow-hidden flex items-center justify-center">
@@ -327,40 +361,6 @@
         </div>
     </section>
 
-    <!-- EVENTI SECTION -->
-    <section id="eventi-section" class="py-24 bg-deep-950 relative border-b border-white/5">
-        <div class="max-w-7xl mx-auto px-6 mb-12 flex justify-between items-end">
-            <div>
-                <span class="text-gold-400 text-xs font-bold tracking-[0.2em] uppercase mb-2 block">Agenda</span>
-                <h2 class="text-4xl md:text-5xl font-serif text-white">Eventi Live</h2>
-            </div>
-            <div class="hidden md:flex gap-2">
-                <button onclick="document.getElementById('events-main-grid').scrollBy({left: -300, behavior: 'smooth'})" class="p-3 rounded-full border border-white/10 hover:bg-white/10 text-white transition"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
-                <button onclick="document.getElementById('events-main-grid').scrollBy({left: 300, behavior: 'smooth'})" class="p-3 rounded-full border border-white/10 hover:bg-white/10 text-white transition"><i data-lucide="arrow-right" class="w-5 h-5"></i></button>
-            </div>
-        </div>
-
-        <!-- Main Events Grid -->
-        <div id="events-main-grid" class="flex md:grid md:grid-cols-4 gap-6 overflow-x-auto md:overflow-visible snap-x snap-mandatory hide-scroll pb-8 px-6 md:px-0">
-            <!-- Populated by JS -->
-            <div class="min-w-[280px] aspect-poster bg-deep-900 rounded-xl animate-pulse border border-white/5"></div>
-            <div class="min-w-[280px] aspect-poster bg-deep-900 rounded-xl animate-pulse border border-white/5"></div>
-            <div class="min-w-[280px] aspect-poster bg-deep-900 rounded-xl animate-pulse border border-white/5"></div>
-            <div class="min-w-[280px] aspect-poster bg-deep-900 rounded-xl animate-pulse border border-white/5"></div>
-        </div>
-
-        <div id="load-more-container" class="text-center mt-8 hidden">
-            <button onclick="showAllEvents()" class="px-8 py-3 border border-white/20 rounded-full text-white hover:bg-white hover:text-black transition uppercase text-xs font-bold tracking-widest flex items-center gap-2 mx-auto">
-                Tutti gli Eventi <i data-lucide="chevron-down" class="w-4 h-4"></i>
-            </button>
-        </div>
-
-        <!-- Hidden List -->
-        <div id="events-hidden-list" class="hidden mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-6 md:px-0 max-w-7xl mx-auto animate-fade-in-up">
-            <!-- Populated by JS -->
-        </div>
-    </section>
-
     <!-- CONTENT MODAL -->
     <div id="content-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-deep-950/95 backdrop-blur-md transition-opacity" onclick="closeModal()"></div>
@@ -455,7 +455,7 @@
     </footer>
 
     <!-- SCRIPT IMPORT & LOGIC -->
-    <script type="module" src="script.js"></script>
+    <script type="module" src="script.ts"></script>
     <script>
         // Init Lucide Icons
         lucide.createIcons();

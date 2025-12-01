@@ -1,32 +1,16 @@
 import { GoogleGenAI } from "@google/genai";
+import { CAMMINO_STAGE_FIELDS, CamminoStage, fetchCamminoStages } from './services/camminoService.ts';
 
 // --- CONFIGURATION ---
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=0&single=true&output=csv"; 
 const CONTENT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=643581002&single=true&output=csv";
 
 // --- STATE ---
-let events = [];
-let pendingEvents = [];
-let cmsData = {}; 
+let events: any[] = [];
+let pendingEvents: any[] = [];
+let cmsData: Record<string, { text?: string; image?: string }> = {};
+let camminoStages: CamminoStage[] = [];
 let chatHistory = [{ role: 'bot', text: "Ciao! Sono il tuo assistente virtuale. Cerchi un evento o info sul territorio?" }];
-
-const CAMMINO_STAGES = {
-    "3": [
-        { title: "Avigliano - Sismano", km: "15 km", diff: "+450m", desc: "Partenza dalla Piazza del Municipio." },
-        { title: "Sismano - Dunarobba", km: "22 km", diff: "+600m", desc: "Attraversamento dei boschi di castagno." },
-        { title: "Dunarobba - Avigliano", km: "18 km", diff: "+350m", desc: "Chiusura dell'anello passando per la Grotta Bella." }
-    ],
-    "2": [
-        { title: "Avigliano - Dunarobba (Fast)", km: "35 km", diff: "+1100m", desc: "Tappa sfidante che unisce storia e natura." },
-        { title: "Dunarobba - Avigliano", km: "25 km", diff: "+600m", desc: "Rientro panoramico." }
-    ],
-    "4": [
-        { title: "Avigliano - Toscolano", km: "12 km", diff: "+300m", desc: "Inizio dolce verso il borgo circolare." },
-        { title: "Toscolano - Sismano", km: "14 km", diff: "+400m", desc: "Immersione nella macchia mediterranea." },
-        { title: "Sismano - Dunarobba", km: "15 km", diff: "+350m", desc: "Giornata dedicata alla geologia." },
-        { title: "Dunarobba - Avigliano", km: "14 km", diff: "+250m", desc: "Rientro rilassante." }
-    ]
-};
 
 // --- HELPERS ---
 
@@ -55,6 +39,25 @@ function parseCSVLine(text) {
     result.push(cell.trim());
     return result.map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"'));
 }
+
+const toNumber = (value?: string) => {
+    if (!value) return 0;
+    const numeric = value.replace(/,/g, '.').match(/[\d.]+/);
+    return numeric ? parseFloat(numeric[0]) : 0;
+};
+
+const withUnit = (value: string, unit: string) => {
+    if (!value) return '';
+    return /[a-zA-Z]/.test(value) ? value : `${value} ${unit}`;
+};
+
+const getStageValue = (stage: CamminoStage, key: keyof CamminoStage) => stage[key] || '';
+
+const getStageTotals = (stages: CamminoStage[]) => {
+    const distance = stages.reduce((sum, stage) => sum + toNumber(getStageValue(stage, CAMMINO_STAGE_FIELDS['Distanza (km)'])), 0);
+    const elevation = stages.reduce((sum, stage) => sum + toNumber(getStageValue(stage, CAMMINO_STAGE_FIELDS['Dislivello (m)'])), 0);
+    return { distance, elevation, count: stages.length };
+};
 
 // --- CORE FUNCTIONS ---
 
@@ -163,6 +166,78 @@ function renderCompactEvent(e) {
     `;
 }
 
+const renderStageCard = (stage: CamminoStage, index: number) => {
+    const title = getStageValue(stage, CAMMINO_STAGE_FIELDS['Tappa']) || `Tappa ${index + 1}`;
+    const from = getStageValue(stage, CAMMINO_STAGE_FIELDS['Da']);
+    const to = getStageValue(stage, CAMMINO_STAGE_FIELDS['A']);
+    const distance = getStageValue(stage, CAMMINO_STAGE_FIELDS['Distanza (km)']);
+    const elevation = getStageValue(stage, CAMMINO_STAGE_FIELDS['Dislivello (m)']);
+    const time = getStageValue(stage, CAMMINO_STAGE_FIELDS['Tempo stimato']);
+    const difficulty = getStageValue(stage, CAMMINO_STAGE_FIELDS['Difficoltà']);
+    const towns = getStageValue(stage, CAMMINO_STAGE_FIELDS['Comuni interessati']);
+    const poi = getStageValue(stage, CAMMINO_STAGE_FIELDS['Punti di interesse']);
+    const description = getStageValue(stage, CAMMINO_STAGE_FIELDS['Descrizione']);
+    const image = formatImageUrl(getStageValue(stage, CAMMINO_STAGE_FIELDS['Immagine']));
+
+    const subtitle = [from, to].filter(Boolean).length === 2 ? `Da ${from} a ${to}` : from || to;
+
+    return `
+        <div class="relative bg-deep-900 border border-white/5 rounded-2xl overflow-hidden shadow-lg group">
+            ${image ? `<div class="absolute inset-0"> <div class="absolute inset-0 bg-gradient-to-t from-deep-950 via-deep-950/70 to-transparent z-[1]"></div><img src="${image}" class="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-100 transition duration-700" loading="lazy" /> </div>` : ''}
+            <div class="relative z-[2] p-6 space-y-4">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <p class="text-[10px] uppercase tracking-[0.3em] text-gold-400 font-bold mb-1">Tappa ${index + 1}</p>
+                        <h3 class="text-xl font-serif text-white leading-tight">${title}</h3>
+                        ${subtitle ? `<p class="text-sm text-slate-400">${subtitle}</p>` : ''}
+                    </div>
+                    ${difficulty ? `<span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-white/10 border border-white/10 text-white">${difficulty}</span>` : ''}
+                </div>
+                <div class="flex flex-wrap gap-2 text-[11px] uppercase tracking-widest font-bold text-slate-200">
+                    ${distance ? `<span class="bg-white/10 border border-white/10 px-3 py-1 rounded-full">${withUnit(distance, 'km')}</span>` : ''}
+                    ${elevation ? `<span class="bg-white/10 border border-white/10 px-3 py-1 rounded-full">${withUnit(elevation, 'm D+')}</span>` : ''}
+                    ${time ? `<span class="bg-white/10 border border-white/10 px-3 py-1 rounded-full">${time}</span>` : ''}
+                </div>
+                ${description ? `<p class="text-slate-300 text-sm leading-relaxed">${description}</p>` : ''}
+                ${(towns || poi) ? `<div class="text-xs text-slate-400 space-y-1">
+                    ${towns ? `<p class="flex items-center gap-2"><i data-lucide="map-pin" class="w-3 h-3"></i><span>${towns}</span></p>` : ''}
+                    ${poi ? `<p class="flex items-center gap-2"><i data-lucide="sparkles" class="w-3 h-3"></i><span>${poi}</span></p>` : ''}
+                </div>` : ''}
+            </div>
+        </div>
+    `;
+};
+
+const updateCamminoSummary = () => {
+    const summaryEl = document.getElementById('cammino-summary');
+    if (!summaryEl || camminoStages.length === 0) return;
+
+    const { distance, elevation, count } = getStageTotals(camminoStages);
+    const distanceLabel = distance ? `${distance.toFixed(1)} km` : '';
+    const elevationLabel = elevation ? `${Math.round(elevation)} m D+` : '';
+    const badgeText = [distanceLabel, elevationLabel, count ? `${count} tappe` : ''].filter(Boolean).join(' · ');
+
+    summaryEl.textContent = badgeText;
+    summaryEl.classList.remove('hidden');
+};
+
+const renderCamminoStages = () => {
+    const container = document.getElementById('cammino-timeline');
+    if (!container) return;
+
+    if (camminoStages.length === 0) {
+        container.innerHTML = '<div class="text-sm text-slate-500 text-center py-8">Caricamento itinerario...</div>';
+        return;
+    }
+
+    container.innerHTML = '';
+    camminoStages.forEach((stage, index) => {
+        container.insertAdjacentHTML('beforeend', renderStageCard(stage, index));
+    });
+
+    if (window.lucide) window.lucide.createIcons();
+};
+
 // --- GLOBAL EXPORTS ---
 
 window.openModal = (baseId) => {
@@ -248,30 +323,23 @@ window.toggleMobileMenu = () => {
     document.body.classList.toggle('overflow-hidden');
 };
 
-window.updateCamminoTimeline = () => {
+const loadCamminoStages = async () => {
     const container = document.getElementById('cammino-timeline');
-    if (!container) return;
+    if (container) container.innerHTML = '<div class="text-sm text-slate-500 text-center py-8">Caricamento itinerario...</div>';
 
-    const durationInput = document.querySelector('input[name="duration"]:checked');
-    const duration = durationInput ? durationInput.value : "3";
-    const stages = CAMMINO_STAGES[duration] || CAMMINO_STAGES["3"];
-    
-    container.innerHTML = '';
-    stages.forEach((stage, index) => {
-        const isLast = index === stages.length - 1;
-        const html = `
-            <div class="relative pl-8 pb-10 ${isLast ? '' : 'border-l-2 border-white/10'} ml-2 fade-in" style="animation-delay: ${index * 0.1}s">
-                <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-neon-400 border-4 border-deep-900 shadow-md"></div>
-                <h4 class="text-xl font-serif font-bold text-white mb-1">${stage.title}</h4>
-                <div class="flex items-center gap-4 text-xs font-bold text-neon-400 uppercase tracking-wider mb-3">
-                    <span class="bg-neon-400/10 border border-neon-400/20 px-2 py-1 rounded">${stage.km}</span>
-                    <span class="bg-neon-400/10 border border-neon-400/20 px-2 py-1 rounded">${stage.diff}</span>
-                </div>
-                <p class="text-slate-400 text-sm leading-relaxed">${stage.desc}</p>
-            </div>
-        `;
-        container.insertAdjacentHTML('beforeend', html);
-    });
+    try {
+        const stages = await fetchCamminoStages();
+        camminoStages = stages.filter(stage => Object.values(stage).some(Boolean));
+        renderCamminoStages();
+        updateCamminoSummary();
+    } catch (error) {
+        console.error('Errore nel caricamento delle tappe:', error);
+        if (container) container.innerHTML = '<div class="text-sm text-rose-200 text-center py-8">Impossibile caricare le tappe dal CSV. Riprova più tardi.</div>';
+    }
+};
+
+window.updateCamminoTimeline = () => {
+    renderCamminoStages();
 };
 
 // --- INIT ---
@@ -279,7 +347,7 @@ window.updateCamminoTimeline = () => {
 document.addEventListener('DOMContentLoaded', async () => {
     await loadContentCMS();
     
-    if(document.getElementById('cammino-timeline')) window.updateCamminoTimeline();
+    if(document.getElementById('cammino-timeline')) await loadCamminoStages();
 
     const rawEvents = await fetchEventsFromSheet();
     const today = new Date(); today.setHours(0,0,0,0);

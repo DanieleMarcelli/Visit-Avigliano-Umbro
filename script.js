@@ -124,20 +124,21 @@ function renderEventCard(e) {
     const month = !isNaN(d) ? d.toLocaleString('it-IT', { month: 'short' }).toUpperCase() : "";
 
     return `
-        <div class="min-w-[280px] snap-center relative aspect-[7/10] bg-deep-900 rounded-2xl overflow-hidden group cursor-pointer border border-white/5 hover:border-neon-400/50 transition-all duration-300">
-            <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style="background-image: url('${e.imageUrl}')"></div>
-            <div class="absolute inset-0 bg-gradient-to-t from-deep-950 via-deep-950/40 to-transparent"></div>
+        <div class="snap-center shrink-0 min-w-[280px] md:min-w-0 w-[280px] md:w-auto relative aspect-[7/10] bg-deep-900 rounded-2xl overflow-hidden group cursor-pointer border border-white/5 hover:border-neon-400/50 transition-all duration-300 shadow-lg">
+            <img src="${e.imageUrl}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
             
-            <div class="absolute top-4 right-4 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-white border border-white/10">
+            <div class="absolute inset-0 bg-gradient-to-t from-deep-950 via-deep-950/50 to-transparent"></div>
+            
+            <div class="absolute top-4 right-4 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-white border border-white/10 z-10">
                 ${e.category}
             </div>
 
-            <div class="absolute bottom-0 left-0 p-6 w-full">
+            <div class="absolute bottom-0 left-0 p-6 w-full z-10">
                 <div class="flex items-end gap-4 mb-2">
-                    <div class="text-neon-400 font-serif text-5xl leading-none font-bold">${day}</div>
-                    <div class="text-slate-400 font-bold text-xs uppercase tracking-widest mb-1 border-l border-slate-600 pl-2">${month}</div>
+                    <div class="text-neon-400 font-serif text-5xl leading-none font-bold drop-shadow-lg">${day}</div>
+                    <div class="text-slate-300 font-bold text-xs uppercase tracking-widest mb-1 border-l border-slate-600 pl-2 shadow-black">${month}</div>
                 </div>
-                <h3 class="text-xl font-serif text-white leading-tight mb-2 group-hover:text-neon-400 transition-colors line-clamp-2">${e.title}</h3>
+                <h3 class="text-xl font-serif text-white leading-tight mb-2 group-hover:text-neon-400 transition-colors line-clamp-2 drop-shadow-md">${e.title}</h3>
                 <p class="text-slate-400 text-xs flex items-center gap-2">
                     <i data-lucide="map-pin" class="w-3 h-3"></i> ${e.location}
                 </p>

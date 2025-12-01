@@ -137,10 +137,25 @@
             <h1 data-content-id="home_hero_text" class="text-6xl md:text-8xl lg:text-9xl font-serif font-black text-white mb-8 tracking-tight leading-none drop-shadow-2xl animate-fade-in-up opacity-0" style="animation-delay: 0.2s">
                 Avigliano <br/> <span class="italic text-slate-400 font-light">Umbro</span>
             </h1>
-            <div class="flex justify-center gap-4 animate-fade-in-up opacity-0" style="animation-delay: 0.4s">
-                <a href="cammino.html" class="px-8 py-4 rounded-full bg-gold-500 text-deep-950 font-bold tracking-widest text-xs uppercase hover:bg-white transition-all shadow-[0_0_20px_rgba(217,119,6,0.4)]">
-                    Scopri il Cammino
+            
+            <!-- Main CTA Area -->
+            <div class="flex flex-col items-center gap-8 animate-fade-in-up opacity-0" style="animation-delay: 0.4s">
+                <a href="#eventi-section" class="px-10 py-4 rounded-full bg-gold-500 text-deep-950 font-bold tracking-[0.2em] text-sm uppercase hover:bg-white transition-all shadow-[0_0_20px_rgba(217,119,6,0.4)] hover:scale-105 transform">
+                    Scopri gli Eventi
                 </a>
+                
+                <!-- Secondary Navigation Links -->
+                <div class="flex flex-wrap justify-center gap-4">
+                     <a href="#territorio" class="px-6 py-2 rounded-full border border-white/20 text-white/80 hover:text-white hover:bg-white/10 hover:border-white/40 transition-all text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
+                        Borghi
+                    </a>
+                    <a href="#lago" class="px-6 py-2 rounded-full border border-white/20 text-white/80 hover:text-white hover:bg-white/10 hover:border-white/40 transition-all text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
+                        Lago Tiberino
+                    </a>
+                    <a href="#ospitalita" class="px-6 py-2 rounded-full border border-white/20 text-white/80 hover:text-white hover:bg-white/10 hover:border-white/40 transition-all text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
+                        Ospitalità
+                    </a>
+                </div>
             </div>
         </div>
         
@@ -154,7 +169,7 @@
         <div class="max-w-7xl mx-auto px-6 mb-12 flex justify-between items-end">
             <div>
                 <span class="text-gold-400 text-xs font-bold tracking-[0.2em] uppercase mb-2 block">Agenda Culturale</span>
-                <h2 class="text-4xl md:text-5xl font-serif text-white">Eventi in Programma</h2>
+                <h2 data-content-id="events_section_title" class="text-4xl md:text-5xl font-serif text-white">Eventi in Programma</h2>
             </div>
             
             <div class="hidden md:flex gap-2">
@@ -164,6 +179,7 @@
         </div>
 
         <!-- 1. MAIN GRID (Top 4 Events) -->
+        <!-- Mobile: Horizontal Scroll Snap | Desktop: 4 Column Grid -->
         <div id="events-main-grid" class="flex md:grid md:grid-cols-4 gap-6 overflow-x-auto md:overflow-visible snap-x snap-mandatory hide-scroll pb-8 px-6 md:px-0">
             <!-- Skeleton Loaders (Removed by JS) -->
             <div class="snap-center shrink-0 min-w-[280px] md:min-w-0 w-[280px] md:w-auto aspect-poster bg-deep-900 rounded-2xl animate-pulse border border-white/5"></div>

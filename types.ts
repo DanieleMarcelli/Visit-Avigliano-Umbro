@@ -42,10 +42,10 @@ export interface HeaderContent {
   logoUrl: string;
   title: string;
   subtitle: string;
-  navTerritory: string;
-  navHistory: string;
-  navContacts: string;
-  eventsLabel: string;
+  navLake: string;
+  navVillages: string;
+  navEvents: string;
+  navTrail: string;
   shareLabel: string;
   languageLabel: string;
 }

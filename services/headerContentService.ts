@@ -6,47 +6,58 @@ export const DEFAULT_HEADER_CONTENT: HeaderContent = {
   logoUrl: 'https://picsum.photos/50/50',
   title: 'Visit Avigliano Umbro',
   subtitle: 'Portale Turistico',
-  navTerritory: 'Territorio',
-  navHistory: 'Storia',
-  navContacts: 'Contatti',
-  eventsLabel: 'Eventi',
+  navLake: 'Il Lago',
+  navVillages: 'Borghi',
+  navEvents: 'Eventi',
+  navTrail: 'Il Cammino',
   shareLabel: 'Condividi',
   languageLabel: 'Lingua'
 };
 
-const FIELD_MAP: Record<string, keyof HeaderContent> = {
-  logourl: 'logoUrl',
-  titolo: 'title',
-  title: 'title',
-  sottotitolo: 'subtitle',
-  subtitle: 'subtitle',
-  territorio: 'navTerritory',
-  storia: 'navHistory',
-  contatti: 'navContacts',
-  eventi: 'eventsLabel',
-  share: 'shareLabel',
-  lingua: 'languageLabel'
+const ID_TO_FIELD: Record<string, keyof HeaderContent> = {
+  nav_logo: 'logoUrl',
+  nav_title: 'title',
+  nav_subtitle: 'subtitle',
+  nav_lago: 'navLake',
+  nav_borghi: 'navVillages',
+  nav_eventi: 'navEvents',
+  nav_cammino: 'navTrail',
+  nav_share: 'shareLabel',
+  nav_lang: 'languageLabel'
 };
 
-const CSV_LINE_SPLIT = /\r?\n/;
+const formatImageUrl = (url: string) => {
+  if (!url) return '';
+  if (url.includes('drive.google.com')) {
+    const idMatch = url.match(/\/d\/(.+?)\/|id=(.+?)&|id=(.+?)$/);
+    const id = idMatch ? (idMatch[1] || idMatch[2] || idMatch[3]) : null;
+    if (id) return `https://drive.google.com/thumbnail?id=${id}&sz=w1000`;
+  }
+  return url;
+};
 
-const trimQuotes = (value: string) => value.replace(/^"|"$/g, '').trim();
-
-const parseHeaderRow = (csvText: string): Partial<HeaderContent> => {
-  const rows = csvText.split(CSV_LINE_SPLIT).filter(Boolean);
+const parseHeaderContent = (csvText: string): Partial<HeaderContent> => {
+  const rows = csvText.split(/\r?\n/).filter(Boolean);
   if (rows.length < 2) return {};
 
-  const headerCells = rows[0].split(',').map(trimQuotes);
-  const valueCells = rows[1].split(',').map(trimQuotes);
+  return rows.slice(1).reduce<Partial<HeaderContent>>((acc, row) => {
+    const cells = row.split(',');
+    const id = cells[0]?.replace(/^"|"$/g, '').trim();
+    const textValue = cells[1]?.replace(/^"|"$/g, '').trim();
+    const imageValue = cells[2]?.replace(/^"|"$/g, '').trim();
 
-  return headerCells.reduce<Partial<HeaderContent>>((acc, rawKey, index) => {
-    const mappedKey = FIELD_MAP[rawKey.toLowerCase()];
-    if (!mappedKey) return acc;
+    const mappedField = id ? ID_TO_FIELD[id.toLowerCase()] : undefined;
+    if (!mappedField) return acc;
 
-    const value = valueCells[index];
-    if (!value) return acc;
+    if (mappedField === 'logoUrl' && imageValue) {
+      return { ...acc, logoUrl: formatImageUrl(imageValue) };
+    }
 
-    return { ...acc, [mappedKey]: value };
+    if (textValue) {
+      return { ...acc, [mappedField]: textValue };
+    }
+
+    return acc;
   }, {});
 };
 
@@ -59,7 +70,7 @@ export const fetchHeaderContent = async (): Promise<HeaderContent> => {
     }
 
     const csvText = await response.text();
-    const parsed = parseHeaderRow(csvText);
+    const parsed = parseHeaderContent(csvText);
 
     return { ...DEFAULT_HEADER_CONTENT, ...parsed };
   } catch (error) {

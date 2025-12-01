@@ -34,15 +34,15 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#" className="text-stone-600 hover:text-brand-900 font-medium text-sm transition-colors">{content.navTerritory}</a>
-            <a href="#" className="text-stone-600 hover:text-brand-900 font-medium text-sm transition-colors">{content.navHistory}</a>
+            <a href="#lago" className="text-stone-600 hover:text-brand-900 font-medium text-sm transition-colors">{content.navLake}</a>
+            <a href="#borghi" className="text-stone-600 hover:text-brand-900 font-medium text-sm transition-colors">{content.navVillages}</a>
 
             <button
                 onClick={onEventsClick}
                 className="relative text-brand-900 font-semibold text-sm flex items-center gap-2 bg-brand-100 px-4 py-2 rounded-full hover:bg-brand-200 transition-all group"
             >
               <Calendar size={16} />
-              {content.eventsLabel}
+              {content.navEvents}
               {notificationCount > 0 && (
                 <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] text-white font-bold ring-2 ring-white animate-pulse shadow-sm">
                   {notificationCount > 9 ? '9+' : notificationCount}
@@ -50,7 +50,7 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </button>
 
-            <a href="#" className="text-stone-600 hover:text-brand-900 font-medium text-sm transition-colors">{content.navContacts}</a>
+            <a href="/cammino.html" className="text-stone-600 hover:text-brand-900 font-medium text-sm transition-colors">{content.navTrail}</a>
           </nav>
 
           {/* Actions */}

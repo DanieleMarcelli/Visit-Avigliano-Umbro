@@ -186,6 +186,24 @@ window.toggleChat = () => {
     if(win) win.classList.toggle('hidden');
 };
 
+window.sendChatMessage = () => {
+    const input = document.getElementById('chat-input');
+    const container = document.getElementById('chat-messages');
+    const text = input.value.trim();
+    if(!text) return;
+
+    // Add User Message
+    container.insertAdjacentHTML('beforeend', `<div class="bg-brand-900 p-3 rounded-lg rounded-tr-none text-white ml-auto border border-white/5">${text}</div>`);
+    input.value = '';
+    
+    // Simulate AI Response (Fallback if no key)
+    setTimeout(() => {
+        const reply = "Grazie per la tua domanda! Al momento sono in modalità demo, ma presto potrò darti informazioni dettagliate sugli eventi e il territorio.";
+        container.insertAdjacentHTML('beforeend', `<div class="bg-white/5 p-3 rounded-lg rounded-tl-none border border-white/5">${reply}</div>`);
+        container.scrollTop = container.scrollHeight;
+    }, 1000);
+}
+
 window.toggleMobileMenu = () => {
     const menu = document.getElementById('mobile-menu-overlay');
     if (menu) menu.classList.toggle('hidden');

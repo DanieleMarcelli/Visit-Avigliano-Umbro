@@ -7,15 +7,17 @@ import { Footer } from './components/Footer';
 import { AIChatAssistant } from './components/AIChatAssistant';
 import { AdminDashboard } from './components/AdminDashboard';
 import { EVENTS, MONTHS } from './constants';
-import { FilterState, EventCategory, EventLocation, EventItem } from './types';
+import { FilterState, EventCategory, EventLocation, EventItem, HeaderContent } from './types';
 import { CalendarOff } from 'lucide-react';
 import { updateGeminiContext } from './services/geminiService';
+import { DEFAULT_HEADER_CONTENT, fetchHeaderContent } from './services/headerContentService';
 
 const App: React.FC = () => {
   // State for events (initialized with constants, but mutable)
   const [events, setEvents] = useState<EventItem[]>(EVENTS);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
-  
+  const [headerContent, setHeaderContent] = useState<HeaderContent>(DEFAULT_HEADER_CONTENT);
+
   // Notification State
   const [newEventsCount, setNewEventsCount] = useState(0);
 
@@ -30,6 +32,10 @@ const App: React.FC = () => {
   useEffect(() => {
     updateGeminiContext(events);
   }, [events]);
+
+  useEffect(() => {
+    fetchHeaderContent().then(setHeaderContent);
+  }, []);
 
   const handleEventAdded = () => {
     setNewEventsCount(prev => prev + 1);
@@ -79,59 +85,61 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-stone-50 flex flex-col font-sans">
-      <Header 
-        onAdminClick={() => setIsAdminOpen(!isAdminOpen)} 
-        isAdminMode={isAdminOpen} 
+      <Header
+        onAdminClick={() => setIsAdminOpen(!isAdminOpen)}
+        isAdminMode={isAdminOpen}
         notificationCount={newEventsCount}
         onEventsClick={clearNotifications}
+        content={headerContent}
       />
-      
+
       {isAdminOpen ? (
-        <AdminDashboard 
-            events={events} 
-            setEvents={setEvents} 
-            onClose={() => setIsAdminOpen(false)} 
+        <AdminDashboard
+            events={events}
+            setEvents={setEvents}
+            onClose={() => setIsAdminOpen(false)}
             onEventAdded={handleEventAdded}
         />
       ) : (
         <main className="flex-grow">
-            <Hero />
-            
+          <section className="pt-28">
             <FilterBar filters={filters} setFilters={setFilters} />
-            
-            <div id="eventi-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            
-            <div className="flex justify-between items-end mb-8">
-                <div>
-                <h2 className="text-3xl font-serif font-bold text-stone-900">Eventi in Programma</h2>
-                <p className="text-stone-500 mt-2">
-                    {filteredEvents.length} {filteredEvents.length === 1 ? 'evento trovato' : 'eventi trovati'}
-                </p>
-                </div>
-            </div>
 
-            {filteredEvents.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                {filteredEvents.map(event => (
-                    <div key={event.id} className="h-full">
-                    <EventCard event={event} />
-                    </div>
-                ))}
+            <div id="eventi-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+              <div className="flex justify-between items-end mb-8">
+                <div>
+                  <h2 className="text-3xl font-serif font-bold text-stone-900">Eventi in Programma</h2>
+                  <p className="text-stone-500 mt-2">
+                    {filteredEvents.length} {filteredEvents.length === 1 ? 'evento trovato' : 'eventi trovati'}
+                  </p>
                 </div>
-            ) : (
+              </div>
+
+              {filteredEvents.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                  {filteredEvents.map(event => (
+                    <div key={event.id} className="h-full">
+                      <EventCard event={event} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
                 <div className="flex flex-col items-center justify-center py-20 text-stone-400 bg-white rounded-xl border border-dashed border-stone-300">
-                <CalendarOff size={48} className="mb-4 text-stone-300" />
-                <p className="text-lg font-medium">Nessun evento trovato</p>
-                <p className="text-sm">Prova a modificare i filtri di ricerca</p>
-                <button 
+                  <CalendarOff size={48} className="mb-4 text-stone-300" />
+                  <p className="text-lg font-medium">Nessun evento trovato</p>
+                  <p className="text-sm">Prova a modificare i filtri di ricerca</p>
+                  <button
                     onClick={() => setFilters({ search: '', month: MONTHS[0], category: EventCategory.ALL, location: EventLocation.ALL })}
                     className="mt-4 text-brand-900 font-bold hover:underline"
-                >
+                  >
                     Resetta filtri
-                </button>
+                  </button>
                 </div>
-            )}
+              )}
             </div>
+          </section>
+
+          <Hero />
         </main>
       )}
 

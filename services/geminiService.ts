@@ -1,6 +1,14 @@
 import { GoogleGenAI } from "@google/genai";
 import { EventItem } from '../types';
 
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
+if (GEMINI_API_KEY) {
+  console.info("Gemini API key detected. AI features are enabled.");
+} else {
+  console.warn("Gemini API key is missing. AI-powered features will be disabled until a key is configured.");
+}
+
 // We pass the current events dynamically now, but keep the constant as a fallback/initial state source
 let CURRENT_EVENTS_CONTEXT: any[] = [];
 
@@ -22,12 +30,12 @@ If asked about something not in the list, politely suggest checking the official
 `;
 
 export const sendMessageToGemini = async (message: string): Promise<string> => {
-  if (!process.env.API_KEY) {
+  if (!GEMINI_API_KEY) {
     return "API Key is missing. Please configure the environment.";
   }
 
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
     const contextString = `Current Events Data: ${JSON.stringify(CURRENT_EVENTS_CONTEXT)}`;
     
     const response = await ai.models.generateContent({
@@ -46,11 +54,11 @@ export const sendMessageToGemini = async (message: string): Promise<string> => {
 };
 
 export const analyzeEventPoster = async (base64Image: string): Promise<Partial<EventItem>> => {
-    if (!process.env.API_KEY) {
+    if (!GEMINI_API_KEY) {
         throw new Error("API Key missing");
     }
 
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
     
     const prompt = `
     Analyze this event poster (locandina) for Visit Avigliano Umbro.

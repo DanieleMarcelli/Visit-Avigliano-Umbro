@@ -23,6 +23,7 @@
                             dark: '#050b14', // Midnight Blue scuro
                             navy: '#0f172a', 
                             gold: '#d4af37', 
+                            cyan: '#06b6d4',
                             text: '#94a3b8', 
                             white: '#f8fafc',
                         }
@@ -33,18 +34,14 @@
                     },
                     backgroundImage: {
                         'home-hero-overlay': 'radial-gradient(circle at center, rgba(5,11,20,0.3) 0%, rgba(5,11,20,0.9) 80%, #050b14 100%)',
-                        'section-overlay': 'linear-gradient(to right, #050b14 0%, rgba(5,11,20,0.85) 50%, rgba(5,11,20,0.7) 100%)',
-                        'card-gradient': 'linear-gradient(to top, rgba(5,11,20,0.95) 0%, rgba(5,11,20,0.1) 100%)'
+                        'section-overlay': 'linear-gradient(to bottom, #050b14 0%, rgba(5,11,20,0.8) 20%, rgba(5,11,20,0.8) 80%, #050b14 100%)',
+                        'card-gradient': 'linear-gradient(to top, rgba(15, 23, 42, 1) 0%, rgba(15, 23, 42, 0.6) 100%)'
                     },
                     animation: {
-                        'float': 'float 6s ease-in-out infinite',
                         'fade-in-up': 'fadeInUp 1s ease-out forwards',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     },
                     keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-20px)' },
-                        },
                         fadeInUp: {
                             '0%': { opacity: '0', transform: 'translateY(20px)' },
                             '100%': { opacity: '1', transform: 'translateY(0)' },
@@ -56,9 +53,8 @@
     </script>
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .text-outline {
-            -webkit-text-stroke: 1px rgba(255, 255, 255, 0.1);
-            color: transparent;
+        .date-box {
+            font-variant-numeric: tabular-nums;
         }
     </style>
 </head>
@@ -81,7 +77,7 @@
                 <nav class="hidden md:flex items-center gap-8">
                     <a href="cammino.html" class="text-brand-text hover:text-white text-xs font-bold uppercase tracking-widest transition-colors">Il Cammino</a>
                     <a href="#" class="text-brand-text hover:text-white text-xs font-bold uppercase tracking-widest transition-colors">Borghi</a>
-                    <a href="#" class="text-brand-gold border-b border-brand-gold pb-0.5 text-xs font-bold uppercase tracking-widest transition-colors">Eventi</a>
+                    <a href="#events-section" class="text-brand-gold border-b border-brand-gold pb-0.5 text-xs font-bold uppercase tracking-widest transition-colors">Eventi</a>
                     <a href="#" class="text-brand-gold border border-brand-gold/30 px-5 py-2 rounded-full hover:bg-brand-gold hover:text-brand-dark transition-all text-xs font-bold uppercase tracking-widest">Pianifica</a>
                 </nav>
                 
@@ -116,6 +112,7 @@
                 Scopri la Foresta Fossile, percorri antichi sentieri e vivi l'autenticità dei nostri borghi.
             </p>
 
+            <!-- Nav Cards Grid -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-10 max-w-4xl mx-auto animate-fade-in-up" style="animation-delay: 0.7s;">
                 <a href="cammino.html" class="group relative bg-brand-navy/40 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:border-brand-gold hover:bg-brand-navy/80 transition-all duration-500 text-left overflow-hidden">
                     <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all">
@@ -161,10 +158,11 @@
         </div>
     </div>
 
-    <!-- EVENTS SECTION (Dynamic) -->
-    <section id="events-section" class="py-24 relative bg-brand-dark overflow-hidden min-h-[800px] flex items-center">
+    <!-- EVENTS SECTION (Dynamic & Styled) -->
+    <section id="events-section" class="py-24 relative bg-brand-dark min-h-[90vh] flex items-center">
         <!-- Dynamic Background from CSV -->
-        <div id="events-bg" class="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-1000 opacity-0"></div>
+        <div id="events-bg" class="absolute inset-0 z-0 bg-cover bg-center bg-fixed transition-opacity duration-1000 opacity-0"></div>
+        <!-- Gradient Overlay -->
         <div class="absolute inset-0 z-0 bg-section-overlay"></div>
 
         <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
@@ -175,32 +173,24 @@
                     </h2>
                     <div class="h-[1px] w-24 bg-brand-gold/50"></div>
                     <p class="mt-4 text-brand-text font-light max-w-xl">
-                        Vivi il territorio attraverso le nostre tradizioni. Musica, cultura e sagre nel cuore dei borghi.
+                        Il calendario degli appuntamenti: cultura, tradizione e natura nel cuore di Avigliano.
                     </p>
-                </div>
-                <div class="flex gap-2">
-                    <button class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-brand-gold hover:text-brand-dark hover:border-brand-gold transition-all">
-                        <i data-lucide="chevron-left" class="w-5 h-5"></i>
-                    </button>
-                    <button class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-brand-gold hover:text-brand-dark hover:border-brand-gold transition-all">
-                        <i data-lucide="chevron-right" class="w-5 h-5"></i>
-                    </button>
                 </div>
             </div>
 
-            <!-- Events Grid Container -->
-            <div id="events-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Events Grid -->
+            <div id="events-container" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <!-- Loading State -->
-                <div class="col-span-3 text-center py-20">
+                <div class="col-span-1 lg:col-span-3 text-center py-20">
                     <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-brand-gold border-r-2 border-transparent"></div>
-                    <p class="mt-4 text-brand-text text-sm">Caricamento calendario...</p>
+                    <p class="mt-4 text-brand-text text-sm animate-pulse">Sincronizzazione calendario...</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- FOOTER -->
-    <footer class="bg-black text-brand-text py-12 border-t border-white/5">
+    <footer class="bg-black text-brand-text py-12 border-t border-white/5 relative z-10">
         <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
              <div class="flex items-center gap-3">
                  <div class="w-8 h-8 bg-white/5 rounded-full flex items-center justify-center text-brand-gold border border-white/10">
@@ -224,26 +214,58 @@
             loadEvents();
         };
 
+        // Carica lo sfondo della sezione eventi
         function loadBackground() {
             Papa.parse(BG_CSV_URL, {
                 download: true,
                 header: true,
                 complete: function(results) {
                     if (results.data && results.data.length > 0) {
-                        // Cerca una colonna che sembri un URL o usa la prima colonna
                         const firstRow = results.data[0];
-                        // Prova a trovare chiavi comuni o prendi il primo valore
+                        // Cerca una colonna URL immagine
                         const imageUrl = firstRow.url || firstRow.image || firstRow.immagine || Object.values(firstRow)[0];
                         
-                        if (imageUrl) {
+                        if (imageUrl && imageUrl.startsWith('http')) {
                             const bgElement = document.getElementById('events-bg');
                             bgElement.style.backgroundImage = `url('${imageUrl}')`;
                             bgElement.classList.remove('opacity-0');
-                            bgElement.classList.add('opacity-40'); // Opacità controllata per leggibilità
+                            bgElement.classList.add('opacity-30'); // Sfondo sottile per non disturbare il testo
                         }
                     }
                 }
             });
+        }
+
+        // Helper per formattare la data per il badge
+        function parseDateForBadge(dateString) {
+            // Default fallback
+            let day = "?";
+            let month = "???";
+
+            if (!dateString) return { day, month };
+
+            // Tenta di parsare formati comuni
+            // Es: "14/12/2024", "2024-12-14", "14 Dicembre"
+            
+            // Regex per "14 Dicembre" o "14 Dic"
+            const textMatch = dateString.match(/(\d+)\s+([a-zA-Z]+)/);
+            if (textMatch) {
+                day = textMatch[1].padStart(2, '0');
+                month = textMatch[2].substring(0, 3).toUpperCase();
+                return { day, month };
+            }
+
+            // Regex per "14/12" o "14-12"
+            const numMatch = dateString.match(/(\d{1,2})[\/\-](\d{1,2})/);
+            if (numMatch) {
+                day = numMatch[1].padStart(2, '0');
+                const m = parseInt(numMatch[2]);
+                const months = ["GEN", "FEB", "MAR", "APR", "MAG", "GIU", "LUG", "AGO", "SET", "OTT", "NOV", "DIC"];
+                month = (m >= 1 && m <= 12) ? months[m-1] : "???";
+                return { day, month };
+            }
+
+            return { day: dateString.substring(0,2), month: "EVT" };
         }
 
         function loadEvents() {
@@ -260,49 +282,68 @@
                     }
 
                     let html = '';
-                    // Limitiamo a 3 eventi per la home page, oppure tutti se richiesto
-                    // Assumiamo colonne: titolo, data, descrizione, luogo, immagine (opzionale)
-                    events.slice(0, 6).forEach((event, index) => {
+                    
+                    events.slice(0, 6).forEach((event) => {
                         // Skip righe vuote
                         if (!event.titolo && !Object.values(event)[0]) return;
 
-                        // Fallback flessibili per i nomi delle colonne
+                        // Normalize fields
                         const titolo = event.titolo || event.nome || 'Evento';
-                        const data = event.data || 'Data da definire';
+                        const rawDate = event.data || '';
                         const luogo = event.luogo || 'Avigliano Umbro';
                         const desc = event.descrizione || '';
-                        const tipo = event.tipo || 'Cultura';
+                        const tipo = event.tipo || 'Evento';
+                        const image = event.immagine || event.img || event.image || null; // Colonna opzionale per img card
+
+                        const dateObj = parseDateForBadge(rawDate);
 
                         html += `
-                        <div class="group bg-brand-navy border border-white/5 hover:border-brand-gold/50 rounded-xl p-6 transition-all duration-300 hover:-translate-y-2 flex flex-col h-full">
-                            <div class="flex justify-between items-start mb-4">
-                                <div class="bg-brand-dark border border-white/10 px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest text-brand-gold">
+                        <div class="group relative bg-brand-navy rounded-xl overflow-hidden border border-white/5 hover:border-brand-gold/50 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl flex flex-col h-full">
+                            
+                            <!-- Immagine Opzionale o Placeholder Sfumato -->
+                            <div class="h-40 w-full bg-brand-dark relative overflow-hidden">
+                                ${ image ? `<img src="${image}" class="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-500">` : 
+                                `<div class="absolute inset-0 bg-gradient-to-br from-brand-navy to-brand-dark opacity-50"></div>` }
+                                <div class="absolute inset-0 bg-card-gradient"></div>
+                                
+                                <!-- Category Tag Top Right -->
+                                <div class="absolute top-4 right-4 bg-black/50 backdrop-blur px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest text-brand-gold border border-white/10">
                                     ${tipo}
                                 </div>
-                                <span class="text-xs text-brand-text flex items-center gap-1">
-                                    <i data-lucide="map-pin" class="w-3 h-3"></i> ${luogo}
-                                </span>
                             </div>
-                            
-                            <h3 class="text-xl font-serif text-white mb-2 group-hover:text-brand-gold transition-colors">${titolo}</h3>
-                            
-                            <div class="text-xs font-bold uppercase tracking-wider text-brand-text/80 mb-4 flex items-center gap-2">
-                                <i data-lucide="calendar-days" class="w-4 h-4 text-brand-cyan"></i> ${data}
+
+                            <div class="p-6 relative flex-grow flex flex-col">
+                                <!-- Date Badge (Overlapping) -->
+                                <div class="absolute -top-10 left-6 bg-brand-gold text-brand-dark w-16 h-16 rounded-lg flex flex-col items-center justify-center shadow-lg border-2 border-brand-navy z-10 date-box">
+                                    <span class="text-2xl font-bold leading-none">${dateObj.day}</span>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider leading-none mt-1">${dateObj.month}</span>
+                                </div>
+
+                                <div class="mt-4 mb-2">
+                                     <span class="text-xs text-brand-text flex items-center gap-1 mb-2">
+                                        <i data-lucide="map-pin" class="w-3 h-3 text-brand-cyan"></i> ${luogo}
+                                    </span>
+                                    <h3 class="text-xl font-serif text-white group-hover:text-brand-gold transition-colors leading-tight min-h-[3.5rem]">
+                                        ${titolo}
+                                    </h3>
+                                </div>
+                                
+                                <p class="text-sm text-brand-text font-light line-clamp-3 mb-6 flex-grow">
+                                    ${desc}
+                                </p>
+                                
+                                <div class="pt-4 border-t border-white/5 mt-auto">
+                                    <a href="#" class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white hover:text-brand-gold transition-colors">
+                                        Leggi Tutto <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                                    </a>
+                                </div>
                             </div>
-                            
-                            <p class="text-sm text-brand-text font-light line-clamp-3 mb-6 flex-grow">
-                                ${desc}
-                            </p>
-                            
-                            <a href="#" class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white hover:text-brand-gold transition-colors mt-auto">
-                                Dettagli <i data-lucide="arrow-right" class="w-3 h-3"></i>
-                            </a>
                         </div>
                         `;
                     });
 
                     container.innerHTML = html;
-                    lucide.createIcons(); // Re-inizializza icone per il nuovo contenuto
+                    lucide.createIcons(); 
                 },
                 error: function(err) {
                     console.error("Errore Events CSV:", err);
@@ -312,3 +353,4 @@
         }
     </script>
 </body>
+</html>

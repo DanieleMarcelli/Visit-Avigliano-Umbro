@@ -72,7 +72,10 @@ async function loadContentCMS() {
             const imageUrl = cols[2];    
 
             if (id) {
-                if (contentText) cmsData[id] = contentText;
+                // Store in global object for modal use
+                cmsData[id] = { text: contentText, image: imageUrl };
+
+                // Update DOM elements
                 const elements = document.querySelectorAll(`[data-content-id="${id}"]`);
                 elements.forEach(element => {
                     if (contentText) {
@@ -83,7 +86,6 @@ async function loadContentCMS() {
                         element.tagName === 'IMG' ? element.src = formattedUrl : element.style.backgroundImage = `url('${formattedUrl}')`;
                     }
                     element.classList.remove('opacity-0');
-                    // If it's the hero opacity animation, trigger it
                     if(element.classList.contains('animate-fade-in-up')) {
                         element.style.opacity = '1';
                     }
@@ -102,7 +104,6 @@ async function fetchEventsFromSheet() {
         
         return rows.slice(1).map((row, index) => {
             const cols = parseCSVLine(row); 
-            // CSV Columns based on typical structure: Date, Time, Title, Subtitle, Desc, Location, Category, Image
             return {
                 id: `evt-${index}`,
                 date: cols[0],
@@ -126,13 +127,10 @@ function renderEventCard(e) {
     return `
         <div class="snap-center shrink-0 min-w-[280px] md:min-w-0 w-[280px] md:w-auto relative aspect-[7/10] bg-deep-900 rounded-2xl overflow-hidden group cursor-pointer border border-white/5 hover:border-neon-400/50 transition-all duration-300 shadow-lg">
             <img src="${e.imageUrl}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
-            
             <div class="absolute inset-0 bg-gradient-to-t from-deep-950 via-deep-950/50 to-transparent"></div>
-            
             <div class="absolute top-4 right-4 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-white border border-white/10 z-10">
                 ${e.category}
             </div>
-
             <div class="absolute bottom-0 left-0 p-6 w-full z-10">
                 <div class="flex items-end gap-4 mb-2">
                     <div class="text-neon-400 font-serif text-5xl leading-none font-bold drop-shadow-lg">${day}</div>
@@ -167,6 +165,48 @@ function renderCompactEvent(e) {
 
 // --- GLOBAL EXPORTS ---
 
+window.openModal = (baseId) => {
+    const modal = document.getElementById('content-modal');
+    if(!modal) return;
+    
+    // Attempt to grab content from CMS Data or fallback to DOM
+    // The convention is: ID_title, ID_desc, ID_img
+    
+    let title = "Dettaglio";
+    let desc = "Descrizione non disponibile.";
+    let img = "https://via.placeholder.com/800x600";
+
+    // Try finding via DOM if CMS data isn't fully ready or for fallback
+    const domTitle = document.querySelector(`[data-content-id="${baseId}_title"]`);
+    const domImg = document.querySelector(`[data-content-id="${baseId}_img"]`);
+    // For description, we often have a separate ID for the full modal description in CMS, 
+    // but if not, we might use the short desc or a placeholder.
+    // Let's check cmsData first.
+    
+    if (cmsData[`${baseId}_title`]) title = cmsData[`${baseId}_title`].text;
+    else if (domTitle) title = domTitle.innerText;
+
+    if (cmsData[`${baseId}_img`]) img = formatImageUrl(cmsData[`${baseId}_img`].image);
+    else if (domImg) img = domImg.src;
+
+    // Description is the tricky part. We prefer a 'full' description from CMS
+    if (cmsData[`${baseId}_desc`]) desc = cmsData[`${baseId}_desc`].text;
+    
+    document.getElementById('modal-title').innerHTML = title;
+    document.getElementById('modal-desc').innerHTML = desc;
+    document.getElementById('modal-img').src = img;
+    document.getElementById('modal-subtitle').innerText = "Esplora";
+
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+};
+
+window.closeModal = () => {
+    const modal = document.getElementById('content-modal');
+    if(modal) modal.classList.add('hidden');
+    document.body.style.overflow = '';
+};
+
 window.showAllEvents = () => {
     const listContainer = document.getElementById('events-hidden-list');
     const btnContainer = document.getElementById('load-more-container');
@@ -192,16 +232,14 @@ window.sendChatMessage = () => {
     const text = input.value.trim();
     if(!text) return;
 
-    // Add User Message
-    container.insertAdjacentHTML('beforeend', `<div class="bg-brand-900 p-3 rounded-lg rounded-tr-none text-white ml-auto border border-white/5">${text}</div>`);
+    container.insertAdjacentHTML('beforeend', `<div class="bg-brand-900 p-3 rounded-lg rounded-tr-none text-white ml-auto border border-white/5 text-right max-w-[80%]">${text}</div>`);
     input.value = '';
     
-    // Simulate AI Response (Fallback if no key)
     setTimeout(() => {
-        const reply = "Grazie per la tua domanda! Al momento sono in modalità demo, ma presto potrò darti informazioni dettagliate sugli eventi e il territorio.";
-        container.insertAdjacentHTML('beforeend', `<div class="bg-white/5 p-3 rounded-lg rounded-tl-none border border-white/5">${reply}</div>`);
+        const reply = "Grazie per il messaggio! Sono un assistente demo. Per informazioni ufficiali su eventi e orari, ti consiglio di controllare le sezioni dedicate del sito o contattare il Comune.";
+        container.insertAdjacentHTML('beforeend', `<div class="bg-white/5 p-3 rounded-lg rounded-tl-none border border-white/5 text-left max-w-[80%]">${reply}</div>`);
         container.scrollTop = container.scrollHeight;
-    }, 1000);
+    }, 800);
 }
 
 window.toggleMobileMenu = () => {
@@ -241,34 +279,24 @@ window.updateCamminoTimeline = () => {
 document.addEventListener('DOMContentLoaded', async () => {
     await loadContentCMS();
     
-    // Init Cammino
     if(document.getElementById('cammino-timeline')) window.updateCamminoTimeline();
 
-    // Init Events
     const rawEvents = await fetchEventsFromSheet();
     const today = new Date(); today.setHours(0,0,0,0);
     
-    // Filter past events
     events = rawEvents.filter(e => {
-        // Simple date parsing assuming YYYY-MM-DD
         const d = new Date(e.date);
         return !isNaN(d) && d >= today;
     }).sort((a,b) => new Date(a.date) - new Date(b.date));
 
-    // Render Events
     const container = document.getElementById('events-main-grid');
     if(container && events.length > 0) {
-        container.innerHTML = ''; // Clear skeletons
-        
-        // Render Top 4
+        container.innerHTML = ''; 
         events.slice(0, 4).forEach(e => {
             container.insertAdjacentHTML('beforeend', renderEventCard(e));
         });
-
-        // Handle Remaining Events
         pendingEvents = events.slice(4);
         const btnContainer = document.getElementById('load-more-container');
-        
         if (pendingEvents.length > 0 && btnContainer) {
             btnContainer.classList.remove('hidden');
         } else if (btnContainer) {

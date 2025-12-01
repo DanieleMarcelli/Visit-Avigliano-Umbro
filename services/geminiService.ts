@@ -45,7 +45,10 @@ export const sendMessageToGemini = async (message: string): Promise<string> => {
   }
 };
 
-export const analyzeEventPoster = async (base64Image: string): Promise<Partial<EventItem>> => {
+export const analyzeEventPoster = async (
+    base64Image: string,
+    mimeType: string = 'image/png'
+): Promise<Partial<EventItem>> => {
     if (!process.env.API_KEY) {
         throw new Error("API Key missing");
     }
@@ -72,7 +75,7 @@ export const analyzeEventPoster = async (base64Image: string): Promise<Partial<E
             model: 'gemini-2.5-flash',
             contents: {
                 parts: [
-                    { inlineData: { mimeType: 'image/png', data: base64Image } },
+                    { inlineData: { mimeType, data: base64Image } },
                     { text: prompt }
                 ]
             },

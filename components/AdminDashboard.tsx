@@ -31,6 +31,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ events, setEvent
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const mimeType = file.type || '';
+
     // Create a local URL for preview immediately
     const previewUrl = URL.createObjectURL(file);
     setNewEvent(prev => ({ ...prev, imageUrl: previewUrl }));
@@ -38,11 +40,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ events, setEvent
     // Convert to Base64 for Gemini
     const reader = new FileReader();
     reader.onloadend = async () => {
-      const base64String = (reader.result as string).split(',')[1];
-      
+      const result = reader.result as string;
+      const base64String = result.split(',')[1];
+      const inlineMimeType =
+        mimeType || result.match(/^data:(.*?);base64,/)?.[1] || 'image/png';
+
       setIsAnalyzing(true);
       try {
-        const extractedData = await analyzeEventPoster(base64String);
+        const extractedData = await analyzeEventPoster(base64String, inlineMimeType);
         
         // Merge extracted data into form
         setNewEvent(prev => ({

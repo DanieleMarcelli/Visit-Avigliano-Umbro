@@ -49,3 +49,12 @@ export interface HeaderContent {
   shareLabel: string;
   languageLabel: string;
 }
+
+export interface HeroContent {
+  backgroundUrl: string;
+  eyebrow: string;
+  title: string;
+  description: string;
+  primaryCta: string;
+  secondaryCta: string;
+}

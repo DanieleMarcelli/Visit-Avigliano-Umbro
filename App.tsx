@@ -3,20 +3,24 @@ import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { FilterBar } from './components/FilterBar';
 import { EventCard } from './components/EventCard';
+import { EventModal } from './components/EventModal';
 import { Footer } from './components/Footer';
 import { AIChatAssistant } from './components/AIChatAssistant';
 import { AdminDashboard } from './components/AdminDashboard';
 import { EVENTS, MONTHS } from './constants';
-import { FilterState, EventCategory, EventLocation, EventItem, HeaderContent } from './types';
+import { FilterState, EventCategory, EventLocation, EventItem, HeaderContent, HeroContent } from './types';
 import { CalendarOff } from 'lucide-react';
 import { updateGeminiContext } from './services/geminiService';
 import { DEFAULT_HEADER_CONTENT, fetchHeaderContent } from './services/headerContentService';
+import { DEFAULT_HERO_CONTENT, fetchHeroContent } from './services/heroContentService';
 
 const App: React.FC = () => {
   // State for events (initialized with constants, but mutable)
   const [events, setEvents] = useState<EventItem[]>(EVENTS);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [headerContent, setHeaderContent] = useState<HeaderContent>(DEFAULT_HEADER_CONTENT);
+  const [heroContent, setHeroContent] = useState<HeroContent>(DEFAULT_HERO_CONTENT);
+  const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
 
   // Notification State
   const [newEventsCount, setNewEventsCount] = useState(0);
@@ -35,6 +39,10 @@ const App: React.FC = () => {
 
   useEffect(() => {
     fetchHeaderContent().then(setHeaderContent);
+  }, []);
+
+  useEffect(() => {
+    fetchHeroContent().then(setHeroContent);
   }, []);
 
   const handleEventAdded = () => {
@@ -102,10 +110,16 @@ const App: React.FC = () => {
         />
       ) : (
         <main className="flex-grow">
-          <section className="pt-28">
+          <Hero
+            content={heroContent}
+            onPrimaryCta={clearNotifications}
+            onSecondaryCta={() => window.location.href = '/cammino.html'}
+          />
+
+          <section className="pt-16" id="eventi-section">
             <FilterBar filters={filters} setFilters={setFilters} />
 
-            <div id="eventi-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
               <div className="flex justify-between items-end mb-8">
                 <div>
                   <h2 className="text-3xl font-serif font-bold text-stone-900">Eventi in Programma</h2>
@@ -119,7 +133,7 @@ const App: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                   {filteredEvents.map(event => (
                     <div key={event.id} className="h-full">
-                      <EventCard event={event} />
+                      <EventCard event={event} onSelect={setSelectedEvent} />
                     </div>
                   ))}
                 </div>
@@ -138,12 +152,11 @@ const App: React.FC = () => {
               )}
             </div>
           </section>
-
-          <Hero />
         </main>
       )}
 
       {!isAdminOpen && <Footer />}
+      {!isAdminOpen && <EventModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />}
       <AIChatAssistant />
     </div>
   );

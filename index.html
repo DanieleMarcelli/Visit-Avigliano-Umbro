@@ -1,454 +1,314 @@
 <!DOCTYPE html>
 <html lang="it" class="scroll-smooth">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Visit Avigliano Umbro | The Deep Experience</title>
-    <meta name="description" content="Un viaggio immersivo nel cuore dell'Umbria. Eventi, borghi e natura millenaria.">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visit Avigliano Umbro - Cuore Verde e Antico</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- PapaParse per la gestione dei dati dinamici da Google Sheet -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;0,800;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              deep: {
-                950: '#0a0f1c', // Deep Night Background
-                900: '#111827',
-                800: '#1f2937',
-              },
-              gold: {
-                400: '#fbbf24', // Oro Chiaro (Text Accent)
-                500: '#d97706', // Oro Base (Buttons/Borders)
-                600: '#b45309', // Oro Scuro
-              },
-              cyan: {
-                400: '#00f0ff', // Accento Digitale (Neon)
-              }
-            },
-            fontFamily: {
-              sans: ['DM Sans', 'sans-serif'],
-              serif: ['Playfair Display', 'serif'],
-            },
-            aspectRatio: {
-                'poster': '7 / 10',
-            },
-            animation: {
-              'fade-in-up': 'fadeInUp 1s ease-out forwards',
-              'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-              'float': 'float 6s ease-in-out infinite',
-            },
-            keyframes: {
-              fadeInUp: {
-                '0%': { opacity: '0', transform: 'translateY(20px)' },
-                '100%': { opacity: '1', transform: 'translateY(0)' },
-              },
-              float: {
-                '0%, 100%': { transform: 'translateY(0)' },
-                '50%': { transform: 'translateY(-10px)' },
-              }
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#050b14', // Midnight Blue scuro
+                            navy: '#0f172a', 
+                            gold: '#d4af37', 
+                            text: '#94a3b8', 
+                            white: '#f8fafc',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    backgroundImage: {
+                        'home-hero-overlay': 'radial-gradient(circle at center, rgba(5,11,20,0.3) 0%, rgba(5,11,20,0.9) 80%, #050b14 100%)',
+                        'section-overlay': 'linear-gradient(to right, #050b14 0%, rgba(5,11,20,0.85) 50%, rgba(5,11,20,0.7) 100%)',
+                        'card-gradient': 'linear-gradient(to top, rgba(5,11,20,0.95) 0%, rgba(5,11,20,0.1) 100%)'
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'fade-in-up': 'fadeInUp 1s ease-out forwards',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
             }
-          }
         }
-      }
     </script>
     <style>
-        .hide-scroll::-webkit-scrollbar { display: none; }
-        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        .glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
         .text-outline {
-            -webkit-text-stroke: 1px rgba(255, 255, 255, 0.2);
+            -webkit-text-stroke: 1px rgba(255, 255, 255, 0.1);
             color: transparent;
         }
-
-        /* Bento Grid Specifics */
-        .bento-card {
-            position: relative;
-            overflow: hidden;
-            border-radius: 1.5rem; /* rounded-3xl */
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.5s ease;
-            cursor: pointer;
-            min-height: 300px;
-        }
-        .bento-card:hover {
-            border-color: rgba(251, 191, 36, 0.5); /* gold-400 */
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
-        }
-        .bento-overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to top, #0a0f1c 0%, rgba(10, 15, 28, 0.4) 50%, transparent 100%);
-        }
     </style>
-    
-    <script type="importmap">
-    {
-      "imports": {
-        "react/": "https://aistudiocdn.com/react@^19.2.0/",
-        "react": "https://aistudiocdn.com/react@^19.2.0",
-        "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-        "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
-        "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0"
-      }
-    }
-    </script>
 </head>
-<body class="bg-deep-950 text-slate-300 font-sans selection:bg-gold-500 selection:text-white overflow-x-hidden">
+<body class="bg-brand-dark text-brand-text font-sans flex flex-col min-h-screen selection:bg-brand-gold selection:text-brand-dark">
 
     <!-- HEADER -->
-    <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-deep-950/80 backdrop-blur-md border-b border-white/5">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="flex justify-between items-center h-24">
-                <!-- Logo & Brand -->
-                <a href="index.html" class="flex items-center gap-4 group">
-                    <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-gold-400 transition-colors shadow-lg bg-deep-800 relative z-10">
-                        <img id="nav_logo" data-content-id="nav_logo" src="" class="w-full h-full object-cover opacity-0 transition-opacity duration-500">
+    <header class="fixed top-0 left-0 right-0 z-50 bg-brand-dark/80 backdrop-blur-md border-b border-white/5 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <a href="#" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-brand-gold overflow-hidden border border-white/10 group-hover:border-brand-gold transition-colors">
+                        <span class="font-serif font-bold text-lg">VA</span>
                     </div>
                     <div class="flex flex-col">
-                        <span class="text-[10px] uppercase tracking-[0.3em] text-gold-400 font-bold">Portale Turistico</span>
-                        <span class="text-2xl font-serif text-white tracking-wide group-hover:text-gold-400 transition-colors">Visit Avigliano</span>
+                        <span class="text-[10px] uppercase tracking-[0.2em] text-brand-gold font-bold">Portale Turistico</span>
+                        <span class="text-xl font-bold font-serif leading-none text-white">Visit Avigliano</span>
                     </div>
                 </a>
 
-                <!-- Desktop Nav -->
-                <nav class="hidden lg:flex items-center gap-8">
-                    <a href="#lago" class="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-white transition">Il Lago</a>
-                    <a href="#territorio" class="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-white transition">Borghi</a>
-                    <a href="#eventi-section" class="text-xs font-bold uppercase tracking-widest text-gold-400 hover:text-white transition">Eventi</a>
-                    <a href="cammino.html" class="px-6 py-2 rounded-full border border-gold-500/50 text-gold-400 text-xs font-bold uppercase hover:bg-gold-500 hover:text-white transition shadow-[0_0_15px_rgba(217,119,6,0.1)] hover:shadow-[0_0_20px_rgba(217,119,6,0.3)]">
-                        Il Cammino
-                    </a>
+                <nav class="hidden md:flex items-center gap-8">
+                    <a href="cammino.html" class="text-brand-text hover:text-white text-xs font-bold uppercase tracking-widest transition-colors">Il Cammino</a>
+                    <a href="#" class="text-brand-text hover:text-white text-xs font-bold uppercase tracking-widest transition-colors">Borghi</a>
+                    <a href="#" class="text-brand-gold border-b border-brand-gold pb-0.5 text-xs font-bold uppercase tracking-widest transition-colors">Eventi</a>
+                    <a href="#" class="text-brand-gold border border-brand-gold/30 px-5 py-2 rounded-full hover:bg-brand-gold hover:text-brand-dark transition-all text-xs font-bold uppercase tracking-widest">Pianifica</a>
                 </nav>
-
-                <!-- Mobile Toggle -->
-                <button onclick="toggleMobileMenu()" class="lg:hidden text-white hover:text-gold-400 transition">
-                    <i data-lucide="menu" class="w-8 h-8"></i>
+                
+                <button class="md:hidden text-white">
+                    <i data-lucide="menu"></i>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- MOBILE MENU OVERLAY -->
-    <div id="mobile-menu-overlay" class="hidden fixed inset-0 z-[60] bg-deep-950/98 backdrop-blur-xl flex flex-col justify-center items-center gap-8 transition-opacity duration-300">
-        <button onclick="toggleMobileMenu()" class="absolute top-8 right-8 text-white/50 hover:text-white"><i data-lucide="x" class="w-8 h-8"></i></button>
-        <a href="#lago" onclick="toggleMobileMenu()" class="text-3xl font-serif text-white hover:text-gold-400">Il Lago</a>
-        <a href="#territorio" onclick="toggleMobileMenu()" class="text-3xl font-serif text-white hover:text-gold-400">Borghi</a>
-        <a href="#eventi-section" onclick="toggleMobileMenu()" class="text-3xl font-serif text-white hover:text-gold-400">Eventi</a>
-        <a href="cammino.html" class="text-3xl font-serif text-gold-400 italic">Il Cammino</a>
-    </div>
-
     <!-- HERO SECTION -->
-    <section class="relative h-screen w-full overflow-hidden flex items-center justify-center">
-        <!-- Dynamic Background -->
-        <div data-content-id="home_hero_bg" class="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-[20s] hover:scale-105 opacity-0 transition-opacity duration-1000"></div>
-        <div class="absolute inset-0 bg-gradient-to-t from-deep-950 via-deep-950/30 to-deep-950/70 z-10"></div>
+    <div class="relative h-screen flex items-center justify-center overflow-hidden">
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1542345749-0d65b7468134?q=80&w=2070" 
+                 class="w-full h-full object-cover opacity-50 scale-105 animate-pulse-slow">
+            <div class="absolute inset-0 bg-home-hero-overlay"></div>
+        </div>
 
-        <div class="relative z-20 text-center px-4 max-w-6xl mx-auto mt-16">
-            <span data-content-id="home_hero_subtitle" class="block text-cyan-400 text-xs md:text-sm font-bold tracking-[0.4em] uppercase mb-8 animate-fade-in-up drop-shadow-[0_0_10px_rgba(0,240,255,0.5)]">
-                <!-- Caricato da CSV -->
-            </span>
-            <h1 data-content-id="home_hero_text" class="text-5xl md:text-7xl lg:text-9xl font-serif font-black text-white mb-10 tracking-tight leading-tight drop-shadow-2xl animate-fade-in-up">
-                <!-- Caricato da CSV -->
+        <div class="relative z-10 text-center px-4 max-w-5xl mx-auto space-y-8">
+            <div class="inline-flex items-center gap-2 border border-brand-gold/30 rounded-full px-4 py-1 bg-brand-dark/50 backdrop-blur animate-fade-in-up" style="animation-delay: 0.1s;">
+                <span class="w-2 h-2 rounded-full bg-brand-gold animate-pulse"></span>
+                <span class="text-xs font-bold uppercase tracking-[0.2em] text-brand-gold">Benvenuti in Umbria</span>
+            </div>
+
+            <h1 class="text-6xl md:text-8xl lg:text-9xl font-serif font-bold text-white leading-none animate-fade-in-up" style="animation-delay: 0.3s;">
+                Avigliano <br>
+                <span class="italic text-brand-gold">Umbro</span>
             </h1>
-            
-            <div class="flex flex-col sm:flex-row justify-center gap-6 animate-fade-in-up" style="animation-delay: 0.2s">
-                <button onclick="document.getElementById('eventi-section').scrollIntoView({behavior: 'smooth'})" class="px-10 py-4 rounded-full bg-gradient-to-r from-gold-500 to-gold-600 text-white font-bold tracking-widest text-xs uppercase hover:shadow-[0_0_30px_rgba(217,119,6,0.4)] transition-all transform hover:-translate-y-1">
-                    Calendario Eventi
-                </button>
-                <a href="cammino.html" class="px-10 py-4 rounded-full border border-white/20 text-white font-bold tracking-widest text-xs uppercase hover:bg-white/10 backdrop-blur-sm transition-all hover:border-cyan-400/50 hover:text-cyan-400">
-                    Mappa Interattiva
+
+            <p class="text-lg md:text-xl text-brand-text font-light max-w-2xl mx-auto leading-relaxed animate-fade-in-up" style="animation-delay: 0.5s;">
+                Un territorio dove la storia geologica incontra il silenzio dei boschi. <br class="hidden md:block">
+                Scopri la Foresta Fossile, percorri antichi sentieri e vivi l'autenticità dei nostri borghi.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-10 max-w-4xl mx-auto animate-fade-in-up" style="animation-delay: 0.7s;">
+                <a href="cammino.html" class="group relative bg-brand-navy/40 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:border-brand-gold hover:bg-brand-navy/80 transition-all duration-500 text-left overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all">
+                        <i data-lucide="footprints" class="w-16 h-16 text-brand-gold"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <h3 class="text-xl font-serif text-white mb-2 group-hover:text-brand-gold transition-colors">Il Cammino</h3>
+                        <p class="text-xs text-brand-text font-light mb-4">80 km tra fossili e natura.</p>
+                        <span class="text-xs font-bold uppercase tracking-widest text-brand-gold flex items-center gap-2">
+                            Scopri <i data-lucide="arrow-right" class="w-3 h-3 group-hover:translate-x-1 transition-transform"></i>
+                        </span>
+                    </div>
+                </a>
+                <a href="#" class="group relative bg-brand-navy/40 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:border-brand-gold hover:bg-brand-navy/80 transition-all duration-500 text-left overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all">
+                        <i data-lucide="castle" class="w-16 h-16 text-brand-gold"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <h3 class="text-xl font-serif text-white mb-2 group-hover:text-brand-gold transition-colors">I Borghi</h3>
+                        <p class="text-xs text-brand-text font-light mb-4">Castelli e fortezze medievali.</p>
+                        <span class="text-xs font-bold uppercase tracking-widest text-brand-gold flex items-center gap-2">
+                            Esplora <i data-lucide="arrow-right" class="w-3 h-3 group-hover:translate-x-1 transition-transform"></i>
+                        </span>
+                    </div>
+                </a>
+                <a href="#events-section" class="group relative bg-brand-navy/40 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:border-brand-gold hover:bg-brand-navy/80 transition-all duration-500 text-left overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all">
+                        <i data-lucide="calendar" class="w-16 h-16 text-brand-gold"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <h3 class="text-xl font-serif text-white mb-2 group-hover:text-brand-gold transition-colors">Eventi</h3>
+                        <p class="text-xs text-brand-text font-light mb-4">Tradizioni e spettacoli.</p>
+                        <span class="text-xs font-bold uppercase tracking-widest text-brand-gold flex items-center gap-2">
+                            Vedi <i data-lucide="arrow-down" class="w-3 h-3 group-hover:translate-y-1 transition-transform"></i>
+                        </span>
+                    </div>
                 </a>
             </div>
-        </div>
-        
-        <div class="absolute bottom-10 z-20 animate-pulse-slow">
-            <div class="w-[1px] h-20 bg-gradient-to-b from-transparent via-gold-400 to-transparent mx-auto"></div>
-        </div>
-    </section>
 
-    <!-- LAGO TIBERINO SECTION -->
-    <section id="lago" class="relative py-32 border-y border-white/5 bg-deep-900 overflow-hidden">
-        <!-- Background Texture -->
-        <div data-content-id="home_lago_bg" class="absolute inset-0 opacity-20 bg-cover bg-center mix-blend-overlay"></div>
-        
-        <div class="relative z-10 max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            
-            <!-- Left: Content -->
-            <div class="space-y-8">
-                <div class="flex items-center gap-4">
-                    <div class="h-[1px] w-16 bg-gold-500"></div>
-                    <span class="text-gold-400 uppercase tracking-widest text-xs font-bold">Unicum Geologico</span>
-                </div>
-                
-                <h2 data-content-id="home_lago_title" class="text-5xl md:text-7xl font-serif text-white leading-none">
-                    <!-- Title from CSV -->
-                </h2>
-                
-                <p data-content-id="home_lago_desc" class="text-lg text-slate-400 leading-relaxed font-light">
-                    <!-- Desc from CSV -->
-                </p>
-                
-                <!-- IMPORTANTE: STATISTICHE ROW -->
-                <div class="grid grid-cols-3 gap-8 py-8 border-y border-white/5">
-                    <div class="flex flex-col gap-2">
-                        <i data-lucide="footprints" class="w-6 h-6 text-gold-500"></i>
-                        <span class="text-3xl font-serif text-white">80</span>
-                        <span class="text-[10px] uppercase text-slate-500 tracking-widest">Chilometri</span>
-                    </div>
-                    <div class="flex flex-col gap-2 border-l border-white/5 pl-8">
-                        <i data-lucide="mountain" class="w-6 h-6 text-gold-500"></i>
-                        <span class="text-3xl font-serif text-white">+1.250</span>
-                        <span class="text-[10px] uppercase text-slate-500 tracking-widest">Metri Dislivello</span>
-                    </div>
-                    <div class="flex flex-col gap-2 border-l border-white/5 pl-8">
-                        <i data-lucide="map" class="w-6 h-6 text-gold-500"></i>
-                        <span class="text-3xl font-serif text-white">4</span>
-                        <span class="text-[10px] uppercase text-slate-500 tracking-widest">Tappe</span>
-                    </div>
-                </div>
-
-                <div class="pt-4">
-                    <a href="cammino.html" class="inline-flex items-center gap-3 text-cyan-400 border border-cyan-400/30 px-6 py-3 rounded-lg hover:bg-cyan-400/10 transition-all uppercase tracking-widest text-xs font-bold shadow-[0_0_15px_rgba(0,240,255,0.1)]">
-                        <i data-lucide="compass" class="w-4 h-4"></i> Esplora Itinerario
-                    </a>
-                </div>
-            </div>
-
-            <!-- Right: Holographic Map -->
-            <div class="relative group cursor-pointer perspective-1000" onclick="window.location.href='cammino.html'">
-                <div class="absolute -inset-10 bg-cyan-400/20 blur-[100px] rounded-full opacity-20 group-hover:opacity-40 transition duration-700"></div>
-                <!-- Image with Screen Blend Mode for Hologram effect -->
-                <img data-content-id="home_lago_img_side" class="relative w-full h-auto object-contain drop-shadow-2xl hover:scale-105 transition duration-700 opacity-0 transition-opacity mix-blend-screen" alt="Mappa Olografica">
-                
-                <!-- Floating Labels -->
-                <div class="absolute top-1/4 right-0 bg-deep-950/90 backdrop-blur border border-cyan-400/30 p-3 rounded-lg animate-float shadow-[0_0_15px_rgba(0,240,255,0.2)]">
-                    <span class="text-xs font-bold text-cyan-400 uppercase tracking-widest flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span> GPS Active
-                    </span>
-                </div>
+            <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce opacity-50">
+                <i data-lucide="chevron-down" class="w-6 h-6 text-white"></i>
             </div>
         </div>
-    </section>
+    </div>
 
-    <!-- BENTO GRID (BORGHI & NATURA) -->
-    <section id="territorio" class="py-24 bg-deep-950 px-6 border-t border-white/5 relative">
-        <div class="max-w-7xl mx-auto">
+    <!-- EVENTS SECTION (Dynamic) -->
+    <section id="events-section" class="py-24 relative bg-brand-dark overflow-hidden min-h-[800px] flex items-center">
+        <!-- Dynamic Background from CSV -->
+        <div id="events-bg" class="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-1000 opacity-0"></div>
+        <div class="absolute inset-0 z-0 bg-section-overlay"></div>
+
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
             <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
                 <div>
-                    <span class="text-gold-400 text-xs font-bold tracking-[0.2em] uppercase mb-4 block">Il Territorio</span>
-                    <h2 class="text-4xl md:text-6xl font-serif text-white">Custodi del Tempo</h2>
-                </div>
-                <p class="text-slate-400 max-w-md text-sm font-light leading-relaxed">
-                    Un mosaico di borghi medievali e foreste fossili. Clicca sulle card per scoprire i segreti di ogni luogo.
-                </p>
-            </div>
-
-            <!-- 3-Column Bento Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[350px]">
-                
-                <!-- 1. Foresta Fossile (Grande: span-2) -->
-                <div onclick="openModal('natura_foresta')" class="bento-card md:col-span-2 group">
-                    <img data-content-id="natura_foresta_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110 opacity-70">
-                    <div class="bento-overlay"></div>
-                    <div class="absolute bottom-8 left-8 z-10">
-                        <span class="text-cyan-400 text-[10px] font-bold uppercase tracking-widest mb-2 block border border-cyan-400/30 px-2 py-1 rounded w-fit bg-deep-950/50">Natura Millenaria</span>
-                        <h3 data-content-id="natura_foresta_title" class="text-3xl md:text-4xl font-serif text-white">Foresta Fossile</h3>
-                    </div>
-                </div>
-
-                <!-- 2. Dunarobba (Piccolo) -->
-                <div onclick="openModal('borgo_dunarobba')" class="bento-card md:col-span-1 group">
-                    <img data-content-id="borgo_dunarobba_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110 opacity-60">
-                    <div class="bento-overlay"></div>
-                    <div class="absolute bottom-6 left-6 z-10">
-                        <h3 data-content-id="borgo_dunarobba_title" class="text-2xl font-serif text-white group-hover:text-gold-400 transition-colors">Dunarobba</h3>
-                    </div>
-                </div>
-
-                <!-- 3. Grotta Bella (Grande: span-2) -->
-                <div onclick="openModal('natura_grotta')" class="bento-card md:col-span-2 md:order-last group">
-                    <img data-content-id="natura_grotta_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110 opacity-70">
-                    <div class="bento-overlay"></div>
-                    <div class="absolute bottom-8 left-8 z-10">
-                        <span class="text-cyan-400 text-[10px] font-bold uppercase tracking-widest mb-2 block border border-cyan-400/30 px-2 py-1 rounded w-fit bg-deep-950/50">Avventura</span>
-                        <h3 data-content-id="natura_grotta_title" class="text-3xl md:text-4xl font-serif text-white">Grotta Bella</h3>
-                    </div>
-                </div>
-
-                <!-- 4. Santa Restituta -->
-                <div onclick="openModal('borgo_santa')" class="bento-card md:col-span-1 group">
-                    <img data-content-id="borgo_santa_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110 opacity-60">
-                    <div class="bento-overlay"></div>
-                    <div class="absolute bottom-6 left-6 z-10">
-                        <h3 data-content-id="borgo_santa_title" class="text-2xl font-serif text-white group-hover:text-gold-400 transition-colors">Santa Restituta</h3>
-                    </div>
-                </div>
-
-                <!-- 5. Toscolano -->
-                <div onclick="openModal('borgo_toscolano')" class="bento-card md:col-span-1 group">
-                    <img data-content-id="borgo_toscolano_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110 opacity-60">
-                    <div class="bento-overlay"></div>
-                    <div class="absolute bottom-6 left-6 z-10">
-                        <h3 data-content-id="borgo_toscolano_title" class="text-2xl font-serif text-white group-hover:text-gold-400 transition-colors">Toscolano</h3>
-                    </div>
-                </div>
-
-                <!-- 6. Sismano -->
-                <div onclick="openModal('borgo_sismano')" class="bento-card md:col-span-1 group">
-                    <img data-content-id="borgo_sismano_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110 opacity-60">
-                    <div class="bento-overlay"></div>
-                    <div class="absolute bottom-6 left-6 z-10">
-                        <h3 data-content-id="borgo_sismano_title" class="text-2xl font-serif text-white group-hover:text-gold-400 transition-colors">Sismano</h3>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- EVENTI SECTION -->
-    <section id="eventi-section" class="py-24 bg-deep-900 relative border-b border-white/5">
-        <div class="max-w-7xl mx-auto px-6 mb-12 flex justify-between items-end">
-            <div>
-                <span class="text-gold-400 text-xs font-bold tracking-[0.2em] uppercase mb-2 block">Agenda</span>
-                <h2 class="text-4xl md:text-5xl font-serif text-white">Eventi Live</h2>
-            </div>
-            <div class="hidden md:flex gap-2">
-                <button onclick="document.getElementById('events-main-grid').scrollBy({left: -300, behavior: 'smooth'})" class="p-3 rounded-full border border-white/10 hover:bg-white/10 text-white transition hover:border-gold-400"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
-                <button onclick="document.getElementById('events-main-grid').scrollBy({left: 300, behavior: 'smooth'})" class="p-3 rounded-full border border-white/10 hover:bg-white/10 text-white transition hover:border-gold-400"><i data-lucide="arrow-right" class="w-5 h-5"></i></button>
-            </div>
-        </div>
-
-        <!-- Main Events Grid -->
-        <div id="events-main-grid" class="flex md:grid md:grid-cols-4 gap-6 overflow-x-auto md:overflow-visible snap-x snap-mandatory hide-scroll pb-8 px-6 md:px-0">
-            <!-- Loading Skeleton -->
-            <div class="min-w-[280px] aspect-poster bg-deep-800 rounded-2xl animate-pulse border border-white/5"></div>
-            <div class="min-w-[280px] aspect-poster bg-deep-800 rounded-2xl animate-pulse border border-white/5"></div>
-            <div class="min-w-[280px] aspect-poster bg-deep-800 rounded-2xl animate-pulse border border-white/5"></div>
-            <div class="min-w-[280px] aspect-poster bg-deep-800 rounded-2xl animate-pulse border border-white/5"></div>
-        </div>
-
-        <div id="load-more-container" class="text-center mt-12 hidden">
-            <button onclick="showAllEvents()" class="px-8 py-3 border border-white/20 rounded-full text-white hover:bg-white hover:text-deep-950 transition uppercase text-xs font-bold tracking-widest flex items-center gap-2 mx-auto">
-                Mostra Tutti <i data-lucide="chevron-down" class="w-4 h-4"></i>
-            </button>
-        </div>
-
-        <!-- Hidden List -->
-        <div id="events-hidden-list" class="hidden mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-6 md:px-0 max-w-7xl mx-auto animate-fade-in-up">
-            <!-- Populated by JS -->
-        </div>
-    </section>
-
-    <!-- CONTENT MODAL -->
-    <div id="content-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-deep-950/95 backdrop-blur-md transition-opacity" onclick="closeModal()"></div>
-        <div class="relative bg-deep-900 border border-white/10 rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden animate-in zoom-in-95 duration-300 max-h-[90vh] flex flex-col md:flex-row">
-            
-            <!-- Modal Image Side -->
-            <div class="relative h-64 md:h-auto md:w-1/2 shrink-0">
-                <img id="modal-img" src="" class="absolute inset-0 w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-t from-deep-900 to-transparent md:bg-gradient-to-r"></div>
-            </div>
-            
-            <!-- Modal Content Side -->
-            <div class="p-8 md:p-12 overflow-y-auto custom-scrollbar md:w-1/2 flex flex-col">
-                <button onclick="closeModal()" class="self-end text-slate-500 hover:text-white mb-6">
-                    <i data-lucide="x" class="w-8 h-8"></i>
-                </button>
-                
-                <span id="modal-subtitle" class="text-cyan-400 text-xs font-bold uppercase tracking-widest mb-2 block">Esplora</span>
-                <h2 id="modal-title" class="text-4xl font-serif text-white mb-6 leading-tight">Titolo</h2>
-                
-                <div class="prose prose-invert prose-sm text-slate-300 font-light leading-relaxed mb-8 flex-grow">
-                     <p id="modal-desc">Descrizione...</p>
-                </div>
-
-                <div class="pt-6 border-t border-white/10">
-                    <a href="cammino.html" class="inline-flex items-center gap-2 text-gold-400 hover:text-white transition font-bold uppercase text-xs tracking-widest">
-                        Pianifica Visita <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- AI CHAT WIDGET -->
-    <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
-        <div id="gemini-chat" class="hidden w-80 mb-4 bg-deep-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 animate-in slide-in-from-bottom-5">
-            <div class="bg-deep-800 p-4 border-b border-white/5 flex justify-between items-center">
-                <span class="text-cyan-400 font-bold text-xs uppercase tracking-widest flex items-center gap-2">
-                    <i data-lucide="sparkles" class="w-4 h-4"></i> AI Concierge
-                </span>
-                <button onclick="toggleChat()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
-            </div>
-            <div id="chat-messages" class="p-4 h-64 overflow-y-auto text-sm text-slate-300 space-y-3">
-                <div class="bg-white/5 p-3 rounded-lg rounded-tl-none border border-white/5">
-                    Ciao! Sono l'intelligenza artificiale di Avigliano. Posso consigliarti eventi, ristoranti o info sul Cammino. Chiedimi pure!
-                </div>
-            </div>
-            <div class="p-3 bg-black/50 border-t border-white/5 flex gap-2">
-                <input id="chat-input" type="text" placeholder="Scrivi qui..." class="w-full bg-white/5 border border-white/10 rounded-lg text-white text-xs px-3 py-2 outline-none focus:border-cyan-400 transition-colors" onkeydown="if(event.key === 'Enter') sendChatMessage()">
-                <button onclick="sendChatMessage()" class="bg-cyan-400 text-deep-950 p-2 rounded-lg hover:bg-cyan-300 font-bold"><i data-lucide="send" class="w-4 h-4"></i></button>
-            </div>
-        </div>
-
-        <button onclick="toggleChat()" class="group w-14 h-14 bg-gradient-to-br from-cyan-400 to-cyan-600 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(0,240,255,0.4)] hover:scale-110 transition animate-float text-deep-950 relative z-50">
-            <i data-lucide="bot" class="w-6 h-6"></i>
-            <span class="absolute -top-1 -right-1 w-3 h-3 bg-gold-500 rounded-full animate-ping"></span>
-        </button>
-    </div>
-
-    <!-- FOOTER -->
-    <footer class="bg-black py-16 border-t border-white/5">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-                <div class="col-span-1 md:col-span-2">
-                    <h2 class="text-3xl font-serif text-white mb-6">Visit Avigliano Umbro</h2>
-                    <p class="text-slate-500 text-sm leading-relaxed max-w-sm">
-                        Un progetto di valorizzazione territoriale che unisce storia, natura e innovazione digitale. Scopri il cuore verde dell'Umbria attraverso un'esperienza immersiva.
+                    <h2 class="text-4xl lg:text-5xl font-serif text-white mb-4">
+                        Eventi in <span class="text-brand-gold">Programma</span>
+                    </h2>
+                    <div class="h-[1px] w-24 bg-brand-gold/50"></div>
+                    <p class="mt-4 text-brand-text font-light max-w-xl">
+                        Vivi il territorio attraverso le nostre tradizioni. Musica, cultura e sagre nel cuore dei borghi.
                     </p>
                 </div>
-                <div>
-                    <h4 class="text-white font-bold mb-4 uppercase text-xs tracking-widest">Esplora</h4>
-                    <ul class="space-y-2 text-sm text-slate-500">
-                        <li><a href="#eventi-section" class="hover:text-gold-400 transition">Eventi</a></li>
-                        <li><a href="#lago" class="hover:text-gold-400 transition">Lago Tiberino</a></li>
-                        <li><a href="#territorio" class="hover:text-gold-400 transition">Borghi</a></li>
-                        <li><a href="cammino.html" class="hover:text-gold-400 transition">Il Cammino</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="text-white font-bold mb-4 uppercase text-xs tracking-widest">Info</h4>
-                    <p class="text-sm text-slate-500 mb-2">Piazza del Municipio, 1<br>05020 Avigliano Umbro (TR)</p>
-                    <div class="flex gap-4 mt-4">
-                        <a href="#" class="text-slate-500 hover:text-gold-400 transition"><i data-lucide="instagram" class="w-5 h-5"></i></a>
-                        <a href="#" class="text-slate-500 hover:text-gold-400 transition"><i data-lucide="facebook" class="w-5 h-5"></i></a>
-                    </div>
+                <div class="flex gap-2">
+                    <button class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-brand-gold hover:text-brand-dark hover:border-brand-gold transition-all">
+                        <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                    </button>
+                    <button class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-brand-gold hover:text-brand-dark hover:border-brand-gold transition-all">
+                        <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                    </button>
                 </div>
             </div>
-            <div class="border-t border-white/5 pt-8 text-center text-slate-700 text-xs uppercase tracking-widest">
-                <p>© 2025 Visit Avigliano Umbro. Deep Experience Design.</p>
+
+            <!-- Events Grid Container -->
+            <div id="events-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Loading State -->
+                <div class="col-span-3 text-center py-20">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-brand-gold border-r-2 border-transparent"></div>
+                    <p class="mt-4 text-brand-text text-sm">Caricamento calendario...</p>
+                </div>
             </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-black text-brand-text py-12 border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
+             <div class="flex items-center gap-3">
+                 <div class="w-8 h-8 bg-white/5 rounded-full flex items-center justify-center text-brand-gold border border-white/10">
+                    <span class="font-serif font-bold text-xs">VA</span>
+                 </div>
+                 <span class="text-xs font-bold uppercase tracking-widest text-white">Visit Avigliano</span>
+             </div>
+             <p class="text-xs font-light text-brand-text/50">&copy; 2025 Comune di Avigliano Umbro.</p>
         </div>
     </footer>
 
-    <!-- LOGIC -->
-    <script type="module" src="script.js"></script>
+    <script>
+        lucide.createIcons();
+
+        // URLs dei Google Sheets
+        const BG_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=643581002&single=true&output=csv';
+        const EVENTS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=0&single=true&output=csv';
+
+        window.onload = function() {
+            loadBackground();
+            loadEvents();
+        };
+
+        function loadBackground() {
+            Papa.parse(BG_CSV_URL, {
+                download: true,
+                header: true,
+                complete: function(results) {
+                    if (results.data && results.data.length > 0) {
+                        // Cerca una colonna che sembri un URL o usa la prima colonna
+                        const firstRow = results.data[0];
+                        // Prova a trovare chiavi comuni o prendi il primo valore
+                        const imageUrl = firstRow.url || firstRow.image || firstRow.immagine || Object.values(firstRow)[0];
+                        
+                        if (imageUrl) {
+                            const bgElement = document.getElementById('events-bg');
+                            bgElement.style.backgroundImage = `url('${imageUrl}')`;
+                            bgElement.classList.remove('opacity-0');
+                            bgElement.classList.add('opacity-40'); // Opacità controllata per leggibilità
+                        }
+                    }
+                }
+            });
+        }
+
+        function loadEvents() {
+            Papa.parse(EVENTS_CSV_URL, {
+                download: true,
+                header: true,
+                complete: function(results) {
+                    const container = document.getElementById('events-container');
+                    const events = results.data;
+                    
+                    if (!events || events.length === 0) {
+                        container.innerHTML = '<p class="col-span-3 text-center text-brand-text">Nessun evento in programma al momento.</p>';
+                        return;
+                    }
+
+                    let html = '';
+                    // Limitiamo a 3 eventi per la home page, oppure tutti se richiesto
+                    // Assumiamo colonne: titolo, data, descrizione, luogo, immagine (opzionale)
+                    events.slice(0, 6).forEach((event, index) => {
+                        // Skip righe vuote
+                        if (!event.titolo && !Object.values(event)[0]) return;
+
+                        // Fallback flessibili per i nomi delle colonne
+                        const titolo = event.titolo || event.nome || 'Evento';
+                        const data = event.data || 'Data da definire';
+                        const luogo = event.luogo || 'Avigliano Umbro';
+                        const desc = event.descrizione || '';
+                        const tipo = event.tipo || 'Cultura';
+
+                        html += `
+                        <div class="group bg-brand-navy border border-white/5 hover:border-brand-gold/50 rounded-xl p-6 transition-all duration-300 hover:-translate-y-2 flex flex-col h-full">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="bg-brand-dark border border-white/10 px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest text-brand-gold">
+                                    ${tipo}
+                                </div>
+                                <span class="text-xs text-brand-text flex items-center gap-1">
+                                    <i data-lucide="map-pin" class="w-3 h-3"></i> ${luogo}
+                                </span>
+                            </div>
+                            
+                            <h3 class="text-xl font-serif text-white mb-2 group-hover:text-brand-gold transition-colors">${titolo}</h3>
+                            
+                            <div class="text-xs font-bold uppercase tracking-wider text-brand-text/80 mb-4 flex items-center gap-2">
+                                <i data-lucide="calendar-days" class="w-4 h-4 text-brand-cyan"></i> ${data}
+                            </div>
+                            
+                            <p class="text-sm text-brand-text font-light line-clamp-3 mb-6 flex-grow">
+                                ${desc}
+                            </p>
+                            
+                            <a href="#" class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white hover:text-brand-gold transition-colors mt-auto">
+                                Dettagli <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                            </a>
+                        </div>
+                        `;
+                    });
+
+                    container.innerHTML = html;
+                    lucide.createIcons(); // Re-inizializza icone per il nuovo contenuto
+                },
+                error: function(err) {
+                    console.error("Errore Events CSV:", err);
+                    document.getElementById('events-container').innerHTML = '<p class="col-span-3 text-center text-red-400">Impossibile caricare gli eventi.</p>';
+                }
+            });
+        }
+    </script>
 </body>
-</html>

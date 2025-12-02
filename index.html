@@ -4,13 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Visit Avigliano Umbro | Custodi del Tempo</title>
-    <meta name="description" content="Il portale ufficiale del turismo. Scopri i borghi, la Foresta Fossile e il Cammino del Lago Tiberino.">
     
     <script src="https://cdn.tailwindcss.com"></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     
     <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -19,35 +18,17 @@
         theme: {
           extend: {
             colors: {
-              paper: { 
-                  50: '#F9F7F2', // Avorio Antico (Sfondo)
-                  100: '#F0EFE9' 
-              },
-              stone: { 
-                  900: '#1A3C34', // Verde Umbro Profondo (Istituzionale)
-                  800: '#2C4A42', // Verde (Titoli)
-                  600: '#4A4A4A', // Pietra Serena (Testi)
-                  400: '#8C6B4F', // Terra Fossile (Dettagli)
-                  200: '#E5E5E5'  
-              },
-              bronze: { 
-                  400: '#D4AF37', // Oro Ossidiato (Accent)
-                  500: '#B08D55', 
-                  600: '#8C6B4F' 
-              },
-              warning: { 100: '#FFF4F4', 600: '#C0392B' }
+              paper: '#F2F0EB', // Carta tecnica grezza
+              ink: '#1A1A1A',   // Nero inchiostro
+              gold: '#D4AF37',  // Accento Heritage
+              stone: '#8C8C8C', // Grigio tecnico
             },
             fontFamily: {
-              sans: ['DM Sans', 'sans-serif'],
-              serif: ['Playfair Display', 'serif'],
+              sans: ['Barlow', 'sans-serif'], // Font tecnico per testi e dati
+              serif: ['Playfair Display', 'serif'], // Font elegante per titoli
             },
-            boxShadow: {
-                'soft': '0 20px 40px -15px rgba(26, 60, 52, 0.08)', // Ombra verde leggerissima
-                'card': '0 4px 12px -2px rgba(0, 0, 0, 0.05)',
-                'glow': '0 0 20px rgba(212, 175, 55, 0.2)'
-            },
-            aspectRatio: {
-                'poster': '7 / 10',
+            backgroundImage: {
+                'grid-pattern': "linear-gradient(to right, #E5E5E5 1px, transparent 1px), linear-gradient(to bottom, #E5E5E5 1px, transparent 1px);",
             }
           }
         }
@@ -55,329 +36,301 @@
     </script>
 
     <style>
-        /* Utilities */
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* Texture Grana Cinematografica */
-        .noise-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;
-            opacity: 0.035;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-            mix-blend-mode: multiply;
+        /* Griglia Tecnica di Sfondo */
+        .bg-grid {
+            background-size: 80px 80px;
+            background-image: linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px), 
+                              linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px);
         }
 
-        /* Card Design "Artifact" */
-        .paper-card {
-            background: #ffffff;
-            border: 1px solid rgba(0,0,0,0.04);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-        .paper-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 20px 40px -10px rgba(26, 60, 52, 0.15);
-            border-color: #D4AF37;
+        /* Testo Outline (Stile Mammut) */
+        .text-outline {
+            -webkit-text-stroke: 1px rgba(26, 26, 26, 0.2);
+            color: transparent;
         }
 
-        /* Navigazione Frosted */
-        .nav-frosted {
-            background: rgba(249, 247, 242, 0.9);
-            backdrop-filter: blur(16px);
-            border-bottom: 1px solid rgba(26, 60, 52, 0.05);
-        }
-
-        /* Animazioni Scroll Reveal */
-        .reveal { opacity: 0; transform: translateY(30px); transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1); }
+        /* Animazioni */
+        .reveal { opacity: 0; transform: translateY(50px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
         .reveal.active { opacity: 1; transform: translateY(0); }
-        .reveal-delay-1 { transition-delay: 0.1s; }
-        .reveal-delay-2 { transition-delay: 0.2s; }
-        .reveal-delay-3 { transition-delay: 0.3s; }
-
-        /* Tipografia */
-        h1, h2, h3, h4 { letter-spacing: -0.02em; }
+        
+        /* Immagine con Zoom lento */
+        .zoom-img { transition: transform 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .group:hover .zoom-img { transform: scale(1.1); }
     </style>
 </head>
-<body class="bg-paper-50 text-stone-600 font-sans selection:bg-stone-900 selection:text-white overflow-x-hidden">
+<body class="bg-paper text-ink font-sans selection:bg-gold selection:text-white overflow-x-hidden">
 
-    <div class="noise-bg"></div>
-
-    <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 nav-frosted">
-        <div class="max-w-7xl mx-auto px-6 h-24 flex justify-between items-center">
-            <a href="#" class="flex items-center gap-4 group">
-                <div class="w-12 h-12 rounded-full border border-stone-200 p-1 bg-white shadow-sm transition-transform group-hover:scale-105">
-                    <div class="w-full h-full rounded-full bg-stone-900 flex items-center justify-center overflow-hidden">
-                        <img id="nav_logo" data-content-id="nav_logo" src="" class="w-full h-full object-cover opacity-0 transition-opacity">
-                    </div>
-                </div>
-                <div class="flex flex-col">
-                    <span data-content-id="nav_subtitle" class="text-[10px] uppercase tracking-[0.25em] text-stone-400 font-bold leading-none mb-1.5">...</span>
-                    <span class="text-xl font-serif text-stone-900 tracking-wide leading-none group-hover:text-bronze-400 transition-colors">Visit Avigliano</span>
-                </div>
+    <nav class="fixed top-0 w-full z-50 mix-blend-difference text-white px-6 py-6 flex justify-between items-center">
+        <a href="#" class="flex flex-col group">
+            <span class="text-[10px] uppercase tracking-[0.3em] font-bold opacity-70 group-hover:text-gold transition">Visit</span>
+            <span class="text-2xl font-serif leading-none">Avigliano Umbro</span>
+        </a>
+        
+        <div class="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-widest">
+            <a href="#eventi-section" class="hover:text-gold transition relative group">
+                Eventi
+                <span class="absolute -bottom-2 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span>
             </a>
-            
-            <nav class="hidden lg:flex items-center gap-2 bg-paper-100/50 p-1.5 rounded-full border border-stone-200/50 backdrop-blur-sm">
-                <a href="#" class="px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-stone-600 hover:text-stone-900 hover:bg-white hover:shadow-sm transition-all">Home</a>
-                <a href="#eventi-section" class="px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-stone-600 hover:text-stone-900 hover:bg-white hover:shadow-sm transition-all">Eventi</a>
-                <a href="#territorio" class="px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-stone-600 hover:text-stone-900 hover:bg-white hover:shadow-sm transition-all">Borghi</a>
-                <a href="#natura" class="px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-stone-600 hover:text-stone-900 hover:bg-white hover:shadow-sm transition-all">Natura</a>
-                <a href="cammino.html" class="px-6 py-2.5 rounded-full bg-stone-900 text-white shadow-sm border border-stone-900 text-xs font-bold uppercase tracking-wider hover:bg-bronze-400 hover:border-bronze-400 transition-all">Cammino</a>
-            </nav>
-            
-             <div class="flex items-center gap-4">
-                <button onclick="document.getElementById('mobile-menu').classList.remove('hidden')" class="lg:hidden text-stone-900 p-2 hover:text-bronze-400 transition"><i data-lucide="menu"></i></button>
-            </div>
+            <a href="#territorio" class="hover:text-gold transition relative group">
+                Borghi
+                <span class="absolute -bottom-2 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span>
+            </a>
+            <a href="cammino.html" class="flex items-center gap-2 text-gold border border-gold/50 px-4 py-2 rounded-full hover:bg-gold hover:text-black transition">
+                <i data-lucide="compass" class="w-4 h-4"></i> Cammino
+            </a>
         </div>
-    </header>
 
-    <div id="mobile-menu" class="hidden fixed inset-0 z-[60] bg-paper-50/98 backdrop-blur-xl flex flex-col justify-center items-center gap-8 animate-in fade-in duration-300">
-        <button onclick="document.getElementById('mobile-menu').classList.add('hidden')" class="absolute top-8 right-8 text-stone-900 p-3 border border-stone-200 rounded-full"><i data-lucide="x"></i></button>
-        <span class="text-stone-400 text-xs font-bold tracking-[0.3em] uppercase">Menu</span>
-        <a href="#" onclick="document.getElementById('mobile-menu').classList.add('hidden')" class="text-4xl font-serif text-stone-900 hover:text-bronze-400">Home</a>
-        <a href="#eventi-section" onclick="document.getElementById('mobile-menu').classList.add('hidden')" class="text-4xl font-serif text-stone-900 hover:text-bronze-400">Eventi</a>
-        <a href="#territorio" onclick="document.getElementById('mobile-menu').classList.add('hidden')" class="text-4xl font-serif text-stone-900 hover:text-bronze-400">Borghi</a>
-        <a href="#natura" onclick="document.getElementById('mobile-menu').classList.add('hidden')" class="text-4xl font-serif text-stone-900 hover:text-bronze-400">Natura</a>
-        <a href="cammino.html" class="text-4xl font-serif text-bronze-400 italic">Il Cammino</a>
+        <button onclick="document.getElementById('mobile-menu').classList.remove('hidden')" class="md:hidden">
+            <i data-lucide="menu" class="w-8 h-8"></i>
+        </button>
+    </nav>
+
+    <div id="mobile-menu" class="hidden fixed inset-0 z-[60] bg-ink text-white flex flex-col justify-center px-10 gap-8 transition-all">
+        <button onclick="document.getElementById('mobile-menu').classList.add('hidden')" class="absolute top-6 right-6 text-white"><i data-lucide="x" class="w-8 h-8"></i></button>
+        <a href="#eventi-section" onclick="document.getElementById('mobile-menu').classList.add('hidden')" class="text-5xl font-serif hover:text-gold">Eventi</a>
+        <a href="#territorio" onclick="document.getElementById('mobile-menu').classList.add('hidden')" class="text-5xl font-serif hover:text-gold">Borghi</a>
+        <a href="cammino.html" class="text-5xl font-serif text-gold">Il Cammino</a>
     </div>
 
-    <section class="relative h-screen w-full flex items-center justify-center overflow-hidden bg-stone-200">
-        <div data-content-id="home_hero_bg" class="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-[40s] hover:scale-110 opacity-0"></div>
-        <div class="absolute inset-0 bg-gradient-to-t from-stone-900/60 via-stone-900/20 to-transparent z-10"></div>
+    <section class="relative h-screen w-full overflow-hidden flex items-end pb-20 px-6">
+        <div data-content-id="home_hero_bg" class="absolute inset-0 z-0 bg-cover bg-center"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 z-10"></div>
         
-        <div class="relative z-20 text-center px-6 max-w-5xl mx-auto mt-20 reveal">
-            <div class="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-paper-50/90 backdrop-blur shadow-lg mb-8 border border-white/50">
-                <span class="w-1.5 h-1.5 rounded-full bg-stone-900"></span>
-                <span data-content-id="home_hero_subtitle" class="text-stone-900 text-[11px] font-bold tracking-[0.3em] uppercase">...</span>
-                <span class="w-1.5 h-1.5 rounded-full bg-stone-900"></span>
+        <div class="absolute top-0 left-12 h-full w-[1px] bg-white/10 z-20 hidden md:block"></div>
+        <div class="absolute top-0 right-12 h-full w-[1px] bg-white/10 z-20 hidden md:block"></div>
+
+        <div class="relative z-30 w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 items-end reveal">
+            <div class="md:col-span-8">
+                <div class="flex items-center gap-4 mb-4">
+                    <span class="h-[1px] w-12 bg-gold"></span>
+                    <span data-content-id="home_hero_subtitle" class="text-gold text-xs font-bold tracking-[0.4em] uppercase">...</span>
+                </div>
+                <h1 data-content-id="home_hero_title" class="text-6xl md:text-9xl font-serif text-white leading-[0.85] tracking-tight">
+                    Avigliano<br><span class="italic font-light text-white/80">Umbro</span>
+                </h1>
             </div>
             
-            <h1 data-content-id="home_hero_title" class="text-6xl md:text-8xl lg:text-9xl font-serif text-white mb-8 tracking-tight drop-shadow-2xl leading-[0.9]">Visit Avigliano</h1>
-            
-            <p data-content-id="home_hero_desc" class="text-lg md:text-xl text-white/95 font-medium max-w-2xl mx-auto mb-12 leading-relaxed drop-shadow-md">...</p>
-            
-            <div class="flex flex-col sm:flex-row justify-center gap-6">
-                <button onclick="document.getElementById('eventi-section').scrollIntoView({behavior: 'smooth'})" class="px-10 py-4 bg-stone-900 text-white font-bold tracking-widest text-xs uppercase rounded-full hover:bg-bronze-400 transition-all shadow-lg hover:-translate-y-1 border border-stone-900">Programma Eventi</button>
-                <a href="cammino.html" class="px-10 py-4 rounded-full bg-white/10 backdrop-blur text-white font-bold tracking-widest text-xs uppercase hover:bg-white hover:text-stone-900 transition-all shadow-lg flex items-center justify-center gap-2 hover:-translate-y-1 border border-white/30">Cammino del Lago</a>
+            <div class="md:col-span-4 text-white/80 flex flex-col justify-end">
+                <p data-content-id="home_hero_desc" class="text-lg leading-relaxed mb-8 border-l border-white/30 pl-6">...</p>
+                <div class="flex gap-4">
+                    <button onclick="document.getElementById('eventi-section').scrollIntoView({behavior: 'smooth'})" class="px-8 py-4 bg-white text-ink font-bold uppercase tracking-widest text-xs hover:bg-gold transition-colors">Programma</button>
+                    <a href="cammino.html" class="px-8 py-4 border border-white/30 text-white font-bold uppercase tracking-widest text-xs hover:border-gold hover:text-gold transition-colors">Esplora</a>
+                </div>
             </div>
         </div>
     </section>
 
-    <section class="relative z-30 -mt-24 px-6 pb-24">
-        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-            <a href="#territorio" class="paper-card rounded-2xl p-10 group text-center md:text-left reveal reveal-delay-1">
-                <div class="w-14 h-14 rounded-full bg-paper-100 flex items-center justify-center mb-6 text-stone-900 group-hover:bg-stone-900 group-hover:text-white transition-colors mx-auto md:mx-0"><i data-lucide="map"></i></div>
-                <h3 data-content-id="card_territorio_title" class="text-2xl font-serif text-stone-900 mb-3 group-hover:text-bronze-400 transition-colors">...</h3>
-                <p data-content-id="card_territorio_desc" class="text-sm text-stone-600 leading-relaxed mb-6 font-light">...</p>
+    <section class="bg-paper border-b border-ink/5">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-ink/10">
+            <a href="#territorio" class="p-12 group hover:bg-white transition-colors cursor-pointer">
+                <div class="text-gold mb-4"><i data-lucide="map" class="w-8 h-8"></i></div>
+                <h3 data-content-id="card_territorio_title" class="text-2xl font-serif mb-2 group-hover:translate-x-2 transition-transform">...</h3>
+                <p data-content-id="card_territorio_desc" class="text-sm text-stone leading-relaxed">...</p>
             </a>
-            <a href="#lago" class="paper-card rounded-2xl p-10 group text-center md:text-left reveal reveal-delay-2">
-                <div class="w-14 h-14 rounded-full bg-paper-100 flex items-center justify-center mb-6 text-stone-900 group-hover:bg-stone-900 group-hover:text-white transition-colors mx-auto md:mx-0"><i data-lucide="history"></i></div>
-                <h3 data-content-id="card_storia_title" class="text-2xl font-serif text-stone-900 mb-3 group-hover:text-bronze-400 transition-colors">...</h3>
-                <p data-content-id="card_storia_desc" class="text-sm text-stone-600 leading-relaxed mb-6 font-light">...</p>
+            <a href="#lago" class="p-12 group hover:bg-white transition-colors cursor-pointer">
+                <div class="text-gold mb-4"><i data-lucide="history" class="w-8 h-8"></i></div>
+                <h3 data-content-id="card_storia_title" class="text-2xl font-serif mb-2 group-hover:translate-x-2 transition-transform">...</h3>
+                <p data-content-id="card_storia_desc" class="text-sm text-stone leading-relaxed">...</p>
             </a>
-            <a href="#sapori" class="paper-card rounded-2xl p-10 group text-center md:text-left reveal reveal-delay-3">
-                <div class="w-14 h-14 rounded-full bg-paper-100 flex items-center justify-center mb-6 text-stone-900 group-hover:bg-stone-900 group-hover:text-white transition-colors mx-auto md:mx-0"><i data-lucide="utensils"></i></div>
-                <h3 data-content-id="card_sapori_title" class="text-2xl font-serif text-stone-900 mb-3 group-hover:text-bronze-400 transition-colors">...</h3>
-                <p data-content-id="card_sapori_desc" class="text-sm text-stone-600 leading-relaxed mb-6 font-light">...</p>
+            <a href="#sapori" class="p-12 group hover:bg-white transition-colors cursor-pointer">
+                <div class="text-gold mb-4"><i data-lucide="utensils" class="w-8 h-8"></i></div>
+                <h3 data-content-id="card_sapori_title" class="text-2xl font-serif mb-2 group-hover:translate-x-2 transition-transform">...</h3>
+                <p data-content-id="card_sapori_desc" class="text-sm text-stone leading-relaxed">...</p>
             </a>
         </div>
     </section>
 
-    <section id="eventi-section" class="py-24 bg-paper-50 relative border-t border-stone-200">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="flex flex-col md:flex-row justify-between items-end mb-8 gap-8 reveal">
-                <div>
-                    <span data-content-id="section_eventi_subtitle" class="text-bronze-400 text-xs font-bold tracking-[0.25em] uppercase mb-3 block">...</span>
-                    <h2 data-content-id="section_eventi_title" class="text-4xl md:text-5xl font-serif text-stone-900 leading-tight">...</h2>
-                    <p data-content-id="section_eventi_desc" class="text-stone-600 mt-4 font-light max-w-xl">...</p>
-                </div>
-                <div class="flex items-center gap-4">
-                     <button onclick="document.getElementById('events-slider').scrollBy({left: -300, behavior: 'smooth'})" class="w-12 h-12 rounded-full border border-stone-200 hover:bg-stone-900 hover:text-white text-stone-400 flex items-center justify-center transition-all bg-white shadow-sm"><i data-lucide="arrow-left"></i></button>
-                    <button onclick="document.getElementById('events-slider').scrollBy({left: 300, behavior: 'smooth'})" class="w-12 h-12 rounded-full border border-stone-200 hover:bg-stone-900 hover:text-white text-stone-400 flex items-center justify-center transition-all bg-white shadow-sm"><i data-lucide="arrow-right"></i></button>
-                </div>
-            </div>
-
-            <div id="category-filters" class="flex gap-3 overflow-x-auto pb-6 mb-4 hide-scroll reveal reveal-delay-1"></div>
-
-            <div id="events-slider" class="flex gap-8 overflow-x-auto pb-12 hide-scroll snap-x snap-mandatory -mx-6 px-6 md:mx-0 md:px-0 reveal reveal-delay-2"></div>
-             
-            <div id="load-more-btn" class="hidden text-center mt-8 reveal"><button onclick="showAllEvents()" class="px-8 py-3 rounded-full border border-stone-300 text-stone-600 font-bold uppercase text-xs tracking-widest hover:bg-stone-900 hover:text-white transition-all">Tutti gli Eventi</button></div>
-            <div id="all-events-grid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-16 animate-fade-in"></div>
-        </div>
-    </section>
-
-    <section id="territorio" class="py-32 bg-white">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center mb-20 max-w-3xl mx-auto reveal">
-                <span data-content-id="section_territorio_subtitle" class="text-bronze-400 text-xs font-bold tracking-[0.25em] uppercase mb-4 block">...</span>
-                <h2 data-content-id="section_territorio_title" class="text-5xl font-serif text-stone-900 mb-6">...</h2>
-                <p data-content-id="section_territorio_desc" class="text-stone-600 font-light leading-relaxed text-lg">...</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 reveal reveal-delay-1">
-                <div class="lg:col-span-2 relative group rounded-[2rem] overflow-hidden cursor-pointer shadow-soft h-[350px]" onclick="openModal('borgo_avigliano')">
-                    <img data-content-id="borgo_avigliano_img" src="" class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-0">
-                    <div class="absolute inset-0 bg-gradient-to-t from-stone-900/80 to-transparent"></div>
-                    <div class="absolute bottom-0 left-0 p-10">
-                        <h3 data-content-id="borgo_avigliano_title" class="text-3xl font-serif text-white mb-2">Avigliano Umbro</h3>
-                        <p data-content-id="borgo_avigliano_desc" class="text-white/80 font-light line-clamp-2">...</p>
-                    </div>
-                </div>
-
-                <div class="relative group rounded-[2rem] overflow-hidden cursor-pointer shadow-sm h-[350px]" onclick="openModal('borgo_dunarobba')">
-                    <img data-content-id="borgo_dunarobba_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-0">
-                    <div class="absolute inset-0 bg-gradient-to-t from-stone-900/60 to-transparent"></div>
-                    <div class="absolute bottom-0 left-0 p-8"><h3 data-content-id="borgo_dunarobba_title" class="text-2xl font-serif text-white">...</h3></div>
-                </div>
-
-                <div class="relative group rounded-[2rem] overflow-hidden cursor-pointer shadow-sm h-[350px]" onclick="openModal('borgo_santa')">
-                    <img data-content-id="borgo_santa_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-0">
-                    <div class="absolute inset-0 bg-gradient-to-t from-stone-900/60 to-transparent"></div>
-                    <div class="absolute bottom-0 left-0 p-8"><h3 data-content-id="borgo_santa_title" class="text-2xl font-serif text-white">...</h3></div>
-                </div>
-                 <div class="relative group rounded-[2rem] overflow-hidden cursor-pointer shadow-sm h-[350px]" onclick="openModal('borgo_toscolano')">
-                    <img data-content-id="borgo_toscolano_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-0">
-                    <div class="absolute inset-0 bg-gradient-to-t from-stone-900/60 to-transparent"></div>
-                    <div class="absolute bottom-0 left-0 p-8"><h3 data-content-id="borgo_toscolano_title" class="text-2xl font-serif text-white">...</h3></div>
-                </div>
-                <div class="relative group rounded-[2rem] overflow-hidden cursor-pointer shadow-sm h-[350px]" onclick="openModal('borgo_sismano')">
-                    <img data-content-id="borgo_sismano_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-0">
-                    <div class="absolute inset-0 bg-gradient-to-t from-stone-900/60 to-transparent"></div>
-                    <div class="absolute bottom-0 left-0 p-8"><h3 data-content-id="borgo_sismano_title" class="text-2xl font-serif text-white">...</h3></div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="natura" class="py-32 bg-paper-100 border-t border-stone-200">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="flex flex-col md:flex-row justify-between items-end mb-16 reveal">
-                 <div class="max-w-2xl">
-                    <span data-content-id="section_natura_subtitle" class="text-bronze-400 text-xs font-bold tracking-[0.25em] uppercase mb-4 block">...</span>
-                    <h2 data-content-id="section_natura_title" class="text-4xl md:text-5xl font-serif text-stone-900 mb-6">...</h2>
-                    <p data-content-id="section_natura_desc" class="text-stone-600 font-light leading-relaxed text-lg">...</p>
-                 </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 auto-rows-[450px] reveal reveal-delay-1">
-                <div class="relative group rounded-[2rem] overflow-hidden cursor-pointer shadow-soft" onclick="openModal('natura_foresta')">
-                    <img data-content-id="natura_foresta_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-105 opacity-0">
-                    <div class="absolute inset-0 bg-gradient-to-t from-stone-900/90 via-transparent to-transparent"></div>
-                    <div class="absolute top-8 left-8">
-                        <div data-content-id="natura_foresta_badge" class="bg-white/90 backdrop-blur px-5 py-2 rounded-full text-stone-900 text-[10px] font-bold uppercase tracking-widest shadow-sm">...</div>
-                    </div>
-                    <div class="absolute bottom-0 left-0 p-12 w-full">
-                        <h3 data-content-id="natura_foresta_title" class="text-4xl md:text-5xl font-serif text-white mb-4">...</h3>
-                        <p data-content-id="natura_foresta_desc" class="text-white/80 font-light line-clamp-2 text-lg">...</p>
-                         <div class="mt-6 inline-flex items-center text-white text-xs font-bold uppercase tracking-widest gap-2 border-b border-white/30 pb-1 group-hover:border-white transition-all">
-                            Scopri <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="relative group rounded-[2rem] overflow-hidden cursor-pointer shadow-soft" onclick="openModal('natura_grotta')">
-                    <img data-content-id="natura_grotta_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-105 opacity-0">
-                    <div class="absolute inset-0 bg-gradient-to-t from-stone-900/90 via-transparent to-transparent"></div>
-                    <div class="absolute top-8 right-8">
-                        <div data-content-id="natura_grotta_badge" class="bg-warning-600/90 backdrop-blur px-5 py-2 rounded-full text-white text-[10px] font-bold uppercase tracking-widest shadow-sm animate-pulse">...</div>
-                    </div>
-                    <div class="absolute bottom-0 left-0 p-12 w-full">
-                        <h3 data-content-id="natura_grotta_title" class="text-4xl md:text-5xl font-serif text-white mb-4">...</h3>
-                        <p data-content-id="natura_grotta_desc" class="text-white/80 font-light line-clamp-2 text-lg">...</p>
-                         <div class="mt-6 inline-flex items-center text-white text-xs font-bold uppercase tracking-widest gap-2 border-b border-white/30 pb-1 group-hover:border-white transition-all">
-                            Dettagli <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="lago" class="relative py-32 bg-stone-900 text-white overflow-hidden">
-        <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, #d4af37 10px, #d4af37 11px);"></div>
-        <div class="absolute inset-0 bg-gradient-to-b from-stone-900 via-transparent to-stone-900"></div>
-
+    <section id="eventi-section" class="py-24 bg-ink text-white relative overflow-hidden">
+        <div class="absolute top-0 right-0 text-[20rem] font-bold text-white/5 leading-none -mt-20 -mr-20 pointer-events-none">01</div>
+        
         <div class="max-w-7xl mx-auto px-6 relative z-10">
-            <div class="flex flex-col lg:flex-row items-center gap-20">
-                <div class="lg:w-1/2 reveal">
-                    <div class="inline-flex items-center gap-3 mb-6">
-                        <div class="w-10 h-[1px] bg-bronze-400"></div>
-                        <span data-content-id="lago_subtitle" class="text-bronze-400 uppercase tracking-[0.25em] text-xs font-bold">...</span>
-                    </div>
-                    <h2 data-content-id="lago_title" class="text-5xl md:text-7xl font-serif text-white mb-8 leading-[0.9]">...</h2>
-                    <div class="prose prose-lg prose-invert font-light text-stone-300 leading-relaxed mb-12 border-l border-bronze-400/30 pl-6"><p data-content-id="lago_desc">...</p></div>
-                    
-                    <div class="grid grid-cols-3 gap-8 border-t border-white/10 pt-8">
-                        <div><span data-content-id="lago_stat_1_num" class="block text-3xl md:text-4xl font-serif text-white mb-1">...</span><span data-content-id="lago_stat_1_label" class="text-[10px] text-bronze-400 uppercase tracking-widest">...</span></div>
-                        <div><span data-content-id="lago_stat_2_num" class="block text-3xl md:text-4xl font-serif text-white mb-1">...</span><span data-content-id="lago_stat_2_label" class="text-[10px] text-bronze-400 uppercase tracking-widest">...</span></div>
-                        <div><span data-content-id="lago_stat_3_num" class="block text-3xl md:text-4xl font-serif text-white mb-1">...</span><span data-content-id="lago_stat_3_label" class="text-[10px] text-bronze-400 uppercase tracking-widest">...</span></div>
+            <div class="flex justify-between items-end mb-12 border-b border-white/10 pb-8 reveal">
+                <div>
+                    <span data-content-id="section_eventi_subtitle" class="text-gold text-xs font-bold tracking-[0.3em] uppercase mb-2 block">...</span>
+                    <h2 data-content-id="section_eventi_title" class="text-5xl font-serif">...</h2>
+                </div>
+                <div id="category-filters" class="hidden md:flex gap-6 text-xs font-bold uppercase tracking-widest text-stone"></div>
+            </div>
+
+            <div id="events-slider" class="flex gap-8 overflow-x-auto pb-12 hide-scroll snap-x snap-mandatory reveal reveal-delay-1"></div>
+            
+            <div id="load-more-btn" class="text-center mt-8 border-t border-white/10 pt-8 hidden">
+                <button onclick="showAllEvents()" class="text-xs font-bold uppercase tracking-widest hover:text-gold transition">Vedi Tutto L'archivio</button>
+            </div>
+            
+            <div id="all-events-grid" class="hidden grid grid-cols-1 md:grid-cols-3 gap-8 mt-12"></div>
+        </div>
+    </section>
+
+    <section id="territorio" class="bg-paper relative">
+        <div class="bg-grid absolute inset-0 opacity-100 pointer-events-none"></div>
+        
+        <div class="max-w-7xl mx-auto px-6 py-24 relative z-10">
+            <div class="mb-20 text-center reveal">
+                <span data-content-id="section_territorio_subtitle" class="text-gold text-xs font-bold tracking-[0.3em] uppercase mb-4 block">...</span>
+                <h2 data-content-id="section_territorio_title" class="text-6xl font-serif text-ink">...</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-[400px]">
+                
+                <div class="md:col-span-8 relative group overflow-hidden bg-gray-200 cursor-pointer reveal" onclick="openModal('borgo_avigliano')">
+                    <img data-content-id="borgo_avigliano_img" src="" class="absolute inset-0 w-full h-full object-cover zoom-img grayscale group-hover:grayscale-0">
+                    <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
+                    <div class="absolute bottom-0 left-0 p-8 bg-white/90 backdrop-blur m-6 max-w-sm">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-stone mb-2 block">Capoluogo</span>
+                        <h3 data-content-id="borgo_avigliano_title" class="text-3xl font-serif mb-2">...</h3>
+                        <div class="w-10 h-[2px] bg-gold group-hover:w-full transition-all"></div>
                     </div>
                 </div>
-                <div class="lg:w-1/2 w-full reveal reveal-delay-1">
-                    <div class="relative group">
-                        <div class="absolute -inset-4 border border-bronze-400/20 rounded-[2rem] transform translate-x-4 translate-y-4 transition-transform group-hover:translate-x-2 group-hover:translate-y-2"></div>
-                        <div class="relative rounded-[2rem] overflow-hidden shadow-2xl h-[500px] bg-stone-800">
-                            <div class="absolute inset-0 bg-stone-900/20 group-hover:bg-transparent transition-colors z-10"></div>
-                            <img data-content-id="lago_img_side" class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-700 grayscale group-hover:grayscale-0 transform group-hover:scale-105 transition-transform duration-[1.5s]">
-                            <div class="absolute bottom-8 left-8 z-20 bg-stone-900/90 backdrop-blur px-6 py-3 rounded-full border border-white/10">
-                                <a href="cammino.html" class="flex items-center gap-3 text-white text-xs font-bold uppercase tracking-widest hover:text-bronze-400 transition-colors">Scopri la storia <i data-lucide="arrow-right" class="w-4 h-4"></i></a>
-                            </div>
-                        </div>
+
+                <div class="md:col-span-4 relative group overflow-hidden bg-gray-200 cursor-pointer reveal reveal-delay-1" onclick="openModal('borgo_dunarobba')">
+                    <img data-content-id="borgo_dunarobba_img" class="absolute inset-0 w-full h-full object-cover zoom-img grayscale group-hover:grayscale-0">
+                    <div class="absolute inset-0 p-8 flex flex-col justify-end bg-gradient-to-t from-black/80 to-transparent">
+                        <h3 data-content-id="borgo_dunarobba_title" class="text-3xl font-serif text-white">...</h3>
                     </div>
+                </div>
+
+                <div class="md:col-span-4 relative group overflow-hidden bg-gray-200 cursor-pointer reveal" onclick="openModal('borgo_sismano')">
+                    <img data-content-id="borgo_sismano_img" class="absolute inset-0 w-full h-full object-cover zoom-img grayscale group-hover:grayscale-0">
+                    <div class="absolute inset-0 p-8 flex flex-col justify-end bg-gradient-to-t from-black/80 to-transparent">
+                        <h3 data-content-id="borgo_sismano_title" class="text-3xl font-serif text-white">...</h3>
+                    </div>
+                </div>
+
+                <div class="md:col-span-4 relative group overflow-hidden bg-gray-200 cursor-pointer reveal reveal-delay-1" onclick="openModal('borgo_santa')">
+                    <img data-content-id="borgo_santa_img" class="absolute inset-0 w-full h-full object-cover zoom-img grayscale group-hover:grayscale-0">
+                    <div class="absolute inset-0 p-8 flex flex-col justify-end bg-gradient-to-t from-black/80 to-transparent">
+                        <h3 data-content-id="borgo_santa_title" class="text-3xl font-serif text-white">...</h3>
+                    </div>
+                </div>
+
+                <div class="md:col-span-4 relative group overflow-hidden bg-gray-200 cursor-pointer reveal reveal-delay-2" onclick="openModal('borgo_toscolano')">
+                    <img data-content-id="borgo_toscolano_img" class="absolute inset-0 w-full h-full object-cover zoom-img grayscale group-hover:grayscale-0">
+                    <div class="absolute inset-0 p-8 flex flex-col justify-end bg-gradient-to-t from-black/80 to-transparent">
+                        <h3 data-content-id="borgo_toscolano_title" class="text-3xl font-serif text-white">...</h3>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section id="natura" class="grid grid-cols-1 md:grid-cols-2 min-h-[80vh]">
+        <div class="relative group overflow-hidden cursor-pointer bg-ink" onclick="openModal('natura_foresta')">
+            <img data-content-id="natura_foresta_img" class="absolute inset-0 w-full h-full object-cover opacity-60 zoom-img">
+            <div class="relative z-10 p-12 h-full flex flex-col justify-between hover:backdrop-blur-[2px] transition-all">
+                <div data-content-id="natura_foresta_badge" class="inline-block border border-white/30 text-white px-4 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full self-start">...</div>
+                <div>
+                    <h3 data-content-id="natura_foresta_title" class="text-5xl font-serif text-white mb-4">...</h3>
+                    <p data-content-id="natura_foresta_desc" class="text-stone text-lg max-w-md">...</p>
+                </div>
+            </div>
+        </div>
+        <div class="relative group overflow-hidden cursor-pointer bg-ink" onclick="openModal('natura_grotta')">
+            <img data-content-id="natura_grotta_img" class="absolute inset-0 w-full h-full object-cover opacity-60 zoom-img">
+            <div class="relative z-10 p-12 h-full flex flex-col justify-between hover:backdrop-blur-[2px] transition-all">
+                <div data-content-id="natura_grotta_badge" class="inline-block bg-red-600 text-white px-4 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full self-start animate-pulse">...</div>
+                <div>
+                    <h3 data-content-id="natura_grotta_title" class="text-5xl font-serif text-white mb-4">...</h3>
+                    <p data-content-id="natura_grotta_desc" class="text-stone text-lg max-w-md">...</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="sapori" class="py-32 bg-paper-50">
-        <div class="max-w-7xl mx-auto px-6">
-             <div class="text-center mb-20 reveal">
-                <span data-content-id="lifestyle_subtitle" class="text-bronze-400 text-xs font-bold tracking-[0.25em] uppercase mb-4 block">...</span>
-                <h2 data-content-id="lifestyle_title" class="text-5xl font-serif text-stone-900">...</h2>
+    <section id="lago" class="py-32 bg-ink text-white relative">
+        <div class="absolute right-0 top-0 text-[30rem] font-bold text-white/5 leading-none -mt-40 pointer-events-none">2M</div>
+        
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+            <div class="reveal">
+                <span data-content-id="lago_subtitle" class="text-gold text-xs font-bold tracking-[0.3em] uppercase mb-6 block">...</span>
+                <h2 data-content-id="lago_title" class="text-6xl font-serif mb-12">...</h2>
+                <div class="border-l-2 border-gold pl-8">
+                    <p data-content-id="lago_desc" class="text-xl font-light text-stone leading-relaxed">...</p>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-8 mt-16 pt-8 border-t border-white/10">
+                    <div><span data-content-id="lago_stat_1_num" class="block text-4xl font-bold">...</span><span data-content-id="lago_stat_1_label" class="text-[10px] uppercase tracking-widest text-stone">...</span></div>
+                    <div><span data-content-id="lago_stat_2_num" class="block text-4xl font-bold">...</span><span data-content-id="lago_stat_2_label" class="text-[10px] uppercase tracking-widest text-stone">...</span></div>
+                    <div><span data-content-id="lago_stat_3_num" class="block text-4xl font-bold">...</span><span data-content-id="lago_stat_3_label" class="text-[10px] uppercase tracking-widest text-stone">...</span></div>
+                </div>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 reveal reveal-delay-1">
-                <div class="paper-card p-12 rounded-[2.5rem] flex flex-col items-center text-center group">
-                    <div class="w-20 h-20 rounded-full bg-paper-100 flex items-center justify-center mb-8 text-stone-900 group-hover:scale-110 transition-transform"><i data-lucide="utensils" class="w-8 h-8"></i></div>
-                    <h3 data-content-id="lifestyle_food_title" class="text-3xl font-serif text-stone-900 mb-4">...</h3>
-                    <p data-content-id="lifestyle_food_desc" class="text-stone-600 text-sm mb-8 leading-relaxed max-w-sm">...</p>
+            
+            <div class="relative reveal reveal-delay-1">
+                <div class="border border-white/20 p-2">
+                    <img data-content-id="lago_img_side" class="w-full grayscale hover:grayscale-0 transition-all duration-1000">
                 </div>
-                <div class="paper-card p-12 rounded-[2.5rem] flex flex-col items-center text-center group">
-                    <div class="w-20 h-20 rounded-full bg-paper-100 flex items-center justify-center mb-8 text-stone-900 group-hover:scale-110 transition-transform"><i data-lucide="bed" class="w-8 h-8"></i></div>
-                    <h3 data-content-id="lifestyle_sleep_title" class="text-3xl font-serif text-stone-900 mb-4">...</h3>
-                    <p data-content-id="lifestyle_sleep_desc" class="text-stone-600 text-sm mb-8 leading-relaxed max-w-sm">...</p>
-                </div>
+                <a href="cammino.html" class="absolute -bottom-6 -left-6 bg-gold text-ink px-8 py-6 font-bold uppercase tracking-widest text-xs hover:bg-white transition-colors">
+                    Scopri l'Itinerario
+                </a>
             </div>
         </div>
     </section>
 
-    <footer id="contatti" class="bg-stone-900 pt-24 pb-12 text-stone-400">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-16 mb-20 reveal">
-                <div class="col-span-1 md:col-span-1">
-                    <span class="text-2xl font-serif text-white block mb-6">Visit Avigliano</span>
-                    <p data-content-id="footer_desc" class="text-sm leading-relaxed mb-8 font-light">...</p>
-                    <p data-content-id="footer_address" class="text-sm leading-relaxed font-light text-stone-500">...</p>
-                </div>
-                 <div><h4 class="text-white font-bold text-xs uppercase tracking-widest mb-8">Esplora</h4><ul class="space-y-4 text-sm font-light"><li><a href="#" class="hover:text-bronze-400">Home</a></li><li><a href="#territorio" class="hover:text-bronze-400">Borghi</a></li><li><a href="cammino.html" class="hover:text-bronze-400">Cammino</a></li></ul></div>
-                 <div><h4 class="text-white font-bold text-xs uppercase tracking-widest mb-8">Contatti</h4><ul class="space-y-4 text-sm font-light"><li data-content-id="contact_email">...</li><li data-content-id="contact_phone">...</li></ul></div>
+    <footer id="contatti" class="bg-paper pt-24 pb-8 border-t border-ink/10">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
+            <div class="col-span-1 md:col-span-2">
+                <span class="text-3xl font-serif block mb-6">Visit Avigliano</span>
+                <p data-content-id="footer_desc" class="text-stone max-w-sm mb-6">...</p>
+                <p data-content-id="footer_address" class="font-bold text-xs uppercase tracking-widest">...</p>
             </div>
-            <div class="border-t border-white/10 pt-8 text-[10px] uppercase font-bold text-center"><p>&copy; 2025 Comune di Avigliano Umbro.</p></div>
+            <div>
+                <h4 class="font-bold text-xs uppercase tracking-widest mb-6 border-b border-ink/10 pb-2">Navigazione</h4>
+                <ul class="space-y-4 text-sm text-stone">
+                    <li><a href="#" class="hover:text-gold">Home</a></li>
+                    <li><a href="#eventi-section" class="hover:text-gold">Eventi</a></li>
+                    <li><a href="#territorio" class="hover:text-gold">Borghi</a></li>
+                    <li><a href="cammino.html" class="hover:text-gold">Cammino</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold text-xs uppercase tracking-widest mb-6 border-b border-ink/10 pb-2">Contatti</h4>
+                <ul class="space-y-4 text-sm text-stone">
+                    <li data-content-id="contact_email" class="break-all">...</li>
+                    <li data-content-id="contact_phone">...</li>
+                </ul>
+            </div>
+        </div>
+        <div class="text-center text-[10px] uppercase font-bold text-stone/50">
+            &copy; 2025 Comune di Avigliano Umbro - Custodi del Tempo
         </div>
     </footer>
 
     <div id="info-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-stone-900/60 backdrop-blur-md" onclick="closeModal()"></div>
-        <div class="relative bg-white w-full max-w-5xl max-h-[90vh] rounded-3xl md:rounded-[3rem] overflow-hidden flex flex-col md:flex-row shadow-2xl animate-in zoom-in-95 duration-300">
-            <button onclick="closeModal()" class="absolute top-4 right-4 z-50 text-stone-800 bg-white/50 backdrop-blur p-2 rounded-full hover:bg-stone-200 transition"><i data-lucide="x"></i></button>
-            <div class="h-48 md:w-1/2 md:h-auto relative shrink-0"><img id="modal-img" src="" class="absolute inset-0 w-full h-full object-cover"></div>
-            <div class="flex-1 p-8 md:p-12 overflow-y-auto bg-white">
-                <div class="mb-6"><span id="modal-category" class="inline-block bg-bronze-400 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider mb-3">Event</span><span id="modal-subtitle" class="block text-stone-500 text-xs uppercase tracking-widest font-bold">Details</span></div>
-                <h2 id="modal-title" class="text-3xl md:text-4xl font-serif text-stone-900 mb-6 leading-tight">Title</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8 border-y border-stone-100 py-6">
-                    <div class="flex items-start gap-3"><i data-lucide="calendar" class="w-5 h-5 text-bronze-400 mt-0.5"></i><div><span class="block text-[10px] text-stone-400 uppercase font-bold">Data & Ora</span><span id="modal-time" class="text-sm font-medium text-stone-700">...</span></div></div>
-                    <div class="flex items-start gap-3"><i data-lucide="map-pin" class="w-5 h-5 text-bronze-400 mt-0.5"></i><div><span class="block text-[10px] text-stone-400 uppercase font-bold">Luogo</span><span id="modal-location" class="text-sm font-medium text-stone-700">...</span></div></div>
-                    <div class="flex items-start gap-3 sm:col-span-2"><i data-lucide="users" class="w-5 h-5 text-bronze-400 mt-0.5"></i><div><span class="block text-[10px] text-stone-400 uppercase font-bold">Organizzatore</span><span id="modal-organizer" class="text-sm font-medium text-stone-700">...</span></div></div>
+        <div class="absolute inset-0 bg-ink/90 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="relative bg-paper w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col md:flex-row shadow-2xl animate-in zoom-in-95 duration-300">
+            <button onclick="closeModal()" class="absolute top-0 right-0 z-50 bg-gold text-ink p-4 hover:bg-white transition"><i data-lucide="x"></i></button>
+            <div class="h-64 md:h-auto md:w-1/2 relative shrink-0">
+                <img id="modal-img" src="" class="absolute inset-0 w-full h-full object-cover">
+            </div>
+            <div class="flex-1 p-12 overflow-y-auto">
+                <div class="flex items-center gap-4 mb-8">
+                    <span id="modal-category" class="bg-ink text-white px-3 py-1 text-[10px] font-bold uppercase tracking-widest">Event</span>
+                    <span id="modal-subtitle" class="text-stone text-xs uppercase tracking-widest font-bold">Details</span>
                 </div>
-                <div class="prose prose-stone font-light leading-relaxed text-sm md:text-base"><p id="modal-desc">Description...</p></div>
+                <h2 id="modal-title" class="text-5xl font-serif mb-8 leading-none">Title</h2>
+                
+                <div class="grid grid-cols-2 gap-8 mb-12 border-y border-ink/10 py-8">
+                    <div>
+                        <span class="block text-[10px] text-stone uppercase font-bold mb-1">Quando</span>
+                        <span id="modal-time" class="font-serif text-lg">...</span>
+                    </div>
+                    <div>
+                        <span class="block text-[10px] text-stone uppercase font-bold mb-1">Dove</span>
+                        <span id="modal-location" class="font-serif text-lg">...</span>
+                    </div>
+                    <div class="col-span-2">
+                        <span class="block text-[10px] text-stone uppercase font-bold mb-1">Organizzato da</span>
+                        <span id="modal-organizer" class="font-serif text-lg">...</span>
+                    </div>
+                </div>
+                
+                <div class="prose prose-stone max-w-none">
+                    <p id="modal-desc">Description...</p>
+                </div>
             </div>
         </div>
     </div>

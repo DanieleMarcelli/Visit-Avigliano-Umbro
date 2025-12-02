@@ -19,9 +19,22 @@
         theme: {
           extend: {
             colors: {
-              paper: { 50: '#F9F7F2', 100: '#F0EFE9' },
-              stone: { 900: '#1A3C34', 800: '#1A3C34', 600: '#4A4A4A', 400: '#8C6B4F', 200: '#E5E5E5' },
-              bronze: { 400: '#D4AF37', 500: '#B08d55', 600: '#8C6B4F' },
+              paper: { 
+                  50: '#F9F7F2', // Avorio Antico (Sfondo)
+                  100: '#F0EFE9' 
+              },
+              stone: { 
+                  900: '#1A3C34', // Verde Umbro Profondo (Istituzionale)
+                  800: '#2C4A42', // Verde (Titoli)
+                  600: '#4A4A4A', // Pietra Serena (Testi)
+                  400: '#8C6B4F', // Terra Fossile (Dettagli)
+                  200: '#E5E5E5'  
+              },
+              bronze: { 
+                  400: '#D4AF37', // Oro Ossidiato (Accent)
+                  500: '#B08D55', 
+                  600: '#8C6B4F' 
+              },
               warning: { 100: '#FFF4F4', 600: '#C0392B' }
             },
             fontFamily: {
@@ -29,9 +42,12 @@
               serif: ['Playfair Display', 'serif'],
             },
             boxShadow: {
-                'soft': '0 20px 40px -15px rgba(26, 60, 52, 0.08)',
+                'soft': '0 20px 40px -15px rgba(26, 60, 52, 0.08)', // Ombra verde leggerissima
                 'card': '0 4px 12px -2px rgba(0, 0, 0, 0.05)',
                 'glow': '0 0 20px rgba(212, 175, 55, 0.2)'
+            },
+            aspectRatio: {
+                'poster': '7 / 10',
             }
           }
         }
@@ -39,28 +55,46 @@
     </script>
 
     <style>
+        /* Utilities */
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Texture Grana Cinematografica */
         .noise-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;
-            opacity: 0.035; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.035;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
             mix-blend-mode: multiply;
         }
+
+        /* Card Design "Artifact" */
         .paper-card {
-            background: #ffffff; border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            background: #ffffff;
+            border: 1px solid rgba(0,0,0,0.04);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
             transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
         .paper-card:hover {
-            transform: translateY(-6px); box-shadow: 0 20px 40px -10px rgba(26, 60, 52, 0.15); border-color: #D4AF37;
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px -10px rgba(26, 60, 52, 0.15);
+            border-color: #D4AF37;
         }
+
+        /* Navigazione Frosted */
         .nav-frosted {
-            background: rgba(249, 247, 242, 0.9); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(26, 60, 52, 0.05);
+            background: rgba(249, 247, 242, 0.9);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(26, 60, 52, 0.05);
         }
+
+        /* Animazioni Scroll Reveal */
         .reveal { opacity: 0; transform: translateY(30px); transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1); }
         .reveal.active { opacity: 1; transform: translateY(0); }
         .reveal-delay-1 { transition-delay: 0.1s; }
         .reveal-delay-2 { transition-delay: 0.2s; }
         .reveal-delay-3 { transition-delay: 0.3s; }
+
+        /* Tipografia */
         h1, h2, h3, h4 { letter-spacing: -0.02em; }
     </style>
 </head>
@@ -81,6 +115,7 @@
                     <span class="text-xl font-serif text-stone-900 tracking-wide leading-none group-hover:text-bronze-400 transition-colors">Visit Avigliano</span>
                 </div>
             </a>
+            
             <nav class="hidden lg:flex items-center gap-2 bg-paper-100/50 p-1.5 rounded-full border border-stone-200/50 backdrop-blur-sm">
                 <a href="#" class="px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-stone-600 hover:text-stone-900 hover:bg-white hover:shadow-sm transition-all">Home</a>
                 <a href="#eventi-section" class="px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-stone-600 hover:text-stone-900 hover:bg-white hover:shadow-sm transition-all">Eventi</a>
@@ -88,6 +123,7 @@
                 <a href="#natura" class="px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-stone-600 hover:text-stone-900 hover:bg-white hover:shadow-sm transition-all">Natura</a>
                 <a href="cammino.html" class="px-6 py-2.5 rounded-full bg-stone-900 text-white shadow-sm border border-stone-900 text-xs font-bold uppercase tracking-wider hover:bg-bronze-400 hover:border-bronze-400 transition-all">Cammino</a>
             </nav>
+            
              <div class="flex items-center gap-4">
                 <button onclick="document.getElementById('mobile-menu').classList.remove('hidden')" class="lg:hidden text-stone-900 p-2 hover:text-bronze-400 transition"><i data-lucide="menu"></i></button>
             </div>
@@ -106,7 +142,7 @@
 
     <section class="relative h-screen w-full flex items-center justify-center overflow-hidden bg-stone-200">
         <div data-content-id="home_hero_bg" class="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-[40s] hover:scale-110 opacity-0"></div>
-        <div class="absolute inset-0 bg-gradient-to-t from-stone-900/40 via-stone-900/10 to-transparent z-10"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-stone-900/60 via-stone-900/20 to-transparent z-10"></div>
         
         <div class="relative z-20 text-center px-6 max-w-5xl mx-auto mt-20 reveal">
             <div class="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-paper-50/90 backdrop-blur shadow-lg mb-8 border border-white/50">
@@ -115,7 +151,8 @@
                 <span class="w-1.5 h-1.5 rounded-full bg-stone-900"></span>
             </div>
             
-            <h1 data-content-id="home_hero_title" class="text-6xl md:text-8xl lg:text-9xl font-serif text-white mb-8 tracking-tight drop-shadow-2xl leading-[0.9]">...</h1>
+            <h1 data-content-id="home_hero_title" class="text-6xl md:text-8xl lg:text-9xl font-serif text-white mb-8 tracking-tight drop-shadow-2xl leading-[0.9]">Visit Avigliano</h1>
+            
             <p data-content-id="home_hero_desc" class="text-lg md:text-xl text-white/95 font-medium max-w-2xl mx-auto mb-12 leading-relaxed drop-shadow-md">...</p>
             
             <div class="flex flex-col sm:flex-row justify-center gap-6">
@@ -154,12 +191,15 @@
                     <p data-content-id="section_eventi_desc" class="text-stone-600 mt-4 font-light max-w-xl">...</p>
                 </div>
                 <div class="flex items-center gap-4">
-                     <button onclick="document.getElementById('events-slider').scrollBy({left: -350, behavior: 'smooth'})" class="w-12 h-12 rounded-full border border-stone-200 hover:bg-stone-900 hover:text-white text-stone-400 flex items-center justify-center transition-all bg-white shadow-sm"><i data-lucide="arrow-left"></i></button>
-                    <button onclick="document.getElementById('events-slider').scrollBy({left: 350, behavior: 'smooth'})" class="w-12 h-12 rounded-full border border-stone-200 hover:bg-stone-900 hover:text-white text-stone-400 flex items-center justify-center transition-all bg-white shadow-sm"><i data-lucide="arrow-right"></i></button>
+                     <button onclick="document.getElementById('events-slider').scrollBy({left: -300, behavior: 'smooth'})" class="w-12 h-12 rounded-full border border-stone-200 hover:bg-stone-900 hover:text-white text-stone-400 flex items-center justify-center transition-all bg-white shadow-sm"><i data-lucide="arrow-left"></i></button>
+                    <button onclick="document.getElementById('events-slider').scrollBy({left: 300, behavior: 'smooth'})" class="w-12 h-12 rounded-full border border-stone-200 hover:bg-stone-900 hover:text-white text-stone-400 flex items-center justify-center transition-all bg-white shadow-sm"><i data-lucide="arrow-right"></i></button>
                 </div>
             </div>
+
             <div id="category-filters" class="flex gap-3 overflow-x-auto pb-6 mb-4 hide-scroll reveal reveal-delay-1"></div>
+
             <div id="events-slider" class="flex gap-8 overflow-x-auto pb-12 hide-scroll snap-x snap-mandatory -mx-6 px-6 md:mx-0 md:px-0 reveal reveal-delay-2"></div>
+             
             <div id="load-more-btn" class="hidden text-center mt-8 reveal"><button onclick="showAllEvents()" class="px-8 py-3 rounded-full border border-stone-300 text-stone-600 font-bold uppercase text-xs tracking-widest hover:bg-stone-900 hover:text-white transition-all">Tutti gli Eventi</button></div>
             <div id="all-events-grid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-16 animate-fade-in"></div>
         </div>
@@ -172,20 +212,23 @@
                 <h2 data-content-id="section_territorio_title" class="text-5xl font-serif text-stone-900 mb-6">...</h2>
                 <p data-content-id="section_territorio_desc" class="text-stone-600 font-light leading-relaxed text-lg">...</p>
             </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 reveal reveal-delay-1">
                 <div class="lg:col-span-2 relative group rounded-[2rem] overflow-hidden cursor-pointer shadow-soft h-[350px]" onclick="openModal('borgo_avigliano')">
                     <img data-content-id="borgo_avigliano_img" src="" class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-0">
                     <div class="absolute inset-0 bg-gradient-to-t from-stone-900/80 to-transparent"></div>
                     <div class="absolute bottom-0 left-0 p-10">
-                        <h3 data-content-id="borgo_avigliano_title" class="text-3xl font-serif text-white mb-2">...</h3>
+                        <h3 data-content-id="borgo_avigliano_title" class="text-3xl font-serif text-white mb-2">Avigliano Umbro</h3>
                         <p data-content-id="borgo_avigliano_desc" class="text-white/80 font-light line-clamp-2">...</p>
                     </div>
                 </div>
+
                 <div class="relative group rounded-[2rem] overflow-hidden cursor-pointer shadow-sm h-[350px]" onclick="openModal('borgo_dunarobba')">
                     <img data-content-id="borgo_dunarobba_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-0">
                     <div class="absolute inset-0 bg-gradient-to-t from-stone-900/60 to-transparent"></div>
                     <div class="absolute bottom-0 left-0 p-8"><h3 data-content-id="borgo_dunarobba_title" class="text-2xl font-serif text-white">...</h3></div>
                 </div>
+
                 <div class="relative group rounded-[2rem] overflow-hidden cursor-pointer shadow-sm h-[350px]" onclick="openModal('borgo_santa')">
                     <img data-content-id="borgo_santa_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-0">
                     <div class="absolute inset-0 bg-gradient-to-t from-stone-900/60 to-transparent"></div>
@@ -214,6 +257,7 @@
                     <p data-content-id="section_natura_desc" class="text-stone-600 font-light leading-relaxed text-lg">...</p>
                  </div>
             </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 auto-rows-[450px] reveal reveal-delay-1">
                 <div class="relative group rounded-[2rem] overflow-hidden cursor-pointer shadow-soft" onclick="openModal('natura_foresta')">
                     <img data-content-id="natura_foresta_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-105 opacity-0">
@@ -229,6 +273,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="relative group rounded-[2rem] overflow-hidden cursor-pointer shadow-soft" onclick="openModal('natura_grotta')">
                     <img data-content-id="natura_grotta_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-105 opacity-0">
                     <div class="absolute inset-0 bg-gradient-to-t from-stone-900/90 via-transparent to-transparent"></div>
@@ -250,6 +295,7 @@
     <section id="lago" class="relative py-32 bg-stone-900 text-white overflow-hidden">
         <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, #d4af37 10px, #d4af37 11px);"></div>
         <div class="absolute inset-0 bg-gradient-to-b from-stone-900 via-transparent to-stone-900"></div>
+
         <div class="max-w-7xl mx-auto px-6 relative z-10">
             <div class="flex flex-col lg:flex-row items-center gap-20">
                 <div class="lg:w-1/2 reveal">
@@ -259,6 +305,7 @@
                     </div>
                     <h2 data-content-id="lago_title" class="text-5xl md:text-7xl font-serif text-white mb-8 leading-[0.9]">...</h2>
                     <div class="prose prose-lg prose-invert font-light text-stone-300 leading-relaxed mb-12 border-l border-bronze-400/30 pl-6"><p data-content-id="lago_desc">...</p></div>
+                    
                     <div class="grid grid-cols-3 gap-8 border-t border-white/10 pt-8">
                         <div><span data-content-id="lago_stat_1_num" class="block text-3xl md:text-4xl font-serif text-white mb-1">...</span><span data-content-id="lago_stat_1_label" class="text-[10px] text-bronze-400 uppercase tracking-widest">...</span></div>
                         <div><span data-content-id="lago_stat_2_num" class="block text-3xl md:text-4xl font-serif text-white mb-1">...</span><span data-content-id="lago_stat_2_label" class="text-[10px] text-bronze-400 uppercase tracking-widest">...</span></div>

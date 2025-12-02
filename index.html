@@ -20,7 +20,7 @@
             colors: {
               paper: '#F2F0EB', 
               ink: '#05201A',   
-              forest: '#1A3C34', // Verde Istituzionale (Header)
+              forest: '#1A3C34', 
               gold: '#D4AF37',  
               stone: '#8C8C8C', 
             },
@@ -61,20 +61,20 @@
 </head>
 <body class="bg-paper text-ink font-sans selection:bg-gold selection:text-white overflow-x-hidden">
 
-    <nav class="fixed top-0 w-full z-50 bg-forest/95 backdrop-blur border-b border-white/10 h-20 flex items-center justify-between px-6 transition-all shadow-lg">
+    <nav class="fixed top-0 w-full z-50 bg-forest/95 backdrop-blur border-b border-white/10 h-16 md:h-20 flex items-center justify-between px-4 md:px-6 transition-all shadow-lg">
         
         <a href="#" class="flex items-center gap-3 group">
-            <div class="w-10 h-10 rounded-full bg-white p-[2px] shadow-md border border-gold/30 group-hover:scale-105 transition-transform">
+            <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white p-[2px] shadow-md border border-gold/30 group-hover:scale-105 transition-transform shrink-0">
                 <div class="w-full h-full rounded-full bg-forest overflow-hidden flex items-center justify-center">
                     <img id="nav_logo" data-content-id="nav_logo" src="" class="w-full h-full object-cover opacity-0 transition-opacity">
                 </div>
             </div>
             
-            <div class="flex flex-col items-start">
-                <span data-content-id="nav_subtitle" class="bg-white/10 border border-gold/30 text-gold px-2 py-[2px] rounded-md text-[9px] font-bold uppercase tracking-widest mb-[2px] hover:bg-gold hover:text-ink transition-colors cursor-default">
+            <div class="flex flex-col items-start justify-center">
+                <span data-content-id="nav_subtitle" class="bg-gold text-ink px-2 py-[1px] rounded text-[8px] md:text-[9px] font-bold uppercase tracking-widest mb-[2px] shadow-sm whitespace-nowrap">
                     ...
                 </span>
-                <span class="text-xl font-serif text-white leading-none tracking-wide group-hover:text-gold transition-colors">Visit Avigliano</span>
+                <span class="text-lg md:text-xl font-serif text-white leading-none tracking-wide group-hover:text-gold transition-colors">Visit Avigliano</span>
             </div>
         </a>
         
@@ -96,8 +96,8 @@
             </a>
         </div>
 
-        <button onclick="document.getElementById('mobile-menu').classList.remove('hidden')" class="md:hidden text-white hover:text-gold transition">
-            <i data-lucide="menu" class="w-8 h-8"></i>
+        <button onclick="document.getElementById('mobile-menu').classList.remove('hidden')" class="md:hidden text-white hover:text-gold transition p-2">
+            <i data-lucide="menu" class="w-6 h-6"></i>
         </button>
     </nav>
 
@@ -109,7 +109,8 @@
         <a href="cammino.html" class="text-5xl font-serif text-gold">Il Cammino</a>
     </div>
 
-    <section class="relative h-screen w-full overflow-hidden flex items-end pb-20 px-6 pt-24"> <div data-content-id="home_hero_bg" class="absolute inset-0 z-0 bg-cover bg-center"></div>
+    <section class="relative h-screen w-full overflow-hidden flex items-end pb-20 px-6 pt-24"> 
+        <div data-content-id="home_hero_bg" class="absolute inset-0 z-0 bg-cover bg-center"></div>
         <div class="absolute inset-0 bg-gradient-to-t from-ink/90 via-transparent to-ink/20 z-10"></div>
         <div class="absolute top-0 left-12 h-full w-[1px] bg-white/10 z-20 hidden md:block"></div>
         <div class="absolute top-0 right-12 h-full w-[1px] bg-white/10 z-20 hidden md:block"></div>

@@ -61,24 +61,24 @@
 </head>
 <body class="bg-paper text-ink font-sans selection:bg-gold selection:text-white overflow-x-hidden">
 
-    <nav class="fixed top-0 w-full z-50 bg-forest/95 backdrop-blur border-b border-white/10 h-16 md:h-20 flex items-center justify-between px-4 md:px-6 transition-all shadow-lg">
+    <nav class="fixed top-0 w-full z-50 bg-forest/95 backdrop-blur border-b border-white/10 h-12 md:h-16 flex items-center justify-between px-4 md:px-6 transition-all shadow-lg">
         
-        <a href="#" class="flex items-center gap-3 group">
-            <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white p-[2px] shadow-md border border-gold/30 group-hover:scale-105 transition-transform shrink-0">
+        <a href="#" class="flex items-center gap-2 md:gap-3 group">
+            <div class="w-7 h-7 md:w-9 md:h-9 rounded-full bg-white p-[1px] shadow-md border border-gold/30 group-hover:scale-105 transition-transform shrink-0">
                 <div class="w-full h-full rounded-full bg-forest overflow-hidden flex items-center justify-center">
                     <img id="nav_logo" data-content-id="nav_logo" src="" class="w-full h-full object-cover opacity-0 transition-opacity">
                 </div>
             </div>
             
             <div class="flex flex-col items-start justify-center">
-                <span data-content-id="nav_subtitle" class="bg-gold text-ink px-2 py-[1px] rounded text-[8px] md:text-[9px] font-bold uppercase tracking-widest mb-[2px] shadow-sm whitespace-nowrap">
-                    ...
-                </span>
-                <span class="text-lg md:text-xl font-serif text-white leading-none tracking-wide group-hover:text-gold transition-colors">Visit Avigliano</span>
+                <a href="#eventi-section" class="bg-gold text-ink px-2 py-[1px] rounded-[2px] text-[7px] md:text-[8px] font-bold uppercase tracking-widest mb-[1px] shadow-sm whitespace-nowrap hover:bg-white transition-colors animate-pulse">
+                    SCOPRI GLI EVENTI
+                </a>
+                <span class="text-base md:text-lg font-serif text-white leading-none tracking-wide group-hover:text-gold transition-colors">Visit Avigliano</span>
             </div>
         </a>
         
-        <div class="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-widest text-white/80">
+        <div class="hidden md:flex items-center gap-6 text-xs font-bold uppercase tracking-widest text-white/80">
             <a href="#eventi-section" class="hover:text-white transition relative group py-2">
                 Eventi
                 <span class="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span>
@@ -91,12 +91,12 @@
                 Borghi
                 <span class="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span>
             </a>
-            <a href="cammino.html" class="flex items-center gap-2 bg-gold text-ink border border-gold px-5 py-2 rounded-full hover:bg-white hover:border-white transition shadow-[0_0_15px_rgba(212,175,55,0.3)]">
-                <i data-lucide="compass" class="w-4 h-4"></i> Cammino
+            <a href="cammino.html" class="flex items-center gap-2 bg-gold text-ink border border-gold px-4 py-1.5 rounded-full hover:bg-white hover:border-white transition shadow-[0_0_15px_rgba(212,175,55,0.3)]">
+                <i data-lucide="compass" class="w-3 h-3"></i> Cammino
             </a>
         </div>
 
-        <button onclick="document.getElementById('mobile-menu').classList.remove('hidden')" class="md:hidden text-white hover:text-gold transition p-2">
+        <button onclick="document.getElementById('mobile-menu').classList.remove('hidden')" class="md:hidden text-white hover:text-gold transition p-1">
             <i data-lucide="menu" class="w-6 h-6"></i>
         </button>
     </nav>
@@ -109,7 +109,7 @@
         <a href="cammino.html" class="text-5xl font-serif text-gold">Il Cammino</a>
     </div>
 
-    <section class="relative h-screen w-full overflow-hidden flex items-end pb-20 px-6 pt-24"> 
+    <section class="relative h-screen w-full overflow-hidden flex items-end pb-20 px-6 pt-16"> 
         <div data-content-id="home_hero_bg" class="absolute inset-0 z-0 bg-cover bg-center"></div>
         <div class="absolute inset-0 bg-gradient-to-t from-ink/90 via-transparent to-ink/20 z-10"></div>
         <div class="absolute top-0 left-12 h-full w-[1px] bg-white/10 z-20 hidden md:block"></div>
@@ -174,12 +174,14 @@
     <section id="natura" class="py-24 bg-paper relative">
         <div class="bg-grid absolute inset-0 opacity-100 pointer-events-none"></div>
         <div class="max-w-7xl mx-auto px-6 relative z-10">
+            
             <div class="mb-20 text-center reveal">
                 <span class="h-[1px] w-12 bg-gold inline-block align-middle mr-3"></span>
                 <span data-content-id="section_natura_subtitle" class="text-gold text-xs font-bold tracking-[0.3em] uppercase">...</span>
                 <h2 data-content-id="section_natura_title" class="text-6xl font-serif text-ink mt-4 mb-6">...</h2>
                 <p data-content-id="section_natura_desc" class="text-stone text-lg max-w-2xl mx-auto font-light leading-relaxed">...</p>
             </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 min-h-[60vh] reveal reveal-delay-1">
                 <div class="relative group overflow-hidden cursor-pointer bg-ink h-[500px]" onclick="openModal('natura_foresta')">
                     <img data-content-id="natura_foresta_img" src="" class="absolute inset-0 w-full h-full object-cover opacity-60 zoom-img">
@@ -209,11 +211,13 @@
 
     <section id="territorio" class="bg-paper relative pb-24">
         <div class="bg-grid absolute inset-0 opacity-100 pointer-events-none"></div>
+        
         <div class="max-w-7xl mx-auto px-6 relative z-10">
             <div class="mb-20 text-center reveal">
                 <span data-content-id="section_territorio_subtitle" class="text-gold text-xs font-bold tracking-[0.3em] uppercase mb-4 block">...</span>
                 <h2 data-content-id="section_territorio_title" class="text-6xl font-serif text-ink">...</h2>
             </div>
+
             <div class="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-[400px]">
                 <div class="md:col-span-8 relative group overflow-hidden bg-gray-200 cursor-pointer reveal" onclick="openModal('borgo_avigliano')">
                     <img data-content-id="borgo_avigliano_img" src="" class="absolute inset-0 w-full h-full object-cover zoom-img grayscale group-hover:grayscale-0">
@@ -280,6 +284,7 @@
         <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
             <div class="col-span-1 md:col-span-2">
                 <img data-content-id="nav_logo" src="" class="w-16 h-16 object-contain mb-6 opacity-0 transition-opacity bg-white p-2 rounded-full shadow-lg">
+                
                 <span class="text-3xl font-serif block mb-6 text-white">Visit Avigliano</span>
                 <p data-content-id="footer_desc" class="text-stone max-w-sm mb-6">...</p>
                 <p data-content-id="footer_address" class="font-bold text-xs uppercase tracking-widest text-white/50">...</p>
@@ -310,9 +315,11 @@
         <div class="absolute inset-0 bg-ink/90 backdrop-blur-sm" onclick="closeModal()"></div>
         <div class="relative bg-paper w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col md:flex-row shadow-2xl animate-in zoom-in-95 duration-300">
             <button onclick="closeModal()" class="absolute top-0 right-0 z-50 bg-gold text-ink p-4 hover:bg-white transition"><i data-lucide="x"></i></button>
+            
             <div class="h-[50vh] md:h-auto md:w-1/2 relative shrink-0 aspect-[7/10] md:aspect-auto mx-auto md:mx-0">
                 <img id="modal-img" src="" class="absolute inset-0 w-full h-full object-cover">
             </div>
+            
             <div class="flex-1 p-12 overflow-y-auto">
                 <div class="flex items-center gap-4 mb-8"><span id="modal-category" class="bg-ink text-white px-3 py-1 text-[10px] font-bold uppercase tracking-widest">Event</span><span id="modal-subtitle" class="text-stone text-xs uppercase tracking-widest font-bold">Details</span></div>
                 <h2 id="modal-title" class="text-5xl font-serif mb-8 leading-none">Title</h2>
@@ -325,10 +332,6 @@
             </div>
         </div>
     </div>
-
-    <script src="script.js"></script>
-</body>
-</html>
 
     <script src="script.js"></script>
 </body>

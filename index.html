@@ -3,604 +3,273 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Visit Avigliano Umbro | Custodi del Tempo</title>
-    <meta name="description" content="Il portale ufficiale del turismo. Scopri i borghi, la Foresta Fossile e il Cammino del Lago Tiberino.">
-    
+    <title>Il Cammino | Visit Avigliano Umbro</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-    
     <script src="https://unpkg.com/lucide@latest"></script>
-
     <script>
       tailwind.config = {
         theme: {
           extend: {
             colors: {
-              paper: { 50: '#F9F7F2', 100: '#F0EFE9' },
-              stone: { 
-                  900: '#1A3C34', // Verde Istituzionale
-                  800: '#1A3C34', 
-                  600: '#4A4A4A', 
-                  400: '#8C6B4F', 
-                  200: '#E5E5E5'  
-              },
-              bronze: { 400: '#D4AF37', 500: '#B08D55', 600: '#8C6B4F' },
-              warning: { 100: '#FFF4F4', 600: '#C0392B' }
+              paper: { 50: '#fcfbf9', 100: '#f5f2eb' },
+              stone: { 800: '#44403c', 600: '#78716c', 400: '#a8a29e', 200: '#e7e5e4' },
+              bronze: { 50: '#fffbf2', 100: '#fef3c7', 400: '#d4af37', 500: '#b08d55', 600: '#8c6b3d' },
             },
             fontFamily: {
               sans: ['DM Sans', 'sans-serif'],
               serif: ['Playfair Display', 'serif'],
             },
-            boxShadow: {
-                'soft': '0 20px 40px -15px rgba(26, 60, 52, 0.08)',
-                'card': '0 4px 12px -2px rgba(0, 0, 0, 0.05)',
-            }
+            boxShadow: { 'soft': '0 20px 40px -15px rgba(68, 64, 60, 0.1)' }
           }
         }
       }
     </script>
-
     <style>
-        /* Utilities */
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* Texture */
         .noise-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;
-            opacity: 0.035;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; opacity: 0.04;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-            mix-blend-mode: multiply;
         }
-
-        /* Styles */
-        .paper-card {
-            background: #ffffff;
-            border: 1px solid rgba(0,0,0,0.04);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-        .paper-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 20px 40px -10px rgba(26, 60, 52, 0.15);
-            border-color: #D4AF37;
-        }
-        .nav-frosted {
-            background: rgba(249, 247, 242, 0.95);
-            backdrop-filter: blur(16px);
-            border-bottom: 1px solid rgba(26, 60, 52, 0.05);
-        }
-        .reveal { opacity: 0; transform: translateY(30px); transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1); }
+        .nav-frosted { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.03); }
+        .reveal { opacity: 0; transform: translateY(40px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
         .reveal.active { opacity: 1; transform: translateY(0); }
-        .reveal-delay-1 { transition-delay: 0.1s; }
-        .reveal-delay-2 { transition-delay: 0.2s; }
-        h1, h2, h3, h4 { letter-spacing: -0.02em; }
+        .form-input { width: 100%; background: #fffbf2; border: 1px solid #e7e5e4; padding: 1rem; border-radius: 0.75rem; color: #44403c; transition: all 0.3s; }
+        .form-input:focus { outline: none; border-color: #d4af37; box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1); }
     </style>
 </head>
-<body class="bg-paper-50 text-stone-600 font-sans selection:bg-stone-900 selection:text-white overflow-x-hidden">
+<body class="bg-paper-50 text-stone-800 font-sans selection:bg-bronze-400 selection:text-white overflow-x-hidden">
 
     <div class="noise-bg"></div>
 
     <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 nav-frosted">
         <div class="max-w-7xl mx-auto px-6 h-24 flex justify-between items-center">
-            <a href="#" class="flex items-center gap-4 group">
-                <div class="w-12 h-12 rounded-full border border-stone-200 p-1 bg-white shadow-sm transition-transform group-hover:scale-105">
-                    <div class="w-full h-full rounded-full bg-stone-900 flex items-center justify-center overflow-hidden">
-                        <img id="nav_logo" data-content-id="nav_logo" src="" class="w-full h-full object-cover opacity-0 transition-opacity">
-                    </div>
-                </div>
+            <a href="index.html" class="flex items-center gap-4 group">
                 <div class="flex flex-col">
-                    <span data-content-id="nav_subtitle" class="text-[10px] uppercase tracking-[0.25em] text-stone-400 font-bold leading-none mb-1.5">Portale Ufficiale</span>
-                    <span class="text-xl font-serif text-stone-900 tracking-wide leading-none group-hover:text-bronze-400 transition-colors">Visit Avigliano</span>
+                    <span class="text-[10px] uppercase tracking-[0.25em] text-bronze-600 font-bold leading-none mb-1.5">Portale Ufficiale</span>
+                    <span class="text-xl font-serif text-stone-800 tracking-wide leading-none group-hover:text-bronze-500 transition-colors">Visit Avigliano</span>
                 </div>
             </a>
-            <nav class="hidden lg:flex items-center gap-2 bg-paper-100/50 p-1.5 rounded-full border border-stone-200/50 backdrop-blur-sm">
-                <a href="#" class="px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-stone-600 hover:text-stone-900 hover:bg-white hover:shadow-sm transition-all">Home</a>
-                <a href="#eventi-section" class="px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-stone-600 hover:text-stone-900 hover:bg-white hover:shadow-sm transition-all">Eventi</a>
-                <a href="#territorio" class="px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-stone-600 hover:text-stone-900 hover:bg-white hover:shadow-sm transition-all">Borghi</a>
-                <a href="#natura" class="px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-stone-600 hover:text-stone-900 hover:bg-white hover:shadow-sm transition-all">Natura</a>
-                <a href="cammino.html" class="px-6 py-2.5 rounded-full bg-stone-900 text-white shadow-sm border border-stone-900 text-xs font-bold uppercase tracking-wider hover:bg-bronze-400 hover:border-bronze-400 transition-all">Cammino</a>
+            <nav class="hidden lg:flex items-center gap-2 bg-stone-100/50 p-1.5 rounded-full border border-stone-200/50">
+                <a href="index.html" class="px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-stone-500 hover:text-stone-900 hover:bg-white hover:shadow-sm transition-all">Home</a>
+                <a href="index.html#eventi-section" class="px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-stone-500 hover:text-stone-900 hover:bg-white hover:shadow-sm transition-all">Eventi</a>
+                <a href="index.html#territorio" class="px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-stone-500 hover:text-stone-900 hover:bg-white hover:shadow-sm transition-all">Borghi</a>
+                <a href="#" class="px-6 py-2.5 rounded-full bg-white text-bronze-600 shadow-sm border border-stone-100 text-xs font-bold uppercase tracking-wider">Cammino</a>
             </nav>
              <div class="flex items-center gap-4">
-                <button onclick="document.getElementById('mobile-menu').classList.remove('hidden')" class="lg:hidden text-stone-900 p-2 hover:text-bronze-400 transition"><i data-lucide="menu"></i></button>
+                <a href="index.html" class="lg:hidden text-stone-800 p-2"><i data-lucide="arrow-left"></i></a>
             </div>
         </div>
     </header>
 
-    <div id="mobile-menu" class="hidden fixed inset-0 z-[60] bg-paper-50/98 backdrop-blur-xl flex flex-col justify-center items-center gap-8 animate-in fade-in duration-300">
-        <button onclick="document.getElementById('mobile-menu').classList.add('hidden')" class="absolute top-8 right-8 text-stone-900 p-3 border border-stone-200 rounded-full"><i data-lucide="x"></i></button>
-        <a href="#" onclick="document.getElementById('mobile-menu').classList.add('hidden')" class="text-4xl font-serif text-stone-900 hover:text-bronze-400">Home</a>
-        <a href="#eventi-section" onclick="document.getElementById('mobile-menu').classList.add('hidden')" class="text-4xl font-serif text-stone-900 hover:text-bronze-400">Eventi</a>
-        <a href="#territorio" onclick="document.getElementById('mobile-menu').classList.add('hidden')" class="text-4xl font-serif text-stone-900 hover:text-bronze-400">Borghi</a>
-        <a href="#natura" onclick="document.getElementById('mobile-menu').classList.add('hidden')" class="text-4xl font-serif text-stone-900 hover:text-bronze-400">Natura</a>
-        <a href="cammino.html" class="text-4xl font-serif text-bronze-400 italic">Il Cammino</a>
-    </div>
-
-    <section class="relative h-screen w-full flex items-center justify-center overflow-hidden bg-stone-200">
-        <div data-content-id="home_hero_bg" class="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-[40s] hover:scale-110 opacity-0"></div>
-        <div class="absolute inset-0 bg-gradient-to-t from-stone-900/40 via-stone-900/10 to-transparent z-10"></div>
-        
-        <div class="relative z-20 text-center px-6 max-w-5xl mx-auto mt-20 reveal">
-            <div class="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-paper-50/90 backdrop-blur shadow-lg mb-8 border border-white/50">
-                <span class="w-1.5 h-1.5 rounded-full bg-stone-900"></span>
-                <span data-content-id="home_hero_subtitle" class="text-stone-900 text-[11px] font-bold tracking-[0.3em] uppercase">...</span>
-                <span class="w-1.5 h-1.5 rounded-full bg-stone-900"></span>
-            </div>
-            
-            <h1 data-content-id="home_hero_title" class="text-6xl md:text-8xl lg:text-9xl font-serif text-white mb-8 tracking-tight drop-shadow-2xl leading-[0.9]">Visit Avigliano</h1>
-            
-            <p data-content-id="home_hero_desc" class="text-lg md:text-xl text-white/95 font-medium max-w-2xl mx-auto mb-12 leading-relaxed drop-shadow-md">...</p>
-            
-            <div class="flex flex-col sm:flex-row justify-center gap-6">
-                <button onclick="document.getElementById('eventi-section').scrollIntoView({behavior: 'smooth'})" class="px-10 py-4 bg-stone-900 text-white font-bold tracking-widest text-xs uppercase rounded-full hover:bg-bronze-400 transition-all shadow-lg hover:-translate-y-1 border border-stone-900">Programma Eventi</button>
-                <a href="cammino.html" class="px-10 py-4 rounded-full bg-white/10 backdrop-blur text-white font-bold tracking-widest text-xs uppercase hover:bg-white hover:text-stone-900 transition-all shadow-lg flex items-center justify-center gap-2 hover:-translate-y-1 border border-white/30">Cammino del Lago</a>
-            </div>
+    <section class="relative h-[60vh] min-h-[400px] flex items-center justify-center overflow-hidden bg-stone-100">
+        <div data-content-id="cammino_page_hero_bg" class="absolute inset-0 z-0 bg-cover bg-center opacity-0 transition-opacity duration-1000"></div>
+        <div class="absolute inset-0 bg-black/30 z-10"></div>
+        <div class="relative z-20 text-center px-6 max-w-4xl mx-auto mt-20 reveal">
+            <span class="inline-block py-1 px-4 rounded-full border border-white/30 bg-white/10 backdrop-blur text-white text-[10px] font-bold tracking-[0.3em] uppercase mb-6">Itinerario Ufficiale</span>
+            <h1 data-content-id="cammino_page_hero_title" class="text-5xl md:text-7xl font-serif text-white mb-6 drop-shadow-lg">Il Cammino del Lago</h1>
+            <p data-content-id="cammino_page_hero_desc" class="text-lg text-white/90 font-light leading-relaxed max-w-2xl mx-auto">...</p>
         </div>
     </section>
 
-    <section class="relative z-30 -mt-24 px-6 pb-24">
-        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-            <a href="#territorio" class="paper-card rounded-2xl p-10 group text-center md:text-left reveal reveal-delay-1">
-                <div class="w-14 h-14 rounded-full bg-paper-100 flex items-center justify-center mb-6 text-stone-900 group-hover:bg-stone-900 group-hover:text-white transition-colors mx-auto md:mx-0"><i data-lucide="map"></i></div>
-                <h3 data-content-id="card_territorio_title" class="text-2xl font-serif text-stone-900 mb-3 group-hover:text-bronze-400 transition-colors">...</h3>
-                <p data-content-id="card_territorio_desc" class="text-sm text-stone-600 leading-relaxed mb-6 font-light">...</p>
-            </a>
-            <a href="#lago" class="paper-card rounded-2xl p-10 group text-center md:text-left reveal reveal-delay-2">
-                <div class="w-14 h-14 rounded-full bg-paper-100 flex items-center justify-center mb-6 text-stone-900 group-hover:bg-stone-900 group-hover:text-white transition-colors mx-auto md:mx-0"><i data-lucide="history"></i></div>
-                <h3 data-content-id="card_storia_title" class="text-2xl font-serif text-stone-900 mb-3 group-hover:text-bronze-400 transition-colors">...</h3>
-                <p data-content-id="card_storia_desc" class="text-sm text-stone-600 leading-relaxed mb-6 font-light">...</p>
-            </a>
-            <a href="#sapori" class="paper-card rounded-2xl p-10 group text-center md:text-left reveal reveal-delay-3">
-                <div class="w-14 h-14 rounded-full bg-paper-100 flex items-center justify-center mb-6 text-stone-900 group-hover:bg-stone-900 group-hover:text-white transition-colors mx-auto md:mx-0"><i data-lucide="utensils"></i></div>
-                <h3 data-content-id="card_sapori_title" class="text-2xl font-serif text-stone-900 mb-3 group-hover:text-bronze-400 transition-colors">...</h3>
-                <p data-content-id="card_sapori_desc" class="text-sm text-stone-600 leading-relaxed mb-6 font-light">...</p>
-            </a>
-        </div>
-    </section>
-
-    <section id="eventi-section" class="py-24 bg-paper-50 relative border-t border-stone-200">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="flex flex-col md:flex-row justify-between items-end mb-8 gap-8 reveal">
-                <div>
-                    <span data-content-id="section_eventi_subtitle" class="text-bronze-400 text-xs font-bold tracking-[0.25em] uppercase mb-3 block">...</span>
-                    <h2 data-content-id="section_eventi_title" class="text-4xl md:text-5xl font-serif text-stone-900 leading-tight">...</h2>
-                    <p data-content-id="section_eventi_desc" class="text-stone-600 mt-4 font-light max-w-xl">...</p>
+    <section class="py-24 px-6 max-w-7xl mx-auto">
+        <div class="flex flex-col lg:flex-row gap-16">
+            <div class="lg:w-2/3 reveal">
+                <h2 data-content-id="cammino_intro_title" class="text-4xl font-serif text-stone-800 mb-6">...</h2>
+                <div class="prose prose-lg text-stone-600 font-light mb-10">
+                    <p data-content-id="cammino_intro_desc">...</p>
                 </div>
-                <div class="flex items-center gap-4">
-                     <button onclick="document.getElementById('events-slider').scrollBy({left: -350, behavior: 'smooth'})" class="w-12 h-12 rounded-full border border-stone-200 hover:bg-stone-900 hover:text-white text-stone-400 flex items-center justify-center transition-all bg-white shadow-sm"><i data-lucide="arrow-left"></i></button>
-                    <button onclick="document.getElementById('events-slider').scrollBy({left: 350, behavior: 'smooth'})" class="w-12 h-12 rounded-full border border-stone-200 hover:bg-stone-900 hover:text-white text-stone-400 flex items-center justify-center transition-all bg-white shadow-sm"><i data-lucide="arrow-right"></i></button>
+                
+                <div class="grid grid-cols-3 gap-4 border-t border-b border-stone-200 py-8">
+                    <div><span class="block text-3xl font-serif text-stone-800">80<span class="text-sm text-bronze-500 ml-1">km</span></span><span class="text-[10px] text-stone-400 uppercase tracking-widest mt-1 block">Lunghezza</span></div>
+                    <div><span class="block text-3xl font-serif text-stone-800">5<span class="text-sm text-bronze-500 ml-1">Comuni</span></span><span class="text-[10px] text-stone-400 uppercase tracking-widest mt-1 block">Attraversati</span></div>
+                    <div><span class="block text-3xl font-serif text-stone-800">1.2k<span class="text-sm text-bronze-500 ml-1">m</span></span><span class="text-[10px] text-stone-400 uppercase tracking-widest mt-1 block">Dislivello</span></div>
                 </div>
-            </div>
 
-            <div id="category-filters" class="flex gap-3 overflow-x-auto pb-6 mb-4 hide-scroll reveal reveal-delay-1"></div>
-
-            <div id="events-slider" class="flex gap-8 overflow-x-auto pb-12 hide-scroll snap-x snap-mandatory -mx-6 px-6 md:mx-0 md:px-0 reveal reveal-delay-2"></div>
-             
-            <div id="load-more-btn" class="hidden text-center mt-8 reveal"><button onclick="showAllEvents()" class="px-8 py-3 rounded-full border border-stone-300 text-stone-600 font-bold uppercase text-xs tracking-widest hover:bg-stone-900 hover:text-white transition-all">Tutti gli Eventi</button></div>
-            <div id="all-events-grid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-16 animate-fade-in"></div>
-        </div>
-    </section>
-
-    <section id="territorio" class="py-32 bg-white">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center mb-20 max-w-3xl mx-auto reveal">
-                <span data-content-id="section_territorio_subtitle" class="text-bronze-400 text-xs font-bold tracking-[0.25em] uppercase mb-4 block">...</span>
-                <h2 data-content-id="section_territorio_title" class="text-5xl font-serif text-stone-900 mb-6">...</h2>
-                <p data-content-id="section_territorio_desc" class="text-stone-600 font-light leading-relaxed text-lg">...</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 reveal reveal-delay-1">
-                <div class="lg:col-span-2 relative group rounded-[2rem] overflow-hidden cursor-pointer shadow-soft h-[350px]" onclick="openModal('borgo_avigliano')">
-                    <img data-content-id="borgo_avigliano_img" src="https://images.unsplash.com/photo-1541364983171-a8ba01e95cfc?q=80&w=1200" class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-0">
-                    <div class="absolute inset-0 bg-gradient-to-t from-stone-900/80 to-transparent"></div>
-                    <div class="absolute bottom-0 left-0 p-10">
-                        <h3 data-content-id="borgo_avigliano_title" class="text-3xl font-serif text-white mb-2">Avigliano Umbro</h3>
-                        <p data-content-id="borgo_avigliano_desc" class="text-white/80 font-light line-clamp-2">...</p>
+                <div class="mt-12 space-y-8 pl-4 border-l border-bronze-200">
+                    <div class="relative pl-8">
+                        <div class="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-bronze-500 ring-4 ring-white"></div>
+                        <span class="text-[10px] uppercase font-bold text-bronze-500 tracking-widest mb-1 block">Tappa 1</span>
+                        <h4 data-content-id="cammino_tappa1_title" class="font-serif text-xl text-stone-800 mb-1">...</h4>
+                        <p data-content-id="cammino_tappa1_desc" class="text-sm text-stone-500">...</p>
+                    </div>
+                    <div class="relative pl-8">
+                        <div class="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-stone-300 ring-4 ring-white"></div>
+                        <span class="text-[10px] uppercase font-bold text-stone-400 tracking-widest mb-1 block">Tappa 2</span>
+                        <h4 data-content-id="cammino_tappa2_title" class="font-serif text-xl text-stone-800 mb-1">...</h4>
+                        <p data-content-id="cammino_tappa2_desc" class="text-sm text-stone-500">...</p>
+                    </div>
+                    <div class="relative pl-8">
+                        <div class="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-stone-300 ring-4 ring-white"></div>
+                        <span class="text-[10px] uppercase font-bold text-stone-400 tracking-widest mb-1 block">Tappa 3</span>
+                        <h4 data-content-id="cammino_tappa3_title" class="font-serif text-xl text-stone-800 mb-1">...</h4>
+                        <p data-content-id="cammino_tappa3_desc" class="text-sm text-stone-500">...</p>
+                    </div>
+                    <div class="relative pl-8">
+                        <div class="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-bronze-500 ring-4 ring-white"></div>
+                        <span class="text-[10px] uppercase font-bold text-stone-400 tracking-widest mb-1 block">Tappa 4</span>
+                        <h4 data-content-id="cammino_tappa4_title" class="font-serif text-xl text-stone-800 mb-1">...</h4>
+                        <p data-content-id="cammino_tappa4_desc" class="text-sm text-stone-500">...</p>
                     </div>
                 </div>
+            </div>
 
-                <div class="relative group rounded-[2rem] overflow-hidden cursor-pointer shadow-sm h-[350px]" onclick="openModal('borgo_dunarobba')">
-                    <img data-content-id="borgo_dunarobba_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-0">
-                    <div class="absolute inset-0 bg-gradient-to-t from-stone-900/60 to-transparent"></div>
-                    <div class="absolute bottom-0 left-0 p-8"><h3 data-content-id="borgo_dunarobba_title" class="text-2xl font-serif text-white">...</h3></div>
-                </div>
-
-                <div class="relative group rounded-[2rem] overflow-hidden cursor-pointer shadow-sm h-[350px]" onclick="openModal('borgo_santa')">
-                    <img data-content-id="borgo_santa_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-0">
-                    <div class="absolute inset-0 bg-gradient-to-t from-stone-900/60 to-transparent"></div>
-                    <div class="absolute bottom-0 left-0 p-8"><h3 data-content-id="borgo_santa_title" class="text-2xl font-serif text-white">...</h3></div>
-                </div>
-                 <div class="relative group rounded-[2rem] overflow-hidden cursor-pointer shadow-sm h-[350px]" onclick="openModal('borgo_toscolano')">
-                    <img data-content-id="borgo_toscolano_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-0">
-                    <div class="absolute inset-0 bg-gradient-to-t from-stone-900/60 to-transparent"></div>
-                    <div class="absolute bottom-0 left-0 p-8"><h3 data-content-id="borgo_toscolano_title" class="text-2xl font-serif text-white">...</h3></div>
-                </div>
-                <div class="relative group rounded-[2rem] overflow-hidden cursor-pointer shadow-sm h-[350px]" onclick="openModal('borgo_sismano')">
-                    <img data-content-id="borgo_sismano_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-0">
-                    <div class="absolute inset-0 bg-gradient-to-t from-stone-900/60 to-transparent"></div>
-                    <div class="absolute bottom-0 left-0 p-8"><h3 data-content-id="borgo_sismano_title" class="text-2xl font-serif text-white">...</h3></div>
+            <div class="lg:w-1/3 reveal reveal-delay-1">
+                <div class="sticky top-32">
+                    <h3 class="text-xl font-serif text-stone-800 mb-6">La Traccia GPS</h3>
+                    <div class="w-full h-[600px] rounded-[2rem] overflow-hidden shadow-soft border border-stone-200 bg-stone-100 relative group">
+                        <iframe frameBorder="0" scrolling="no" src="https://it.wikiloc.com/wikiloc/spatialArtifacts.do?event=view&id=201301484&measures=on&title=on&near=on&images=on&maptype=M" width="100%" height="100%" class="grayscale group-hover:grayscale-0 transition-all duration-1000"></iframe>
+                    </div>
+                    <div class="mt-6 p-6 bg-white rounded-2xl border border-stone-100 shadow-sm">
+                        <h4 class="text-sm font-bold text-stone-800 uppercase mb-2">Comuni Attraversati</h4>
+                        <ul class="text-xs text-stone-500 space-y-1">
+                            <li>• Avigliano Umbro</li>
+                            <li>• Montecchio</li>
+                            <li>• Guardea</li>
+                            <li>• Amelia</li>
+                            <li>• Montecastrilli</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="natura" class="py-32 bg-paper-100 border-t border-stone-200">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="flex flex-col md:flex-row justify-between items-end mb-16 reveal">
-                 <div class="max-w-2xl">
-                    <span data-content-id="section_natura_subtitle" class="text-bronze-400 text-xs font-bold tracking-[0.25em] uppercase mb-4 block">...</span>
-                    <h2 data-content-id="section_natura_title" class="text-4xl md:text-5xl font-serif text-stone-900 mb-6">...</h2>
-                    <p data-content-id="section_natura_desc" class="text-stone-600 font-light leading-relaxed text-lg">...</p>
-                 </div>
+    <section id="prenota" class="py-24 bg-white border-t border-stone-200">
+        <div class="max-w-5xl mx-auto px-6">
+            <div class="text-center mb-16 reveal">
+                <span class="text-bronze-500 text-xs font-bold tracking-[0.25em] uppercase mb-4 block">Ufficio Credenziali</span>
+                <h2 class="text-4xl md:text-5xl font-serif text-stone-800">Passaporto del Pellegrino</h2>
+                <p class="text-stone-500 mt-4 max-w-xl mx-auto font-light">Compila il modulo ufficiale per richiedere la Credenziale e registrare la tua presenza. Il documento ti verrà inviato via email.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 auto-rows-[450px] reveal reveal-delay-1">
-                <div class="relative group rounded-[2rem] overflow-hidden cursor-pointer shadow-soft" onclick="openModal('natura_foresta')">
-                    <img data-content-id="natura_foresta_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-105 opacity-0">
-                    <div class="absolute inset-0 bg-gradient-to-t from-stone-900/90 via-transparent to-transparent"></div>
-                    <div class="absolute top-8 left-8">
-                        <div data-content-id="natura_foresta_badge" class="bg-white/90 backdrop-blur px-5 py-2 rounded-full text-stone-900 text-[10px] font-bold uppercase tracking-widest shadow-sm">...</div>
-                    </div>
-                    <div class="absolute bottom-0 left-0 p-12 w-full">
-                        <h3 data-content-id="natura_foresta_title" class="text-4xl md:text-5xl font-serif text-white mb-4">...</h3>
-                        <p data-content-id="natura_foresta_desc" class="text-white/80 font-light line-clamp-2 text-lg">...</p>
-                         <div class="mt-6 inline-flex items-center text-white text-xs font-bold uppercase tracking-widest gap-2 border-b border-white/30 pb-1 group-hover:border-white transition-all">
-                            Scopri <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            <div class="bg-white rounded-[2.5rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] border border-stone-100 overflow-hidden reveal reveal-delay-1">
+                <div class="bg-bronze-50 p-8 border-b border-bronze-100 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-white p-2 rounded-full shadow-sm text-bronze-600"><i data-lucide="scroll-text" class="w-6 h-6"></i></div>
+                        <div>
+                            <span class="block text-xs font-bold uppercase tracking-widest text-bronze-600">Modulo Richiesta</span>
+                            <span class="font-serif text-stone-800 text-lg">Credenziale Ufficiale</span>
                         </div>
                     </div>
-                </div>
-
-                <div class="relative group rounded-[2rem] overflow-hidden cursor-pointer shadow-soft" onclick="openModal('natura_grotta')">
-                    <img data-content-id="natura_grotta_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-105 opacity-0">
-                    <div class="absolute inset-0 bg-gradient-to-t from-stone-900/90 via-transparent to-transparent"></div>
-                    <div class="absolute top-8 right-8">
-                        <div data-content-id="natura_grotta_badge" class="bg-warning-600/90 backdrop-blur px-5 py-2 rounded-full text-white text-[10px] font-bold uppercase tracking-widest shadow-sm animate-pulse">...</div>
-                    </div>
-                    <div class="absolute bottom-0 left-0 p-12 w-full">
-                        <h3 data-content-id="natura_grotta_title" class="text-4xl md:text-5xl font-serif text-white mb-4">...</h3>
-                        <p data-content-id="natura_grotta_desc" class="text-white/80 font-light line-clamp-2 text-lg">...</p>
-                         <div class="mt-6 inline-flex items-center text-white text-xs font-bold uppercase tracking-widest gap-2 border-b border-white/30 pb-1 group-hover:border-white transition-all">
-                            Dettagli <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                        </div>
+                    <div class="hidden md:block text-right">
+                        <span class="block text-[10px] font-bold uppercase text-stone-400">Codice Cammino</span>
+                        <span class="font-mono text-stone-600">LAGO-TIBERINO</span>
                     </div>
                 </div>
-            </div>
-        </div>
-    </section>
 
-    <section id="lago" class="relative py-32 bg-stone-900 text-white overflow-hidden">
-        <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, #d4af37 10px, #d4af37 11px);"></div>
-        <div class="absolute inset-0 bg-gradient-to-b from-stone-900 via-transparent to-stone-900"></div>
+                <div class="p-8 md:p-12">
+                    <form action="https://formsubmit.co/comunediaviglianoumbro@gmail.com" method="POST" class="space-y-8">
+                        
+                        <input type="hidden" name="_subject" value="NUOVA RICHIESTA CREDENZIALE CAMMINO">
+                        <input type="hidden" name="_template" value="table">
+                        <input type="hidden" name="_captcha" value="false">
+                        <input type="hidden" name="_next" value="https://visitaviglianoumbro.it/cammino.html?status=success">
 
-        <div class="max-w-7xl mx-auto px-6 relative z-10">
-            <div class="flex flex-col lg:flex-row items-center gap-20">
-                <div class="lg:w-1/2 reveal">
-                    <div class="inline-flex items-center gap-3 mb-6">
-                        <div class="w-10 h-[1px] bg-bronze-400"></div>
-                        <span data-content-id="lago_subtitle" class="text-bronze-400 uppercase tracking-[0.25em] text-xs font-bold">...</span>
-                    </div>
-                    <h2 data-content-id="lago_title" class="text-5xl md:text-7xl font-serif text-white mb-8 leading-[0.9]">...</h2>
-                    <div class="prose prose-lg prose-invert font-light text-stone-300 leading-relaxed mb-12 border-l border-bronze-400/30 pl-6"><p data-content-id="lago_desc">...</p></div>
-                    
-                    <div class="grid grid-cols-3 gap-8 border-t border-white/10 pt-8">
-                        <div><span data-content-id="lago_stat_1_num" class="block text-3xl md:text-4xl font-serif text-white mb-1">...</span><span data-content-id="lago_stat_1_label" class="text-[10px] text-bronze-400 uppercase tracking-widest">...</span></div>
-                        <div><span data-content-id="lago_stat_2_num" class="block text-3xl md:text-4xl font-serif text-white mb-1">...</span><span data-content-id="lago_stat_2_label" class="text-[10px] text-bronze-400 uppercase tracking-widest">...</span></div>
-                        <div><span data-content-id="lago_stat_3_num" class="block text-3xl md:text-4xl font-serif text-white mb-1">...</span><span data-content-id="lago_stat_3_label" class="text-[10px] text-bronze-400 uppercase tracking-widest">...</span></div>
-                    </div>
-                </div>
-                <div class="lg:w-1/2 w-full reveal reveal-delay-1">
-                    <div class="relative group">
-                        <div class="absolute -inset-4 border border-bronze-500/20 rounded-[2rem] transform translate-x-4 translate-y-4 transition-transform group-hover:translate-x-2 group-hover:translate-y-2"></div>
-                        <div class="relative rounded-[2rem] overflow-hidden shadow-2xl h-[500px] bg-stone-800">
-                            <div class="absolute inset-0 bg-stone-900/20 group-hover:bg-transparent transition-colors z-10"></div>
-                            <img data-content-id="lago_img_side" class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-700 grayscale group-hover:grayscale-0 transform group-hover:scale-105 transition-transform duration-[1.5s]">
-                            <div class="absolute bottom-8 left-8 z-20 bg-stone-900/90 backdrop-blur px-6 py-3 rounded-full border border-white/10">
-                                <a href="cammino.html" class="flex items-center gap-3 text-white text-xs font-bold uppercase tracking-widest hover:text-bronze-400 transition-colors">Scopri la storia <i data-lucide="arrow-right" class="w-4 h-4"></i></a>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="space-y-6">
+                                <h4 class="text-sm font-bold uppercase tracking-widest text-stone-400 border-b border-stone-100 pb-2">Dettagli Viaggio</h4>
+                                
+                                <div>
+                                    <label class="block text-xs font-bold text-stone-600 mb-2 uppercase">Modalità</label>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <label class="cursor-pointer group">
+                                            <input type="radio" name="Modalita" value="A Piedi" class="peer sr-only" checked>
+                                            <div class="p-4 rounded-xl border border-stone-200 bg-paper-50 peer-checked:bg-bronze-50 peer-checked:border-bronze-400 peer-checked:text-bronze-700 transition-all text-center hover:bg-stone-50">
+                                                <i data-lucide="footprints" class="w-6 h-6 mx-auto mb-2 text-stone-400 peer-checked:text-bronze-500"></i>
+                                                <span class="text-xs font-bold uppercase tracking-wide">A Piedi</span>
+                                            </div>
+                                        </label>
+                                        <label class="cursor-pointer group">
+                                            <input type="radio" name="Modalita" value="In Bici" class="peer sr-only">
+                                            <div class="p-4 rounded-xl border border-stone-200 bg-paper-50 peer-checked:bg-bronze-50 peer-checked:border-bronze-400 peer-checked:text-bronze-700 transition-all text-center hover:bg-stone-50">
+                                                <i data-lucide="bike" class="w-6 h-6 mx-auto mb-2 text-stone-400 peer-checked:text-bronze-500"></i>
+                                                <span class="text-xs font-bold uppercase tracking-wide">In Bici</span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold text-stone-600 mb-2 uppercase">Data Partenza</label>
+                                        <input type="date" name="Data_Partenza" required class="form-input">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-stone-600 mb-2 uppercase">N. Persone</label>
+                                        <input type="number" name="Numero_Persone" min="1" value="1" required class="form-input">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-6">
+                                <h4 class="text-sm font-bold uppercase tracking-widest text-stone-400 border-b border-stone-100 pb-2">Anagrafica Referente</h4>
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold text-stone-600 mb-2 uppercase">Nome</label>
+                                        <input type="text" name="Nome" required class="form-input">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-stone-600 mb-2 uppercase">Cognome</label>
+                                        <input type="text" name="Cognome" required class="form-input">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-stone-600 mb-2 uppercase">Email</label>
+                                    <input type="email" name="Email" placeholder="Per ricevere la credenziale" required class="form-input">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-stone-600 mb-2 uppercase">Provenienza</label>
+                                    <input type="text" name="Citta_Provenienza" placeholder="Città / Nazione" required class="form-input">
+                                </div>
                             </div>
                         </div>
-                    </div>
+
+                        <div class="pt-8 border-t border-stone-100 mt-8 flex flex-col items-center">
+                            <div class="flex items-center gap-3 mb-6">
+                                <input type="checkbox" required id="privacy" class="w-4 h-4 text-bronze-500 border-stone-300 rounded focus:ring-bronze-500">
+                                <label for="privacy" class="text-xs text-stone-500">Accetto il trattamento dei dati personali per il rilascio della credenziale.</label>
+                            </div>
+                            
+                            <button type="submit" class="w-full md:w-auto px-12 py-4 bg-stone-800 text-white rounded-full font-bold uppercase tracking-widest text-xs hover:bg-bronze-600 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 flex items-center justify-center gap-3">
+                                <span>Invia Richiesta</span>
+                                <i data-lucide="send" class="w-4 h-4"></i>
+                            </button>
+                            <p class="text-[10px] text-stone-400 mt-4">La richiesta verrà processata dall'Ufficio Turismo del Comune.</p>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="sapori" class="py-32 bg-paper-50">
-        <div class="max-w-7xl mx-auto px-6">
-             <div class="text-center mb-20 reveal">
-                <span data-content-id="lifestyle_subtitle" class="text-bronze-400 text-xs font-bold tracking-[0.25em] uppercase mb-4 block">...</span>
-                <h2 data-content-id="lifestyle_title" class="text-5xl font-serif text-stone-900">...</h2>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 reveal reveal-delay-1">
-                <div class="paper-card p-12 rounded-[2.5rem] flex flex-col items-center text-center group">
-                    <div class="w-20 h-20 rounded-full bg-paper-100 flex items-center justify-center mb-8 text-stone-900 group-hover:scale-110 transition-transform"><i data-lucide="utensils" class="w-8 h-8"></i></div>
-                    <h3 data-content-id="lifestyle_food_title" class="text-3xl font-serif text-stone-900 mb-4">...</h3>
-                    <p data-content-id="lifestyle_food_desc" class="text-stone-600 text-sm mb-8 leading-relaxed max-w-sm">...</p>
-                </div>
-                <div class="paper-card p-12 rounded-[2.5rem] flex flex-col items-center text-center group">
-                    <div class="w-20 h-20 rounded-full bg-paper-100 flex items-center justify-center mb-8 text-stone-900 group-hover:scale-110 transition-transform"><i data-lucide="bed" class="w-8 h-8"></i></div>
-                    <h3 data-content-id="lifestyle_sleep_title" class="text-3xl font-serif text-stone-900 mb-4">...</h3>
-                    <p data-content-id="lifestyle_sleep_desc" class="text-stone-600 text-sm mb-8 leading-relaxed max-w-sm">...</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <footer id="contatti" class="bg-stone-900 pt-24 pb-12 text-stone-400">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-16 mb-20 reveal">
-                <div class="col-span-1 md:col-span-1">
-                    <span class="text-2xl font-serif text-white block mb-6">Visit Avigliano</span>
-                    <p data-content-id="footer_desc" class="text-sm leading-relaxed mb-8 font-light">...</p>
-                    <p data-content-id="footer_address" class="text-sm leading-relaxed font-light text-stone-500">...</p>
-                </div>
-                 <div><h4 class="text-white font-bold text-xs uppercase tracking-widest mb-8">Esplora</h4><ul class="space-y-4 text-sm font-light"><li><a href="#" class="hover:text-bronze-400">Home</a></li><li><a href="#territorio" class="hover:text-bronze-400">Borghi</a></li><li><a href="cammino.html" class="hover:text-bronze-400">Cammino</a></li></ul></div>
-                 <div><h4 class="text-white font-bold text-xs uppercase tracking-widest mb-8">Contatti</h4><ul class="space-y-4 text-sm font-light"><li data-content-id="contact_email">...</li><li data-content-id="contact_phone">...</li></ul></div>
-            </div>
-            <div class="border-t border-white/10 pt-8 text-[10px] uppercase font-bold text-center"><p>&copy; 2025 Comune di Avigliano Umbro.</p></div>
-        </div>
+    <footer class="bg-stone-900 py-12 text-center border-t border-stone-800 mt-0">
+        <p class="text-stone-500 text-xs uppercase tracking-widest">&copy; 2025 Visit Avigliano Umbro</p>
     </footer>
 
-    <div id="info-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-stone-900/60 backdrop-blur-md" onclick="closeModal()"></div>
-        <div class="relative bg-white w-full max-w-5xl max-h-[90vh] rounded-3xl md:rounded-[3rem] overflow-hidden flex flex-col md:flex-row shadow-2xl animate-in zoom-in-95 duration-300">
-            <button onclick="closeModal()" class="absolute top-4 right-4 z-50 text-stone-800 bg-white/50 backdrop-blur p-2 rounded-full hover:bg-stone-200 transition"><i data-lucide="x"></i></button>
-            <div class="h-48 md:w-1/2 md:h-auto relative shrink-0"><img id="modal-img" src="" class="absolute inset-0 w-full h-full object-cover"></div>
-            <div class="flex-1 p-8 md:p-12 overflow-y-auto bg-white">
-                <div class="mb-6"><span id="modal-category" class="inline-block bg-bronze-400 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider mb-3">Event</span><span id="modal-subtitle" class="block text-stone-500 text-xs uppercase tracking-widest font-bold">Details</span></div>
-                <h2 id="modal-title" class="text-3xl md:text-4xl font-serif text-stone-900 mb-6 leading-tight">Title</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8 border-y border-stone-100 py-6">
-                    <div class="flex items-start gap-3"><i data-lucide="calendar" class="w-5 h-5 text-bronze-400 mt-0.5"></i><div><span class="block text-[10px] text-stone-400 uppercase font-bold">Data & Ora</span><span id="modal-time" class="text-sm font-medium text-stone-700">...</span></div></div>
-                    <div class="flex items-start gap-3"><i data-lucide="map-pin" class="w-5 h-5 text-bronze-400 mt-0.5"></i><div><span class="block text-[10px] text-stone-400 uppercase font-bold">Luogo</span><span id="modal-location" class="text-sm font-medium text-stone-700">...</span></div></div>
-                    <div class="flex items-start gap-3 sm:col-span-2"><i data-lucide="users" class="w-5 h-5 text-bronze-400 mt-0.5"></i><div><span class="block text-[10px] text-stone-400 uppercase font-bold">Organizzatore</span><span id="modal-organizer" class="text-sm font-medium text-stone-700">...</span></div></div>
-                </div>
-                <div class="prose prose-stone font-light leading-relaxed text-sm md:text-base"><p id="modal-desc">Description...</p></div>
-            </div>
-        </div>
-    </div>
-
+    <script src="script.js"></script>
     <script>
-        // CONFIGURAZIONE CSV
-        const CSV_EVENTS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=0&single=true&output=csv";
-        const CSV_CONTENT = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=643581002&single=true&output=csv";
-
-        // STATO
-        let cmsData = {}; 
-        let allEvents = [];
-        let filteredEvents = [];
-        let currentCategory = 'Tutti';
-
-        // SCROLL REVEAL
-        const observerOptions = { root: null, rootMargin: '0px', threshold: 0.1 };
-        const observer = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, observerOptions);
-
-        // PARSER CSV
-        function parseCSV(text) {
-            const lines = text.split('\n').filter(l => l.trim() !== '');
-            const result = [];
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i];
-                const row = [];
-                let currentCell = '';
-                let insideQuotes = false;
-                for (let j = 0; j < line.length; j++) {
-                    const char = line[j];
-                    if (char === '"') { insideQuotes = !insideQuotes; } 
-                    else if (char === ',' && !insideQuotes) { row.push(currentCell.trim()); currentCell = ''; } 
-                    else { currentCell += char; }
-                }
-                row.push(currentCell.trim());
-                result.push(row.map(cell => cell.replace(/^"|"$/g, '').replace(/""/g, '"')));
-            }
-            return result;
-        }
-
-        function formatUrl(url) {
-            if (!url) return '';
-            if (url.includes('drive.google.com') || url.includes('/d/')) {
-                const idMatch = url.match(/\/d\/(.+?)\/|id=(.+?)&|id=(.+?)$/);
-                const id = idMatch ? (idMatch[1] || idMatch[2] || idMatch[3]) : null;
-                if (id) return `https://drive.google.com/thumbnail?id=${id}&sz=w2000`;
-            }
-            return url;
-        }
-
-        // CARICAMENTO CMS
-        async function initCMS() {
-            try {
-                const resp = await fetch(CSV_CONTENT);
-                const text = await resp.text();
-                const rows = parseCSV(text);
-                rows.forEach(row => {
-                    const id = row[0];
-                    const textContent = row[1];
-                    const imgUrl = formatUrl(row[2]);
-                    if (!id) return;
-                    cmsData[id] = { text: textContent, img: imgUrl };
-                    const els = document.querySelectorAll(`[data-content-id="${id}"]`);
-                    els.forEach(el => {
-                        if (imgUrl) {
-                            if (el.tagName === 'IMG') { el.src = imgUrl; el.onload = () => el.classList.remove('opacity-0'); } 
-                            else { el.style.backgroundImage = `url('${imgUrl}')`; el.classList.remove('opacity-0'); }
-                        }
-                        if (textContent && !imgUrl) el.innerHTML = textContent;
-                    });
-                });
-            } catch (err) { console.error("CMS Error:", err); }
-        }
-
-        // CARICAMENTO EVENTI
-        async function initEvents() {
-            try {
-                const resp = await fetch(CSV_EVENTS);
-                const text = await resp.text();
-                const rows = parseCSV(text);
-                const today = new Date();
-                today.setHours(0,0,0,0);
-                
-                allEvents = rows.map((row, idx) => ({
-                    id: `evt-${idx}`,
-                    dateStr: row[0],
-                    time: row[1] || 'Orario da definire',
-                    title: row[2],
-                    subtitle: row[3],
-                    desc: row[4],
-                    loc: row[5],
-                    cat: row[6] || 'Evento',
-                    img: formatUrl(row[7]) || 'https://images.unsplash.com/photo-1514525253440-b393452e8d26?q=80&w=800',
-                    organizer: row[8] || 'Comune di Avigliano Umbro'
-                })).filter(e => {
-                    const d = new Date(e.dateStr);
-                    return !isNaN(d) && d >= today;
-                }).sort((a,b) => new Date(a.dateStr) - new Date(b.dateStr));
-                
-                renderFilters();
-                filterEvents('Tutti');
-            } catch (err) { console.error("Events Error:", err); }
-        }
-
-        // LOGICA FILTRI
-        function renderFilters() {
-            const container = document.getElementById('category-filters');
-            if(!container) return;
-            const categories = ['Tutti', ...new Set(allEvents.map(e => e.cat))];
-            container.innerHTML = categories.map(cat => `
-                <button onclick="filterEvents('${cat}')" class="filter-btn px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap ${cat === currentCategory ? 'bg-stone-900 text-white border-stone-900' : 'bg-white text-stone-600 border-stone-200 hover:border-bronze-400'}">${cat}</button>
-            `).join('');
-        }
-
-        window.filterEvents = (category) => {
-            currentCategory = category;
-            filteredEvents = category === 'Tutti' ? allEvents : allEvents.filter(e => e.cat === category);
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                if(btn.innerText === category) btn.className = "filter-btn px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap bg-stone-900 text-white border-stone-900";
-                else btn.className = "filter-btn px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap bg-white text-stone-600 border-stone-200 hover:border-bronze-400";
-            });
-            renderEvents();
-        };
-
-        // RENDER EVENTI
-        function renderEvents() {
-            const slider = document.getElementById('events-slider');
-            if(!slider) return;
-            slider.innerHTML = '';
-            const displayEvents = filteredEvents.slice(0, 6);
-            const hasMore = filteredEvents.length > 6;
-            
-            if (displayEvents.length === 0) {
-                slider.innerHTML = '<div class="w-full text-center text-stone-400 py-10 font-serif italic">Nessun evento in questa categoria.</div>';
-                return;
-            }
-
-            displayEvents.forEach(e => {
-                const d = new Date(e.dateStr);
-                const day = d.getDate();
-                const month = d.toLocaleString('it-IT', { month: 'short' }).toUpperCase();
-                const card = `
-                <div class="snap-center shrink-0 w-[280px] h-[400px] relative rounded-2xl overflow-hidden group cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-500 bg-stone-900 border border-stone-200" onclick="openModal('${e.id}')">
-                    <img src="${e.img}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-100 group-hover:opacity-40">
-                    <div class="absolute inset-0 bg-gradient-to-t from-stone-900 via-transparent to-transparent opacity-80 group-hover:bg-stone-900/90 transition-all duration-500"></div>
-                    <div class="absolute top-4 right-4 bg-white/20 backdrop-blur border border-white/20 px-3 py-1 rounded-full text-[9px] font-bold uppercase text-white tracking-widest shadow-sm">${e.cat}</div>
-                    <div class="absolute bottom-0 left-0 w-full p-6 text-white transition-all duration-500 transform translate-y-[20px] group-hover:translate-y-0">
-                        <div class="flex items-center gap-3 mb-2 text-bronze-400">
-                            <div class="flex flex-col items-center leading-none border-r border-white/30 pr-3"><span class="text-xl font-serif font-bold text-white">${day}</span><span class="text-[9px] uppercase tracking-widest text-white/80">${month}</span></div>
-                            <div class="flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold"><i data-lucide="clock" class="w-3 h-3"></i> ${e.time}</div>
-                        </div>
-                        <h3 class="text-xl font-serif leading-tight mb-2 group-hover:text-bronze-400 transition-colors line-clamp-2 drop-shadow-md">${e.title}</h3>
-                        <div class="h-0 opacity-0 group-hover:h-auto group-hover:opacity-100 transition-all duration-500 overflow-hidden">
-                            <p class="text-xs text-stone-300 font-light mb-4 line-clamp-3">${e.desc}</p>
-                            <span class="text-[10px] font-bold uppercase tracking-widest text-bronze-400 border-b border-bronze-400/50 pb-0.5">Leggi tutto</span>
-                        </div>
-                    </div>
-                </div>`;
-                slider.insertAdjacentHTML('beforeend', card);
-            });
-
-            const loadMoreBtn = document.getElementById('load-more-btn');
-            if(loadMoreBtn) {
-                if (hasMore) {
-                    loadMoreBtn.classList.remove('hidden');
-                    loadMoreBtn.querySelector('button').innerText = `Vedi altri eventi (${filteredEvents.length - 6})`;
-                } else { loadMoreBtn.classList.add('hidden'); }
-            }
-            if(window.lucide) window.lucide.createIcons();
-        }
-
-        window.showAllEvents = () => {
-            const grid = document.getElementById('all-events-grid');
-            if(!grid) return;
-            grid.innerHTML = '';
-            const remaining = filteredEvents.slice(6);
-            remaining.forEach(e => {
-                const d = new Date(e.dateStr);
-                const dateStr = d.toLocaleDateString('it-IT');
-                const item = `
-                <div class="flex gap-5 p-5 bg-white border border-stone-200 rounded-2xl hover:border-bronze-400 transition-all cursor-pointer group items-center shadow-sm hover:shadow-md" onclick="openModal('${e.id}')">
-                    <div class="w-[70px] h-[100px] rounded-lg bg-stone-200 overflow-hidden shrink-0 relative shadow-inner"><img src="${e.img}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"></div>
-                    <div class="flex flex-col justify-center">
-                        <div class="flex items-center gap-2 mb-1"><span class="bg-bronze-400 text-white px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider">${e.cat}</span><span class="text-stone-400 text-[10px] font-bold uppercase tracking-widest">${dateStr}</span></div>
-                        <h4 class="text-stone-900 font-serif text-lg leading-tight group-hover:text-bronze-600 transition-colors line-clamp-1 mb-1">${e.title}</h4>
-                        <p class="text-xs text-stone-500 italic line-clamp-1 mb-2">${e.organizer}</p>
-                        <span class="text-stone-400 text-xs flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> ${e.loc}</span>
-                    </div>
-                </div>`;
-                grid.insertAdjacentHTML('beforeend', item);
-            });
-            grid.classList.remove('hidden');
-            document.getElementById('load-more-btn').classList.add('hidden');
-            if(window.lucide) window.lucide.createIcons();
-        };
-
-        // --- MODAL ---
-        window.openModal = (baseId) => {
-            let content = {};
-            const evt = allEvents.find(e => e.id === baseId);
-            if (evt) {
-                const d = new Date(evt.dateStr);
-                const fullDate = d.toLocaleDateString('it-IT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-                content = { title: evt.title, desc: evt.desc, img: evt.img, subtitle: evt.subtitle || 'Evento in programma', category: evt.cat, time: `${fullDate} | Ore ${evt.time}`, location: evt.loc, organizer: evt.organizer };
-            } else {
-                const titleKey = baseId + "_title", descKey = baseId + "_desc", imgKey = baseId + "_img";
-                content = {
-                    title: cmsData[baseId]?.title || (cmsData[titleKey]?.text) || "Dettaglio",
-                    desc: cmsData[baseId]?.text || (cmsData[descKey]?.text) || "",
-                    img: cmsData[baseId]?.img || (cmsData[imgKey]?.img) || "",
-                    subtitle: "Territorio & Cultura", category: "Info", time: "Sempre aperto", location: "Avigliano Umbro", organizer: "Comune di Avigliano Umbro"
-                };
-            }
-            if(document.getElementById('modal-title')) {
-                document.getElementById('modal-title').innerHTML = content.title;
-                document.getElementById('modal-subtitle').innerHTML = content.subtitle;
-                document.getElementById('modal-desc').innerHTML = content.desc;
-                document.getElementById('modal-category').innerHTML = content.category;
-                document.getElementById('modal-time').innerHTML = content.time;
-                document.getElementById('modal-location').innerHTML = content.location;
-                document.getElementById('modal-organizer').innerHTML = content.organizer;
-                document.getElementById('modal-img').src = content.img || 'https://via.placeholder.com/800x600';
-                document.getElementById('info-modal').classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            }
-        };
-
-        window.closeModal = () => {
-            document.getElementById('info-modal').classList.add('hidden');
-            document.body.style.overflow = '';
-        };
-
         document.addEventListener('DOMContentLoaded', () => {
-            initCMS();
-            initEvents();
             const revealElements = document.querySelectorAll('.reveal');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if(entry.isIntersecting){
+                        entry.target.classList.add('active');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
             revealElements.forEach(el => observer.observe(el));
+        });
+    </script>
+</body>
+</html>
         });
     </script>
 </body>

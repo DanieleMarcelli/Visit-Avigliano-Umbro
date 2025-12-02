@@ -9,12 +9,7 @@ let filteredEvents = [];
 let currentCategory = 'Tutti';
 
 // --- SCROLL REVEAL OBSERVER ---
-const observerOptions = {
-    root: null,
-    rootMargin: '0px',
-    threshold: 0.1
-};
-
+const observerOptions = { root: null, rootMargin: '0px', threshold: 0.1 };
 const observer = new IntersectionObserver((entries, observer) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -40,8 +35,7 @@ function parseCSV(text) {
             else { currentCell += char; }
         }
         row.push(currentCell.trim());
-        const cleanedRow = row.map(cell => cell.replace(/^"|"$/g, '').replace(/""/g, '"'));
-        result.push(cleanedRow);
+        result.push(row.map(cell => cell.replace(/^"|"$/g, '').replace(/""/g, '"')));
     }
     return result;
 }
@@ -89,71 +83,51 @@ async function initEvents() {
         const today = new Date();
         today.setHours(0,0,0,0);
         
-        allEvents = rows.map((row, idx) => {
-            return {
-                id: `evt-${idx}`,
-                dateStr: row[0],
-                time: row[1] || 'Orario da definire',
-                title: row[2],
-                subtitle: row[3],
-                desc: row[4],
-                loc: row[5],
-                cat: row[6] || 'Evento',
-                img: formatUrl(row[7]) || 'https://images.unsplash.com/photo-1514525253440-b393452e8d26?q=80&w=800',
-                organizer: row[8] || 'Comune di Avigliano Umbro'
-            };
-        })
-        .filter(e => {
+        allEvents = rows.map((row, idx) => ({
+            id: `evt-${idx}`,
+            dateStr: row[0],
+            time: row[1] || 'Orario da definire',
+            title: row[2],
+            subtitle: row[3],
+            desc: row[4],
+            loc: row[5],
+            cat: row[6] || 'Evento',
+            img: formatUrl(row[7]) || 'https://images.unsplash.com/photo-1514525253440-b393452e8d26?q=80&w=800',
+            organizer: row[8] || 'Comune di Avigliano Umbro'
+        })).filter(e => {
             const d = new Date(e.dateStr);
             return !isNaN(d) && d >= today;
-        })
-        .sort((a,b) => new Date(a.dateStr) - new Date(b.dateStr));
+        }).sort((a,b) => new Date(a.dateStr) - new Date(b.dateStr));
         
         renderFilters();
         filterEvents('Tutti');
-        
-    } catch (err) {
-        console.error("Events Error:", err);
-        const slider = document.getElementById('events-slider');
-        if(slider) slider.innerHTML = '<div class="w-full text-center text-stone-400 py-10">Errore caricamento.</div>';
-    }
+    } catch (err) { console.error("Events Error:", err); }
 }
 
-// --- FILTER LOGIC ---
+// --- FILTER & RENDER ---
 function renderFilters() {
     const container = document.getElementById('category-filters');
     if(!container) return;
-    
     const categories = ['Tutti', ...new Set(allEvents.map(e => e.cat))];
     container.innerHTML = categories.map(cat => `
-        <button onclick="filterEvents('${cat}')" 
-            class="filter-btn px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap
-            ${cat === currentCategory ? 'bg-bronze-500 text-white border-bronze-500' : 'bg-white text-stone-600 border-stone-200 hover:border-bronze-400'}">
-            ${cat}
-        </button>
+        <button onclick="filterEvents('${cat}')" class="filter-btn px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap ${cat === currentCategory ? 'bg-stone-900 text-white border-stone-900' : 'bg-white text-stone-600 border-stone-200 hover:border-bronze-400'}">${cat}</button>
     `).join('');
 }
 
 window.filterEvents = (category) => {
     currentCategory = category;
     filteredEvents = category === 'Tutti' ? allEvents : allEvents.filter(e => e.cat === category);
-    
     document.querySelectorAll('.filter-btn').forEach(btn => {
-        if(btn.innerText === category) {
-            btn.className = "filter-btn px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap bg-bronze-500 text-white border-bronze-500";
-        } else {
-            btn.className = "filter-btn px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap bg-white text-stone-600 border-stone-200 hover:border-bronze-400";
-        }
+        if(btn.innerText === category) btn.className = "filter-btn px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap bg-stone-900 text-white border-stone-900";
+        else btn.className = "filter-btn px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap bg-white text-stone-600 border-stone-200 hover:border-bronze-400";
     });
     renderEvents();
 };
 
-// --- RENDER ---
 function renderEvents() {
     const slider = document.getElementById('events-slider');
     if(!slider) return;
     slider.innerHTML = '';
-    
     const displayEvents = filteredEvents.slice(0, 6);
     const hasMore = filteredEvents.length > 6;
     
@@ -166,36 +140,23 @@ function renderEvents() {
         const d = new Date(e.dateStr);
         const day = d.getDate();
         const month = d.toLocaleString('it-IT', { month: 'short' }).toUpperCase();
-        
         const card = `
         <div class="snap-center shrink-0 w-[280px] h-[400px] relative rounded-2xl overflow-hidden group cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-500 bg-stone-900 border border-stone-200" onclick="openModal('${e.id}')">
             <img src="${e.img}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-100 group-hover:opacity-40">
-            <div class="absolute inset-0 bg-gradient-to-t from-stone-950 via-transparent to-transparent opacity-80 group-hover:bg-stone-900/80 transition-all duration-500"></div>
-            
-            <div class="absolute top-4 right-4 bg-white/20 backdrop-blur border border-white/20 px-3 py-1 rounded-full text-[9px] font-bold uppercase text-white tracking-widest shadow-sm">
-                ${e.cat}
-            </div>
-
+            <div class="absolute inset-0 bg-gradient-to-t from-stone-900 via-transparent to-transparent opacity-80 group-hover:bg-stone-900/90 transition-all duration-500"></div>
+            <div class="absolute top-4 right-4 bg-white/20 backdrop-blur border border-white/20 px-3 py-1 rounded-full text-[9px] font-bold uppercase text-white tracking-widest shadow-sm">${e.cat}</div>
             <div class="absolute bottom-0 left-0 w-full p-6 text-white transition-all duration-500 transform translate-y-[20px] group-hover:translate-y-0">
                 <div class="flex items-center gap-3 mb-2 text-bronze-400">
-                    <div class="flex flex-col items-center leading-none border-r border-white/30 pr-3">
-                        <span class="text-xl font-serif font-bold text-white">${day}</span>
-                        <span class="text-[9px] uppercase tracking-widest text-white/80">${month}</span>
-                    </div>
-                    <div class="flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold">
-                        <i data-lucide="clock" class="w-3 h-3"></i> ${e.time}
-                    </div>
+                    <div class="flex flex-col items-center leading-none border-r border-white/30 pr-3"><span class="text-xl font-serif font-bold text-white">${day}</span><span class="text-[9px] uppercase tracking-widest text-white/80">${month}</span></div>
+                    <div class="flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold"><i data-lucide="clock" class="w-3 h-3"></i> ${e.time}</div>
                 </div>
-
-                <h3 class="text-xl font-serif leading-tight mb-2 group-hover:text-bronze-300 transition-colors line-clamp-2 drop-shadow-md">${e.title}</h3>
-                
+                <h3 class="text-xl font-serif leading-tight mb-2 group-hover:text-bronze-400 transition-colors line-clamp-2 drop-shadow-md">${e.title}</h3>
                 <div class="h-0 opacity-0 group-hover:h-auto group-hover:opacity-100 transition-all duration-500 overflow-hidden">
                     <p class="text-xs text-stone-300 font-light mb-4 line-clamp-3">${e.desc}</p>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-bronze-400 border-b border-bronze-400/50 pb-0.5">Leggi tutto</span>
                 </div>
             </div>
-        </div>
-        `;
+        </div>`;
         slider.insertAdjacentHTML('beforeend', card);
     });
 
@@ -204,11 +165,8 @@ function renderEvents() {
         if (hasMore) {
             loadMoreBtn.classList.remove('hidden');
             loadMoreBtn.querySelector('button').innerText = `Vedi altri eventi (${filteredEvents.length - 6})`;
-        } else {
-            loadMoreBtn.classList.add('hidden');
-        }
+        } else { loadMoreBtn.classList.add('hidden'); }
     }
-    
     if(window.lucide) window.lucide.createIcons();
 }
 
@@ -216,98 +174,56 @@ window.showAllEvents = () => {
     const grid = document.getElementById('all-events-grid');
     if(!grid) return;
     grid.innerHTML = '';
-    
     const remaining = filteredEvents.slice(6);
-    
     remaining.forEach(e => {
         const d = new Date(e.dateStr);
         const dateStr = d.toLocaleDateString('it-IT');
-        
         const item = `
-        <div class="flex gap-5 p-5 bg-white border border-stone-100 rounded-2xl hover:border-bronze-300 transition-all cursor-pointer group items-center shadow-sm hover:shadow-md" onclick="openModal('${e.id}')">
-            <div class="w-[70px] h-[100px] rounded-lg bg-stone-100 overflow-hidden shrink-0 relative shadow-inner">
-                <img src="${e.img}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-            </div>
+        <div class="flex gap-5 p-5 bg-white border border-stone-200 rounded-2xl hover:border-bronze-400 transition-all cursor-pointer group items-center shadow-sm hover:shadow-md" onclick="openModal('${e.id}')">
+            <div class="w-[70px] h-[100px] rounded-lg bg-stone-200 overflow-hidden shrink-0 relative shadow-inner"><img src="${e.img}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"></div>
             <div class="flex flex-col justify-center">
-                <div class="flex items-center gap-2 mb-1">
-                    <span class="bg-bronze-100 text-bronze-700 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider">${e.cat}</span>
-                    <span class="text-stone-400 text-[10px] font-bold uppercase tracking-widest">${dateStr}</span>
-                </div>
-                <h4 class="text-stone-800 font-serif text-lg leading-tight group-hover:text-bronze-600 transition-colors line-clamp-1 mb-1">${e.title}</h4>
+                <div class="flex items-center gap-2 mb-1"><span class="bg-bronze-400 text-white px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider">${e.cat}</span><span class="text-stone-400 text-[10px] font-bold uppercase tracking-widest">${dateStr}</span></div>
+                <h4 class="text-stone-900 font-serif text-lg leading-tight group-hover:text-bronze-600 transition-colors line-clamp-1 mb-1">${e.title}</h4>
                 <p class="text-xs text-stone-500 italic line-clamp-1 mb-2">${e.organizer}</p>
                 <span class="text-stone-400 text-xs flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> ${e.loc}</span>
             </div>
-        </div>
-        `;
+        </div>`;
         grid.insertAdjacentHTML('beforeend', item);
     });
-    
     grid.classList.remove('hidden');
     document.getElementById('load-more-btn').classList.add('hidden');
     if(window.lucide) window.lucide.createIcons();
 };
 
-// --- MODAL SYSTEM ---
+// --- MODAL ---
 window.openModal = (baseId) => {
     let content = {};
     const evt = allEvents.find(e => e.id === baseId);
-    
     if (evt) {
         const d = new Date(evt.dateStr);
         const fullDate = d.toLocaleDateString('it-IT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        
-        content = {
-            title: evt.title,
-            desc: evt.desc,
-            img: evt.img,
-            subtitle: evt.subtitle || 'Evento in programma',
-            category: evt.cat,
-            time: `${fullDate} | Ore ${evt.time}`,
-            location: evt.loc,
-            organizer: evt.organizer
-        };
+        content = { title: evt.title, desc: evt.desc, img: evt.img, subtitle: evt.subtitle || 'Evento in programma', category: evt.cat, time: `${fullDate} | Ore ${evt.time}`, location: evt.loc, organizer: evt.organizer };
     } else {
-        const titleKey = baseId + "_title";
-        const descKey = baseId + "_desc";
-        const imgKey = baseId + "_img";
+        const titleKey = baseId + "_title", descKey = baseId + "_desc", imgKey = baseId + "_img";
         content = {
             title: cmsData[baseId]?.title || (cmsData[titleKey]?.text) || "Dettaglio",
             desc: cmsData[baseId]?.text || (cmsData[descKey]?.text) || "",
             img: cmsData[baseId]?.img || (cmsData[imgKey]?.img) || "",
-            subtitle: "Territorio & Cultura",
-            category: "Info",
-            time: "Sempre aperto",
-            location: "Avigliano Umbro",
-            organizer: "Comune di Avigliano Umbro"
+            subtitle: "Territorio & Cultura", category: "Info", time: "Sempre aperto", location: "Avigliano Umbro", organizer: "Comune di Avigliano Umbro"
         };
     }
-
-    const modalTitle = document.getElementById('modal-title');
-    if(modalTitle) modalTitle.innerHTML = content.title;
-    
-    const modalSubtitle = document.getElementById('modal-subtitle');
-    if(modalSubtitle) modalSubtitle.innerHTML = content.subtitle;
-    
-    const modalDesc = document.getElementById('modal-desc');
-    if(modalDesc) modalDesc.innerHTML = content.desc;
-    
-    const modalCat = document.getElementById('modal-category');
-    if(modalCat) modalCat.innerHTML = content.category;
-    
-    const modalTime = document.getElementById('modal-time');
-    if(modalTime) modalTime.innerHTML = content.time;
-    
-    const modalLoc = document.getElementById('modal-location');
-    if(modalLoc) modalLoc.innerHTML = content.location;
-    
-    const modalOrg = document.getElementById('modal-organizer');
-    if(modalOrg) modalOrg.innerHTML = content.organizer;
-    
-    const modalImg = document.getElementById('modal-img');
-    if(modalImg) modalImg.src = content.img || 'https://via.placeholder.com/800x600';
-    
-    document.getElementById('info-modal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
+    if(document.getElementById('modal-title')) {
+        document.getElementById('modal-title').innerHTML = content.title;
+        document.getElementById('modal-subtitle').innerHTML = content.subtitle;
+        document.getElementById('modal-desc').innerHTML = content.desc;
+        document.getElementById('modal-category').innerHTML = content.category;
+        document.getElementById('modal-time').innerHTML = content.time;
+        document.getElementById('modal-location').innerHTML = content.location;
+        document.getElementById('modal-organizer').innerHTML = content.organizer;
+        document.getElementById('modal-img').src = content.img || 'https://via.placeholder.com/800x600';
+        document.getElementById('info-modal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
 };
 
 window.closeModal = () => {
@@ -316,12 +232,6 @@ window.closeModal = () => {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    initCMS();
-    initEvents();
-    
-    const revealElements = document.querySelectorAll('.reveal');
-    revealElements.forEach(el => observer.observe(el));
-});
     initCMS();
     initEvents();
     const revealElements = document.querySelectorAll('.reveal');

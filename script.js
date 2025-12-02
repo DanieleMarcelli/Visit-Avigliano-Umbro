@@ -25,6 +25,7 @@ function parseCSV(text) {
     const result = [];
     for (let i = 1; i < lines.length; i++) {
         const line = lines[i];
+        if (line.startsWith('---')) continue; // Skip comments/separators
         const row = [];
         let currentCell = '';
         let insideQuotes = false;
@@ -35,7 +36,8 @@ function parseCSV(text) {
             else { currentCell += char; }
         }
         row.push(currentCell.trim());
-        result.push(row.map(cell => cell.replace(/^"|"$/g, '').replace(/""/g, '"')));
+        const cleanedRow = row.map(cell => cell.replace(/^"|"$/g, '').replace(/""/g, '"'));
+        if(cleanedRow.length > 0 && cleanedRow[0] !== '') result.push(cleanedRow);
     }
     return result;
 }
@@ -45,7 +47,7 @@ function formatUrl(url) {
     if (url.includes('drive.google.com') || url.includes('/d/')) {
         const idMatch = url.match(/\/d\/(.+?)\/|id=(.+?)&|id=(.+?)$/);
         const id = idMatch ? (idMatch[1] || idMatch[2] || idMatch[3]) : null;
-        if (id) return `https://drive.google.com/thumbnail?id=${id}&sz=w2000`;
+        if (id) return `https://drive.google.com/thumbnail?id=${id}&sz=w1000`;
     }
     return url;
 }
@@ -54,6 +56,7 @@ function formatUrl(url) {
 async function initCMS() {
     try {
         const resp = await fetch(CSV_CONTENT);
+        if(!resp.ok) throw new Error("Errore CSV");
         const text = await resp.text();
         const rows = parseCSV(text);
         rows.forEach(row => {
@@ -65,7 +68,7 @@ async function initCMS() {
             const els = document.querySelectorAll(`[data-content-id="${id}"]`);
             els.forEach(el => {
                 if (imgUrl) {
-                    if (el.tagName === 'IMG') { el.src = imgUrl; el.onload = () => el.classList.remove('opacity-0'); } 
+                    if (el.tagName === 'IMG') { el.src = imgUrl; el.onload = () => el.classList.remove('opacity-0'); if(el.complete) el.classList.remove('opacity-0'); } 
                     else { el.style.backgroundImage = `url('${imgUrl}')`; el.classList.remove('opacity-0'); }
                 }
                 if (textContent && !imgUrl) el.innerHTML = textContent;
@@ -78,6 +81,7 @@ async function initCMS() {
 async function initEvents() {
     try {
         const resp = await fetch(CSV_EVENTS);
+        if(!resp.ok) throw new Error("Errore CSV Eventi");
         const text = await resp.text();
         const rows = parseCSV(text);
         const today = new Date();
@@ -101,7 +105,11 @@ async function initEvents() {
         
         renderFilters();
         filterEvents('Tutti');
-    } catch (err) { console.error("Events Error:", err); }
+    } catch (err) { 
+        console.error("Events Error:", err); 
+        const slider = document.getElementById('events-slider');
+        if(slider) slider.innerHTML = '<div class="w-full text-center text-stone-400 py-10">Nessun evento in programma.</div>';
+    }
 }
 
 // --- FILTER & RENDER ---
@@ -140,10 +148,11 @@ function renderEvents() {
         const d = new Date(e.dateStr);
         const day = d.getDate();
         const month = d.toLocaleString('it-IT', { month: 'short' }).toUpperCase();
+        // CARD 7:10 FISSO (280x400)
         const card = `
         <div class="snap-center shrink-0 w-[280px] h-[400px] relative rounded-2xl overflow-hidden group cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-500 bg-stone-900 border border-stone-200" onclick="openModal('${e.id}')">
             <img src="${e.img}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-100 group-hover:opacity-40">
-            <div class="absolute inset-0 bg-gradient-to-t from-stone-900 via-transparent to-transparent opacity-80 group-hover:bg-stone-900/90 transition-all duration-500"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-stone-950 via-transparent to-transparent opacity-80 group-hover:bg-stone-900/90 transition-all duration-500"></div>
             <div class="absolute top-4 right-4 bg-white/20 backdrop-blur border border-white/20 px-3 py-1 rounded-full text-[9px] font-bold uppercase text-white tracking-widest shadow-sm">${e.cat}</div>
             <div class="absolute bottom-0 left-0 w-full p-6 text-white transition-all duration-500 transform translate-y-[20px] group-hover:translate-y-0">
                 <div class="flex items-center gap-3 mb-2 text-bronze-400">
@@ -195,16 +204,21 @@ window.showAllEvents = () => {
     if(window.lucide) window.lucide.createIcons();
 };
 
-// --- MODAL ---
+// --- MODAL SYSTEM ---
 window.openModal = (baseId) => {
     let content = {};
     const evt = allEvents.find(e => e.id === baseId);
+    
+    // Se è un evento
     if (evt) {
         const d = new Date(evt.dateStr);
         const fullDate = d.toLocaleDateString('it-IT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         content = { title: evt.title, desc: evt.desc, img: evt.img, subtitle: evt.subtitle || 'Evento in programma', category: evt.cat, time: `${fullDate} | Ore ${evt.time}`, location: evt.loc, organizer: evt.organizer };
-    } else {
+    } 
+    // Se è un contenuto statico (Borgo/Natura)
+    else {
         const titleKey = baseId + "_title", descKey = baseId + "_desc", imgKey = baseId + "_img";
+        // Cerca prima l'ID diretto, poi le chiavi composte
         content = {
             title: cmsData[baseId]?.title || (cmsData[titleKey]?.text) || "Dettaglio",
             desc: cmsData[baseId]?.text || (cmsData[descKey]?.text) || "",
@@ -212,6 +226,8 @@ window.openModal = (baseId) => {
             subtitle: "Territorio & Cultura", category: "Info", time: "Sempre aperto", location: "Avigliano Umbro", organizer: "Comune di Avigliano Umbro"
         };
     }
+    
+    // Popola il modale solo se gli elementi esistono
     if(document.getElementById('modal-title')) {
         document.getElementById('modal-title').innerHTML = content.title;
         document.getElementById('modal-subtitle').innerHTML = content.subtitle;
@@ -220,7 +236,9 @@ window.openModal = (baseId) => {
         document.getElementById('modal-time').innerHTML = content.time;
         document.getElementById('modal-location').innerHTML = content.location;
         document.getElementById('modal-organizer').innerHTML = content.organizer;
-        document.getElementById('modal-img').src = content.img || 'https://via.placeholder.com/800x600';
+        const mImg = document.getElementById('modal-img');
+        if(mImg) mImg.src = content.img || 'https://via.placeholder.com/800x600';
+        
         document.getElementById('info-modal').classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     }
@@ -231,9 +249,11 @@ window.closeModal = () => {
     document.body.style.overflow = '';
 };
 
+// INITIALIZE
 document.addEventListener('DOMContentLoaded', () => {
     initCMS();
     initEvents();
+    
     const revealElements = document.querySelectorAll('.reveal');
     revealElements.forEach(el => observer.observe(el));
 });

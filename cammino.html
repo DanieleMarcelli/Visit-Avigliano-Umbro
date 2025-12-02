@@ -44,21 +44,10 @@
         .reveal { opacity: 0; transform: translateY(40px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
         .reveal.active { opacity: 1; transform: translateY(0); }
         
-        /* Custom Input Styles */
         .form-input {
-            width: 100%;
-            background: #fffbf2; /* bronze-50 */
-            border: 1px solid #e7e5e4;
-            padding: 1rem;
-            border-radius: 0.75rem;
-            color: #44403c;
-            transition: all 0.3s;
+            width: 100%; background: #fffbf2; border: 1px solid #e7e5e4; padding: 1rem; border-radius: 0.75rem; color: #44403c; transition: all 0.3s;
         }
-        .form-input:focus {
-            outline: none;
-            border-color: #d4af37;
-            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
-        }
+        .form-input:focus { outline: none; border-color: #d4af37; box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1); }
     </style>
 </head>
 <body class="bg-paper-50 text-stone-800 font-sans selection:bg-bronze-400 selection:text-white overflow-x-hidden">
@@ -85,9 +74,9 @@
         </div>
     </header>
 
-    <section class="relative h-[50vh] min-h-[400px] flex items-center justify-center overflow-hidden bg-stone-100">
+    <section class="relative h-[60vh] min-h-[400px] flex items-center justify-center overflow-hidden bg-stone-100">
         <div data-content-id="cammino_page_hero_bg" class="absolute inset-0 z-0 bg-cover bg-center opacity-0 transition-opacity duration-1000"></div>
-        <div class="absolute inset-0 bg-black/20 z-10"></div>
+        <div class="absolute inset-0 bg-black/30 z-10"></div>
         <div class="relative z-20 text-center px-6 max-w-4xl mx-auto mt-20 reveal">
             <span class="inline-block py-1 px-4 rounded-full border border-white/30 bg-white/10 backdrop-blur text-white text-[10px] font-bold tracking-[0.3em] uppercase mb-6">Itinerario Ufficiale</span>
             <h1 data-content-id="cammino_page_hero_title" class="text-5xl md:text-7xl font-serif text-white mb-6 drop-shadow-lg">Il Cammino del Lago</h1>
@@ -97,29 +86,61 @@
 
     <section class="py-24 px-6 max-w-7xl mx-auto">
         <div class="flex flex-col lg:flex-row gap-16">
-            <div class="lg:w-1/2 reveal">
+            <div class="lg:w-2/3 reveal">
                 <h2 data-content-id="cammino_intro_title" class="text-4xl font-serif text-stone-800 mb-6">...</h2>
-                <p data-content-id="cammino_intro_desc" class="text-stone-600 text-lg leading-relaxed font-light mb-10">...</p>
+                <div class="prose prose-lg text-stone-600 font-light mb-10">
+                    <p data-content-id="cammino_intro_desc">...</p>
+                </div>
                 
                 <div class="grid grid-cols-3 gap-4 border-t border-b border-stone-200 py-8">
                     <div><span class="block text-3xl font-serif text-stone-800">80<span class="text-sm text-bronze-500 ml-1">km</span></span><span class="text-[10px] text-stone-400 uppercase tracking-widest mt-1 block">Lunghezza</span></div>
-                    <div><span class="block text-3xl font-serif text-stone-800">4<span class="text-sm text-bronze-500 ml-1">Tappe</span></span><span class="text-[10px] text-stone-400 uppercase tracking-widest mt-1 block">Itinerario</span></div>
+                    <div><span class="block text-3xl font-serif text-stone-800">5<span class="text-sm text-bronze-500 ml-1">Comuni</span></span><span class="text-[10px] text-stone-400 uppercase tracking-widest mt-1 block">Attraversati</span></div>
                     <div><span class="block text-3xl font-serif text-stone-800">1.2k<span class="text-sm text-bronze-500 ml-1">m</span></span><span class="text-[10px] text-stone-400 uppercase tracking-widest mt-1 block">Dislivello</span></div>
                 </div>
 
                 <div class="mt-12 space-y-8 pl-4 border-l border-bronze-200">
-                    <div class="relative pl-8"><div class="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-bronze-500 ring-4 ring-white"></div><h4 data-content-id="cammino_tappa1_title" class="font-serif text-lg text-stone-800">...</h4><p data-content-id="cammino_tappa1_desc" class="text-sm text-stone-500">...</p></div>
-                    <div class="relative pl-8"><div class="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-stone-300 ring-4 ring-white"></div><h4 data-content-id="cammino_tappa2_title" class="font-serif text-lg text-stone-800">...</h4><p data-content-id="cammino_tappa2_desc" class="text-sm text-stone-500">...</p></div>
-                    <div class="relative pl-8"><div class="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-stone-300 ring-4 ring-white"></div><h4 data-content-id="cammino_tappa3_title" class="font-serif text-lg text-stone-800">...</h4><p data-content-id="cammino_tappa3_desc" class="text-sm text-stone-500">...</p></div>
-                    <div class="relative pl-8"><div class="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-bronze-500 ring-4 ring-white"></div><h4 data-content-id="cammino_tappa4_title" class="font-serif text-lg text-stone-800">...</h4><p data-content-id="cammino_tappa4_desc" class="text-sm text-stone-500">...</p></div>
+                    <div class="relative pl-8">
+                        <div class="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-bronze-500 ring-4 ring-white"></div>
+                        <span class="text-[10px] uppercase font-bold text-bronze-500 tracking-widest mb-1 block">Tappa 1</span>
+                        <h4 data-content-id="cammino_tappa1_title" class="font-serif text-xl text-stone-800 mb-1">...</h4>
+                        <p data-content-id="cammino_tappa1_desc" class="text-sm text-stone-500">...</p>
+                    </div>
+                    <div class="relative pl-8">
+                        <div class="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-stone-300 ring-4 ring-white"></div>
+                        <span class="text-[10px] uppercase font-bold text-stone-400 tracking-widest mb-1 block">Tappa 2</span>
+                        <h4 data-content-id="cammino_tappa2_title" class="font-serif text-xl text-stone-800 mb-1">...</h4>
+                        <p data-content-id="cammino_tappa2_desc" class="text-sm text-stone-500">...</p>
+                    </div>
+                    <div class="relative pl-8">
+                        <div class="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-stone-300 ring-4 ring-white"></div>
+                        <span class="text-[10px] uppercase font-bold text-stone-400 tracking-widest mb-1 block">Tappa 3</span>
+                        <h4 data-content-id="cammino_tappa3_title" class="font-serif text-xl text-stone-800 mb-1">...</h4>
+                        <p data-content-id="cammino_tappa3_desc" class="text-sm text-stone-500">...</p>
+                    </div>
+                    <div class="relative pl-8">
+                        <div class="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-bronze-500 ring-4 ring-white"></div>
+                        <span class="text-[10px] uppercase font-bold text-stone-400 tracking-widest mb-1 block">Tappa 4</span>
+                        <h4 data-content-id="cammino_tappa4_title" class="font-serif text-xl text-stone-800 mb-1">...</h4>
+                        <p data-content-id="cammino_tappa4_desc" class="text-sm text-stone-500">...</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="lg:w-1/2 reveal reveal-delay-1">
+            <div class="lg:w-1/3 reveal reveal-delay-1">
                 <div class="sticky top-32">
-                    <h3 class="text-xl font-serif text-stone-800 mb-6">Mappa Interattiva</h3>
+                    <h3 class="text-xl font-serif text-stone-800 mb-6">La Traccia GPS</h3>
                     <div class="w-full h-[600px] rounded-[2rem] overflow-hidden shadow-soft border border-stone-200 bg-stone-100 relative group">
                         <iframe frameBorder="0" scrolling="no" src="https://it.wikiloc.com/wikiloc/spatialArtifacts.do?event=view&id=201301484&measures=on&title=on&near=on&images=on&maptype=M" width="100%" height="100%" class="grayscale group-hover:grayscale-0 transition-all duration-1000"></iframe>
+                    </div>
+                    <div class="mt-6 p-6 bg-white rounded-2xl border border-stone-100 shadow-sm">
+                        <h4 class="text-sm font-bold text-stone-800 uppercase mb-2">Comuni Attraversati</h4>
+                        <ul class="text-xs text-stone-500 space-y-1">
+                            <li>• Avigliano Umbro</li>
+                            <li>• Montecchio</li>
+                            <li>• Guardea</li>
+                            <li>• Amelia</li>
+                            <li>• Montecastrilli</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -130,8 +151,8 @@
         <div class="max-w-5xl mx-auto px-6">
             <div class="text-center mb-16 reveal">
                 <span class="text-bronze-500 text-xs font-bold tracking-[0.25em] uppercase mb-4 block">Ufficio Credenziali</span>
-                <h2 class="text-4xl md:text-5xl font-serif text-stone-800">Il tuo Passaporto per il Cammino</h2>
-                <p class="text-stone-500 mt-4 max-w-xl mx-auto font-light">Compila il modulo ufficiale per richiedere la Credenziale del Pellegrino e registrare la tua presenza sul territorio.</p>
+                <h2 class="text-4xl md:text-5xl font-serif text-stone-800">Passaporto del Pellegrino</h2>
+                <p class="text-stone-500 mt-4 max-w-xl mx-auto font-light">Compila il modulo ufficiale per richiedere la Credenziale e registrare la tua presenza. Il documento ti verrà inviato via email.</p>
             </div>
 
             <div class="bg-white rounded-[2.5rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] border border-stone-100 overflow-hidden reveal reveal-delay-1">
@@ -139,13 +160,13 @@
                     <div class="flex items-center gap-3">
                         <div class="bg-white p-2 rounded-full shadow-sm text-bronze-600"><i data-lucide="scroll-text" class="w-6 h-6"></i></div>
                         <div>
-                            <span class="block text-xs font-bold uppercase tracking-widest text-bronze-600">Documento Ufficiale</span>
-                            <span class="font-serif text-stone-800 text-lg">Richiesta Credenziale</span>
+                            <span class="block text-xs font-bold uppercase tracking-widest text-bronze-600">Modulo Richiesta</span>
+                            <span class="font-serif text-stone-800 text-lg">Credenziale Ufficiale</span>
                         </div>
                     </div>
                     <div class="hidden md:block text-right">
-                        <span class="block text-[10px] font-bold uppercase text-stone-400">Rif. Pratica</span>
-                        <span class="font-mono text-stone-600">CAM-2025</span>
+                        <span class="block text-[10px] font-bold uppercase text-stone-400">Codice Cammino</span>
+                        <span class="font-mono text-stone-600">LAGO-TIBERINO</span>
                     </div>
                 </div>
 
@@ -187,29 +208,29 @@
                                         <input type="date" name="Data_Partenza" required class="form-input">
                                     </div>
                                     <div>
-                                        <label class="block text-xs font-bold text-stone-600 mb-2 uppercase">N. Pellegrini</label>
+                                        <label class="block text-xs font-bold text-stone-600 mb-2 uppercase">N. Persone</label>
                                         <input type="number" name="Numero_Persone" min="1" value="1" required class="form-input">
                                     </div>
                                 </div>
                             </div>
 
                             <div class="space-y-6">
-                                <h4 class="text-sm font-bold uppercase tracking-widest text-stone-400 border-b border-stone-100 pb-2">Anagrafica</h4>
+                                <h4 class="text-sm font-bold uppercase tracking-widest text-stone-400 border-b border-stone-100 pb-2">Anagrafica Referente</h4>
                                 
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-xs font-bold text-stone-600 mb-2 uppercase">Nome</label>
-                                        <input type="text" name="Nome" placeholder="Mario" required class="form-input">
+                                        <input type="text" name="Nome" required class="form-input">
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-stone-600 mb-2 uppercase">Cognome</label>
-                                        <input type="text" name="Cognome" placeholder="Rossi" required class="form-input">
+                                        <input type="text" name="Cognome" required class="form-input">
                                     </div>
                                 </div>
 
                                 <div>
                                     <label class="block text-xs font-bold text-stone-600 mb-2 uppercase">Email</label>
-                                    <input type="email" name="Email" placeholder="mario.rossi@email.com" required class="form-input">
+                                    <input type="email" name="Email" placeholder="Per ricevere la credenziale" required class="form-input">
                                 </div>
 
                                 <div>
@@ -229,7 +250,7 @@
                                 <span>Invia Richiesta</span>
                                 <i data-lucide="send" class="w-4 h-4"></i>
                             </button>
-                            <p class="text-[10px] text-stone-400 mt-4">La richiesta verrà elaborata dall'Ufficio Turismo del Comune.</p>
+                            <p class="text-[10px] text-stone-400 mt-4">La richiesta verrà processata dall'Ufficio Turismo del Comune.</p>
                         </div>
                     </form>
                 </div>
@@ -244,7 +265,6 @@
     <script src="script.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Animazione specifica per questa pagina
             const revealElements = document.querySelectorAll('.reveal');
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {

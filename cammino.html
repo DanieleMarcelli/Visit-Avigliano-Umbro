@@ -29,25 +29,25 @@
 </head>
 <body class="bg-paper text-ink font-sans selection:bg-gold selection:text-white">
 
-    <nav class="fixed top-0 w-full z-50 bg-forest/95 backdrop-blur border-b border-white/10 h-16 md:h-20 flex items-center justify-between px-4 md:px-6 transition-all shadow-lg">
-        <a href="index.html" class="flex items-center gap-3 group">
-            <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white p-[2px] shadow-md border border-gold/30 group-hover:scale-105 transition-transform shrink-0">
+    <nav class="fixed top-0 w-full z-50 bg-forest/95 backdrop-blur border-b border-white/10 h-12 md:h-16 flex items-center justify-between px-4 md:px-6 transition-all shadow-lg">
+        <a href="index.html" class="flex items-center gap-2 md:gap-3 group">
+            <div class="w-7 h-7 md:w-9 md:h-9 rounded-full bg-white p-[1px] shadow-md border border-gold/30 group-hover:scale-105 transition-transform shrink-0">
                 <div class="w-full h-full rounded-full bg-forest overflow-hidden flex items-center justify-center">
                     <img id="nav_logo" data-content-id="nav_logo" src="" class="w-full h-full object-cover opacity-0 transition-opacity">
                 </div>
             </div>
             <div class="flex flex-col items-start justify-center">
-                <span data-content-id="nav_subtitle" class="bg-gold text-ink px-2 py-[1px] rounded text-[8px] md:text-[9px] font-bold uppercase tracking-widest mb-[2px] shadow-sm whitespace-nowrap">...</span>
-                <span class="text-lg md:text-xl font-serif text-white leading-none tracking-wide group-hover:text-gold transition-colors">Visit Avigliano</span>
+                <a href="index.html#eventi-section" class="bg-gold text-ink px-2 py-[1px] rounded-[2px] text-[7px] md:text-[8px] font-bold uppercase tracking-widest mb-[1px] shadow-sm whitespace-nowrap hover:bg-white transition-colors animate-pulse">SCOPRI GLI EVENTI</a>
+                <span class="text-base md:text-lg font-serif text-white leading-none tracking-wide group-hover:text-gold transition-colors">Visit Avigliano</span>
             </div>
         </a>
-        <div class="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-widest text-white/80">
+        <div class="hidden md:flex items-center gap-6 text-xs font-bold uppercase tracking-widest text-white/80">
             <a href="index.html" class="hover:text-white transition relative group py-2">Home<span class="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span></a>
             <a href="index.html#eventi-section" class="hover:text-white transition relative group py-2">Eventi<span class="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span></a>
             <a href="index.html#territorio" class="hover:text-white transition relative group py-2">Borghi<span class="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span></a>
-            <a href="#" class="flex items-center gap-2 bg-gold text-ink border border-gold px-5 py-2 rounded-full hover:bg-white hover:border-white transition shadow-[0_0_15px_rgba(212,175,55,0.3)]"><i data-lucide="compass" class="w-4 h-4"></i> Cammino</a>
+            <a href="#" class="flex items-center gap-2 bg-gold text-ink border border-gold px-4 py-1.5 rounded-full hover:bg-white hover:border-white transition shadow-[0_0_15px_rgba(212,175,55,0.3)]"><i data-lucide="compass" class="w-3 h-3"></i> Cammino</a>
         </div>
-        <a href="index.html" class="md:hidden text-white hover:text-gold transition p-2"><i data-lucide="arrow-left" class="w-6 h-6"></i></a>
+        <a href="index.html" class="md:hidden text-white hover:text-gold transition p-1"><i data-lucide="arrow-left" class="w-6 h-6"></i></a>
     </nav>
 
     <section class="h-[60vh] relative flex items-center justify-center overflow-hidden bg-forest-radial text-white pt-20">
@@ -117,6 +117,7 @@
             
             <form action="https://formsubmit.co/comunediaviglianoumbro@gmail.com" method="POST" class="bg-white text-ink p-12 shadow-2xl relative">
                 <div class="absolute top-0 right-0 w-8 h-8 bg-gold triangle"></div>
+                
                 <input type="hidden" name="_next" value="https://visitaviglianoumbro.it/cammino.html?status=success">
                 
                 <div class="grid md:grid-cols-2 gap-8 mb-8">

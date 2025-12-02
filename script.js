@@ -5,7 +5,8 @@ const CSV_CONTENT = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON
 // STATE
 let cmsData = {}; 
 let allEvents = [];
-let pendingEvents = [];
+let filteredEvents = [];
+let currentCategory = 'Tutti';
 
 // --- PARSER CSV ---
 function parseCSV(text) {
@@ -45,25 +46,17 @@ async function initCMS() {
         const resp = await fetch(CSV_CONTENT);
         const text = await resp.text();
         const rows = parseCSV(text);
-
         rows.forEach(row => {
             const id = row[0];
             const textContent = row[1];
             const imgUrl = formatUrl(row[2]);
             if (!id) return;
-            
             cmsData[id] = { text: textContent, img: imgUrl };
-            
             const els = document.querySelectorAll(`[data-content-id="${id}"]`);
             els.forEach(el => {
                 if (imgUrl) {
-                    if (el.tagName === 'IMG') {
-                        el.src = imgUrl;
-                        el.onload = () => el.classList.remove('opacity-0');
-                    } else {
-                        el.style.backgroundImage = `url('${imgUrl}')`;
-                        el.classList.remove('opacity-0');
-                    }
+                    if (el.tagName === 'IMG') { el.src = imgUrl; el.onload = () => el.classList.remove('opacity-0'); } 
+                    else { el.style.backgroundImage = `url('${imgUrl}')`; el.classList.remove('opacity-0'); }
                 }
                 if (textContent && !imgUrl) el.innerHTML = textContent;
             });
@@ -80,7 +73,7 @@ async function initEvents() {
         const today = new Date();
         today.setHours(0,0,0,0);
         
-        // CSV: Date(0), Time(1), Title(2), Subtitle(3), Desc(4), Loc(5), Cat(6), Img(7)
+        // Colonna 8: Organizzatore
         allEvents = rows.map((row, idx) => {
             return {
                 id: `evt-${idx}`,
@@ -91,7 +84,8 @@ async function initEvents() {
                 desc: row[4],
                 loc: row[5],
                 cat: row[6] || 'Evento',
-                img: formatUrl(row[7]) || 'https://images.unsplash.com/photo-1514525253440-b393452e8d26?q=80&w=800'
+                img: formatUrl(row[7]) || 'https://images.unsplash.com/photo-1514525253440-b393452e8d26?q=80&w=800',
+                organizer: row[8] || 'Comune di Avigliano Umbro'
             };
         })
         .filter(e => {
@@ -100,47 +94,74 @@ async function initEvents() {
         })
         .sort((a,b) => new Date(a.dateStr) - new Date(b.dateStr));
         
-        renderEvents();
+        renderFilters();
+        filterEvents('Tutti');
         
     } catch (err) {
         console.error("Events Error:", err);
-        document.getElementById('events-slider').innerHTML = '<div class="w-full text-center text-stone-400 py-10">Caricamento eventi non riuscito.</div>';
+        document.getElementById('events-slider').innerHTML = '<div class="w-full text-center text-stone-400 py-10">Errore caricamento.</div>';
     }
 }
 
+// --- FILTER LOGIC ---
+function renderFilters() {
+    const categories = ['Tutti', ...new Set(allEvents.map(e => e.cat))];
+    const container = document.getElementById('category-filters');
+    container.innerHTML = categories.map(cat => `
+        <button onclick="filterEvents('${cat}')" 
+            class="filter-btn px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap
+            ${cat === currentCategory ? 'bg-bronze-500 text-white border-bronze-500' : 'bg-white text-stone-600 border-stone-200 hover:border-bronze-400'}">
+            ${cat}
+        </button>
+    `).join('');
+}
+
+window.filterEvents = (category) => {
+    currentCategory = category;
+    filteredEvents = category === 'Tutti' ? allEvents : allEvents.filter(e => e.cat === category);
+    
+    // Update button styles
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        if(btn.innerText === category) {
+            btn.className = "filter-btn px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap bg-bronze-500 text-white border-bronze-500";
+        } else {
+            btn.className = "filter-btn px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap bg-white text-stone-600 border-stone-200 hover:border-bronze-400";
+        }
+    });
+
+    renderEvents();
+};
+
+// --- RENDER ---
 function renderEvents() {
     const slider = document.getElementById('events-slider');
     slider.innerHTML = '';
     
-    const featured = allEvents.slice(0, 6);
-    pendingEvents = allEvents.slice(6);
+    const displayEvents = filteredEvents.slice(0, 6);
+    const hasMore = filteredEvents.length > 6;
     
-    if (featured.length === 0) {
-        slider.innerHTML = '<div class="w-full text-center text-stone-400 py-10 font-serif italic">Nessun evento in programma prossimamente.</div>';
+    if (displayEvents.length === 0) {
+        slider.innerHTML = '<div class="w-full text-center text-stone-400 py-10 font-serif italic">Nessun evento in questa categoria.</div>';
         return;
     }
 
-    featured.forEach(e => {
+    displayEvents.forEach(e => {
         const d = new Date(e.dateStr);
         const day = d.getDate();
         const month = d.toLocaleString('it-IT', { month: 'short' }).toUpperCase();
         
-        // --- MODIFICA QUI: RAPPORTO 7:10 ---
-        // Width: 280px / Height: 400px (280/400 = 0.7 esatto)
+        // HOVER EFFECT: group-hover:translate-y-0 reveals description
         const card = `
         <div class="snap-center shrink-0 w-[280px] h-[400px] relative rounded-2xl overflow-hidden group cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-500 bg-stone-900 border border-stone-200" onclick="openModal('${e.id}')">
-            
-            <img src="${e.img}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-95 group-hover:opacity-100">
-            
-            <div class="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/20 to-transparent opacity-80 hover:opacity-70 transition-opacity"></div>
+            <img src="${e.img}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-100 group-hover:opacity-40">
+            <div class="absolute inset-0 bg-gradient-to-t from-stone-950 via-transparent to-transparent opacity-80 group-hover:bg-stone-900/80 transition-all duration-500"></div>
             
             <div class="absolute top-4 right-4 bg-white/20 backdrop-blur border border-white/20 px-3 py-1 rounded-full text-[9px] font-bold uppercase text-white tracking-widest shadow-sm">
                 ${e.cat}
             </div>
 
-            <div class="absolute bottom-0 left-0 w-full p-6 text-white translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                
-                <div class="flex items-center gap-3 mb-2 text-bronze-200">
+            <div class="absolute bottom-0 left-0 w-full p-6 text-white transition-all duration-500 transform translate-y-[20px] group-hover:translate-y-0">
+                <div class="flex items-center gap-3 mb-2 text-bronze-400">
                     <div class="flex flex-col items-center leading-none border-r border-white/30 pr-3">
                         <span class="text-xl font-serif font-bold text-white">${day}</span>
                         <span class="text-[9px] uppercase tracking-widest text-white/80">${month}</span>
@@ -150,11 +171,11 @@ function renderEvents() {
                     </div>
                 </div>
 
-                <h3 class="text-xl font-serif leading-tight mb-1 group-hover:text-bronze-300 transition-colors line-clamp-2 drop-shadow-md">${e.title}</h3>
-                ${e.subtitle ? `<p class="text-xs text-stone-200 font-light mb-3 line-clamp-1 italic drop-shadow">${e.subtitle}</p>` : '<div class="mb-3"></div>'}
+                <h3 class="text-xl font-serif leading-tight mb-2 group-hover:text-bronze-300 transition-colors line-clamp-2 drop-shadow-md">${e.title}</h3>
                 
-                <div class="flex items-center gap-2 text-[10px] text-stone-300 uppercase tracking-widest border-t border-white/20 pt-3">
-                    <i data-lucide="map-pin" class="w-3 h-3 text-bronze-400"></i> ${e.loc}
+                <div class="h-0 opacity-0 group-hover:h-auto group-hover:opacity-100 transition-all duration-500 overflow-hidden">
+                    <p class="text-xs text-stone-300 font-light mb-4 line-clamp-3">${e.desc}</p>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-bronze-400 border-b border-bronze-400/50 pb-0.5">Leggi tutto</span>
                 </div>
             </div>
         </div>
@@ -162,32 +183,28 @@ function renderEvents() {
         slider.insertAdjacentHTML('beforeend', card);
     });
 
-    if (pendingEvents.length > 0) {
-        document.getElementById('load-more-btn').classList.remove('hidden');
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    if (hasMore) {
+        loadMoreBtn.classList.remove('hidden');
+        loadMoreBtn.querySelector('button').innerText = `Vedi altri eventi (${filteredEvents.length - 6})`;
+    } else {
+        loadMoreBtn.classList.add('hidden');
     }
     
     if(window.lucide) window.lucide.createIcons();
-    
-    // Popola i dati per il modale
-    allEvents.forEach(e => {
-        cmsData[e.id] = { 
-            text: e.desc, 
-            img: e.img, 
-            title: e.title, 
-            subtitle: `${e.dateStr} | Ore ${e.time} | ${e.loc}` 
-        };
-    });
 }
 
 window.showAllEvents = () => {
     const grid = document.getElementById('all-events-grid');
     grid.innerHTML = '';
     
-    pendingEvents.forEach(e => {
+    // Show remaining events
+    const remaining = filteredEvents.slice(6);
+    
+    remaining.forEach(e => {
         const d = new Date(e.dateStr);
         const dateStr = d.toLocaleDateString('it-IT');
         
-        // Card orizzontale per la lista "Vedi tutti"
         const item = `
         <div class="flex gap-5 p-5 bg-white border border-stone-100 rounded-2xl hover:border-bronze-300 transition-all cursor-pointer group items-center shadow-sm hover:shadow-md" onclick="openModal('${e.id}')">
             <div class="w-[70px] h-[100px] rounded-lg bg-stone-100 overflow-hidden shrink-0 relative shadow-inner">
@@ -199,7 +216,7 @@ window.showAllEvents = () => {
                     <span class="text-stone-400 text-[10px] font-bold uppercase tracking-widest">${dateStr}</span>
                 </div>
                 <h4 class="text-stone-800 font-serif text-lg leading-tight group-hover:text-bronze-600 transition-colors line-clamp-1 mb-1">${e.title}</h4>
-                <p class="text-xs text-stone-500 italic line-clamp-1 mb-2">${e.subtitle || ''}</p>
+                <p class="text-xs text-stone-500 italic line-clamp-1 mb-2">${e.organizer}</p>
                 <span class="text-stone-400 text-xs flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> ${e.loc}</span>
             </div>
         </div>
@@ -208,45 +225,60 @@ window.showAllEvents = () => {
     });
     
     grid.classList.remove('hidden');
-    document.getElementById('load-more-btn').style.display = 'none';
+    document.getElementById('load-more-btn').classList.add('hidden');
     if(window.lucide) window.lucide.createIcons();
 };
 
-// --- MODAL SYSTEM ---
+// --- MODAL SYSTEM (FULL DETAILS) ---
 window.openModal = (baseId) => {
-    const titleKey = baseId + "_title";
-    const descKey = baseId + "_desc";
-    const imgKey = baseId + "_img";
+    let content = {};
     
-    let title = "Dettaglio";
-    let desc = "Descrizione non disponibile.";
-    let img = "";
-    let subtitle = "Experience"; 
+    // Is it an event?
+    const evt = allEvents.find(e => e.id === baseId);
     
-    if (cmsData[baseId] && cmsData[baseId].title) { // Evento
-        title = cmsData[baseId].title;
-        desc = cmsData[baseId].text;
-        img = cmsData[baseId].img;
-        if(cmsData[baseId].subtitle) subtitle = cmsData[baseId].subtitle;
-    } else { // Sezione CMS
-        if (cmsData[titleKey]?.text) title = cmsData[titleKey].text;
-        if (cmsData[descKey]?.text) desc = cmsData[descKey].text;
-        if (cmsData[imgKey]?.img) img = cmsData[imgKey].img;
+    if (evt) {
+        const d = new Date(evt.dateStr);
+        const fullDate = d.toLocaleDateString('it-IT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        
+        content = {
+            title: evt.title,
+            desc: evt.desc,
+            img: evt.img,
+            subtitle: evt.subtitle || 'Evento in programma',
+            category: evt.cat,
+            time: `${fullDate} | Ore ${evt.time}`,
+            location: evt.loc,
+            organizer: evt.organizer
+        };
+    } else {
+        // Fallback for CMS sections
+        const titleKey = baseId + "_title";
+        const descKey = baseId + "_desc";
+        const imgKey = baseId + "_img";
+        content = {
+            title: cmsData[baseId]?.title || (cmsData[titleKey]?.text) || "Dettaglio",
+            desc: cmsData[baseId]?.text || (cmsData[descKey]?.text) || "",
+            img: cmsData[baseId]?.img || (cmsData[imgKey]?.img) || "",
+            subtitle: "Territorio & Cultura",
+            category: "Info",
+            time: "Sempre aperto",
+            location: "Avigliano Umbro",
+            organizer: "Comune di Avigliano Umbro"
+        };
     }
 
-    const modal = document.getElementById('info-modal');
-    document.getElementById('modal-title').innerHTML = title;
-    document.getElementById('modal-subtitle').innerHTML = subtitle;
-    document.getElementById('modal-desc').innerHTML = desc;
+    document.getElementById('modal-title').innerHTML = content.title;
+    document.getElementById('modal-subtitle').innerHTML = content.subtitle;
+    document.getElementById('modal-desc').innerHTML = content.desc;
+    document.getElementById('modal-category').innerHTML = content.category;
+    document.getElementById('modal-time').innerHTML = content.time;
+    document.getElementById('modal-location').innerHTML = content.location;
+    document.getElementById('modal-organizer').innerHTML = content.organizer;
     
     const modalImg = document.getElementById('modal-img');
-    if(img) {
-        modalImg.src = img;
-    } else {
-        modalImg.src = 'https://via.placeholder.com/800x600?text=Avigliano+Umbro';
-    }
+    modalImg.src = content.img || 'https://via.placeholder.com/800x600';
     
-    modal.classList.remove('hidden');
+    document.getElementById('info-modal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 };
 
@@ -254,6 +286,11 @@ window.closeModal = () => {
     document.getElementById('info-modal').classList.add('hidden');
     document.body.style.overflow = '';
 };
+
+document.addEventListener('DOMContentLoaded', () => {
+    initCMS();
+    initEvents();
+});
 
 document.addEventListener('DOMContentLoaded', () => {
     initCMS();

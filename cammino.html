@@ -11,7 +11,7 @@
       tailwind.config = {
         theme: {
           extend: {
-            colors: { paper: '#F2F0EB', ink: '#1A1A1A', gold: '#D4AF37', stone: '#8C8C8C' },
+            colors: { paper: '#F2F0EB', ink: '#05201A', forest: '#1A3C34', gold: '#D4AF37', stone: '#8C8C8C' },
             fontFamily: { sans: ['Barlow', 'sans-serif'], serif: ['Playfair Display', 'serif'] }
           }
         }
@@ -20,6 +20,7 @@
     <style>
         .hide-scroll::-webkit-scrollbar { display: none; }
         .bg-grid { background-size: 40px 40px; background-image: linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px); }
+        .bg-forest-radial { background: radial-gradient(circle at 50% 0%, #1A3C34 0%, #05201A 70%); }
         .reveal { opacity: 0; transform: translateY(30px); transition: all 1s; }
         .reveal.active { opacity: 1; transform: translateY(0); }
         .form-input { width: 100%; background: #fff; border: 1px solid #ddd; padding: 1rem; color: #1a1a1a; }
@@ -28,20 +29,28 @@
 </head>
 <body class="bg-paper text-ink font-sans selection:bg-gold selection:text-white">
 
-    <nav class="fixed top-0 w-full z-50 bg-paper/90 backdrop-blur border-b border-ink/5 px-6 py-4 flex justify-between items-center">
-        <a href="index.html" class="flex flex-col">
-            <span class="text-[10px] uppercase tracking-widest font-bold text-stone">Portale</span>
-            <span class="text-xl font-serif">Visit Avigliano</span>
+    <nav class="fixed top-0 w-full z-50 bg-forest/95 backdrop-blur border-b border-white/10 h-20 flex items-center justify-between px-6 transition-all shadow-lg">
+        <a href="index.html" class="flex items-center gap-3 group">
+            <div class="w-10 h-10 rounded-full bg-white p-[2px] shadow-md border border-gold/30 group-hover:scale-105 transition-transform">
+                <div class="w-full h-full rounded-full bg-forest overflow-hidden flex items-center justify-center">
+                    <img id="nav_logo" data-content-id="nav_logo" src="" class="w-full h-full object-cover opacity-0 transition-opacity">
+                </div>
+            </div>
+            <div class="flex flex-col items-start">
+                <span data-content-id="nav_subtitle" class="bg-white/10 border border-gold/30 text-gold px-2 py-[2px] rounded-md text-[9px] font-bold uppercase tracking-widest mb-[2px] hover:bg-gold hover:text-ink transition-colors cursor-default">...</span>
+                <span class="text-xl font-serif text-white leading-none tracking-wide group-hover:text-gold transition-colors">Visit Avigliano</span>
+            </div>
         </a>
-        <div class="hidden md:flex gap-6 text-xs font-bold uppercase tracking-widest">
-            <a href="index.html" class="hover:text-gold">Home</a>
-            <a href="index.html#eventi-section" class="hover:text-gold">Eventi</a>
-            <a href="index.html#territorio" class="hover:text-gold">Borghi</a>
+        <div class="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-widest text-white/80">
+            <a href="index.html" class="hover:text-white transition relative group py-2">Home<span class="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span></a>
+            <a href="index.html#eventi-section" class="hover:text-white transition relative group py-2">Eventi<span class="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span></a>
+            <a href="index.html#territorio" class="hover:text-white transition relative group py-2">Borghi<span class="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span></a>
+            <a href="#" class="flex items-center gap-2 bg-gold text-ink border border-gold px-5 py-2 rounded-full hover:bg-white hover:border-white transition shadow-[0_0_15px_rgba(212,175,55,0.3)]"><i data-lucide="compass" class="w-4 h-4"></i> Cammino</a>
         </div>
-        <a href="index.html" class="md:hidden"><i data-lucide="arrow-left"></i></a>
+        <a href="index.html" class="md:hidden text-white"><i data-lucide="arrow-left"></i></a>
     </nav>
 
-    <section class="h-[60vh] relative flex items-center justify-center overflow-hidden bg-ink text-white">
+    <section class="h-[60vh] relative flex items-center justify-center overflow-hidden bg-forest-radial text-white pt-20">
         <div data-content-id="cammino_page_hero_bg" class="absolute inset-0 bg-cover bg-center opacity-60"></div>
         <div class="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-transparent"></div>
         <div class="relative z-10 text-center px-6 max-w-4xl reveal active">
@@ -99,7 +108,7 @@
         </div>
     </section>
 
-    <section class="bg-ink text-white py-24">
+    <section class="bg-forest-radial text-white py-24">
         <div class="max-w-4xl mx-auto px-6">
             <div class="text-center mb-16">
                 <span class="text-gold text-xs font-bold tracking-[0.3em] uppercase block mb-4">Ufficio Credenziali</span>
@@ -108,51 +117,32 @@
             
             <form action="https://formsubmit.co/comunediaviglianoumbro@gmail.com" method="POST" class="bg-white text-ink p-12 shadow-2xl relative">
                 <div class="absolute top-0 right-0 w-8 h-8 bg-gold triangle"></div>
-                
                 <input type="hidden" name="_next" value="https://visitaviglianoumbro.it/cammino.html?status=success">
                 
                 <div class="grid md:grid-cols-2 gap-8 mb-8">
-                    <div>
-                        <label class="block text-xs font-bold uppercase mb-2">Nome</label>
-                        <input type="text" name="Nome" required class="form-input border-2 border-ink/10 focus:border-gold">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase mb-2">Cognome</label>
-                        <input type="text" name="Cognome" required class="form-input border-2 border-ink/10 focus:border-gold">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase mb-2">Email</label>
-                        <input type="email" name="Email" required class="form-input border-2 border-ink/10 focus:border-gold">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase mb-2">Data Partenza</label>
-                        <input type="date" name="Data" required class="form-input border-2 border-ink/10 focus:border-gold">
-                    </div>
+                    <div><label class="block text-xs font-bold uppercase mb-2">Nome</label><input type="text" name="Nome" required class="form-input border-2 border-ink/10 focus:border-gold"></div>
+                    <div><label class="block text-xs font-bold uppercase mb-2">Cognome</label><input type="text" name="Cognome" required class="form-input border-2 border-ink/10 focus:border-gold"></div>
+                    <div><label class="block text-xs font-bold uppercase mb-2">Email</label><input type="email" name="Email" required class="form-input border-2 border-ink/10 focus:border-gold"></div>
+                    <div><label class="block text-xs font-bold uppercase mb-2">Data Partenza</label><input type="date" name="Data" required class="form-input border-2 border-ink/10 focus:border-gold"></div>
                 </div>
                 
                 <div class="mb-8">
                     <label class="block text-xs font-bold uppercase mb-4">Modalità</label>
                     <div class="flex gap-4">
-                        <label class="flex items-center gap-2 cursor-pointer bg-paper px-6 py-3 border border-transparent hover:border-gold transition">
-                            <input type="radio" name="Tipo" value="Piedi" checked> A Piedi
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer bg-paper px-6 py-3 border border-transparent hover:border-gold transition">
-                            <input type="radio" name="Tipo" value="Bici"> In Bici
-                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer bg-paper px-6 py-3 border border-transparent hover:border-gold transition"><input type="radio" name="Tipo" value="Piedi" checked> A Piedi</label>
+                        <label class="flex items-center gap-2 cursor-pointer bg-paper px-6 py-3 border border-transparent hover:border-gold transition"><input type="radio" name="Tipo" value="Bici"> In Bici</label>
                     </div>
                 </div>
 
                 <div class="flex items-center justify-between border-t border-ink/10 pt-8">
-                    <label class="flex items-center gap-2 text-xs">
-                        <input type="checkbox" required> Accetto il trattamento dati
-                    </label>
+                    <label class="flex items-center gap-2 text-xs"><input type="checkbox" required> Accetto il trattamento dati</label>
                     <button type="submit" class="bg-ink text-white px-10 py-4 font-bold uppercase tracking-widest text-xs hover:bg-gold transition-colors">Invia Richiesta</button>
                 </div>
             </form>
         </div>
     </section>
 
-    <footer class="bg-ink text-stone py-8 text-center text-xs border-t border-white/10">
+    <footer class="bg-forest-radial text-stone py-8 text-center text-xs border-t border-white/10">
         &copy; 2025 Visit Avigliano Umbro
     </footer>
 
@@ -160,6 +150,15 @@
     <script>
         const observer = new IntersectionObserver((e)=>{e.forEach(t=>{t.isIntersecting&&t.target.classList.add("active")})},{threshold:.1});
         document.querySelectorAll(".reveal").forEach(e=>observer.observe(e));
+        
+        // Load Logo also here
+        document.addEventListener('DOMContentLoaded', () => {
+            const logo = document.getElementById('nav_logo');
+            if(logo && window.cmsData && window.cmsData['nav_logo']) {
+                logo.src = window.cmsData['nav_logo'].img;
+                logo.classList.remove('opacity-0');
+            }
+        });
     </script>
 </body>
 </html>

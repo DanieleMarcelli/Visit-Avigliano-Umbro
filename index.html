@@ -80,17 +80,13 @@
     <section class="relative h-screen w-full flex items-center justify-center overflow-hidden bg-stone-100">
         <div data-content-id="home_hero_bg" class="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-[20s] hover:scale-105 opacity-0"></div>
         <div class="absolute inset-0 bg-black/10 z-10"></div>
-        
         <div class="relative z-20 text-center px-6 max-w-5xl mx-auto mt-20">
             <div class="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/90 backdrop-blur shadow-lg mb-8 animate-fade-up">
                 <span class="w-2 h-2 rounded-full bg-bronze-500"></span>
                 <span data-content-id="home_hero_subtitle" class="text-stone-800 text-[11px] font-bold tracking-[0.3em] uppercase">...</span>
             </div>
-            
             <h1 data-content-id="home_hero_title" class="text-6xl md:text-8xl lg:text-9xl font-serif text-white mb-8 tracking-tight drop-shadow-lg leading-[0.9]">Visit Avigliano</h1>
-            
             <p data-content-id="home_hero_desc" class="text-lg md:text-xl text-white/90 font-medium max-w-2xl mx-auto mb-12 leading-relaxed drop-shadow-md">...</p>
-            
             <div class="flex flex-col sm:flex-row justify-center gap-6">
                 <button onclick="document.getElementById('eventi-section').scrollIntoView({behavior: 'smooth'})" class="px-10 py-4 bg-white text-stone-900 font-bold tracking-widest text-xs uppercase rounded-full hover:bg-stone-100 transition-all shadow-lg hover:-translate-y-1">Eventi</button>
                 <a href="cammino.html" class="px-10 py-4 rounded-full bg-bronze-500/90 backdrop-blur text-white font-bold tracking-widest text-xs uppercase hover:bg-bronze-600 transition-all shadow-lg flex items-center justify-center gap-2">Cammino del Lago</a>
@@ -120,16 +116,20 @@
 
     <section id="eventi-section" class="py-24 bg-paper-50 relative border-t border-stone-200">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-8 gap-8">
                 <div>
                     <span data-content-id="section_eventi_subtitle" class="text-bronze-500 text-xs font-bold tracking-[0.25em] uppercase mb-3 block">...</span>
                     <h2 data-content-id="section_eventi_title" class="text-4xl md:text-5xl font-serif text-stone-800 leading-tight">...</h2>
                 </div>
                 <div class="flex items-center gap-4">
-                    <button onclick="document.getElementById('events-slider').scrollBy({left: -350, behavior: 'smooth'})" class="w-12 h-12 rounded-full border border-stone-200 hover:bg-bronze-400 hover:text-white text-stone-400 flex items-center justify-center transition-all bg-white shadow-sm"><i data-lucide="arrow-left"></i></button>
+                     <button onclick="document.getElementById('events-slider').scrollBy({left: -350, behavior: 'smooth'})" class="w-12 h-12 rounded-full border border-stone-200 hover:bg-bronze-400 hover:text-white text-stone-400 flex items-center justify-center transition-all bg-white shadow-sm"><i data-lucide="arrow-left"></i></button>
                     <button onclick="document.getElementById('events-slider').scrollBy({left: 350, behavior: 'smooth'})" class="w-12 h-12 rounded-full border border-stone-200 hover:bg-bronze-400 hover:text-white text-stone-400 flex items-center justify-center transition-all bg-white shadow-sm"><i data-lucide="arrow-right"></i></button>
                 </div>
             </div>
+
+            <div id="category-filters" class="flex gap-3 overflow-x-auto pb-6 mb-4 hide-scroll">
+                </div>
+
             <div id="events-slider" class="flex gap-8 overflow-x-auto pb-12 hide-scroll snap-x snap-mandatory -mx-6 px-6 md:mx-0 md:px-0"></div>
              <div id="load-more-btn" class="hidden text-center mt-8"><button onclick="showAllEvents()" class="px-8 py-3 rounded-full border border-stone-300 text-stone-600 font-bold uppercase text-xs tracking-widest hover:bg-stone-800 hover:text-white transition-all">Tutti gli Eventi</button></div>
             <div id="all-events-grid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-16 animate-fade-in"></div>
@@ -145,7 +145,6 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-[350px]">
-                
                 <div class="md:col-span-2 md:row-span-2 relative group rounded-[2rem] overflow-hidden cursor-pointer shadow-soft" onclick="openModal('natura_foresta')">
                     <img data-content-id="natura_foresta_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-105 opacity-0">
                     <div class="absolute inset-0 bg-gradient-to-t from-stone-900/80 via-transparent to-transparent"></div>
@@ -155,32 +154,27 @@
                         <p data-content-id="natura_foresta_desc" class="text-white/80 font-light line-clamp-2">...</p>
                     </div>
                 </div>
-
                 <div class="md:col-span-1 relative group rounded-[2rem] overflow-hidden cursor-pointer shadow-sm" onclick="openModal('borgo_dunarobba')">
                     <img data-content-id="borgo_dunarobba_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-0">
                     <div class="absolute inset-0 bg-gradient-to-t from-stone-900/60 to-transparent"></div>
                     <div class="absolute bottom-0 left-0 p-8"><h3 data-content-id="borgo_dunarobba_title" class="text-2xl font-serif text-white group-hover:translate-x-2 transition-transform">...</h3></div>
                 </div>
-
                 <div class="md:col-span-1 relative group rounded-[2rem] overflow-hidden cursor-pointer shadow-sm" onclick="openModal('borgo_santa')">
                     <img data-content-id="borgo_santa_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-0">
                     <div class="absolute inset-0 bg-gradient-to-t from-stone-900/60 to-transparent"></div>
                     <div class="absolute bottom-0 left-0 p-8"><h3 data-content-id="borgo_santa_title" class="text-2xl font-serif text-white group-hover:translate-x-2 transition-transform">...</h3></div>
                 </div>
-
                 <div class="md:col-span-2 relative group rounded-[2rem] overflow-hidden cursor-pointer shadow-soft" onclick="openModal('natura_grotta')">
                     <img data-content-id="natura_grotta_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-0">
                     <div class="absolute inset-0 bg-gradient-to-t from-stone-900/70 via-transparent to-transparent"></div>
                     <div class="absolute top-6 right-6"><div data-content-id="natura_grotta_badge" class="bg-white/90 backdrop-blur px-4 py-2 rounded-full text-stone-800 text-[10px] font-bold uppercase tracking-widest shadow-sm">...</div></div>
                     <div class="absolute bottom-0 left-0 p-10"><h3 data-content-id="natura_grotta_title" class="text-3xl font-serif text-white group-hover:translate-x-2 transition-transform">...</h3></div>
                 </div>
-
                  <div class="md:col-span-1 relative group rounded-[2rem] overflow-hidden cursor-pointer shadow-sm" onclick="openModal('borgo_toscolano')">
                     <img data-content-id="borgo_toscolano_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-0">
                     <div class="absolute inset-0 bg-gradient-to-t from-stone-900/60 to-transparent"></div>
                     <div class="absolute bottom-0 left-0 p-8"><h3 data-content-id="borgo_toscolano_title" class="text-2xl font-serif text-white group-hover:translate-x-2 transition-transform">...</h3></div>
                 </div>
-
                 <div class="md:col-span-1 relative group rounded-[2rem] overflow-hidden cursor-pointer shadow-sm" onclick="openModal('borgo_sismano')">
                     <img data-content-id="borgo_sismano_img" class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-0">
                     <div class="absolute inset-0 bg-gradient-to-t from-stone-900/60 to-transparent"></div>
@@ -211,7 +205,6 @@
     <section class="py-32 relative overflow-hidden flex items-center bg-stone-900">
         <div data-content-id="cammino_bg" class="absolute inset-0 opacity-0 mix-blend-overlay bg-cover bg-center"></div>
         <div class="absolute inset-0 bg-gradient-to-r from-stone-900 via-stone-900/80 to-stone-900/20"></div>
-        
         <div class="relative z-10 max-w-7xl mx-auto px-6 w-full">
             <div class="max-w-xl">
                 <div class="flex items-center gap-3 mb-6 text-bronze-400">
@@ -219,7 +212,6 @@
                     <span data-content-id="cammino_subtitle" class="text-xs font-bold uppercase tracking-[0.25em]">...</span>
                 </div>
                 <h2 data-content-id="cammino_title" class="text-5xl md:text-7xl font-serif text-white mb-8">...</h2>
-                
                 <div class="grid grid-cols-3 gap-8 mb-12 border-t border-white/10 pt-8">
                     <div><span class="block text-3xl font-serif text-white">80<span class="text-sm text-bronze-400 ml-1">km</span></span></div>
                     <div><span class="block text-3xl font-serif text-white">4<span class="text-sm text-bronze-400 ml-1">Tappe</span></span></div>
@@ -258,7 +250,7 @@
                     <span class="text-2xl font-serif text-white block mb-6">Visit Avigliano</span>
                     <p data-content-id="footer_desc" class="text-sm leading-relaxed mb-8 font-light">...</p>
                 </div>
-                <div><h4 class="text-white font-bold text-xs uppercase tracking-widest mb-8">Esplora</h4><ul class="space-y-4 text-sm font-light"><li><a href="#">Home</a></li><li><a href="#territorio">Borghi</a></li></ul></div>
+                 <div><h4 class="text-white font-bold text-xs uppercase tracking-widest mb-8">Esplora</h4><ul class="space-y-4 text-sm font-light"><li><a href="#">Home</a></li><li><a href="#territorio">Borghi</a></li></ul></div>
                  <div><h4 class="text-white font-bold text-xs uppercase tracking-widest mb-8">Contatti</h4><ul class="space-y-4 text-sm font-light"><li>turismo@comune.aviglianoumbro.tr.it</li></ul></div>
             </div>
             <div class="border-t border-white/10 pt-8 text-[10px] uppercase font-bold"><p>&copy; 2025 Comune di Avigliano Umbro.</p></div>
@@ -267,16 +259,56 @@
 
     <div id="info-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-stone-900/60 backdrop-blur-md" onclick="closeModal()"></div>
-        <div class="relative bg-white w-full max-w-6xl h-[85vh] rounded-[3rem] overflow-hidden flex flex-col md:flex-row shadow-2xl animate-in zoom-in-95 duration-300">
-            <button onclick="closeModal()" class="absolute top-8 right-8 z-50 text-stone-800 bg-white/50 backdrop-blur p-3 rounded-full hover:bg-stone-200 transition"><i data-lucide="x"></i></button>
-            <div class="md:w-1/2 h-64 md:h-full relative"><img id="modal-img" src="" class="absolute inset-0 w-full h-full object-cover"></div>
-            <div class="md:w-1/2 p-16 overflow-y-auto bg-white">
-                <span id="modal-subtitle" class="text-bronze-600 text-xs font-bold uppercase tracking-[0.25em] mb-6 block">Experience</span>
-                <h2 id="modal-title" class="text-5xl font-serif text-stone-900 mb-10 leading-tight"></h2>
-                <div class="prose prose-lg text-stone-600 font-light leading-relaxed"><p id="modal-desc"></p></div>
+        <div class="relative bg-white w-full max-w-5xl max-h-[90vh] rounded-3xl md:rounded-[3rem] overflow-hidden flex flex-col md:flex-row shadow-2xl animate-in zoom-in-95 duration-300">
+            
+            <button onclick="closeModal()" class="absolute top-4 right-4 z-50 text-stone-800 bg-white/50 backdrop-blur p-2 rounded-full hover:bg-stone-200 transition"><i data-lucide="x"></i></button>
+            
+            <div class="h-48 md:w-1/2 md:h-auto relative shrink-0">
+                <img id="modal-img" src="" class="absolute inset-0 w-full h-full object-cover">
+            </div>
+            
+            <div class="flex-1 p-8 md:p-12 overflow-y-auto bg-white">
+                <div class="mb-6">
+                    <span id="modal-category" class="inline-block bg-bronze-100 text-bronze-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider mb-3">Event</span>
+                    <span id="modal-subtitle" class="block text-stone-500 text-xs uppercase tracking-widest font-bold">Details</span>
+                </div>
+                
+                <h2 id="modal-title" class="text-3xl md:text-4xl font-serif text-stone-900 mb-6 leading-tight">Title</h2>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8 border-y border-stone-100 py-6">
+                    <div class="flex items-start gap-3">
+                        <i data-lucide="calendar" class="w-5 h-5 text-bronze-500 mt-0.5"></i>
+                        <div>
+                            <span class="block text-[10px] text-stone-400 uppercase font-bold">Data & Ora</span>
+                            <span id="modal-time" class="text-sm font-medium text-stone-700">...</span>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <i data-lucide="map-pin" class="w-5 h-5 text-bronze-500 mt-0.5"></i>
+                        <div>
+                            <span class="block text-[10px] text-stone-400 uppercase font-bold">Luogo</span>
+                            <span id="modal-location" class="text-sm font-medium text-stone-700">...</span>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 sm:col-span-2">
+                        <i data-lucide="users" class="w-5 h-5 text-bronze-500 mt-0.5"></i>
+                        <div>
+                            <span class="block text-[10px] text-stone-400 uppercase font-bold">Organizzatore</span>
+                            <span id="modal-organizer" class="text-sm font-medium text-stone-700">...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="prose prose-stone font-light leading-relaxed text-sm md:text-base">
+                    <p id="modal-desc">Description...</p>
+                </div>
             </div>
         </div>
     </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
 
     <script src="script.js"></script>
 </body>

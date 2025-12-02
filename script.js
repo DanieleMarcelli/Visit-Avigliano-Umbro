@@ -114,14 +114,17 @@ async function initEvents() {
         
     } catch (err) {
         console.error("Events Error:", err);
-        document.getElementById('events-slider').innerHTML = '<div class="w-full text-center text-stone-400 py-10">Errore caricamento.</div>';
+        const slider = document.getElementById('events-slider');
+        if(slider) slider.innerHTML = '<div class="w-full text-center text-stone-400 py-10">Errore caricamento.</div>';
     }
 }
 
 // --- FILTER LOGIC ---
 function renderFilters() {
-    const categories = ['Tutti', ...new Set(allEvents.map(e => e.cat))];
     const container = document.getElementById('category-filters');
+    if(!container) return;
+    
+    const categories = ['Tutti', ...new Set(allEvents.map(e => e.cat))];
     container.innerHTML = categories.map(cat => `
         <button onclick="filterEvents('${cat}')" 
             class="filter-btn px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap
@@ -148,6 +151,7 @@ window.filterEvents = (category) => {
 // --- RENDER ---
 function renderEvents() {
     const slider = document.getElementById('events-slider');
+    if(!slider) return;
     slider.innerHTML = '';
     
     const displayEvents = filteredEvents.slice(0, 6);
@@ -196,11 +200,13 @@ function renderEvents() {
     });
 
     const loadMoreBtn = document.getElementById('load-more-btn');
-    if (hasMore) {
-        loadMoreBtn.classList.remove('hidden');
-        loadMoreBtn.querySelector('button').innerText = `Vedi altri eventi (${filteredEvents.length - 6})`;
-    } else {
-        loadMoreBtn.classList.add('hidden');
+    if(loadMoreBtn) {
+        if (hasMore) {
+            loadMoreBtn.classList.remove('hidden');
+            loadMoreBtn.querySelector('button').innerText = `Vedi altri eventi (${filteredEvents.length - 6})`;
+        } else {
+            loadMoreBtn.classList.add('hidden');
+        }
     }
     
     if(window.lucide) window.lucide.createIcons();
@@ -208,6 +214,7 @@ function renderEvents() {
 
 window.showAllEvents = () => {
     const grid = document.getElementById('all-events-grid');
+    if(!grid) return;
     grid.innerHTML = '';
     
     const remaining = filteredEvents.slice(6);
@@ -275,16 +282,29 @@ window.openModal = (baseId) => {
         };
     }
 
-    document.getElementById('modal-title').innerHTML = content.title;
-    document.getElementById('modal-subtitle').innerHTML = content.subtitle;
-    document.getElementById('modal-desc').innerHTML = content.desc;
-    document.getElementById('modal-category').innerHTML = content.category;
-    document.getElementById('modal-time').innerHTML = content.time;
-    document.getElementById('modal-location').innerHTML = content.location;
-    document.getElementById('modal-organizer').innerHTML = content.organizer;
+    const modalTitle = document.getElementById('modal-title');
+    if(modalTitle) modalTitle.innerHTML = content.title;
+    
+    const modalSubtitle = document.getElementById('modal-subtitle');
+    if(modalSubtitle) modalSubtitle.innerHTML = content.subtitle;
+    
+    const modalDesc = document.getElementById('modal-desc');
+    if(modalDesc) modalDesc.innerHTML = content.desc;
+    
+    const modalCat = document.getElementById('modal-category');
+    if(modalCat) modalCat.innerHTML = content.category;
+    
+    const modalTime = document.getElementById('modal-time');
+    if(modalTime) modalTime.innerHTML = content.time;
+    
+    const modalLoc = document.getElementById('modal-location');
+    if(modalLoc) modalLoc.innerHTML = content.location;
+    
+    const modalOrg = document.getElementById('modal-organizer');
+    if(modalOrg) modalOrg.innerHTML = content.organizer;
     
     const modalImg = document.getElementById('modal-img');
-    modalImg.src = content.img || 'https://via.placeholder.com/800x600';
+    if(modalImg) modalImg.src = content.img || 'https://via.placeholder.com/800x600';
     
     document.getElementById('info-modal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';

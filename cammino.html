@@ -29,16 +29,16 @@
 </head>
 <body class="bg-paper text-ink font-sans selection:bg-gold selection:text-white">
 
-    <nav class="fixed top-0 w-full z-50 bg-forest/95 backdrop-blur border-b border-white/10 h-20 flex items-center justify-between px-6 transition-all shadow-lg">
+    <nav class="fixed top-0 w-full z-50 bg-forest/95 backdrop-blur border-b border-white/10 h-16 md:h-20 flex items-center justify-between px-4 md:px-6 transition-all shadow-lg">
         <a href="index.html" class="flex items-center gap-3 group">
-            <div class="w-10 h-10 rounded-full bg-white p-[2px] shadow-md border border-gold/30 group-hover:scale-105 transition-transform">
+            <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white p-[2px] shadow-md border border-gold/30 group-hover:scale-105 transition-transform shrink-0">
                 <div class="w-full h-full rounded-full bg-forest overflow-hidden flex items-center justify-center">
                     <img id="nav_logo" data-content-id="nav_logo" src="" class="w-full h-full object-cover opacity-0 transition-opacity">
                 </div>
             </div>
-            <div class="flex flex-col items-start">
-                <span data-content-id="nav_subtitle" class="bg-white/10 border border-gold/30 text-gold px-2 py-[2px] rounded-md text-[9px] font-bold uppercase tracking-widest mb-[2px] hover:bg-gold hover:text-ink transition-colors cursor-default">...</span>
-                <span class="text-xl font-serif text-white leading-none tracking-wide group-hover:text-gold transition-colors">Visit Avigliano</span>
+            <div class="flex flex-col items-start justify-center">
+                <span data-content-id="nav_subtitle" class="bg-gold text-ink px-2 py-[1px] rounded text-[8px] md:text-[9px] font-bold uppercase tracking-widest mb-[2px] shadow-sm whitespace-nowrap">...</span>
+                <span class="text-lg md:text-xl font-serif text-white leading-none tracking-wide group-hover:text-gold transition-colors">Visit Avigliano</span>
             </div>
         </a>
         <div class="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-widest text-white/80">
@@ -47,7 +47,7 @@
             <a href="index.html#territorio" class="hover:text-white transition relative group py-2">Borghi<span class="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span></a>
             <a href="#" class="flex items-center gap-2 bg-gold text-ink border border-gold px-5 py-2 rounded-full hover:bg-white hover:border-white transition shadow-[0_0_15px_rgba(212,175,55,0.3)]"><i data-lucide="compass" class="w-4 h-4"></i> Cammino</a>
         </div>
-        <a href="index.html" class="md:hidden text-white"><i data-lucide="arrow-left"></i></a>
+        <a href="index.html" class="md:hidden text-white hover:text-gold transition p-2"><i data-lucide="arrow-left" class="w-6 h-6"></i></a>
     </nav>
 
     <section class="h-[60vh] relative flex items-center justify-center overflow-hidden bg-forest-radial text-white pt-20">
@@ -120,22 +120,40 @@
                 <input type="hidden" name="_next" value="https://visitaviglianoumbro.it/cammino.html?status=success">
                 
                 <div class="grid md:grid-cols-2 gap-8 mb-8">
-                    <div><label class="block text-xs font-bold uppercase mb-2">Nome</label><input type="text" name="Nome" required class="form-input border-2 border-ink/10 focus:border-gold"></div>
-                    <div><label class="block text-xs font-bold uppercase mb-2">Cognome</label><input type="text" name="Cognome" required class="form-input border-2 border-ink/10 focus:border-gold"></div>
-                    <div><label class="block text-xs font-bold uppercase mb-2">Email</label><input type="email" name="Email" required class="form-input border-2 border-ink/10 focus:border-gold"></div>
-                    <div><label class="block text-xs font-bold uppercase mb-2">Data Partenza</label><input type="date" name="Data" required class="form-input border-2 border-ink/10 focus:border-gold"></div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase mb-2">Nome</label>
+                        <input type="text" name="Nome" required class="form-input border-2 border-ink/10 focus:border-gold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase mb-2">Cognome</label>
+                        <input type="text" name="Cognome" required class="form-input border-2 border-ink/10 focus:border-gold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase mb-2">Email</label>
+                        <input type="email" name="Email" required class="form-input border-2 border-ink/10 focus:border-gold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase mb-2">Data Partenza</label>
+                        <input type="date" name="Data" required class="form-input border-2 border-ink/10 focus:border-gold">
+                    </div>
                 </div>
                 
                 <div class="mb-8">
                     <label class="block text-xs font-bold uppercase mb-4">Modalità</label>
                     <div class="flex gap-4">
-                        <label class="flex items-center gap-2 cursor-pointer bg-paper px-6 py-3 border border-transparent hover:border-gold transition"><input type="radio" name="Tipo" value="Piedi" checked> A Piedi</label>
-                        <label class="flex items-center gap-2 cursor-pointer bg-paper px-6 py-3 border border-transparent hover:border-gold transition"><input type="radio" name="Tipo" value="Bici"> In Bici</label>
+                        <label class="flex items-center gap-2 cursor-pointer bg-paper px-6 py-3 border border-transparent hover:border-gold transition">
+                            <input type="radio" name="Tipo" value="Piedi" checked> A Piedi
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer bg-paper px-6 py-3 border border-transparent hover:border-gold transition">
+                            <input type="radio" name="Tipo" value="Bici"> In Bici
+                        </label>
                     </div>
                 </div>
 
                 <div class="flex items-center justify-between border-t border-ink/10 pt-8">
-                    <label class="flex items-center gap-2 text-xs"><input type="checkbox" required> Accetto il trattamento dati</label>
+                    <label class="flex items-center gap-2 text-xs">
+                        <input type="checkbox" required> Accetto il trattamento dati
+                    </label>
                     <button type="submit" class="bg-ink text-white px-10 py-4 font-bold uppercase tracking-widest text-xs hover:bg-gold transition-colors">Invia Richiesta</button>
                 </div>
             </form>
@@ -151,7 +169,7 @@
         const observer = new IntersectionObserver((e)=>{e.forEach(t=>{t.isIntersecting&&t.target.classList.add("active")})},{threshold:.1});
         document.querySelectorAll(".reveal").forEach(e=>observer.observe(e));
         
-        // Load Logo also here
+        // Carica logo anche qui
         document.addEventListener('DOMContentLoaded', () => {
             const logo = document.getElementById('nav_logo');
             if(logo && window.cmsData && window.cmsData['nav_logo']) {

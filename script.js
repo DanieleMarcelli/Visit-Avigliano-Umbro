@@ -8,6 +8,22 @@ let allEvents = [];
 let filteredEvents = [];
 let currentCategory = 'Tutti';
 
+// --- SCROLL REVEAL OBSERVER ---
+const observerOptions = {
+    root: null,
+    rootMargin: '0px',
+    threshold: 0.1
+};
+
+const observer = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+            observer.unobserve(entry.target);
+        }
+    });
+}, observerOptions);
+
 // --- PARSER CSV ---
 function parseCSV(text) {
     const lines = text.split('\n').filter(l => l.trim() !== '');
@@ -73,7 +89,6 @@ async function initEvents() {
         const today = new Date();
         today.setHours(0,0,0,0);
         
-        // Colonna 8: Organizzatore
         allEvents = rows.map((row, idx) => {
             return {
                 id: `evt-${idx}`,
@@ -120,7 +135,6 @@ window.filterEvents = (category) => {
     currentCategory = category;
     filteredEvents = category === 'Tutti' ? allEvents : allEvents.filter(e => e.cat === category);
     
-    // Update button styles
     document.querySelectorAll('.filter-btn').forEach(btn => {
         if(btn.innerText === category) {
             btn.className = "filter-btn px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap bg-bronze-500 text-white border-bronze-500";
@@ -128,7 +142,6 @@ window.filterEvents = (category) => {
             btn.className = "filter-btn px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap bg-white text-stone-600 border-stone-200 hover:border-bronze-400";
         }
     });
-
     renderEvents();
 };
 
@@ -150,7 +163,6 @@ function renderEvents() {
         const day = d.getDate();
         const month = d.toLocaleString('it-IT', { month: 'short' }).toUpperCase();
         
-        // HOVER EFFECT: group-hover:translate-y-0 reveals description
         const card = `
         <div class="snap-center shrink-0 w-[280px] h-[400px] relative rounded-2xl overflow-hidden group cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-500 bg-stone-900 border border-stone-200" onclick="openModal('${e.id}')">
             <img src="${e.img}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-100 group-hover:opacity-40">
@@ -198,7 +210,6 @@ window.showAllEvents = () => {
     const grid = document.getElementById('all-events-grid');
     grid.innerHTML = '';
     
-    // Show remaining events
     const remaining = filteredEvents.slice(6);
     
     remaining.forEach(e => {
@@ -229,11 +240,9 @@ window.showAllEvents = () => {
     if(window.lucide) window.lucide.createIcons();
 };
 
-// --- MODAL SYSTEM (FULL DETAILS) ---
+// --- MODAL SYSTEM ---
 window.openModal = (baseId) => {
     let content = {};
-    
-    // Is it an event?
     const evt = allEvents.find(e => e.id === baseId);
     
     if (evt) {
@@ -251,7 +260,6 @@ window.openModal = (baseId) => {
             organizer: evt.organizer
         };
     } else {
-        // Fallback for CMS sections
         const titleKey = baseId + "_title";
         const descKey = baseId + "_desc";
         const imgKey = baseId + "_img";
@@ -290,9 +298,7 @@ window.closeModal = () => {
 document.addEventListener('DOMContentLoaded', () => {
     initCMS();
     initEvents();
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-    initCMS();
-    initEvents();
+    
+    const revealElements = document.querySelectorAll('.reveal');
+    revealElements.forEach(el => observer.observe(el));
 });

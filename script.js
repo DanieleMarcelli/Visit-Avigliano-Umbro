@@ -114,7 +114,7 @@ async function initEvents() {
     } catch (err) { 
         console.error("Events Error:", err); 
         const slider = document.getElementById('events-slider');
-        if(slider) slider.innerHTML = '<div class="w-full text-center text-stone-400 py-10">Errore nel caricamento eventi.</div>';
+        if(slider) slider.innerHTML = '<div class="w-full text-center text-stone-400 py-10">Errore caricamento eventi.</div>';
     }
 }
 
@@ -162,16 +162,16 @@ function renderEvents() {
             <img src="${e.img}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-100">
             <div class="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-900/60 to-transparent opacity-90"></div>
             <div class="absolute top-4 right-4 bg-white/20 backdrop-blur border border-white/20 px-3 py-1 rounded-full text-[9px] font-bold uppercase text-white tracking-widest shadow-sm">${e.cat}</div>
-            <div class="absolute bottom-0 left-0 w-full p-6 text-white transition-all duration-500 transform translate-y-[20px] group-hover:translate-y-0">
-                <div class="flex items-start gap-3 mb-3 text-bronze-400">
+            <div class="absolute bottom-0 left-0 w-full p-6 text-white transition-all duration-500 group-hover:translate-y-0">
+                <div class="flex items-start gap-3 mb-2 text-bronze-400">
                     <div class="flex flex-col items-center leading-none border-r border-white/30 pr-3"><span class="text-3xl font-serif font-bold text-white">${day}</span><span class="text-[9px] uppercase tracking-widest text-white/80">${month}</span></div>
-                    <div class="flex flex-col gap-1 justify-center">
+                    <div class="flex flex-col justify-center gap-1">
                         <div class="flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold text-white/90"><i data-lucide="clock" class="w-3 h-3"></i> ${e.time}</div>
                         <div class="flex items-center gap-1 text-[9px] uppercase tracking-wider text-stone-300 line-clamp-1"><i data-lucide="map-pin" class="w-3 h-3"></i> ${e.loc}</div>
                     </div>
                 </div>
                 <h3 class="text-xl font-serif leading-tight mb-1 group-hover:text-bronze-400 transition-colors line-clamp-2 drop-shadow-md">${e.title}</h3>
-                <p class="text-xs text-stone-300 font-light italic line-clamp-1 mb-2">${e.subtitle}</p>
+                ${e.subtitle ? `<p class="text-xs text-stone-300 font-light italic line-clamp-1 mb-2">${e.subtitle}</p>` : ''}
                 <div class="h-0 opacity-0 group-hover:h-auto group-hover:opacity-100 transition-all duration-500 overflow-hidden">
                     <p class="text-xs text-stone-300 font-light mb-3 line-clamp-2 border-t border-white/10 pt-2">${e.desc}</p>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-bronze-400 border-b border-bronze-400/50 pb-0.5">Leggi tutto</span>
@@ -191,38 +191,45 @@ function renderEvents() {
     if(window.lucide) window.lucide.createIcons();
 }
 
-// RENDER GRIGLIA "VEDI TUTTI" (LIST VIEW)
+// RENDER GRIGLIA "VEDI TUTTI" (STILE LOCANDINA)
 window.showAllEvents = () => {
     const grid = document.getElementById('all-events-grid');
     if(!grid) return;
     grid.innerHTML = '';
+    
     const remaining = filteredEvents.slice(6);
     
     remaining.forEach(e => {
         const d = new Date(e.dateStr);
-        const dateStr = d.toLocaleDateString('it-IT');
+        const day = d.getDate();
+        const month = d.toLocaleString('it-IT', { month: 'short' }).toUpperCase();
         
-        // Design Orizzontale "Ticket" per la lista completa
+        // CARD IDENTICA A QUELLA DELLO SLIDER MA ADATTATA ALLA GRIGLIA
+        // Usa w-full per riempire la colonna della griglia, ma mantiene altezza fissa 400px
         const item = `
-        <div class="flex gap-4 p-4 bg-white border border-stone-200 rounded-2xl hover:border-bronze-400 transition-all cursor-pointer group items-start shadow-sm hover:shadow-md" onclick="openModal('${e.id}')">
-            <div class="w-20 h-28 shrink-0 rounded-lg bg-stone-200 overflow-hidden relative shadow-inner">
-                <img src="${e.img}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-            </div>
-            <div class="flex-1 min-w-0 py-1">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="bg-stone-100 text-stone-600 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider">${e.cat}</span>
-                    <span class="text-bronze-500 text-[10px] font-bold uppercase tracking-widest">${dateStr}</span>
+        <div class="w-full h-[400px] relative rounded-2xl overflow-hidden group cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-500 bg-stone-900 border border-stone-200" onclick="openModal('${e.id}')">
+            <img src="${e.img}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-100">
+            <div class="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-900/60 to-transparent opacity-90"></div>
+            <div class="absolute top-4 right-4 bg-white/20 backdrop-blur border border-white/20 px-3 py-1 rounded-full text-[9px] font-bold uppercase text-white tracking-widest shadow-sm">${e.cat}</div>
+            <div class="absolute bottom-0 left-0 w-full p-6 text-white transition-all duration-500 group-hover:translate-y-0">
+                <div class="flex items-start gap-3 mb-2 text-bronze-400">
+                    <div class="flex flex-col items-center leading-none border-r border-white/30 pr-3"><span class="text-3xl font-serif font-bold text-white">${day}</span><span class="text-[9px] uppercase tracking-widest text-white/80">${month}</span></div>
+                    <div class="flex flex-col justify-center gap-1">
+                        <div class="flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold text-white/90"><i data-lucide="clock" class="w-3 h-3"></i> ${e.time}</div>
+                        <div class="flex items-center gap-1 text-[9px] uppercase tracking-wider text-stone-300 line-clamp-1"><i data-lucide="map-pin" class="w-3 h-3"></i> ${e.loc}</div>
+                    </div>
                 </div>
-                <h4 class="text-stone-900 font-serif text-lg leading-tight group-hover:text-bronze-600 transition-colors line-clamp-1 mb-1">${e.title}</h4>
-                <p class="text-xs text-stone-500 italic line-clamp-1 mb-2">${e.subtitle || e.organizer}</p>
-                <div class="flex items-center gap-3 text-xs text-stone-400 border-t border-stone-100 pt-2 mt-1">
-                    <span class="flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3 text-bronze-400"></i> ${e.loc}</span>
-                    <span class="flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3 text-bronze-400"></i> ${e.time}</span>
+                <h3 class="text-xl font-serif leading-tight mb-1 group-hover:text-bronze-400 transition-colors line-clamp-2 drop-shadow-md">${e.title}</h3>
+                ${e.subtitle ? `<p class="text-xs text-stone-300 font-light italic line-clamp-1 mb-2">${e.subtitle}</p>` : ''}
+                <div class="h-0 opacity-0 group-hover:h-auto group-hover:opacity-100 transition-all duration-500 overflow-hidden">
+                    <p class="text-xs text-stone-300 font-light mb-3 line-clamp-2 border-t border-white/10 pt-2">${e.desc}</p>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-bronze-400 border-b border-bronze-400/50 pb-0.5">Leggi tutto</span>
                 </div>
             </div>
         </div>`;
         grid.insertAdjacentHTML('beforeend', item);
     });
+    
     grid.classList.remove('hidden');
     document.getElementById('load-more-btn').classList.add('hidden');
     if(window.lucide) window.lucide.createIcons();
@@ -232,6 +239,7 @@ window.showAllEvents = () => {
 window.openModal = (baseId) => {
     let content = {};
     const evt = allEvents.find(e => e.id === baseId);
+    
     if (evt) {
         const d = new Date(evt.dateStr);
         const fullDate = d.toLocaleDateString('it-IT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -245,14 +253,17 @@ window.openModal = (baseId) => {
             subtitle: "Territorio & Cultura", category: "Info", time: "Sempre aperto", location: "Avigliano Umbro", organizer: "Comune di Avigliano Umbro"
         };
     }
+    
     if(document.getElementById('modal-title')) {
         document.getElementById('modal-title').innerHTML = content.title;
         document.getElementById('modal-subtitle').innerHTML = content.subtitle;
-        document.getElementById('modal-desc').innerHTML = content.desc;
+        document.getElementById('modal-desc').innerHTML = content.desc.replace(/\n/g, '<br>');
         document.getElementById('modal-category').innerHTML = content.category;
+        
         const timeEl = document.getElementById('modal-time'); if(timeEl) timeEl.innerHTML = content.time;
         const locEl = document.getElementById('modal-location'); if(locEl) locEl.innerHTML = content.location;
         const orgEl = document.getElementById('modal-organizer'); if(orgEl) orgEl.innerHTML = content.organizer;
+        
         document.getElementById('modal-img').src = content.img || 'https://via.placeholder.com/800x600';
         document.getElementById('info-modal').classList.remove('hidden');
         document.body.style.overflow = 'hidden';
@@ -264,14 +275,9 @@ window.closeModal = () => {
     document.body.style.overflow = '';
 };
 
-// INIT
 document.addEventListener('DOMContentLoaded', () => {
     initCMS();
     initEvents();
     const revealElements = document.querySelectorAll('.reveal');
     revealElements.forEach(el => observer.observe(el));
-});
-        }, {threshold: 0.1});
-        revealElements.forEach(el => obs.observe(el));
-    }
 });

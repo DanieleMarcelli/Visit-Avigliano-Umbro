@@ -1,182 +1,29 @@
-<!DOCTYPE html>
-<html lang="it" class="scroll-smooth">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Il Cammino | Visit Avigliano Umbro</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: { paper: '#F2F0EB', ink: '#05201A', forest: '#1A3C34', gold: '#D4AF37', stone: '#8C8C8C' },
-            fontFamily: { sans: ['Barlow', 'sans-serif'], serif: ['Playfair Display', 'serif'] }
-          }
-        }
-      }
-    </script>
-    <style>
-        .hide-scroll::-webkit-scrollbar { display: none; }
-        .bg-grid { background-size: 40px 40px; background-image: linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px); }
-        .bg-forest-radial { background: radial-gradient(circle at 50% 0%, #1A3C34 0%, #05201A 70%); }
-        .reveal { opacity: 0; transform: translateY(30px); transition: all 1s; }
-        .reveal.active { opacity: 1; transform: translateY(0); }
-        .form-input { width: 100%; background: #fff; border: 1px solid #ddd; padding: 1rem; color: #1a1a1a; }
-        .form-input:focus { outline: none; border-color: #D4AF37; }
-    </style>
-</head>
-<body class="bg-paper text-ink font-sans selection:bg-gold selection:text-white">
+<section class="relative h-[60vh] min-h-[550px] w-full overflow-hidden flex items-center justify-center px-6 pt-28"> 
+        <div data-content-id="home_hero_bg" class="absolute inset-0 z-0 bg-cover bg-center"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/20 to-transparent z-10"></div>
+        <div class="absolute top-0 left-12 h-full w-[1px] bg-white/10 z-20 hidden md:block"></div>
+        <div class="absolute top-0 right-12 h-full w-[1px] bg-white/10 z-20 hidden md:block"></div>
 
-    <nav class="fixed top-0 w-full z-50 bg-forest/95 backdrop-blur border-b border-white/10 h-20 md:h-24 flex items-center justify-between px-6 transition-all shadow-lg">
-        <a href="index.html" class="flex items-center gap-4 group">
-            <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white p-[2px] shadow-md border border-gold/30 group-hover:scale-105 transition-transform shrink-0">
-                <div class="w-full h-full rounded-full bg-forest overflow-hidden flex items-center justify-center">
-                    <img id="nav_logo" data-content-id="nav_logo" src="" class="w-full h-full object-cover opacity-0 transition-opacity">
-                </div>
-            </div>
-            <div class="flex flex-col items-start justify-center">
-                <a href="index.html#eventi-section" class="bg-gold text-ink px-3 py-[2px] rounded-[2px] text-[8px] md:text-[10px] font-bold uppercase tracking-widest mb-1 shadow-sm whitespace-nowrap hover:bg-white transition-colors animate-pulse">SCOPRI GLI EVENTI</a>
-                <span class="text-xl md:text-2xl font-serif text-white leading-none tracking-wide group-hover:text-gold transition-colors">Visit Avigliano</span>
-            </div>
-        </a>
-        <div class="hidden md:flex items-center gap-10 text-xs font-bold uppercase tracking-widest text-white/80">
-            <a href="index.html" class="hover:text-white transition relative group py-2">Home<span class="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span></a>
-            <a href="index.html#eventi-section" class="hover:text-white transition relative group py-2">Eventi<span class="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span></a>
-            <a href="index.html#territorio" class="hover:text-white transition relative group py-2">Borghi<span class="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span></a>
-            <a href="#" class="flex items-center gap-2 bg-gold text-ink border border-gold px-6 py-3 rounded-full hover:bg-white hover:border-white transition shadow-[0_0_20px_rgba(212,175,55,0.3)]"><i data-lucide="compass" class="w-4 h-4"></i> Cammino</a>
-        </div>
-        <a href="index.html" class="md:hidden text-white hover:text-gold transition p-2"><i data-lucide="arrow-left" class="w-8 h-8"></i></a>
-    </nav>
-
-    <section class="h-[60vh] relative flex items-center justify-center overflow-hidden bg-forest-radial text-white pt-28">
-        <div data-content-id="cammino_page_hero_bg" class="absolute inset-0 bg-cover bg-center opacity-60"></div>
-        <div class="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-transparent"></div>
-        <div class="relative z-10 text-center px-6 max-w-4xl reveal active">
-            <span class="border border-white/30 px-4 py-1 rounded-full text-[10px] uppercase tracking-[0.3em] mb-6 inline-block">Itinerario 01</span>
-            <h1 data-content-id="cammino_page_hero_title" class="text-6xl md:text-8xl font-serif mb-6">...</h1>
-            <p data-content-id="cammino_page_hero_desc" class="text-xl font-light text-stone">...</p>
-        </div>
-    </section>
-
-    <div class="bg-ink text-white border-b border-white/10">
-        <div class="max-w-7xl mx-auto grid grid-cols-3 divide-x divide-white/10 text-center py-8">
-            <div><span class="block text-4xl font-serif text-gold">80<span class="text-sm ml-1 text-stone">km</span></span><span class="text-[10px] uppercase tracking-widest text-stone">Lunghezza</span></div>
-            <div><span class="block text-4xl font-serif text-gold">5<span class="text-sm ml-1 text-stone">Borghi</span></span><span class="text-[10px] uppercase tracking-widest text-stone">Attraversati</span></div>
-            <div><span class="block text-4xl font-serif text-gold">1.2<span class="text-sm ml-1 text-stone">km</span></span><span class="text-[10px] uppercase tracking-widest text-stone">Dislivello</span></div>
-        </div>
-    </div>
-
-    <section class="py-24 px-6 max-w-7xl mx-auto grid lg:grid-cols-2 gap-16">
-        <div class="reveal">
-            <h2 data-content-id="cammino_intro_title" class="text-4xl font-serif mb-8">...</h2>
-            <div class="prose prose-lg text-stone"><p data-content-id="cammino_intro_desc">...</p></div>
+        <div class="relative z-30 w-full max-w-4xl mx-auto text-center reveal">
             
-            <div class="mt-16 space-y-0 relative border-l-2 border-ink/10 ml-3">
-                <div class="pl-10 pb-12 relative">
-                    <div class="absolute -left-[9px] top-0 w-4 h-4 bg-gold rounded-full border-4 border-paper"></div>
-                    <span class="text-[10px] uppercase font-bold text-gold tracking-widest mb-1 block">Tappa 01</span>
-                    <h4 data-content-id="cammino_tappa1_title" class="text-xl font-serif mb-2">...</h4>
-                    <p data-content-id="cammino_tappa1_desc" class="text-sm text-stone">...</p>
-                </div>
-                <div class="pl-10 pb-12 relative">
-                    <div class="absolute -left-[9px] top-0 w-4 h-4 bg-ink rounded-full border-4 border-paper"></div>
-                    <span class="text-[10px] uppercase font-bold text-stone tracking-widest mb-1 block">Tappa 02</span>
-                    <h4 data-content-id="cammino_tappa2_title" class="text-xl font-serif mb-2">...</h4>
-                    <p data-content-id="cammino_tappa2_desc" class="text-sm text-stone">...</p>
-                </div>
-                <div class="pl-10 pb-12 relative">
-                    <div class="absolute -left-[9px] top-0 w-4 h-4 bg-ink rounded-full border-4 border-paper"></div>
-                    <span class="text-[10px] uppercase font-bold text-stone tracking-widest mb-1 block">Tappa 03</span>
-                    <h4 data-content-id="cammino_tappa3_title" class="text-xl font-serif mb-2">...</h4>
-                    <p data-content-id="cammino_tappa3_desc" class="text-sm text-stone">...</p>
-                </div>
-                <div class="pl-10 relative">
-                    <div class="absolute -left-[9px] top-0 w-4 h-4 bg-gold rounded-full border-4 border-paper"></div>
-                    <span class="text-[10px] uppercase font-bold text-stone tracking-widest mb-1 block">Tappa 04</span>
-                    <h4 data-content-id="cammino_tappa4_title" class="text-xl font-serif mb-2">...</h4>
-                    <p data-content-id="cammino_tappa4_desc" class="text-sm text-stone">...</p>
-                </div>
+            <div class="mb-8 flex justify-center">
+                <span data-content-id="home_hero_subtitle" 
+                      class="inline-block px-5 md:px-8 py-2 md:py-3 rounded-full bg-white/10 backdrop-blur-md border border-gold/60 text-gold text-[10px] md:text-sm font-bold tracking-widest md:tracking-[0.3em] uppercase shadow-[0_0_25px_rgba(212,175,55,0.2)] hover:bg-gold hover:text-ink transition-all duration-500 cursor-default max-w-full whitespace-normal text-center">
+                    ...
+                </span>
             </div>
-        </div>
 
-        <div class="reveal sticky top-24 h-fit">
-            <div class="border-2 border-ink p-2 shadow-[10px_10px_0px_rgba(0,0,0,0.1)]">
-                <iframe frameBorder="0" scrolling="no" src="https://it.wikiloc.com/wikiloc/spatialArtifacts.do?event=view&id=201301484&measures=on&title=on&near=on&images=on&maptype=M" width="100%" height="600px" class="grayscale hover:grayscale-0 transition-all duration-700"></iframe>
-            </div>
-        </div>
-    </section>
-
-    <section class="bg-forest-radial text-white py-24">
-        <div class="max-w-4xl mx-auto px-6">
-            <div class="text-center mb-16">
-                <span class="text-gold text-xs font-bold tracking-[0.3em] uppercase block mb-4">Ufficio Credenziali</span>
-                <h2 class="text-5xl font-serif">Richiedi il Passaporto</h2>
-            </div>
+            <h1 data-content-id="home_hero_title" class="text-5xl md:text-8xl font-serif text-white leading-[0.9] tracking-tight mb-8 drop-shadow-2xl">
+                Visit Avigliano
+            </h1>
             
-            <form action="https://formsubmit.co/comunediaviglianoumbro@gmail.com" method="POST" class="bg-white text-ink p-12 shadow-2xl relative">
-                <div class="absolute top-0 right-0 w-8 h-8 bg-gold triangle"></div>
-                <input type="hidden" name="_next" value="https://visitaviglianoumbro.it/cammino.html?status=success">
-                
-                <div class="grid md:grid-cols-2 gap-8 mb-8">
-                    <div>
-                        <label class="block text-xs font-bold uppercase mb-2">Nome</label>
-                        <input type="text" name="Nome" required class="form-input border-2 border-ink/10 focus:border-gold">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase mb-2">Cognome</label>
-                        <input type="text" name="Cognome" required class="form-input border-2 border-ink/10 focus:border-gold">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase mb-2">Email</label>
-                        <input type="email" name="Email" required class="form-input border-2 border-ink/10 focus:border-gold">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase mb-2">Data Partenza</label>
-                        <input type="date" name="Data" required class="form-input border-2 border-ink/10 focus:border-gold">
-                    </div>
-                </div>
-                
-                <div class="mb-8">
-                    <label class="block text-xs font-bold uppercase mb-4">Modalità</label>
-                    <div class="flex gap-4">
-                        <label class="flex items-center gap-2 cursor-pointer bg-paper px-6 py-3 border border-transparent hover:border-gold transition">
-                            <input type="radio" name="Tipo" value="Piedi" checked> A Piedi
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer bg-paper px-6 py-3 border border-transparent hover:border-gold transition">
-                            <input type="radio" name="Tipo" value="Bici"> In Bici
-                        </label>
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-between border-t border-ink/10 pt-8">
-                    <label class="flex items-center gap-2 text-xs">
-                        <input type="checkbox" required> Accetto il trattamento dati
-                    </label>
-                    <button type="submit" class="bg-ink text-white px-10 py-4 font-bold uppercase tracking-widest text-xs hover:bg-gold transition-colors">Invia Richiesta</button>
-                </div>
-            </form>
+            <p data-content-id="home_hero_desc" class="text-lg md:text-xl text-white/90 leading-relaxed max-w-2xl mx-auto font-light mb-10">
+                ...
+            </p>
+            
+            <div class="flex flex-col sm:flex-row justify-center gap-6">
+                <button onclick="document.getElementById('eventi-section').scrollIntoView({behavior: 'smooth'})" class="px-8 py-4 bg-white text-ink font-bold uppercase tracking-widest text-xs hover:bg-gold transition-colors shadow-lg">Programma</button>
+                <a href="cammino.html" class="px-8 py-4 border border-white/30 text-white font-bold uppercase tracking-widest text-xs hover:border-gold hover:text-gold transition-colors">Esplora</a>
+            </div>
         </div>
     </section>
-
-    <footer class="bg-forest-radial text-stone py-8 text-center text-xs border-t border-white/10">
-        &copy; 2025 Visit Avigliano Umbro
-    </footer>
-
-    <script src="script.js"></script>
-    <script>
-        const observer = new IntersectionObserver((e)=>{e.forEach(t=>{t.isIntersecting&&t.target.classList.add("active")})},{threshold:.1});
-        document.querySelectorAll(".reveal").forEach(e=>observer.observe(e));
-        
-        // Carica logo anche qui
-        document.addEventListener('DOMContentLoaded', () => {
-            const logo = document.getElementById('nav_logo');
-            if(logo && window.cmsData && window.cmsData['nav_logo']) {
-                logo.src = window.cmsData['nav_logo'].img;
-                logo.classList.remove('opacity-0');
-            }
-        });
-    </script>
-</body>
-</html>

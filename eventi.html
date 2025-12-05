@@ -7,6 +7,8 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -36,32 +38,49 @@
 
     <style>
         .hide-scroll::-webkit-scrollbar { display: none; }
-        .bg-grid { background-size: 80px 80px; background-image: linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px); }
-        .bg-forest-radial { background: radial-gradient(circle at 50% 0%, #1A3C34 0%, #05201A 70%); }
-        .reveal { opacity: 0; transform: translateY(50px); transition: all 1s; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .bg-grid {
+            background-size: 80px 80px;
+            background-image: linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px), 
+                              linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px);
+        }
+
+        .bg-forest-radial {
+            background: radial-gradient(circle at 50% 0%, #1A3C34 0%, #05201A 70%);
+        }
+
+        .reveal { opacity: 0; transform: translateY(50px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
         .reveal.active { opacity: 1; transform: translateY(0); }
-        .zoom-img { transition: transform 1.5s; } .group:hover .zoom-img { transform: scale(1.1); }
+        .reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal-delay-2 { transition-delay: 0.2s; }
+        
+        .zoom-img { transition: transform 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .group:hover .zoom-img { transform: scale(1.1); }
     </style>
 </head>
 <body class="bg-paper text-ink font-sans selection:bg-gold selection:text-white overflow-x-hidden">
 
-    <nav class="fixed top-0 w-full z-50 bg-forest/95 backdrop-blur border-b border-white/10 h-20 md:h-24 flex items-center justify-between px-6 transition-all shadow-lg">
-        <a href="index.html" class="flex items-center gap-4 group">
-            <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white p-[2px] shadow-md border border-gold/30 group-hover:scale-105 transition-transform shrink-0">
+    <nav class="fixed top-0 w-full z-50 bg-forest/95 backdrop-blur border-b border-white/10 h-20 flex items-center justify-between px-6 transition-all shadow-lg">
+        <a href="index.html" class="flex items-center gap-3 group">
+            <div class="w-10 h-10 rounded-full bg-white p-[2px] shadow-md border border-gold/30 group-hover:scale-105 transition-transform shrink-0">
                 <div class="w-full h-full rounded-full bg-forest overflow-hidden flex items-center justify-center">
                     <img id="nav_logo" data-content-id="nav_logo" src="" class="w-full h-full object-cover opacity-0 transition-opacity">
                 </div>
             </div>
             <div class="flex flex-col items-start justify-center">
-                <a href="eventi.html" class="bg-gold text-ink px-3 py-[2px] rounded-[2px] text-[8px] md:text-[10px] font-bold uppercase tracking-widest mb-1 shadow-sm whitespace-nowrap hover:bg-white transition-colors">SCOPRI GLI EVENTI</a>
-                <span class="text-xl md:text-2xl font-serif text-white leading-none tracking-wide group-hover:text-gold transition-colors">Visit Avigliano</span>
+                <a href="eventi.html" class="bg-gold text-ink px-2 py-[1px] rounded text-[8px] md:text-[10px] font-bold uppercase tracking-widest mb-1 shadow-sm whitespace-nowrap hover:bg-white transition-colors">
+                    SCOPRI GLI EVENTI
+                </a>
+                <span class="text-xl font-serif text-white leading-none tracking-wide group-hover:text-gold transition-colors">Visit Avigliano</span>
             </div>
         </a>
-        <div class="hidden md:flex items-center gap-10 text-xs font-bold uppercase tracking-widest text-white/80">
+        <div class="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-widest text-white/80">
             <a href="index.html" class="hover:text-white transition relative group py-2">Home<span class="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span></a>
             <a href="eventi.html" class="text-gold relative group py-2">Eventi<span class="absolute bottom-0 left-0 w-full h-[1px] bg-gold"></span></a>
+            <a href="index.html#natura" class="hover:text-white transition relative group py-2">Natura<span class="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span></a>
             <a href="index.html#territorio" class="hover:text-white transition relative group py-2">Borghi<span class="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span></a>
-            <a href="cammino.html" class="flex items-center gap-2 bg-gold text-ink border border-gold px-6 py-3 rounded-full hover:bg-white hover:border-white transition shadow-[0_0_20px_rgba(212,175,55,0.3)]"><i data-lucide="compass" class="w-4 h-4"></i> Cammino</a>
+            <a href="cammino.html" class="flex items-center gap-2 bg-gold text-ink border border-gold px-5 py-2 rounded-full hover:bg-white hover:border-white transition shadow-[0_0_15px_rgba(212,175,55,0.3)]"><i data-lucide="compass" class="w-4 h-4"></i> Cammino</a>
         </div>
         <button onclick="document.getElementById('mobile-menu').classList.remove('hidden')" class="md:hidden text-white hover:text-gold transition p-2"><i data-lucide="menu" class="w-8 h-8"></i></button>
     </nav>
@@ -70,6 +89,7 @@
         <button onclick="document.getElementById('mobile-menu').classList.add('hidden')" class="absolute top-6 right-6 text-white"><i data-lucide="x" class="w-8 h-8"></i></button>
         <a href="index.html" class="text-5xl font-serif hover:text-gold">Home</a>
         <a href="eventi.html" class="text-5xl font-serif text-gold">Eventi</a>
+        <a href="index.html#natura" class="text-5xl font-serif hover:text-gold">Natura</a>
         <a href="index.html#territorio" class="text-5xl font-serif hover:text-gold">Borghi</a>
         <a href="cammino.html" class="text-5xl font-serif hover:text-gold">Il Cammino</a>
     </div>
@@ -80,8 +100,8 @@
         
         <div class="relative z-30 w-full max-w-4xl mx-auto text-center reveal active">
             <span class="inline-block border border-white/30 px-4 py-1 rounded-full text-[10px] text-white uppercase tracking-[0.3em] mb-6">Programma Ufficiale</span>
-            <h1 data-content-id="eventi_page_hero_title" class="text-5xl md:text-7xl font-serif text-white mb-6 drop-shadow-2xl">...</h1>
-            <p data-content-id="eventi_page_hero_desc" class="text-lg text-white/90 font-light max-w-2xl mx-auto">...</p>
+            <h1 data-content-id="eventi_page_hero_title" class="text-5xl md:text-7xl font-serif text-white mb-6 drop-shadow-2xl">Il Ritmo del Borgo</h1>
+            <p data-content-id="eventi_page_hero_desc" class="text-lg text-white/90 font-light max-w-2xl mx-auto">Tutti gli appuntamenti, le sagre e gli spettacoli nel territorio.</p>
         </div>
     </section>
 
@@ -100,15 +120,16 @@
         </div>
     </section>
 
-    <footer class="bg-forest-radial pt-24 pb-8 border-t border-white/10 text-stone">
+    <footer id="contatti" class="bg-forest-radial pt-24 pb-8 border-t border-white/10 text-stone">
         <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
             <div class="col-span-1 md:col-span-2">
                 <img data-content-id="nav_logo" src="" class="w-16 h-16 object-contain mb-6 opacity-0 transition-opacity bg-white p-2 rounded-full shadow-lg">
                 <span class="text-3xl font-serif block mb-6 text-white">Visit Avigliano</span>
                 <p data-content-id="footer_desc" class="text-stone max-w-sm mb-6">...</p>
+                <p data-content-id="footer_address" class="font-bold text-xs uppercase tracking-widest text-white/50">...</p>
             </div>
             <div>
-                <h4 class="font-bold text-xs uppercase tracking-widest mb-6 border-b border-white/10 pb-2 text-gold">Link Rapidi</h4>
+                <h4 class="font-bold text-xs uppercase tracking-widest mb-6 border-b border-white/10 pb-2 text-gold">Navigazione</h4>
                 <ul class="space-y-4 text-sm text-stone">
                     <li><a href="index.html" class="hover:text-gold">Home</a></li>
                     <li><a href="cammino.html" class="hover:text-gold">Il Cammino</a></li>
@@ -117,11 +138,14 @@
             <div>
                 <h4 class="font-bold text-xs uppercase tracking-widest mb-6 border-b border-white/10 pb-2 text-gold">Contatti</h4>
                 <ul class="space-y-4 text-sm text-stone">
-                    <li data-content-id="contact_email">...</li>
+                    <li data-content-id="contact_email" class="break-all">...</li>
+                    <li data-content-id="contact_phone">...</li>
                 </ul>
             </div>
         </div>
-        <div class="text-center text-[10px] uppercase font-bold text-white/30">&copy; 2025 Visit Avigliano Umbro</div>
+        <div class="text-center text-[10px] uppercase font-bold text-white/30">
+            &copy; 2025 Comune di Avigliano Umbro - Custodi del Tempo
+        </div>
     </footer>
 
     <div id="info-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -143,6 +167,20 @@
             </div>
         </div>
     </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Init specifico per la pagina eventi
+        document.addEventListener('DOMContentLoaded', () => {
+            const logo = document.getElementById('nav_logo');
+            if(logo && window.cmsData && window.cmsData['nav_logo']) {
+                logo.src = window.cmsData['nav_logo'].img;
+                logo.classList.remove('opacity-0');
+            }
+        });
+    </script>
+</body>
+</html>
 
     <script src="script.js"></script>
 </body>

@@ -118,7 +118,7 @@ function renderFilters() {
     if(!container) return;
     const categories = ['Tutti', ...new Set(allEvents.map(e => e.cat).filter(c => c))];
     container.innerHTML = categories.map(cat => `
-        <button onclick="filterEvents('${cat}')" class="filter-btn px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap ${cat === currentCategory ? 'bg-ink text-white border-ink' : 'bg-white text-stone-600 border-stone-200 hover:border-gold'}">${cat}</button>
+        <button onclick="filterEvents('${cat}')" class="filter-btn px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap ${cat === currentCategory ? 'bg-stone-900 text-white border-stone-900' : 'bg-white text-stone-600 border-stone-200 hover:border-bronze-400'}">${cat}</button>
     `).join('');
 }
 
@@ -126,76 +126,43 @@ window.filterEvents = (category) => {
     currentCategory = category;
     filteredEvents = category === 'Tutti' ? allEvents : allEvents.filter(e => e.cat === category);
     document.querySelectorAll('.filter-btn').forEach(btn => {
-        if(btn.innerText === category) btn.className = "filter-btn px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap bg-ink text-white border-ink";
-        else btn.className = "filter-btn px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap bg-white text-stone-600 border-stone-200 hover:border-gold";
+        if(btn.innerText === category) btn.className = "filter-btn px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap bg-stone-900 text-white border-stone-900";
+        else btn.className = "filter-btn px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap bg-white text-stone-600 border-stone-200 hover:border-bronze-400";
     });
     renderEvents();
 };
 
-// RENDER UNIFICATO (HOME + PAGE)
-function renderEvents() {
-    const sliderContainer = document.getElementById('events-slider'); 
-    const gridContainer = document.getElementById('events-page-grid'); 
-    
-    // RENDER SLIDER (HOME)
-    if (sliderContainer) {
-        sliderContainer.innerHTML = '';
-        const displayEvents = filteredEvents.slice(0, 6);
-        
-        if (displayEvents.length === 0) {
-            sliderContainer.innerHTML = '<div class="w-full text-center text-stone-400 py-10 font-serif italic">Nessun evento trovato.</div>';
-        } else {
-            displayEvents.forEach(e => {
-                sliderContainer.insertAdjacentHTML('beforeend', createCardHTML(e));
-            });
-        }
-        const loadBtn = document.getElementById('load-more-btn');
-        if(loadBtn) loadBtn.classList.toggle('hidden', filteredEvents.length <= 6);
-    }
-
-    // RENDER GRIGLIA (PAGINA EVENTI)
-    if (gridContainer) {
-        gridContainer.innerHTML = '';
-        if (filteredEvents.length === 0) {
-            gridContainer.innerHTML = '<div class="col-span-full text-center py-20 text-stone-500 font-serif text-xl">Nessun evento in questa categoria.</div>';
-        } else {
-            filteredEvents.forEach(e => {
-                gridContainer.insertAdjacentHTML('beforeend', createCardHTML(e, true)); 
-            });
-        }
-    }
-    
-    if(window.lucide) window.lucide.createIcons();
-}
-
-// GENERATORE CARD (CORRETTO PER VISIBILITA' TESTI)
+// --- GENERATORE CARD UNIFICATO (IL CUORE DELLA SOLUZIONE) ---
+// Questa funzione crea SEMPRE card verticali 7:10 scure e corrette
 function createCardHTML(e, isGrid = false) {
     const d = new Date(e.dateStr);
     const day = d.getDate();
     const month = d.toLocaleString('it-IT', { month: 'short' }).toUpperCase();
     
-    const widthClass = isGrid ? 'w-full' : 'w-[280px] shrink-0 snap-center';
+    // Se è griglia, width è 100% della colonna. Se è slider, width è fissa.
+    // L'altezza h-[400px] è fissa per garantire il formato verticale.
+    const containerClass = isGrid ? 'w-full h-[400px]' : 'w-[280px] h-[400px] shrink-0 snap-center';
     
     return `
-    <div class="${widthClass} h-[400px] relative rounded-2xl overflow-hidden group cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-500 bg-ink border border-white/20 mx-auto" onclick="openModal('${e.id}')">
+    <div class="${containerClass} relative rounded-2xl overflow-hidden group cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-500 bg-stone-900 border border-white/20 mx-auto" onclick="openModal('${e.id}')">
         
         <img src="${e.img}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-100">
         
-        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent opacity-90"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/60 to-transparent opacity-90"></div>
         
-        <div class="absolute top-4 right-4 bg-gold text-ink border border-gold px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest shadow-sm">
+        <div class="absolute top-4 right-4 bg-gold text-ink border border-gold px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest shadow-sm z-20">
             ${e.cat}
         </div>
 
-        <div class="absolute bottom-0 left-0 w-full p-6 text-white transition-all duration-500 transform translate-y-[20px] group-hover:translate-y-0">
+        <div class="absolute bottom-0 left-0 w-full p-6 text-white transition-all duration-500 transform translate-y-[10px] group-hover:translate-y-0 z-20">
             
             <div class="flex items-start gap-3 mb-2 text-gold">
                 <div class="flex flex-col items-center leading-none border-r border-white/30 pr-3">
                     <span class="text-3xl font-serif font-bold text-white">${day}</span>
-                    <span class="text-[9px] uppercase tracking-widest text-white/90">${month}</span>
+                    <span class="text-[9px] uppercase tracking-widest text-white/80">${month}</span>
                 </div>
                 <div class="flex flex-col justify-center gap-1">
-                    <div class="flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold text-white">
+                    <div class="flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold text-white/90">
                         <i data-lucide="clock" class="w-3 h-3 text-gold"></i> ${e.time}
                     </div>
                     <div class="flex items-center gap-1 text-[9px] uppercase tracking-wider text-stone-300 line-clamp-1">
@@ -205,7 +172,7 @@ function createCardHTML(e, isGrid = false) {
             </div>
 
             <h3 class="text-xl font-serif leading-tight mb-1 group-hover:text-gold transition-colors line-clamp-2 drop-shadow-md text-white">${e.title}</h3>
-            ${e.subtitle ? `<p class="text-xs text-stone-200 font-light italic line-clamp-1 mb-2">${e.subtitle}</p>` : ''}
+            ${e.subtitle ? `<p class="text-xs text-stone-300 font-light italic line-clamp-1 mb-2">${e.subtitle}</p>` : ''}
             
             <div class="h-0 opacity-0 group-hover:h-auto group-hover:opacity-100 transition-all duration-500 overflow-hidden">
                 <p class="text-xs text-stone-300 font-light mb-3 line-clamp-2 border-t border-white/20 pt-2">${e.desc}</p>
@@ -214,6 +181,55 @@ function createCardHTML(e, isGrid = false) {
         </div>
     </div>`;
 }
+
+// RENDER (Gestisce Home e Pagina Eventi)
+function renderEvents() {
+    const sliderContainer = document.getElementById('events-slider'); // Home Slider
+    const gridContainer = document.getElementById('events-page-grid'); // Eventi Page
+    const homeGridContainer = document.getElementById('all-events-grid'); // Home Expanded
+    
+    // HOME SLIDER
+    if (sliderContainer) {
+        sliderContainer.innerHTML = '';
+        const displayEvents = filteredEvents.slice(0, 6);
+        if (displayEvents.length === 0) {
+            sliderContainer.innerHTML = '<div class="w-full text-center text-stone-400 py-10 font-serif italic">Nessun evento trovato.</div>';
+        } else {
+            displayEvents.forEach(e => sliderContainer.insertAdjacentHTML('beforeend', createCardHTML(e)));
+        }
+        
+        // Bottone "Scopri Tutti"
+        const loadBtn = document.getElementById('load-more-btn');
+        if(loadBtn) loadBtn.classList.toggle('hidden', filteredEvents.length <= 6);
+    }
+
+    // PAGINA EVENTI.HTML
+    if (gridContainer) {
+        gridContainer.innerHTML = '';
+        if (filteredEvents.length === 0) {
+            gridContainer.innerHTML = '<div class="col-span-full text-center py-20 text-stone-500 font-serif text-xl">Nessun evento in questa categoria.</div>';
+        } else {
+            filteredEvents.forEach(e => gridContainer.insertAdjacentHTML('beforeend', createCardHTML(e, true)));
+        }
+    }
+}
+
+// RENDER ESPANSIONE HOME (VEDI TUTTI)
+window.showAllEvents = () => {
+    const grid = document.getElementById('all-events-grid');
+    if(!grid) return;
+    grid.innerHTML = '';
+    
+    const remaining = filteredEvents.slice(6);
+    remaining.forEach(e => {
+        // Qui usiamo createCardHTML(e, true) per generare card VERTICALI anche nella griglia espansa
+        grid.insertAdjacentHTML('beforeend', createCardHTML(e, true)); 
+    });
+    
+    grid.classList.remove('hidden');
+    document.getElementById('load-more-btn').classList.add('hidden');
+    if(window.lucide) window.lucide.createIcons();
+};
 
 // MODAL
 window.openModal = (baseId) => {
@@ -261,20 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initEvents();
     const revealElements = document.querySelectorAll('.reveal');
     revealElements.forEach(el => observer.observe(el));
-});
-        document.body.style.overflow = 'hidden';
-    }
-};
-
-window.closeModal = () => {
-    document.getElementById('info-modal').classList.add('hidden');
-    document.body.style.overflow = '';
-};
-
-// INIT
-document.addEventListener('DOMContentLoaded', () => {
-    initCMS();
-    initEvents();
-    const revealElements = document.querySelectorAll('.reveal');
-    revealElements.forEach(el => observer.observe(el));
+    
+    const logo = document.getElementById('nav_logo');
+    if(logo && cmsData['nav_logo']) logo.src = cmsData['nav_logo'].img;
 });

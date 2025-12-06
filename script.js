@@ -68,14 +68,8 @@ async function initCMS() {
             const els = document.querySelectorAll(`[data-content-id="${id}"]`);
             els.forEach(el => {
                 if (imgUrl) {
-                    if (el.tagName === 'IMG') { 
-                        el.src = imgUrl; 
-                        el.onload = () => el.classList.remove('opacity-0'); 
-                        if(el.complete) el.classList.remove('opacity-0');
-                    } else { 
-                        el.style.backgroundImage = `url('${imgUrl}')`; 
-                        el.classList.remove('opacity-0'); 
-                    }
+                    if (el.tagName === 'IMG') { el.src = imgUrl; el.onload = () => el.classList.remove('opacity-0'); if(el.complete) el.classList.remove('opacity-0'); } 
+                    else { el.style.backgroundImage = `url('${imgUrl}')`; el.classList.remove('opacity-0'); }
                 }
                 if (textContent && !imgUrl) el.innerHTML = textContent;
             });
@@ -131,16 +125,14 @@ function renderFilters() {
 window.filterEvents = (category) => {
     currentCategory = category;
     filteredEvents = category === 'Tutti' ? allEvents : allEvents.filter(e => e.cat === category);
-    
     document.querySelectorAll('.filter-btn').forEach(btn => {
         if(btn.innerText === category) btn.className = "filter-btn px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap bg-stone-900 text-white border-stone-900";
         else btn.className = "filter-btn px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap bg-white text-stone-600 border-stone-200 hover:border-bronze-400";
     });
-    
     renderEvents();
 };
 
-// RENDER UNIFICATO (HOME SLIDER + PAGE GRID)
+// RENDER UNIFICATO
 function renderEvents() {
     const sliderContainer = document.getElementById('events-slider'); // Home Page Slider
     const gridContainer = document.getElementById('events-page-grid'); // Eventi Page Grid
@@ -159,18 +151,18 @@ function renderEvents() {
         }
         
         const loadBtn = document.getElementById('load-more-btn');
-        if(loadBtn) loadBtn.classList.toggle('hidden', filteredEvents.length <= 6);
+        if(loadBtn) {
+            loadBtn.classList.toggle('hidden', filteredEvents.length <= 6);
+        }
     }
 
     // SE SIAMO NELLA PAGINA EVENTI (GRIGLIA COMPLETA)
     if (gridContainer) {
         gridContainer.innerHTML = '';
-        
         if (filteredEvents.length === 0) {
             gridContainer.innerHTML = '<div class="col-span-full text-center py-20 text-stone-500 font-serif text-xl">Nessun evento in questa categoria.</div>';
         } else {
             filteredEvents.forEach(e => {
-                // Per la griglia, la card è identica ma il contenitore grid si occupa del layout
                 gridContainer.insertAdjacentHTML('beforeend', createCardHTML(e, true)); 
             });
         }
@@ -185,40 +177,23 @@ function createCardHTML(e, isGrid = false) {
     const day = d.getDate();
     const month = d.toLocaleString('it-IT', { month: 'short' }).toUpperCase();
     
-    // Se è griglia, width è 100% del container. Se è slider, width è fisso.
     const widthClass = isGrid ? 'w-full' : 'w-[280px] shrink-0 snap-center';
     
     return `
     <div class="${widthClass} h-[400px] relative rounded-2xl overflow-hidden group cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-500 bg-stone-900 border border-stone-200 mx-auto" onclick="openModal('${e.id}')">
-        
         <img src="${e.img}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-100">
-        
         <div class="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-900/60 to-transparent opacity-90"></div>
-        
-        <div class="absolute top-4 right-4 bg-white/20 backdrop-blur border border-white/20 px-3 py-1 rounded-full text-[9px] font-bold uppercase text-white tracking-widest shadow-sm">
-            ${e.cat}
-        </div>
-
+        <div class="absolute top-4 right-4 bg-white/20 backdrop-blur border border-white/20 px-3 py-1 rounded-full text-[9px] font-bold uppercase text-white tracking-widest shadow-sm">${e.cat}</div>
         <div class="absolute bottom-0 left-0 w-full p-6 text-white transition-all duration-500 transform translate-y-[20px] group-hover:translate-y-0">
-            
-            <div class="flex items-start gap-3 mb-2 text-bronze-400">
-                <div class="flex flex-col items-center leading-none border-r border-white/30 pr-3">
-                    <span class="text-3xl font-serif font-bold text-white">${day}</span>
-                    <span class="text-[9px] uppercase tracking-widest text-white/80">${month}</span>
-                </div>
+            <div class="flex items-start gap-3 mb-3 text-bronze-400">
+                <div class="flex flex-col items-center leading-none border-r border-white/30 pr-3"><span class="text-3xl font-serif font-bold text-white">${day}</span><span class="text-[9px] uppercase tracking-widest text-white/80">${month}</span></div>
                 <div class="flex flex-col justify-center gap-1">
-                    <div class="flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold text-white/90">
-                        <i data-lucide="clock" class="w-3 h-3"></i> ${e.time}
-                    </div>
-                    <div class="flex items-center gap-1 text-[9px] uppercase tracking-wider text-stone-300 line-clamp-1">
-                        <i data-lucide="map-pin" class="w-3 h-3"></i> ${e.loc}
-                    </div>
+                    <div class="flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold text-white/90"><i data-lucide="clock" class="w-3 h-3"></i> ${e.time}</div>
+                    <div class="flex items-center gap-1 text-[9px] uppercase tracking-wider text-stone-300 line-clamp-1"><i data-lucide="map-pin" class="w-3 h-3"></i> ${e.loc}</div>
                 </div>
             </div>
-
             <h3 class="text-xl font-serif leading-tight mb-1 group-hover:text-bronze-400 transition-colors line-clamp-2 drop-shadow-md">${e.title}</h3>
             ${e.subtitle ? `<p class="text-xs text-stone-300 font-light italic line-clamp-1 mb-2">${e.subtitle}</p>` : ''}
-            
             <div class="h-0 opacity-0 group-hover:h-auto group-hover:opacity-100 transition-all duration-500 overflow-hidden">
                 <p class="text-xs text-stone-300 font-light mb-3 line-clamp-2 border-t border-white/10 pt-2">${e.desc}</p>
                 <span class="text-[10px] font-bold uppercase tracking-widest text-bronze-400 border-b border-bronze-400/50 pb-0.5">Leggi tutto</span>

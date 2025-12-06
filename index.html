@@ -20,28 +20,10 @@
             colors: {
               paper: '#F8F5F2', // Neve calda (Sfondo)
               ink: '#0F291E',   // Verde Abete Notturno (Testi scuri)
-              
-              // RIMAPPATURA COLORI PER TEMA NATALIZIO
               forest: '#14382C', // Verde Bosco (Header)
-              
-              // Mappiamo 'stone' (usato da script.js) sui colori natalizi
-              stone: { 
-                  900: '#0B2018', // Sfondo Card (Verde scurissimo)
-                  800: '#14382C', 
-                  600: '#3E4E4A', // Testi secondari
-                  400: '#8C8C8C', 
-                  200: '#D1D5DB'  // Bordi
-              },
-              
-              // Mappiamo 'bronze' e 'gold' per gli accenti
-              bronze: { 
-                  400: '#D4AF37', // Oro Classico
-                  500: '#B8860B', 
-              },
-              gold: '#F59E0B', 
-
-              // Nuovo colore per accenti forti (Pulsanti/Badge)
-              christmasRed: '#A91B0D', 
+              gold: '#F59E0B',   // Oro più caldo
+              stone: '#8C8C8C', 
+              christmasRed: '#A91B0D', // NUOVO: Rosso Cardinale
             },
             fontFamily: {
               sans: ['Barlow', 'sans-serif'], 
@@ -94,6 +76,19 @@
             height: 2px;
             background-color: #A91B0D; /* Rosso Natale */
             margin: 10px auto 0;
+        }
+        
+        /* Card Styles */
+        .paper-card {
+            background: #ffffff;
+            border: 1px solid rgba(0,0,0,0.04);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .paper-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px -10px rgba(20, 56, 44, 0.15);
+            border-color: #D4AF37;
         }
     </style>
 </head>
@@ -189,17 +184,17 @@
             <a href="#territorio" class="p-12 group hover:bg-white transition-colors cursor-pointer">
                 <div class="text-christmasRed mb-4"><i data-lucide="map" class="w-8 h-8"></i></div>
                 <h3 data-content-id="card_territorio_title" class="text-2xl font-serif mb-2 group-hover:translate-x-2 transition-transform">...</h3>
-                <p data-content-id="card_territorio_desc" class="text-sm text-stone-600 leading-relaxed">...</p>
+                <p data-content-id="card_territorio_desc" class="text-sm text-stone leading-relaxed">...</p>
             </a>
             <a href="#lago" class="p-12 group hover:bg-white transition-colors cursor-pointer">
                 <div class="text-christmasRed mb-4"><i data-lucide="history" class="w-8 h-8"></i></div>
                 <h3 data-content-id="card_storia_title" class="text-2xl font-serif mb-2 group-hover:translate-x-2 transition-transform">...</h3>
-                <p data-content-id="card_storia_desc" class="text-sm text-stone-600 leading-relaxed">...</p>
+                <p data-content-id="card_storia_desc" class="text-sm text-stone leading-relaxed">...</p>
             </a>
             <a href="#tradizioni" class="p-12 group hover:bg-white transition-colors cursor-pointer">
                 <div class="text-christmasRed mb-4"><i data-lucide="utensils" class="w-8 h-8"></i></div>
                 <h3 data-content-id="card_sapori_title" class="text-2xl font-serif mb-2 group-hover:translate-x-2 transition-transform">...</h3>
-                <p data-content-id="card_sapori_desc" class="text-sm text-stone-600 leading-relaxed">...</p>
+                <p data-content-id="card_sapori_desc" class="text-sm text-stone leading-relaxed">...</p>
             </a>
         </div>
     </section>
@@ -229,7 +224,7 @@
                 <span class="h-[1px] w-12 bg-christmasRed inline-block align-middle mr-3"></span>
                 <span data-content-id="section_natura_subtitle" class="text-christmasRed text-xs font-bold tracking-[0.3em] uppercase">...</span>
                 <h2 data-content-id="section_natura_title" class="text-6xl font-serif text-ink mt-4 mb-6">...</h2>
-                <p data-content-id="section_natura_desc" class="text-stone-600 text-lg max-w-2xl mx-auto font-light leading-relaxed">...</p>
+                <p data-content-id="section_natura_desc" class="text-stone text-lg max-w-2xl mx-auto font-light leading-relaxed">...</p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 min-h-[60vh] reveal reveal-delay-1">
                 <div class="relative group overflow-hidden cursor-pointer bg-ink h-[500px]" onclick="openModal('natura_foresta')">
@@ -404,6 +399,10 @@
 
     <script src="script.js"></script>
     <script>
+        const observer = new IntersectionObserver((e)=>{e.forEach(t=>{t.isIntersecting&&t.target.classList.add("active")})},{threshold:.1});
+        document.querySelectorAll(".reveal").forEach(e=>observer.observe(e));
+        
+        // Carica logo anche qui
         document.addEventListener('DOMContentLoaded', () => {
             const logo = document.getElementById('nav_logo');
             if(logo && window.cmsData && window.cmsData['nav_logo']) {

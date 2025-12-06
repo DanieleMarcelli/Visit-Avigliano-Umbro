@@ -7,8 +7,6 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -18,19 +16,17 @@
         theme: {
           extend: {
             colors: {
-              paper: '#F2F0EB', 
-              ink: '#05201A',   
-              forest: '#1A3C34', 
-              gold: '#D4AF37',  
+              paper: '#F8F5F2', 
+              ink: '#0F291E',   
+              forest: '#14382C', 
+              gold: '#F59E0B', 
               stone: '#8C8C8C', 
+              christmasRed: '#A91B0D',
             },
             fontFamily: {
               sans: ['Barlow', 'sans-serif'], 
               serif: ['Playfair Display', 'serif'], 
             },
-            backgroundImage: {
-                'grid-pattern': "linear-gradient(to right, #E5E5E5 1px, transparent 1px), linear-gradient(to bottom, #E5E5E5 1px, transparent 1px);",
-            }
           }
         }
       }
@@ -40,188 +36,152 @@
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
         
-        .bg-grid {
-            background-size: 80px 80px;
-            background-image: linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px), 
-                              linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px);
+        .snow-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;
+            opacity: 0.4;
+            background-image: url("data:image/svg+xml,%3Csvg version='1.1' xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='2' cy='2' r='1' fill='%23ffffff' opacity='0.4'/%3E%3C/svg%3E");
+            animation: snow 40s linear infinite;
+            mix-blend-mode: overlay;
         }
 
-        .bg-forest-radial {
-            background: radial-gradient(circle at 50% 0%, #1A3C34 0%, #05201A 70%);
-        }
+        .bg-forest-radial { background: radial-gradient(circle at 50% 0%, #1A4D3E 0%, #051A12 80%); }
 
-        .reveal { opacity: 0; transform: translateY(50px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 1s; }
         .reveal.active { opacity: 1; transform: translateY(0); }
-        
-        .form-input { 
-            width: 100%; background: #fff; border: 1px solid #ddd; padding: 1rem; color: #1a1a1a; 
-            border-radius: 0.5rem;
-        }
-        .form-input:focus { outline: none; border-color: #D4AF37; }
+        .form-input { width: 100%; background: #fff; border: 1px solid #ddd; padding: 1rem; color: #1a1a1a; border-radius: 0.5rem; }
+        .form-input:focus { outline: none; border-color: #F59E0B; }
     </style>
 </head>
-<body class="bg-paper text-ink font-sans selection:bg-gold selection:text-white overflow-x-hidden">
+<body class="bg-paper text-ink font-sans selection:bg-christmasRed selection:text-white">
+
+    <div class="snow-bg"></div>
 
     <nav class="fixed top-0 w-full z-50 bg-forest/95 backdrop-blur border-b border-white/10 h-20 md:h-24 flex items-center justify-between px-6 transition-all shadow-lg">
-        
         <a href="index.html" class="flex items-center gap-4 group">
             <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white p-[2px] shadow-md border border-gold/30 group-hover:scale-105 transition-transform shrink-0">
                 <div class="w-full h-full rounded-full bg-forest overflow-hidden flex items-center justify-center">
                     <img id="nav_logo" data-content-id="nav_logo" src="" class="w-full h-full object-cover opacity-0 transition-opacity">
                 </div>
             </div>
-            
             <div class="flex flex-col items-start justify-center">
-                <a href="index.html#eventi-section" class="bg-gold text-ink px-3 py-[2px] rounded-[2px] text-[8px] md:text-[10px] font-bold uppercase tracking-widest mb-1 shadow-sm whitespace-nowrap hover:bg-white transition-colors animate-pulse">
-                    SCOPRI GLI EVENTI
-                </a>
+                <a href="eventi.html" class="bg-christmasRed text-white px-3 py-[2px] rounded-[2px] text-[8px] md:text-[10px] font-bold uppercase tracking-widest mb-1 shadow-sm whitespace-nowrap hover:bg-white hover:text-christmasRed transition-colors animate-pulse border border-christmasRed">MAGIA DEL NATALE</a>
                 <span class="text-xl md:text-2xl font-serif text-white leading-none tracking-wide group-hover:text-gold transition-colors">Visit Avigliano</span>
             </div>
         </a>
-        
         <div class="hidden md:flex items-center gap-10 text-xs font-bold uppercase tracking-widest text-white/80">
-            <a href="index.html" class="hover:text-white transition relative group py-2">
-                Home
-                <span class="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span>
-            </a>
-            <a href="index.html#eventi-section" class="hover:text-white transition relative group py-2">
-                Eventi
-                <span class="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span>
-            </a>
-            <a href="index.html#territorio" class="hover:text-white transition relative group py-2">
-                Borghi
-                <span class="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span>
-            </a>
-            <a href="#" class="flex items-center gap-2 bg-gold text-ink border border-gold px-6 py-3 rounded-full hover:bg-white hover:border-white transition shadow-[0_0_20px_rgba(212,175,55,0.3)]">
-                <i data-lucide="compass" class="w-4 h-4"></i> Cammino
-            </a>
+            <a href="index.html" class="hover:text-white transition relative group py-2">Home<span class="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span></a>
+            <a href="eventi.html" class="hover:text-white transition relative group py-2">Eventi<span class="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span></a>
+            <a href="index.html#territorio" class="hover:text-white transition relative group py-2">Borghi<span class="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span></a>
+            <a href="#" class="flex items-center gap-2 bg-gold text-ink border border-gold px-6 py-3 rounded-full hover:bg-white hover:border-white transition shadow-[0_0_20px_rgba(212,175,55,0.3)]"><i data-lucide="compass" class="w-4 h-4"></i> Cammino</a>
         </div>
-
-        <button onclick="document.getElementById('mobile-menu').classList.remove('hidden')" class="md:hidden text-white hover:text-gold transition p-2">
-            <i data-lucide="menu" class="w-8 h-8"></i>
-        </button>
+        <button onclick="document.getElementById('mobile-menu').classList.remove('hidden')" class="md:hidden text-white hover:text-gold transition p-2"><i data-lucide="menu" class="w-8 h-8"></i></button>
     </nav>
 
     <div id="mobile-menu" class="hidden fixed inset-0 z-[60] bg-forest-radial text-white flex flex-col justify-center px-10 gap-8 transition-all">
         <button onclick="document.getElementById('mobile-menu').classList.add('hidden')" class="absolute top-6 right-6 text-white"><i data-lucide="x" class="w-8 h-8"></i></button>
         <a href="index.html" class="text-5xl font-serif hover:text-gold">Home</a>
-        <a href="index.html#eventi-section" class="text-5xl font-serif hover:text-gold">Eventi</a>
+        <a href="eventi.html" class="text-5xl font-serif hover:text-gold">Eventi</a>
         <a href="index.html#territorio" class="text-5xl font-serif hover:text-gold">Borghi</a>
-        <a href="#" class="text-5xl font-serif text-gold">Il Cammino</a>
+        <a href="cammino.html" class="text-5xl font-serif text-gold">Il Cammino</a>
     </div>
 
-    <section class="relative h-[60vh] min-h-[400px] flex items-center justify-center overflow-hidden bg-forest-radial text-white pt-20">
-        <div data-content-id="cammino_page_hero_bg" class="absolute inset-0 z-0 bg-cover bg-center opacity-60"></div>
+    <section class="h-[60vh] relative flex items-center justify-center overflow-hidden bg-forest-radial text-white pt-20">
+        <div data-content-id="cammino_page_hero_bg" class="absolute inset-0 bg-cover bg-center opacity-60"></div>
         <div class="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-transparent"></div>
-        
-        <div class="relative z-20 text-center px-6 max-w-4xl reveal active">
-            <span class="border border-white/30 px-4 py-1 rounded-full text-[10px] uppercase tracking-[0.3em] mb-6 inline-block">Itinerario 01</span>
+        <div class="relative z-10 text-center px-6 max-w-4xl reveal active">
+            
+            <span class="bg-christmasRed text-white px-6 py-2 rounded-full text-[11px] font-bold uppercase tracking-[0.2em] mb-6 inline-block shadow-lg border border-white/20 animate-pulse">
+                Progetto in Attivazione
+            </span>
+
             <h1 data-content-id="cammino_page_hero_title" class="text-6xl md:text-8xl font-serif mb-6 drop-shadow-lg">...</h1>
-            <p data-content-id="cammino_page_hero_desc" class="text-xl font-light text-stone max-w-2xl mx-auto">...</p>
+            <p data-content-id="cammino_page_hero_desc" class="text-xl font-light text-stone-300 max-w-2xl mx-auto">...</p>
         </div>
     </section>
 
     <div class="bg-ink text-white border-b border-white/10">
         <div class="max-w-7xl mx-auto grid grid-cols-3 divide-x divide-white/10 text-center py-8">
-            <div>
-                <span class="block text-4xl font-serif text-gold">80<span class="text-sm ml-1 text-stone">km</span></span>
-                <span class="text-[10px] uppercase tracking-widest text-stone">Lunghezza</span>
-            </div>
-            <div>
-                <span class="block text-4xl font-serif text-gold">5<span class="text-sm ml-1 text-stone">Borghi</span></span>
-                <span class="text-[10px] uppercase tracking-widest text-stone">Attraversati</span>
-            </div>
-            <div>
-                <span class="block text-4xl font-serif text-gold">1.2<span class="text-sm ml-1 text-stone">km</span></span>
-                <span class="text-[10px] uppercase tracking-widest text-stone">Dislivello</span>
-            </div>
+            <div><span class="block text-4xl font-serif text-gold">80<span class="text-sm ml-1 text-stone-400">km</span></span><span class="text-[10px] uppercase tracking-widest text-stone-400">Lunghezza</span></div>
+            <div><span class="block text-4xl font-serif text-gold">5<span class="text-sm ml-1 text-stone-400">Borghi</span></span><span class="text-[10px] uppercase tracking-widest text-stone-400">Attraversati</span></div>
+            <div><span class="block text-4xl font-serif text-gold">1.2<span class="text-sm ml-1 text-stone-400">km</span></span><span class="text-[10px] uppercase tracking-widest text-stone-400">Dislivello</span></div>
         </div>
     </div>
 
     <section class="py-24 px-6 max-w-7xl mx-auto grid lg:grid-cols-2 gap-16">
         <div class="reveal">
             <h2 data-content-id="cammino_intro_title" class="text-4xl font-serif text-ink mb-8">...</h2>
-            <div class="prose prose-lg text-stone mb-12">
+            <div class="prose prose-lg text-stone-600 font-light mb-10">
                 <p data-content-id="cammino_intro_desc">...</p>
             </div>
             
-            <div class="mt-16 space-y-0 relative border-l-2 border-ink/10 ml-3">
+            <div class="mt-16 space-y-0 relative border-l-2 border-stone-200 ml-3">
                 <div class="pl-10 pb-12 relative">
                     <div class="absolute -left-[9px] top-0 w-4 h-4 bg-gold rounded-full border-4 border-paper"></div>
                     <span class="text-[10px] uppercase font-bold text-gold tracking-widest mb-1 block">Tappa 01</span>
-                    <h4 data-content-id="cammino_tappa1_title" class="text-xl font-serif mb-2">...</h4>
-                    <p data-content-id="cammino_tappa1_desc" class="text-sm text-stone">...</p>
+                    <h4 data-content-id="cammino_tappa1_title" class="font-serif text-xl text-ink mb-2">...</h4>
+                    <p data-content-id="cammino_tappa1_desc" class="text-sm text-stone-600">...</p>
                 </div>
                 <div class="pl-10 pb-12 relative">
                     <div class="absolute -left-[9px] top-0 w-4 h-4 bg-ink rounded-full border-4 border-paper"></div>
-                    <span class="text-[10px] uppercase font-bold text-stone tracking-widest mb-1 block">Tappa 02</span>
-                    <h4 data-content-id="cammino_tappa2_title" class="text-xl font-serif mb-2">...</h4>
-                    <p data-content-id="cammino_tappa2_desc" class="text-sm text-stone">...</p>
+                    <span class="text-[10px] uppercase font-bold text-stone-400 tracking-widest mb-1 block">Tappa 02</span>
+                    <h4 data-content-id="cammino_tappa2_title" class="font-serif text-xl text-ink mb-2">...</h4>
+                    <p data-content-id="cammino_tappa2_desc" class="text-sm text-stone-600">...</p>
                 </div>
                 <div class="pl-10 pb-12 relative">
                     <div class="absolute -left-[9px] top-0 w-4 h-4 bg-ink rounded-full border-4 border-paper"></div>
-                    <span class="text-[10px] uppercase font-bold text-stone tracking-widest mb-1 block">Tappa 03</span>
-                    <h4 data-content-id="cammino_tappa3_title" class="text-xl font-serif mb-2">...</h4>
-                    <p data-content-id="cammino_tappa3_desc" class="text-sm text-stone">...</p>
+                    <span class="text-[10px] uppercase font-bold text-stone-400 tracking-widest mb-1 block">Tappa 03</span>
+                    <h4 data-content-id="cammino_tappa3_title" class="font-serif text-xl text-ink mb-2">...</h4>
+                    <p data-content-id="cammino_tappa3_desc" class="text-sm text-stone-600">...</p>
                 </div>
                 <div class="pl-10 relative">
                     <div class="absolute -left-[9px] top-0 w-4 h-4 bg-gold rounded-full border-4 border-paper"></div>
-                    <span class="text-[10px] uppercase font-bold text-stone tracking-widest mb-1 block">Tappa 04</span>
-                    <h4 data-content-id="cammino_tappa4_title" class="text-xl font-serif mb-2">...</h4>
-                    <p data-content-id="cammino_tappa4_desc" class="text-sm text-stone">...</p>
+                    <span class="text-[10px] uppercase font-bold text-stone-400 tracking-widest mb-1 block">Tappa 04</span>
+                    <h4 data-content-id="cammino_tappa4_title" class="font-serif text-xl text-ink mb-2">...</h4>
+                    <p data-content-id="cammino_tappa4_desc" class="text-sm text-stone-600">...</p>
                 </div>
             </div>
         </div>
 
-        <div class="reveal sticky top-32 h-fit">
-            <div class="border-2 border-ink p-2 shadow-[10px_10px_0px_rgba(0,0,0,0.1)] bg-white">
+        <div class="reveal sticky top-24 h-fit">
+            <div class="border-2 border-ink p-2 shadow-[10px_10px_0px_rgba(0,0,0,0.1)]">
                 <iframe frameBorder="0" scrolling="no" src="https://it.wikiloc.com/wikiloc/spatialArtifacts.do?event=view&id=201301484&measures=on&title=on&near=on&images=on&maptype=M" width="100%" height="600px" class="grayscale hover:grayscale-0 transition-all duration-700"></iframe>
-            </div>
-            
-            <div class="mt-8 p-6 bg-paper border border-ink/5 rounded-lg">
-                <h4 class="text-xs font-bold uppercase tracking-widest mb-4 text-gold">Info Utili</h4>
-                <ul class="space-y-2 text-sm text-stone">
-                    <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-ink"></i> Percorso ad anello</li>
-                    <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-ink"></i> Segnaletica CAI presente</li>
-                    <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-ink"></i> Fonti d'acqua nelle tappe</li>
-                </ul>
             </div>
         </div>
     </section>
 
     <section class="bg-forest-radial text-white py-24">
         <div class="max-w-4xl mx-auto px-6">
-            <div class="text-center mb-16 reveal">
+            <div class="text-center mb-16">
                 <span class="text-gold text-xs font-bold tracking-[0.3em] uppercase block mb-4">Ufficio Credenziali</span>
                 <h2 class="text-5xl font-serif">Richiedi il Passaporto</h2>
             </div>
             
-            <form action="https://formsubmit.co/comunediaviglianoumbro@gmail.com" method="POST" class="bg-white text-ink p-12 shadow-2xl relative reveal reveal-delay-1 rounded-3xl">
+            <form action="https://formsubmit.co/comunediaviglianoumbro@gmail.com" method="POST" class="bg-white text-ink p-12 shadow-2xl relative rounded-3xl">
                 <div class="absolute top-0 right-0 w-16 h-16 bg-gold rounded-bl-[3rem]"></div>
                 
                 <input type="hidden" name="_next" value="https://visitaviglianoumbro.it/cammino.html?status=success">
                 
                 <div class="grid md:grid-cols-2 gap-8 mb-8">
                     <div>
-                        <label class="block text-xs font-bold uppercase mb-2 text-stone">Nome</label>
+                        <label class="block text-xs font-bold uppercase mb-2 text-stone-600">Nome</label>
                         <input type="text" name="Nome" required class="form-input border-2 border-ink/10 focus:border-gold">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase mb-2 text-stone">Cognome</label>
+                        <label class="block text-xs font-bold uppercase mb-2 text-stone-600">Cognome</label>
                         <input type="text" name="Cognome" required class="form-input border-2 border-ink/10 focus:border-gold">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase mb-2 text-stone">Email</label>
+                        <label class="block text-xs font-bold uppercase mb-2 text-stone-600">Email</label>
                         <input type="email" name="Email" required class="form-input border-2 border-ink/10 focus:border-gold">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase mb-2 text-stone">Data Partenza</label>
+                        <label class="block text-xs font-bold uppercase mb-2 text-stone-600">Data Partenza</label>
                         <input type="date" name="Data" required class="form-input border-2 border-ink/10 focus:border-gold">
                     </div>
                 </div>
                 
                 <div class="mb-8">
-                    <label class="block text-xs font-bold uppercase mb-4 text-stone">Modalità</label>
+                    <label class="block text-xs font-bold uppercase mb-4 text-stone-600">Modalità</label>
                     <div class="flex gap-4">
                         <label class="flex-1 flex items-center justify-center gap-2 cursor-pointer bg-paper px-6 py-4 border border-transparent hover:border-gold transition rounded-xl">
                             <input type="radio" name="Tipo" value="Piedi" checked> 
@@ -235,7 +195,7 @@
                 </div>
 
                 <div class="flex items-center justify-between border-t border-ink/10 pt-8">
-                    <label class="flex items-center gap-2 text-xs text-stone">
+                    <label class="flex items-center gap-2 text-xs text-stone-600">
                         <input type="checkbox" required> Accetto il trattamento dati
                     </label>
                     <button type="submit" class="bg-ink text-white px-10 py-4 font-bold uppercase tracking-widest text-xs hover:bg-gold transition-colors rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1">
@@ -246,35 +206,8 @@
         </div>
     </section>
 
-    <footer class="bg-forest-radial pt-24 pb-8 border-t border-white/10 text-stone">
-        <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
-            <div class="col-span-1 md:col-span-2">
-                <img data-content-id="nav_logo" src="" class="w-16 h-16 object-contain mb-6 opacity-0 transition-opacity bg-white p-2 rounded-full shadow-lg">
-                
-                <span class="text-3xl font-serif block mb-6 text-white">Visit Avigliano</span>
-                <p data-content-id="footer_desc" class="text-stone max-w-sm mb-6">...</p>
-                <p data-content-id="footer_address" class="font-bold text-xs uppercase tracking-widest text-white/50">...</p>
-            </div>
-            <div>
-                <h4 class="font-bold text-xs uppercase tracking-widest mb-6 border-b border-white/10 pb-2 text-gold">Navigazione</h4>
-                <ul class="space-y-4 text-sm text-stone">
-                    <li><a href="index.html" class="hover:text-gold">Home</a></li>
-                    <li><a href="index.html#eventi-section" class="hover:text-gold">Eventi</a></li>
-                    <li><a href="index.html#territorio" class="hover:text-gold">Borghi</a></li>
-                    <li><a href="#" class="hover:text-gold">Cammino</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="font-bold text-xs uppercase tracking-widest mb-6 border-b border-white/10 pb-2 text-gold">Contatti</h4>
-                <ul class="space-y-4 text-sm text-stone">
-                    <li data-content-id="contact_email" class="break-all">...</li>
-                    <li data-content-id="contact_phone">...</li>
-                </ul>
-            </div>
-        </div>
-        <div class="text-center text-[10px] uppercase font-bold text-white/30">
-            &copy; 2025 Comune di Avigliano Umbro - Custodi del Tempo
-        </div>
+    <footer class="bg-forest-radial text-stone py-8 text-center text-xs border-t border-white/10">
+        &copy; 2025 Visit Avigliano Umbro
     </footer>
 
     <script src="script.js"></script>
@@ -282,7 +215,7 @@
         const observer = new IntersectionObserver((e)=>{e.forEach(t=>{t.isIntersecting&&t.target.classList.add("active")})},{threshold:.1});
         document.querySelectorAll(".reveal").forEach(e=>observer.observe(e));
         
-        // Carica logo
+        // Carica logo anche qui
         document.addEventListener('DOMContentLoaded', () => {
             const logo = document.getElementById('nav_logo');
             if(logo && window.cmsData && window.cmsData['nav_logo']) {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Natale ad Avigliano | Custodi del Tempo</title>
+    <title>Visit Avigliano | Portale Turistico Ufficiale</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -21,22 +21,13 @@
               paper: '#F8F5F2', 
               ink: '#0F291E',   
               forest: '#14382C', 
-              gold: '#F59E0B',   
+              gold: '#C5A059', /* Oro leggermente più sobrio per l'istituzionale */   
               stone: '#8C8C8C', 
-              christmasRed: '#A91B0D', 
+              accentRed: '#A91B0D', /* Rinominato da christmasRed a accentRed */
             },
             fontFamily: {
               sans: ['Barlow', 'sans-serif'], 
               serif: ['Playfair Display', 'serif'], 
-            },
-            animation: {
-                'snow': 'snow 20s linear infinite',
-            },
-            keyframes: {
-                snow: {
-                    '0%': { backgroundPosition: '0 0' },
-                    '100%': { backgroundPosition: '100px 500px' },
-                }
             }
           }
         }
@@ -47,14 +38,7 @@
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* TEXTURE NEVE */
-        .snow-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;
-            opacity: 0.4;
-            background-image: url("data:image/svg+xml,%3Csvg version='1.1' xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='2' cy='2' r='1' fill='%23ffffff' opacity='0.4'/%3E%3C/svg%3E");
-            animation: snow 40s linear infinite;
-            mix-blend-mode: overlay;
-        }
+        /* RIMOSSO: Texture Neve (.snow-bg) */
 
         .bg-forest-radial {
             background: radial-gradient(circle at 50% 0%, #1A4D3E 0%, #051A12 80%);
@@ -69,20 +53,18 @@
         .group:hover .zoom-img { transform: scale(1.1); }
         
         .title-decor::after {
-            content: ''; display: block; width: 40px; height: 2px; background-color: #A91B0D; margin: 10px auto 0;
+            content: ''; display: block; width: 40px; height: 2px; background-color: #C5A059; margin: 10px auto 0; /* Colore cambiato in Gold */
         }
         
         .paper-card {
             background: #ffffff; border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 4px 20px rgba(0,0,0,0.03); transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
         .paper-card:hover {
-            transform: translateY(-6px); box-shadow: 0 20px 40px -10px rgba(20, 56, 44, 0.15); border-color: #D4AF37;
+            transform: translateY(-6px); box-shadow: 0 20px 40px -10px rgba(20, 56, 44, 0.15); border-color: #C5A059;
         }
     </style>
 </head>
-<body class="bg-paper text-ink font-sans selection:bg-christmasRed selection:text-white overflow-x-hidden">
-
-    <div class="snow-bg"></div>
+<body class="bg-paper text-ink font-sans selection:bg-gold selection:text-white overflow-x-hidden">
 
     <nav class="fixed top-0 w-full z-50 bg-forest/95 backdrop-blur border-b border-white/10 h-20 md:h-24 flex items-center justify-between px-6 transition-all shadow-lg">
         <a href="#" class="flex items-center gap-4 group">
@@ -92,8 +74,8 @@
                 </div>
             </div>
             <div class="flex flex-col items-start justify-center">
-                <a href="eventi.html" class="bg-christmasRed text-white px-3 py-[2px] rounded-[2px] text-[8px] md:text-[10px] font-bold uppercase tracking-widest mb-1 shadow-sm whitespace-nowrap hover:bg-white hover:text-christmasRed transition-colors animate-pulse border border-christmasRed">
-                    MAGIA DEL NATALE
+                <a href="eventi.html" class="bg-gold text-ink px-3 py-[2px] rounded-[2px] text-[8px] md:text-[10px] font-bold uppercase tracking-widest mb-1 shadow-sm whitespace-nowrap hover:bg-white hover:text-gold transition-colors border border-gold">
+                    PORTALE TURISTICO
                 </a>
                 <span class="text-xl md:text-2xl font-serif text-white leading-none tracking-wide group-hover:text-gold transition-colors">Visit Avigliano</span>
             </div>
@@ -124,12 +106,12 @@
         <div class="relative z-30 w-full max-w-4xl mx-auto text-center reveal">
             <div class="mb-8 flex justify-center">
                 <span data-content-id="home_hero_subtitle" 
-                      class="inline-block px-5 md:px-8 py-2 md:py-3 rounded-full bg-christmasRed/90 backdrop-blur-md border border-gold/60 text-white text-[10px] md:text-sm font-bold tracking-widest md:tracking-[0.3em] uppercase shadow-[0_0_25px_rgba(169,27,13,0.4)] cursor-default whitespace-normal text-center max-w-full">...</span>
+                      class="inline-block px-5 md:px-8 py-2 md:py-3 rounded-full bg-forest/80 backdrop-blur-md border border-gold/60 text-white text-[10px] md:text-sm font-bold tracking-widest md:tracking-[0.3em] uppercase shadow-[0_0_25px_rgba(20,56,44,0.4)] cursor-default whitespace-normal text-center max-w-full">...</span>
             </div>
             <h1 data-content-id="home_hero_title" class="text-5xl md:text-8xl font-serif text-white leading-[0.9] tracking-tight mb-8 drop-shadow-2xl">Visit Avigliano</h1>
             <p data-content-id="home_hero_desc" class="text-lg md:text-xl text-white/90 leading-relaxed max-w-2xl mx-auto font-light mb-10">...</p>
             <div class="flex flex-col sm:flex-row justify-center gap-6">
-                <a href="eventi.html" class="px-8 py-4 bg-white text-ink font-bold uppercase tracking-widest text-xs hover:bg-gold transition-colors shadow-lg">Programma Feste</a>
+                <a href="eventi.html" class="px-8 py-4 bg-white text-ink font-bold uppercase tracking-widest text-xs hover:bg-gold transition-colors shadow-lg">Eventi in Corso</a>
                 <a href="cammino.html" class="px-8 py-4 border border-white/30 text-white font-bold uppercase tracking-widest text-xs hover:border-gold hover:text-gold transition-colors">Esplora</a>
             </div>
         </div>
@@ -138,17 +120,17 @@
     <section class="bg-paper border-b border-ink/5">
         <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-ink/10">
             <a href="#territorio" class="p-12 group hover:bg-white transition-colors cursor-pointer">
-                <div class="text-christmasRed mb-4"><i data-lucide="map" class="w-8 h-8"></i></div>
+                <div class="text-gold mb-4"><i data-lucide="map" class="w-8 h-8"></i></div>
                 <h3 data-content-id="card_territorio_title" class="text-2xl font-serif mb-2 group-hover:translate-x-2 transition-transform">...</h3>
                 <p data-content-id="card_territorio_desc" class="text-sm text-stone-600 leading-relaxed">...</p>
             </a>
             <a href="#lago" class="p-12 group hover:bg-white transition-colors cursor-pointer">
-                <div class="text-christmasRed mb-4"><i data-lucide="history" class="w-8 h-8"></i></div>
+                <div class="text-gold mb-4"><i data-lucide="history" class="w-8 h-8"></i></div>
                 <h3 data-content-id="card_storia_title" class="text-2xl font-serif mb-2 group-hover:translate-x-2 transition-transform">...</h3>
                 <p data-content-id="card_storia_desc" class="text-sm text-stone-600 leading-relaxed">...</p>
             </a>
             <a href="#tradizioni" class="p-12 group hover:bg-white transition-colors cursor-pointer">
-                <div class="text-christmasRed mb-4"><i data-lucide="utensils" class="w-8 h-8"></i></div>
+                <div class="text-gold mb-4"><i data-lucide="utensils" class="w-8 h-8"></i></div>
                 <h3 data-content-id="card_sapori_title" class="text-2xl font-serif mb-2 group-hover:translate-x-2 transition-transform">...</h3>
                 <p data-content-id="card_sapori_desc" class="text-sm text-stone-600 leading-relaxed">...</p>
             </a>
@@ -156,7 +138,7 @@
     </section>
 
     <section id="eventi-section" class="py-24 bg-forest-radial text-white relative overflow-hidden">
-        <div class="absolute top-0 right-0 text-[20rem] font-bold text-white/5 leading-none -mt-20 -mr-20 pointer-events-none select-none">25</div>
+        <div class="absolute top-0 right-0 text-[20rem] font-bold text-white/5 leading-none -mt-20 -mr-20 pointer-events-none select-none">EV</div>
         <div class="max-w-7xl mx-auto px-6 relative z-10">
             <div class="flex justify-between items-end mb-12 border-b border-white/10 pb-8 reveal">
                 <div>
@@ -176,8 +158,8 @@
     <section id="natura" class="py-24 bg-paper relative">
         <div class="max-w-7xl mx-auto px-6 relative z-10">
             <div class="mb-20 text-center reveal">
-                <span class="h-[1px] w-12 bg-christmasRed inline-block align-middle mr-3"></span>
-                <span data-content-id="section_natura_subtitle" class="text-christmasRed text-xs font-bold tracking-[0.3em] uppercase">...</span>
+                <span class="h-[1px] w-12 bg-gold inline-block align-middle mr-3"></span>
+                <span data-content-id="section_natura_subtitle" class="text-gold text-xs font-bold tracking-[0.3em] uppercase">...</span>
                 <h2 data-content-id="section_natura_title" class="text-6xl font-serif text-ink mt-4 mb-6">...</h2>
                 <p data-content-id="section_natura_desc" class="text-stone-600 text-lg max-w-2xl mx-auto font-light leading-relaxed">...</p>
             </div>
@@ -194,7 +176,7 @@
                     <img data-content-id="natura_grotta_img" src="" class="absolute inset-0 w-full h-full object-cover opacity-60 zoom-img">
                     <div class="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-transparent opacity-60"></div>
                     <div class="relative z-10 p-12 h-full flex flex-col justify-between hover:backdrop-blur-[2px] transition-all">
-                        <div data-content-id="natura_grotta_badge" class="inline-block bg-red-600 text-white px-4 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full self-start animate-pulse">...</div>
+                        <div data-content-id="natura_grotta_badge" class="inline-block bg-gold text-ink px-4 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full self-start animate-pulse">...</div>
                         <div><h3 data-content-id="natura_grotta_title" class="text-5xl font-serif text-white mb-4">...</h3><p data-content-id="natura_grotta_desc" class="text-white/80 text-lg max-w-md">...</p></div>
                     </div>
                 </div>
@@ -205,7 +187,7 @@
     <section id="territorio" class="bg-paper relative pb-24">
         <div class="max-w-7xl mx-auto px-6 relative z-10">
             <div class="mb-20 text-center reveal">
-                <span data-content-id="section_territorio_subtitle" class="text-christmasRed text-xs font-bold tracking-[0.3em] uppercase mb-4 block">...</span>
+                <span data-content-id="section_territorio_subtitle" class="text-gold text-xs font-bold tracking-[0.3em] uppercase mb-4 block">...</span>
                 <h2 data-content-id="section_territorio_title" class="text-6xl font-serif text-ink">...</h2>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-[400px]">
@@ -215,7 +197,7 @@
                     <div class="absolute bottom-0 left-0 p-8 bg-white/90 backdrop-blur m-6 max-w-sm">
                         <span class="text-[10px] font-bold uppercase tracking-widest text-stone-600 mb-2 block">Capoluogo</span>
                         <h3 data-content-id="borgo_avigliano_title" class="text-3xl font-serif mb-2">...</h3>
-                        <div class="w-10 h-[2px] bg-christmasRed group-hover:w-full transition-all"></div>
+                        <div class="w-10 h-[2px] bg-gold group-hover:w-full transition-all"></div>
                     </div>
                 </div>
                 <div class="md:col-span-4 relative group overflow-hidden bg-gray-200 cursor-pointer reveal reveal-delay-1" onclick="openModal('borgo_dunarobba')">
@@ -239,7 +221,7 @@
     </section>
 
     <section id="lago" class="py-32 bg-forest-radial text-white relative">
-        <div class="absolute right-0 top-0 text-[30rem] font-bold text-white/5 leading-none -mt-40 pointer-events-none">2M</div>
+        <div class="absolute right-0 top-0 text-[30rem] font-bold text-white/5 leading-none -mt-40 pointer-events-none">KM</div>
         <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
             <div class="reveal">
                 <span data-content-id="lago_subtitle" class="text-gold text-xs font-bold tracking-[0.3em] uppercase mb-6 block">...</span>
@@ -261,22 +243,22 @@
     <section id="tradizioni" class="py-32 bg-paper">
         <div class="max-w-7xl mx-auto px-6">
              <div class="text-center mb-20 reveal">
-                <span data-content-id="lifestyle_subtitle" class="text-christmasRed text-xs font-bold tracking-[0.25em] uppercase mb-4 block">...</span>
+                <span data-content-id="lifestyle_subtitle" class="text-gold text-xs font-bold tracking-[0.25em] uppercase mb-4 block">...</span>
                 <h2 data-content-id="lifestyle_title" class="text-5xl font-serif text-ink">...</h2>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 reveal reveal-delay-1">
                 <div class="paper-card p-10 rounded-[2rem] flex flex-col items-center text-center group hover:bg-white transition-colors">
-                    <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-6 text-christmasRed group-hover:scale-110 transition-transform"><i data-lucide="utensils" class="w-8 h-8"></i></div>
+                    <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-6 text-gold group-hover:scale-110 transition-transform"><i data-lucide="utensils" class="w-8 h-8"></i></div>
                     <h3 data-content-id="lifestyle_manfricoli_title" class="text-2xl font-serif text-ink mb-4">...</h3>
                     <p data-content-id="lifestyle_manfricoli_desc" class="text-stone-600 text-sm leading-relaxed mb-6">...</p>
                 </div>
                 <div class="paper-card p-10 rounded-[2rem] flex flex-col items-center text-center group hover:bg-white transition-colors">
-                    <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-6 text-christmasRed group-hover:scale-110 transition-transform"><i data-lucide="drama" class="w-8 h-8"></i></div>
+                    <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-6 text-gold group-hover:scale-110 transition-transform"><i data-lucide="drama" class="w-8 h-8"></i></div>
                     <h3 data-content-id="lifestyle_maschere_title" class="text-2xl font-serif text-ink mb-4">...</h3>
                     <p data-content-id="lifestyle_maschere_desc" class="text-stone-600 text-sm leading-relaxed mb-6">...</p>
                 </div>
                 <div class="paper-card p-10 rounded-[2rem] flex flex-col items-center text-center group hover:bg-white transition-colors">
-                    <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-6 text-christmasRed group-hover:scale-110 transition-transform"><i data-lucide="bed" class="w-8 h-8"></i></div>
+                    <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-6 text-gold group-hover:scale-110 transition-transform"><i data-lucide="bed" class="w-8 h-8"></i></div>
                     <h3 data-content-id="lifestyle_sleep_title" class="text-2xl font-serif text-ink mb-4">...</h3>
                     <p data-content-id="lifestyle_sleep_desc" class="text-stone-600 text-sm leading-relaxed mb-6">...</p>
                 </div>

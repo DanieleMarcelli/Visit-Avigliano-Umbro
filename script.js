@@ -132,15 +132,12 @@ window.filterEvents = (category) => {
     renderEvents();
 };
 
-// --- GENERATORE CARD UNIFICATO (IL CUORE DELLA SOLUZIONE) ---
-// Questa funzione crea SEMPRE card verticali 7:10 scure e corrette
+// --- GENERATORE CARD UNIFICATO (CON FIX LEGGIBILITÀ) ---
 function createCardHTML(e, isGrid = false) {
     const d = new Date(e.dateStr);
     const day = d.getDate();
     const month = d.toLocaleString('it-IT', { month: 'short' }).toUpperCase();
     
-    // Se è griglia, width è 100% della colonna. Se è slider, width è fissa.
-    // L'altezza h-[400px] è fissa per garantire il formato verticale.
     const containerClass = isGrid ? 'w-full h-[400px]' : 'w-[280px] h-[400px] shrink-0 snap-center';
     
     return `
@@ -148,7 +145,7 @@ function createCardHTML(e, isGrid = false) {
         
         <img src="${e.img}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-100">
         
-        <div class="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/60 to-transparent opacity-90"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent z-10 pointer-events-none"></div>
         
         <div class="absolute top-4 right-4 bg-gold text-ink border border-gold px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest shadow-sm z-20">
             ${e.cat}
@@ -212,6 +209,9 @@ function renderEvents() {
             filteredEvents.forEach(e => gridContainer.insertAdjacentHTML('beforeend', createCardHTML(e, true)));
         }
     }
+    
+    // Re-inizializza icone
+    if(window.lucide) window.lucide.createIcons();
 }
 
 // RENDER ESPANSIONE HOME (VEDI TUTTI)
@@ -222,7 +222,6 @@ window.showAllEvents = () => {
     
     const remaining = filteredEvents.slice(6);
     remaining.forEach(e => {
-        // Qui usiamo createCardHTML(e, true) per generare card VERTICALI anche nella griglia espansa
         grid.insertAdjacentHTML('beforeend', createCardHTML(e, true)); 
     });
     
@@ -243,7 +242,7 @@ window.openModal = (baseId) => {
     } else {
         const titleKey = baseId + "_title", descKey = baseId + "_desc", imgKey = baseId + "_img";
         content = {
-            title: cmsData[baseId]?.title || (cmsData[titleKey]?.text) || "Dettaglio",
+            title: cmsData[baseId]?.text || (cmsData[titleKey]?.text) || "Dettaglio", // Fix: usa .text per titolo base
             desc: cmsData[baseId]?.text || (cmsData[descKey]?.text) || "",
             img: cmsData[baseId]?.img || (cmsData[imgKey]?.img) || "",
             subtitle: "Territorio & Cultura", category: "Info", time: "Sempre aperto", location: "Avigliano Umbro", organizer: "Comune di Avigliano Umbro"
@@ -253,7 +252,7 @@ window.openModal = (baseId) => {
     if(document.getElementById('modal-title')) {
         document.getElementById('modal-title').innerHTML = content.title;
         document.getElementById('modal-subtitle').innerHTML = content.subtitle;
-        document.getElementById('modal-desc').innerHTML = content.desc.replace(/\n/g, '<br>');
+        document.getElementById('modal-desc').innerHTML = content.desc ? content.desc.replace(/\n/g, '<br>') : '';
         document.getElementById('modal-category').innerHTML = content.category;
         
         const timeEl = document.getElementById('modal-time'); if(timeEl) timeEl.innerHTML = content.time;
@@ -276,7 +275,15 @@ document.addEventListener('DOMContentLoaded', () => {
     initCMS();
     initEvents();
     const revealElements = document.querySelectorAll('.reveal');
-    revealElements.forEach(el => observer.observe(el));
+    const obs = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('active');
+                obs.unobserve(entry.target);
+            }
+        });
+    });
+    revealElements.forEach(el => obs.observe(el));
     
     const logo = document.getElementById('nav_logo');
     if(logo && cmsData['nav_logo']) logo.src = cmsData['nav_logo'].img;

@@ -1,261 +1,1071 @@
-<!DOCTYPE html>
-<html lang="it" class="scroll-smooth">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Il Cammino | Visit Avigliano Umbro</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-    
-    <script src="https://unpkg.com/lucide@latest"></script>
+import React, { useEffect, useMemo, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  MapPin,
+  Route,
+  Footprints,
+  Leaf,
+  Users,
+  School,
+  Globe,
+  Clock,
+  Download,
+  Phone,
+  Mail,
+  ExternalLink,
+  Calendar,
+  ShieldCheck,
+  HandHeart,
+  Settings,
+  LogOut,
+  Plus,
+  Trash2,
+  Eye,
+  CloudDownload,
+  CloudUpload,
+  KeyRound,
+  Link as LinkIcon,
+} from "lucide-react";
+import { motion } from "framer-motion";
 
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              paper: '#F8F5F2', 
-              ink: '#0F291E',   
-              forest: '#14382C', 
-              gold: '#F59E0B', 
-              stone: '#8C8C8C', 
-              christmasRed: '#A91B0D',
-            },
-            fontFamily: {
-              sans: ['Barlow', 'sans-serif'], 
-              serif: ['Playfair Display', 'serif'], 
-            },
-            animation: {
-                'snow': 'snow 20s linear infinite',
-            },
-            keyframes: {
-                snow: {
-                    '0%': { backgroundPosition: '0 0' },
-                    '100%': { backgroundPosition: '100px 500px' },
+/**
+ * Sito one-page + Admin – Cammino del Lago Tiberino (anteprima)
+ *
+ * ✅ Admin per modificare tutto
+ * ✅ DEMO: salvataggio localStorage
+ * ✅ WordPress headless: carica/salva JSON su una pagina WP via REST API
+ *
+ * Nota: per un uso pubblico serio serve:
+ * - HTTPS
+ * - utente WP dedicato + Application Password
+ * - pagina config che contiene SOLO JSON
+ */
+
+const STORAGE_KEY = "clt_site_v3";
+
+// Tema: eleganza + identità (bosco / pietra / avorio / terra)
+const THEME = {
+  primary: "#1F3D2B",      // verde bosco profondo
+  background: "#F6F7F4",   // avorio/caldo
+  muted: "#5B625D",        // pietra
+  accent: "#9C7A3C",       // terra/ocra (micro-accenti)
+  ink: "#121513",          // testo principale
+  card: "#FFFFFF",         // pannelli
+  border: "#E2E5DE",       // bordi caldi
+};
+
+const themeStyles = {
+  pageBg: { backgroundColor: THEME.background },
+  topBar: { backgroundColor: "rgba(255,255,255,0.82)", borderColor: THEME.border },
+  iconTile: { backgroundColor: THEME.primary, color: "#fff" },
+  mutedText: { color: THEME.muted },
+  accentBg: { backgroundColor: THEME.accent },
+  border: { borderColor: THEME.border },
+};
+
+const WP_SETTINGS_KEY = "clt_wp_settings_v1";
+const DEFAULT_CONFIG_SLUG = "cammino-config";
+
+function cn(...classes) {
+  return classes.filter(Boolean).join(" ");
+}
+
+function uid(prefix = "id") {
+  return `${prefix}_${Math.random().toString(16).slice(2)}_${Date.now().toString(16)}`;
+}
+
+function safeParse(json) {
+  try {
+    return { ok: true, value: JSON.parse(json) };
+  } catch (e) {
+    return { ok: false, error: String(e) };
+  }
+}
+
+function stripHtml(html) {
+  return String(html || "")
+    .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&amp;/g, "&")
+    .trim();
+}
+
+function b64(str) {
+  try {
+    return typeof window !== "undefined" ? window.btoa(unescape(encodeURIComponent(str))) : "";
+  } catch {
+    return "";
+  }
+}
+
+async function wpFetchJson({ baseUrl, slug, signal }) {
+  const url = `${baseUrl.replace(/\/$/, "")}/wp-json/wp/v2/pages?slug=${encodeURIComponent(slug)}`;
+  const r = await fetch(url, { signal });
+  if (!r.ok) throw new Error(`WP fetch failed: ${r.status}`);
+  const arr = await r.json();
+  if (!Array.isArray(arr) || !arr[0]) throw new Error("WP: pagina config non trovata");
+  const page = arr[0];
+  const raw = stripHtml(page?.content?.rendered || "");
+  const parsed = safeParse(raw);
+  if (!parsed.ok) throw new Error("WP: contenuto pagina non è JSON valido");
+  return { pageId: String(page.id), json: parsed.value };
+}
+
+async function wpSaveJson({ baseUrl, pageId, username, appPassword, json }) {
+  const url = `${baseUrl.replace(/\/$/, "")}/wp-json/wp/v2/pages/${pageId}`;
+  const auth = `Basic ${b64(`${username}:${appPassword}`)}`;
+  const body = {
+    content: JSON.stringify(json, null, 2),
+    status: "publish",
+  };
+  const r = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: auth,
+    },
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) {
+    const t = await r.text().catch(() => "");
+    throw new Error(`WP save failed: ${r.status} ${t}`);
+  }
+  return await r.json();
+}
+
+const defaultSite = {
+  media: {
+    heroImage:
+      "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1600&q=80",
+    heroAlt: "Paesaggio umbro, sentiero tra colline",
+    gallery: [
+      {
+        src: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
+        alt: "Bosco e luce naturale",
+      },
+      {
+        src: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1200&q=80",
+        alt: "Sentiero tra alberi",
+      },
+      {
+        src: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1200&q=80",
+        alt: "Natura e verde",
+      },
+    ],
+  },
+  name: "Cammino del Lago Tiberino",
+  tagline: "Camminare dentro un lago che non c’è più.",
+  area: "Umbria – borghi rurali e paesaggi del Lago Tiberino",
+  season: "Periodo consigliato: marzo–giugno / settembre–novembre",
+  highlights: [
+    "Foresta fossile e geologia",
+    "Borghi collinari e storia locale",
+    "Natura, silenzio, percorsi adatti a 2–4 notti",
+  ],
+  quickFacts: [
+    { label: "Durata consigliata", value: "3–4 tappe" },
+    { label: "Target", value: "camminatori, famiglie, scuole" },
+    { label: "Stagioni", value: "primavera / autunno" },
+    { label: "Stile", value: "turismo lento" },
+  ],
+  cta: { primary: "Pianifica il cammino", secondary: "Scarica le tracce" },
+  tracks: [
+    { name: "Traccia completa (GPX)", file: "#", note: "Sostituisci # con il link al GPX." },
+    { name: "Tappe (PDF)", file: "#", note: "Sostituisci # con il link al PDF." },
+  ],
+  stages: [
+    {
+      id: "t1",
+      title: "Tappa 1 – Borgo A → Borgo B",
+      km: 14,
+      time: "4h 30m",
+      difficulty: "Media",
+      elevation: "+420m / -380m",
+      highlights: ["Belvedere sul paesaggio", "Tratti tra ulivi", "Punto acqua"],
+      services: ["Bar", "Fontanella", "Struttura ricettiva"],
+      gpx: "#",
+    },
+  ],
+  experiences: [
+    {
+      title: "Visita guidata alla foresta fossile",
+      who: "Guide / museo",
+      duration: "1–2 ore",
+      for: ["scuole", "famiglie", "curiosi"],
+    },
+  ],
+  events: [{ date: "Primavera", title: "Weekend del Lago Tiberino", desc: "Uscite guidate + borghi + degustazioni." }],
+  operators: [
+    {
+      type: "Dove dormire",
+      items: [{ name: "B&B Esempio", place: "Borgo B", link: "#" }],
+    },
+  ],
+  planning: {
+    howToArrive: [
+      { title: "In auto", desc: "Parcheggi consigliati presso i punti di partenza delle tappe." },
+      { title: "Con mezzi pubblici", desc: "Inserire fermate utili e soluzioni ultimo miglio." },
+      { title: "Navetta / ultimo miglio", desc: "Servizio su prenotazione per collegare tappe e strutture." },
+    ],
+    safety: [
+      "Portare acqua (min 1L) e scarpe adeguate.",
+      "Controllare meteo e chiusure temporanee.",
+      "In estate: partire presto e protezione solare.",
+    ],
+    accessibilityNote:
+      "Alcuni tratti sono accessibili e adatti a famiglie. Indicare chiaramente: percorsi, lunghezze, pendenze e fondo.",
+  },
+  faq: [
+    { q: "Serve prenotare?", a: "Per il cammino no. Per visite guidate e navette sì." },
+    { q: "È adatto alle famiglie?", a: "Sì, se si scelgono tratti brevi e fondi adeguati." },
+  ],
+  contacts: {
+    office: "Ufficio informazioni Cammino",
+    phone: "+39 000 000000",
+    email: "info@cammnolagotiberino.it",
+    address: "Inserire indirizzo / punto info",
+  },
+  map: {
+    osmEmbedUrl:
+      "https://www.openstreetmap.org/export/embed.html?bbox=12.25%2C42.65%2C12.55%2C42.85&layer=mapnik",
+    osmOpenUrl: "https://www.openstreetmap.org",
+  },
+  admin: {
+    password: "cambia-questa-password",
+  },
+};
+
+const sections = [
+  { id: "home", label: "Home" },
+  { id: "tappe", label: "Tappe" },
+  { id: "mappa", label: "Mappa" },
+  { id: "pianifica", label: "Pianifica" },
+  { id: "esperienze", label: "Esperienze" },
+  { id: "eventi", label: "Eventi" },
+  { id: "operatori", label: "Operatori" },
+  { id: "faq", label: "FAQ" },
+  { id: "contatti", label: "Contatti" },
+];
+
+function Label({ children }) {
+  return (
+    <div className="text-xs font-medium" style={themeStyles.mutedText}>
+      {children}
+    </div>
+  );
+}
+
+function Pill({ icon: Icon, children }) {
+  return (
+    <span className="inline-flex items-center gap-2 rounded-full border bg-white/70 px-3 py-1 text-sm shadow-sm backdrop-blur">
+      <Icon className="h-4 w-4" />
+      {children}
+    </span>
+  );
+}
+
+function SectionTitle({ kicker, title, desc, icon: Icon }) {
+  return (
+    <div className="mb-6">
+      <div className="flex items-center gap-2 text-sm" style={themeStyles.mutedText}>
+        {Icon ? <Icon className="h-4 w-4" /> : null}
+        <span>{kicker}</span>
+      </div>
+      <h2 className="mt-2 text-2xl font-semibold tracking-tight">{title}</h2>
+      {desc ? <p className="mt-2 max-w-3xl" style={themeStyles.mutedText}>{desc}</p> : null}
+    </div>
+  );
+}
+
+function StageCard({ s }) {
+  return (
+    <Card className="rounded-2xl shadow-sm">
+      <CardHeader className="space-y-3">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <CardTitle className="text-lg">{s.title}</CardTitle>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <Badge variant="secondary" className="rounded-full">
+                <Route className="mr-1 h-3.5 w-3.5" /> {s.km} km
+              </Badge>
+              <Badge variant="secondary" className="rounded-full">
+                <Clock className="mr-1 h-3.5 w-3.5" /> {s.time}
+              </Badge>
+              <Badge variant="secondary" className="rounded-full">
+                <ShieldCheck className="mr-1 h-3.5 w-3.5" /> {s.difficulty}
+              </Badge>
+              <Badge variant="secondary" className="rounded-full">
+                <Leaf className="mr-1 h-3.5 w-3.5" /> {s.elevation}
+              </Badge>
+            </div>
+          </div>
+          <Button variant="outline" className="rounded-xl" onClick={() => window.open(s.gpx || "#", "_blank")}
+          >
+            <Download className="mr-2 h-4 w-4" /> GPX
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <div className="text-sm font-medium">Cosa trovi</div>
+          <ul className="mt-2 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+            {(s.highlights || []).map((h) => (
+              <li key={h} className="flex items-start gap-2">
+                <span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-foreground/60" />
+                <span>{h}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <div className="text-sm font-medium">Servizi</div>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {(s.services || []).map((x) => (
+              <Badge key={x} variant="outline" className="rounded-full">
+                {x}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function FAQItem({ q, a }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Card className="rounded-2xl shadow-sm">
+      <button className="flex w-full items-center justify-between gap-4 p-5 text-left" onClick={() => setOpen((v) => !v)}>
+        <div className="font-medium">{q}</div>
+        <span
+          className={cn("transition", open ? "rotate-180" : "")}
+          style={themeStyles.mutedText}
+        >
+          ▾
+        </span>
+      </button>
+      {open ? <CardContent className="pb-5 pt-0 text-sm" style={themeStyles.mutedText}>{a}</CardContent> : null}
+    </Card>
+  );
+}
+
+function AdminShell({ title, children, onClose, onLogout, onPreview }) {
+  return (
+    <div className="min-h-screen" style={themeStyles.pageBg}>
+      <div className="sticky top-0 z-50 border-b backdrop-blur" style={themeStyles.topBar}>
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
+          <div className="flex items-center gap-2">
+            <div className="grid h-9 w-9 place-items-center rounded-2xl" style={themeStyles.iconTile}>
+              <Settings className="h-5 w-5" />
+            </div>
+            <div className="leading-tight">
+              <div className="text-sm font-semibold">Admin</div>
+              <div className="text-xs" style={themeStyles.mutedText}>{title}</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" className="rounded-xl" onClick={onPreview}>
+              <Eye className="mr-2 h-4 w-4" /> Anteprima
+            </Button>
+            <Button variant="outline" className="rounded-xl" onClick={onLogout}>
+              <LogOut className="mr-2 h-4 w-4" /> Esci
+            </Button>
+            <Button className="rounded-xl" onClick={onClose}>Chiudi</Button>
+          </div>
+        </div>
+      </div>
+      <div className="mx-auto max-w-6xl px-4 py-8">{children}</div>
+    </div>
+  );
+}
+
+function AdminLogin({ siteName, onLogin, hintPassword }) {
+  const [pwd, setPwd] = useState("");
+  const [err, setErr] = useState("");
+
+  return (
+    <div className="min-h-screen" style={themeStyles.pageBg}>
+      <div className="mx-auto max-w-md px-4 py-14">
+        <Card className="rounded-2xl shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-lg">Admin – {siteName}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="text-sm" style={themeStyles.mutedText}>Inserisca la password per modificare i contenuti.</div>
+            <Input
+              type="password"
+              className="rounded-xl"
+              placeholder="Password"
+              value={pwd}
+              onChange={(e) => {
+                setPwd(e.target.value);
+                setErr("");
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  const ok = onLogin(pwd);
+                  if (!ok) setErr("Password errata");
                 }
-            }
-          }
-        }
+              }}
+            />
+            {err ? <div className="text-sm text-red-600">{err}</div> : null}
+            <Button
+              className="w-full rounded-xl"
+              onClick={() => {
+                const ok = onLogin(pwd);
+                if (!ok) setErr("Password errata");
+              }}
+            >
+              Entra
+            </Button>
+
+            <div className="rounded-xl border bg-white p-3 text-xs" style={{ ...themeStyles.mutedText, ...themeStyles.border }}>
+              Nota: demo con salvataggio nel browser. In produzione, password e salvataggio devono stare sul backend.
+              {hintPassword ? (
+                <div className="mt-2">
+                  Password demo attuale: <span className="font-mono">{hintPassword}</span>
+                </div>
+              ) : null}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+function AdminPanel({ site, setSite, onClose, onLogout, onPreview }) {
+  const [jsonDraft, setJsonDraft] = useState("");
+  const [jsonErr, setJsonErr] = useState("");
+
+  const [wp, setWp] = useState({
+    baseUrl: "",
+    slug: DEFAULT_CONFIG_SLUG,
+    pageId: "",
+    username: "",
+    appPassword: "",
+  });
+  const [wpMsg, setWpMsg] = useState("");
+  const [wpBusy, setWpBusy] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(WP_SETTINGS_KEY);
+      if (raw) {
+        const p = safeParse(raw);
+        if (p.ok && p.value) setWp((prev) => ({ ...prev, ...p.value }));
       }
-    </script>
+    } catch {
+      // ignore
+    }
+  }, []);
 
-    <style>
-        .hide-scroll::-webkit-scrollbar { display: none; }
-        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        .snow-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;
-            opacity: 0.4;
-            background-image: url("data:image/svg+xml,%3Csvg version='1.1' xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='2' cy='2' r='1' fill='%23ffffff' opacity='0.4'/%3E%3C/svg%3E");
-            animation: snow 40s linear infinite;
-            mix-blend-mode: overlay;
-        }
+  function saveWp(next) {
+    setWp(next);
+    try {
+      localStorage.setItem(WP_SETTINGS_KEY, JSON.stringify(next));
+    } catch {
+      // ignore
+    }
+  }
 
-        /* ORME DEL CAMMINO */
-        @keyframes walk {
-            0% { background-position: 0 0; }
-            100% { background-position: 100px 0; }
-        }
-        
-        .footsteps-decoration {
-            width: 100%; height: 40px;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='40' viewBox='0 0 100 40'%3E%3Cpath d='M10 25c-3 0-5-2-5-5s2-5 5-5 5 2 5 5-2 5-5 5zm25-10c3 0 5 2 5 5s-2 5-5 5-5-2-5-5 2-5 5-5zm25 10c-3 0-5-2-5-5s2-5 5-5 5 2 5 5-2 5-5 5zm25-10c3 0 5 2 5 5s-2 5-5 5-5-2-5-5 2-5 5-5z' fill='%23F59E0B' fill-opacity='0.6'/%3E%3C/svg%3E");
-            background-repeat: repeat-x; background-size: 100px 40px;
-            animation: walk 20s linear infinite; opacity: 1;
-        }
+  function saveNow(next) {
+    setSite(next);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    } catch {
+      // ignore
+    }
+  }
 
-        .bg-forest-radial { background: radial-gradient(circle at 50% 0%, #1A4D3E 0%, #051A12 80%); }
+  async function wpLoad() {
+    setWpMsg("");
+    if (!wp.baseUrl) return setWpMsg("Inserire Base URL WordPress");
+    setWpBusy(true);
+    try {
+      const { pageId, json } = await wpFetchJson({ baseUrl: wp.baseUrl, slug: wp.slug || DEFAULT_CONFIG_SLUG });
+      saveNow(json);
+      saveWp({ ...wp, pageId });
+      setWpMsg(`Caricato da WordPress (pagina ID ${pageId})`);
+    } catch (e) {
+      setWpMsg(String(e?.message || e));
+    } finally {
+      setWpBusy(false);
+    }
+  }
 
-        .reveal { opacity: 0; transform: translateY(30px); transition: all 1s; }
-        .reveal.active { opacity: 1; transform: translateY(0); }
-        .form-input { width: 100%; background: #fff; border: 1px solid #ddd; padding: 1rem; color: #1a1a1a; border-radius: 0.5rem; }
-        .form-input:focus { outline: none; border-color: #F59E0B; }
-    </style>
-</head>
-<body class="bg-paper text-ink font-sans selection:bg-christmasRed selection:text-white">
+  async function wpSave() {
+    setWpMsg("");
+    if (!wp.baseUrl) return setWpMsg("Inserire Base URL WordPress");
+    if (!wp.username || !wp.appPassword) return setWpMsg("Inserire Username e Application Password");
 
-    <div class="snow-bg"></div>
+    setWpBusy(true);
+    try {
+      let pageId = wp.pageId;
+      if (!pageId) {
+        const got = await wpFetchJson({ baseUrl: wp.baseUrl, slug: wp.slug || DEFAULT_CONFIG_SLUG });
+        pageId = got.pageId;
+        saveWp({ ...wp, pageId });
+      }
+      await wpSaveJson({
+        baseUrl: wp.baseUrl,
+        pageId,
+        username: wp.username,
+        appPassword: wp.appPassword,
+        json: site,
+      });
+      setWpMsg(`Salvato su WordPress (pagina ID ${pageId})`);
+    } catch (e) {
+      setWpMsg(String(e?.message || e));
+    } finally {
+      setWpBusy(false);
+    }
+  }
 
-    <nav class="fixed top-0 w-full z-50 bg-forest/95 backdrop-blur border-b border-white/10 h-20 md:h-24 flex items-center justify-between px-6 transition-all shadow-lg">
-        <a href="index.html" class="flex items-center gap-4 group">
-            <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white p-[2px] shadow-md border border-gold/30 group-hover:scale-105 transition-transform shrink-0">
-                <div class="w-full h-full rounded-full bg-forest overflow-hidden flex items-center justify-center">
-                    <img id="nav_logo" data-content-id="nav_logo" src="" class="w-full h-full object-cover opacity-0 transition-opacity">
-                </div>
+  function exportJson() {
+    const blob = new Blob([JSON.stringify(site, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "cammino-lago-tiberino-site.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function importJson() {
+    const parsed = safeParse(jsonDraft);
+    if (!parsed.ok) {
+      setJsonErr(parsed.error);
+      return;
+    }
+    setJsonErr("");
+    saveNow(parsed.value);
+  }
+
+  return (
+    <AdminShell title={site.name} onClose={onClose} onLogout={onLogout} onPreview={onPreview}>
+      <div className="grid gap-6">
+        <Card className="rounded-2xl shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-base">Informazioni principali</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label>Nome</Label>
+              <Input className="rounded-xl" value={site.name || ""} onChange={(e) => saveNow({ ...site, name: e.target.value })} />
             </div>
-            <div class="flex flex-col items-start justify-center">
-                <a href="eventi.html" class="bg-christmasRed text-white px-3 py-[2px] rounded-[2px] text-[8px] md:text-[10px] font-bold uppercase tracking-widest mb-1 shadow-sm whitespace-nowrap hover:bg-white hover:text-christmasRed transition-colors animate-pulse border border-christmasRed">MAGIA DEL NATALE</a>
-                <span class="text-xl md:text-2xl font-serif text-white leading-none tracking-wide group-hover:text-gold transition-colors">Visit Avigliano</span>
+            <div className="space-y-2">
+              <Label>Area</Label>
+              <Input className="rounded-xl" value={site.area || ""} onChange={(e) => saveNow({ ...site, area: e.target.value })} />
             </div>
-        </a>
-        <div class="hidden md:flex items-center gap-10 text-xs font-bold uppercase tracking-widest text-white/80">
-            <a href="index.html" class="hover:text-white transition relative group py-2">Home<span class="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span></a>
-            <a href="eventi.html" class="hover:text-white transition relative group py-2">Eventi<span class="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span></a>
-            <a href="index.html#territorio" class="hover:text-white transition relative group py-2">Borghi<span class="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span></a>
-            <a href="#" class="flex items-center gap-2 bg-gold text-ink border border-gold px-6 py-3 rounded-full hover:bg-white hover:border-white transition shadow-[0_0_20px_rgba(212,175,55,0.3)]"><i data-lucide="compass" class="w-4 h-4"></i> Cammino</a>
-        </div>
-        <button onclick="document.getElementById('mobile-menu').classList.remove('hidden')" class="md:hidden text-white hover:text-gold transition p-2"><i data-lucide="menu" class="w-8 h-8"></i></button>
-    </nav>
-
-    <div class="fixed top-20 md:top-24 left-0 w-full z-40 pointer-events-none">
-        <div class="footsteps-decoration"></div>
-    </div>
-
-    <div id="mobile-menu" class="hidden fixed inset-0 z-[60] bg-forest-radial text-white flex flex-col justify-center px-10 gap-8 transition-all">
-        <button onclick="document.getElementById('mobile-menu').classList.add('hidden')" class="absolute top-6 right-6 text-white"><i data-lucide="x" class="w-8 h-8"></i></button>
-        <a href="index.html" class="text-5xl font-serif hover:text-gold">Home</a>
-        <a href="eventi.html" class="text-5xl font-serif hover:text-gold">Eventi</a>
-        <a href="index.html#territorio" class="text-5xl font-serif hover:text-gold">Borghi</a>
-        <a href="cammino.html" class="text-5xl font-serif text-gold">Il Cammino</a>
-    </div>
-
-    <section class="h-[60vh] relative flex items-center justify-center overflow-hidden bg-forest-radial text-white pt-20">
-        <div data-content-id="cammino_page_hero_bg" class="absolute inset-0 bg-cover bg-center opacity-60"></div>
-        <div class="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-transparent"></div>
-        <div class="relative z-10 text-center px-6 max-w-4xl reveal active">
-            
-            <span class="bg-christmasRed text-white px-6 py-2 rounded-full text-[11px] font-bold uppercase tracking-[0.2em] mb-6 inline-block shadow-lg border border-white/20 animate-pulse">
-                Progetto in Attivazione
-            </span>
-
-            <h1 data-content-id="cammino_page_hero_title" class="text-6xl md:text-8xl font-serif mb-6 drop-shadow-lg">...</h1>
-            <p data-content-id="cammino_page_hero_desc" class="text-xl font-light text-stone-300 max-w-2xl mx-auto">...</p>
-        </div>
-    </section>
-
-    <div class="bg-ink text-white border-b border-white/10">
-        <div class="max-w-7xl mx-auto grid grid-cols-3 divide-x divide-white/10 text-center py-8">
-            <div><span class="block text-4xl font-serif text-gold">80<span class="text-sm ml-1 text-stone-400">km</span></span><span class="text-[10px] uppercase tracking-widest text-stone-400">Lunghezza</span></div>
-            <div><span class="block text-4xl font-serif text-gold">5<span class="text-sm ml-1 text-stone-400">Borghi</span></span><span class="text-[10px] uppercase tracking-widest text-stone-400">Attraversati</span></div>
-            <div><span class="block text-4xl font-serif text-gold">1.2<span class="text-sm ml-1 text-stone-400">km</span></span><span class="text-[10px] uppercase tracking-widest text-stone-400">Dislivello</span></div>
-        </div>
-    </div>
-
-    <section class="py-24 px-6 max-w-7xl mx-auto grid lg:grid-cols-2 gap-16">
-        <div class="reveal">
-            <h2 data-content-id="cammino_intro_title" class="text-4xl font-serif text-ink mb-8">...</h2>
-            <div class="prose prose-lg text-stone-600 font-light mb-10">
-                <p data-content-id="cammino_intro_desc">...</p>
+            <div className="space-y-2 md:col-span-2">
+              <Label>Claim</Label>
+              <Input className="rounded-xl" value={site.tagline || ""} onChange={(e) => saveNow({ ...site, tagline: e.target.value })} />
             </div>
-            
-            <div class="mt-16 space-y-0 relative border-l-2 border-stone-200 ml-3">
-                <div class="pl-10 pb-12 relative">
-                    <div class="absolute -left-[9px] top-0 w-4 h-4 bg-gold rounded-full border-4 border-paper"></div>
-                    <span class="text-[10px] uppercase font-bold text-gold tracking-widest mb-1 block">Tappa 01</span>
-                    <h4 data-content-id="cammino_tappa1_title" class="font-serif text-xl text-ink mb-2">...</h4>
-                    <p data-content-id="cammino_tappa1_desc" class="text-sm text-stone-600">...</p>
-                </div>
-                <div class="pl-10 pb-12 relative">
-                    <div class="absolute -left-[9px] top-0 w-4 h-4 bg-ink rounded-full border-4 border-paper"></div>
-                    <span class="text-[10px] uppercase font-bold text-stone-400 tracking-widest mb-1 block">Tappa 02</span>
-                    <h4 data-content-id="cammino_tappa2_title" class="font-serif text-xl text-ink mb-2">...</h4>
-                    <p data-content-id="cammino_tappa2_desc" class="text-sm text-stone-600">...</p>
-                </div>
-                <div class="pl-10 pb-12 relative">
-                    <div class="absolute -left-[9px] top-0 w-4 h-4 bg-ink rounded-full border-4 border-paper"></div>
-                    <span class="text-[10px] uppercase font-bold text-stone-400 tracking-widest mb-1 block">Tappa 03</span>
-                    <h4 data-content-id="cammino_tappa3_title" class="font-serif text-xl text-ink mb-2">...</h4>
-                    <p data-content-id="cammino_tappa3_desc" class="text-sm text-stone-600">...</p>
-                </div>
-                <div class="pl-10 relative">
-                    <div class="absolute -left-[9px] top-0 w-4 h-4 bg-gold rounded-full border-4 border-paper"></div>
-                    <span class="text-[10px] uppercase font-bold text-stone-400 tracking-widest mb-1 block">Tappa 04</span>
-                    <h4 data-content-id="cammino_tappa4_title" class="font-serif text-xl text-ink mb-2">...</h4>
-                    <p data-content-id="cammino_tappa4_desc" class="text-sm text-stone-600">...</p>
-                </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label>Periodo consigliato</Label>
+              <Input className="rounded-xl" value={site.season || ""} onChange={(e) => saveNow({ ...site, season: e.target.value })} />
             </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        <div class="reveal sticky top-24 h-fit">
-            <div class="border-2 border-ink p-2 shadow-[10px_10px_0px_rgba(0,0,0,0.1)]">
-                <iframe frameBorder="0" scrolling="no" src="https://it.wikiloc.com/wikiloc/spatialArtifacts.do?event=view&id=201301484&measures=on&title=on&near=on&images=on&maptype=M" width="100%" height="600px" class="grayscale hover:grayscale-0 transition-all duration-700"></iframe>
+        <Card className="rounded-2xl shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-base">Immagini (hero + gallery)</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2 md:col-span-2">
+              <Label>Hero image URL</Label>
+              <Input
+                className="rounded-xl"
+                value={site.media?.heroImage || ""}
+                onChange={(e) => saveNow({ ...site, media: { ...(site.media || {}), heroImage: e.target.value } })}
+              />
             </div>
-        </div>
-    </section>
-
-    <section class="bg-forest-radial text-white py-24">
-        <div class="max-w-4xl mx-auto px-6">
-            <div class="text-center mb-16">
-                <span class="text-gold text-xs font-bold tracking-[0.3em] uppercase block mb-4">Ufficio Credenziali</span>
-                <h2 class="text-5xl font-serif">Richiedi il Passaporto</h2>
+            <div className="space-y-2 md:col-span-2">
+              <Label>Hero alt text</Label>
+              <Input
+                className="rounded-xl"
+                value={site.media?.heroAlt || ""}
+                onChange={(e) => saveNow({ ...site, media: { ...(site.media || {}), heroAlt: e.target.value } })}
+              />
             </div>
-            
-            <form action="https://formsubmit.co/comunediaviglianoumbro@gmail.com" method="POST" class="bg-white text-ink p-12 shadow-2xl relative rounded-3xl">
-                <div class="absolute top-0 right-0 w-16 h-16 bg-gold rounded-bl-[3rem]"></div>
-                
-                <input type="hidden" name="_next" value="https://visitaviglianoumbro.it/cammino.html?status=success">
-                
-                <div class="grid md:grid-cols-2 gap-8 mb-8">
-                    <div>
-                        <label class="block text-xs font-bold uppercase mb-2 text-stone-600">Nome</label>
-                        <input type="text" name="Nome" required class="form-input border-2 border-ink/10 focus:border-gold">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase mb-2 text-stone-600">Cognome</label>
-                        <input type="text" name="Cognome" required class="form-input border-2 border-ink/10 focus:border-gold">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase mb-2 text-stone-600">Email</label>
-                        <input type="email" name="Email" required class="form-input border-2 border-ink/10 focus:border-gold">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase mb-2 text-stone-600">Data Partenza</label>
-                        <input type="date" name="Data" required class="form-input border-2 border-ink/10 focus:border-gold">
-                    </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label>Gallery (una riga = URL | ALT)</Label>
+              <Textarea
+                className="min-h-[140px] rounded-xl"
+                value={(site.media?.gallery || []).map((x) => `${x.src} | ${x.alt || ""}`).join("\n")}
+                onChange={(e) => {
+                  const lines = e.target.value
+                    .split("\n")
+                    .map((x) => x.trim())
+                    .filter(Boolean)
+                    .map((row) => {
+                      const [src, ...rest] = row.split("|");
+                      return { src: (src || "").trim(), alt: rest.join("|").trim() };
+                    });
+                  saveNow({ ...site, media: { ...(site.media || {}), gallery: lines } });
+                }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-2xl shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-base">Mappa</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2 md:col-span-2">
+              <Label>URL iframe OpenStreetMap</Label>
+              <Input
+                className="rounded-xl"
+                value={site.map?.osmEmbedUrl || ""}
+                onChange={(e) => saveNow({ ...site, map: { ...(site.map || {}), osmEmbedUrl: e.target.value } })}
+              />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label>URL apertura mappa (link)</Label>
+              <Input
+                className="rounded-xl"
+                value={site.map?.osmOpenUrl || ""}
+                onChange={(e) => saveNow({ ...site, map: { ...(site.map || {}), osmOpenUrl: e.target.value } })}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-2xl shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-base">Tracce e materiali</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {(site.tracks || []).map((t, idx) => (
+              <div key={idx} className="rounded-2xl border bg-white p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="font-medium">Elemento {idx + 1}</div>
+                  <Button
+                    variant="outline"
+                    className="rounded-xl"
+                    onClick={() => saveNow({ ...site, tracks: (site.tracks || []).filter((_, i) => i !== idx) })}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" /> Rimuovi
+                  </Button>
                 </div>
-                
-                <div class="mb-8">
-                    <label class="block text-xs font-bold uppercase mb-4 text-stone-600">Modalità</label>
-                    <div class="flex gap-4">
-                        <label class="flex-1 flex items-center justify-center gap-2 cursor-pointer bg-paper px-6 py-4 border border-transparent hover:border-gold transition rounded-xl">
-                            <input type="radio" name="Tipo" value="Piedi" checked> 
-                            <span class="text-sm font-bold uppercase">A Piedi</span>
-                        </label>
-                        <label class="flex-1 flex items-center justify-center gap-2 cursor-pointer bg-paper px-6 py-4 border border-transparent hover:border-gold transition rounded-xl">
-                            <input type="radio" name="Tipo" value="Bici"> 
-                            <span class="text-sm font-bold uppercase">In Bici</span>
-                        </label>
-                    </div>
+                <div className="mt-3 grid gap-3 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>Nome</Label>
+                    <Input
+                      className="rounded-xl"
+                      value={t.name || ""}
+                      onChange={(e) => {
+                        const next = [...(site.tracks || [])];
+                        next[idx] = { ...t, name: e.target.value };
+                        saveNow({ ...site, tracks: next });
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Link</Label>
+                    <Input
+                      className="rounded-xl"
+                      value={t.file || ""}
+                      onChange={(e) => {
+                        const next = [...(site.tracks || [])];
+                        next[idx] = { ...t, file: e.target.value };
+                        saveNow({ ...site, tracks: next });
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label>Nota</Label>
+                    <Input
+                      className="rounded-xl"
+                      value={t.note || ""}
+                      onChange={(e) => {
+                        const next = [...(site.tracks || [])];
+                        next[idx] = { ...t, note: e.target.value };
+                        saveNow({ ...site, tracks: next });
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+            <Button
+              className="rounded-xl"
+              onClick={() => saveNow({ ...site, tracks: [...(site.tracks || []), { name: "Nuovo file", file: "#", note: "" }] })}
+            >
+              <Plus className="mr-2 h-4 w-4" /> Aggiungi elemento
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-2xl shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-base">Tappe</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {(site.stages || []).map((s, idx) => (
+              <div key={s.id || idx} className="rounded-2xl border bg-white p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="font-medium">{s.title || `Tappa ${idx + 1}`}</div>
+                  <Button
+                    variant="outline"
+                    className="rounded-xl"
+                    onClick={() => saveNow({ ...site, stages: (site.stages || []).filter((_, i) => i !== idx) })}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" /> Rimuovi
+                  </Button>
+                </div>
+                <div className="mt-3 grid gap-3 md:grid-cols-2">
+                  <div className="space-y-2 md:col-span-2">
+                    <Label>Titolo</Label>
+                    <Input
+                      className="rounded-xl"
+                      value={s.title || ""}
+                      onChange={(e) => {
+                        const next = [...(site.stages || [])];
+                        next[idx] = { ...s, title: e.target.value };
+                        saveNow({ ...site, stages: next });
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Km</Label>
+                    <Input
+                      className="rounded-xl"
+                      value={String(s.km ?? "")}
+                      onChange={(e) => {
+                        const next = [...(site.stages || [])];
+                        const v = e.target.value;
+                        next[idx] = { ...s, km: v === "" ? "" : Number(v) };
+                        saveNow({ ...site, stages: next });
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Tempo</Label>
+                    <Input
+                      className="rounded-xl"
+                      value={s.time || ""}
+                      onChange={(e) => {
+                        const next = [...(site.stages || [])];
+                        next[idx] = { ...s, time: e.target.value };
+                        saveNow({ ...site, stages: next });
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Difficoltà</Label>
+                    <Input
+                      className="rounded-xl"
+                      value={s.difficulty || ""}
+                      onChange={(e) => {
+                        const next = [...(site.stages || [])];
+                        next[idx] = { ...s, difficulty: e.target.value };
+                        saveNow({ ...site, stages: next });
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Dislivello</Label>
+                    <Input
+                      className="rounded-xl"
+                      value={s.elevation || ""}
+                      onChange={(e) => {
+                        const next = [...(site.stages || [])];
+                        next[idx] = { ...s, elevation: e.target.value };
+                        saveNow({ ...site, stages: next });
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label>Link GPX</Label>
+                    <Input
+                      className="rounded-xl"
+                      value={s.gpx || ""}
+                      onChange={(e) => {
+                        const next = [...(site.stages || [])];
+                        next[idx] = { ...s, gpx: e.target.value };
+                        saveNow({ ...site, stages: next });
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label>Highlights (una riga = un punto)</Label>
+                    <Textarea
+                      className="min-h-[90px] rounded-xl"
+                      value={(s.highlights || []).join("\n")}
+                      onChange={(e) => {
+                        const lines = e.target.value
+                          .split("\n")
+                          .map((x) => x.trim())
+                          .filter(Boolean);
+                        const next = [...(site.stages || [])];
+                        next[idx] = { ...s, highlights: lines };
+                        saveNow({ ...site, stages: next });
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label>Servizi (una riga = un servizio)</Label>
+                    <Textarea
+                      className="min-h-[90px] rounded-xl"
+                      value={(s.services || []).join("\n")}
+                      onChange={(e) => {
+                        const lines = e.target.value
+                          .split("\n")
+                          .map((x) => x.trim())
+                          .filter(Boolean);
+                        const next = [...(site.stages || [])];
+                        next[idx] = { ...s, services: lines };
+                        saveNow({ ...site, stages: next });
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+            <Button
+              className="rounded-xl"
+              onClick={() => {
+                const nextStage = {
+                  id: uid("tappa"),
+                  title: `Nuova tappa ${(site.stages || []).length + 1}`,
+                  km: 0,
+                  time: "",
+                  difficulty: "",
+                  elevation: "",
+                  highlights: [],
+                  services: [],
+                  gpx: "#",
+                };
+                saveNow({ ...site, stages: [...(site.stages || []), nextStage] });
+              }}
+            >
+              <Plus className="mr-2 h-4 w-4" /> Aggiungi tappa
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-2xl shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-base">Esperienze</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {(site.experiences || []).map((ex, idx) => (
+              <div key={idx} className="rounded-2xl border bg-white p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="font-medium">{ex.title || `Esperienza ${idx + 1}`}</div>
+                  <Button
+                    variant="outline"
+                    className="rounded-xl"
+                    onClick={() => saveNow({ ...site, experiences: (site.experiences || []).filter((_, i) => i !== idx) })}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" /> Rimuovi
+                  </Button>
+                </div>
+                <div className="mt-3 grid gap-3 md:grid-cols-2">
+                  <div className="space-y-2 md:col-span-2">
+                    <Label>Titolo</Label>
+                    <Input
+                      className="rounded-xl"
+                      value={ex.title || ""}
+                      onChange={(e) => {
+                        const next = [...(site.experiences || [])];
+                        next[idx] = { ...ex, title: e.target.value };
+                        saveNow({ ...site, experiences: next });
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Chi</Label>
+                    <Input
+                      className="rounded-xl"
+                      value={ex.who || ""}
+                      onChange={(e) => {
+                        const next = [...(site.experiences || [])];
+                        next[idx] = { ...ex, who: e.target.value };
+                        saveNow({ ...site, experiences: next });
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Durata</Label>
+                    <Input
+                      className="rounded-xl"
+                      value={ex.duration || ""}
+                      onChange={(e) => {
+                        const next = [...(site.experiences || [])];
+                        next[idx] = { ...ex, duration: e.target.value };
+                        saveNow({ ...site, experiences: next });
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label>Per chi (una riga = un tag)</Label>
+                    <Textarea
+                      className="min-h-[80px] rounded-xl"
+                      value={(ex.for || []).join("\n")}
+                      onChange={(e) => {
+                        const lines = e.target.value
+                          .split("\n")
+                          .map((x) => x.trim())
+                          .filter(Boolean);
+                        const next = [...(site.experiences || [])];
+                        next[idx] = { ...ex, for: lines };
+                        saveNow({ ...site, experiences: next });
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+            <Button
+              className="rounded-xl"
+              onClick={() => saveNow({ ...site, experiences: [...(site.experiences || []), { title: "Nuova esperienza", who: "", duration: "", for: [] }] })}
+            >
+              <Plus className="mr-2 h-4 w-4" /> Aggiungi esperienza
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-2xl shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-base">Eventi</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {(site.events || []).map((ev, idx) => (
+              <div key={idx} className="rounded-2xl border bg-white p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="font-medium">{ev.title || `Evento ${idx + 1}`}</div>
+                  <Button
+                    variant="outline"
+                    className="rounded-xl"
+                    onClick={() => saveNow({ ...site, events: (site.events || []).filter((_, i) => i !== idx) })}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" /> Rimuovi
+                  </Button>
+                </div>
+                <div className="mt-3 grid gap-3 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>Periodo/Data</Label>
+                    <Input
+                      className="rounded-xl"
+                      value={ev.date || ""}
+                      onChange={(e) => {
+                        const next = [...(site.events || [])];
+                        next[idx] = { ...ev, date: e.target.value };
+                        saveNow({ ...site, events: next });
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Titolo</Label>
+                    <Input
+                      className="rounded-xl"
+                      value={ev.title || ""}
+                      onChange={(e) => {
+                        const next = [...(site.events || [])];
+                        next[idx] = { ...ev, title: e.target.value };
+                        saveNow({ ...site, events: next });
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label>Descrizione</Label>
+                    <Textarea
+                      className="min-h-[80px] rounded-xl"
+                      value={ev.desc || ""}
+                      onChange={(e) => {
+                        const next = [...(site.events || [])];
+                        next[idx] = { ...ev, desc: e.target.value };
+                        saveNow({ ...site, events: next });
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+            <Button
+              className="rounded-xl"
+              onClick={() => saveNow({ ...site, events: [...(site.events || []), { date: "", title: "Nuovo evento", desc: "" }] })}
+            >
+              <Plus className="mr-2 h-4 w-4" /> Aggiungi evento
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-2xl shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-base">Operatori (categorie + elementi)</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {(site.operators || []).map((g, gIdx) => (
+              <div key={gIdx} className="rounded-2xl border bg-white p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="font-medium">Categoria</div>
+                  <Button
+                    variant="outline"
+                    className="rounded-xl"
+                    onClick={() => saveNow({ ...site, operators: (site.operators || []).filter((_, i) => i !== gIdx) })}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" /> Rimuovi categoria
+                  </Button>
                 </div>
 
-                <div class="flex items-center justify-between border-t border-ink/10 pt-8">
-                    <label class="flex items-center gap-2 text-xs text-stone-600">
-                        <input type="checkbox" required> Accetto il trattamento dati
-                    </label>
-                    <button type="submit" class="bg-ink text-white px-10 py-4 font-bold uppercase tracking-widest text-xs hover:bg-gold transition-colors rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1">
-                        Invia Richiesta
-                    </button>
+                <div className="mt-3 space-y-2">
+                  <Label>Nome categoria</Label>
+                  <Input
+                    className="rounded-xl"
+                    value={g.type || ""}
+                    onChange={(e) => {
+                      const next = [...(site.operators || [])];
+                      next[gIdx] = { ...g, type: e.target.value };
+                      saveNow({ ...site, operators: next });
+                    }}
+                  />
                 </div>
-            </form>
-        </div>
-    </section>
 
-    <footer class="bg-forest-radial text-stone py-8 text-center text-xs border-t border-white/10">
-        &copy; 2025 Visit Avigliano Umbro
-    </footer>
+                <div className="mt-4 space-y-3">
+                  <div className="text-sm font-medium">Elementi</div>
+                  {(g.items || []).map((it, itIdx) => (
+                    <div key={itIdx} className="rounded-2xl border bg-white p-4">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="font-medium">Elemento {itIdx + 1}</div>
+                        <Button
+                          variant="outline"
+                          className="rounded-xl"
+                          onClick={() => {
+                            const nextOps = [...(site.operators || [])];
+                            const nextItems = (g.items || []).filter((_, i) => i !== itIdx);
+                            nextOps[gIdx] = { ...g, items: nextItems };
+                            saveNow({ ...site, operators: nextOps });
+                          }}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" /> Rimuovi
+                        </Button>
+                      </div>
 
-    <script src="script.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const logo = document.getElementById('nav_logo');
-            if(logo && window.cmsData && window.cmsData['nav_logo']) {
-                logo.src = window.cmsData['nav_logo'].img;
-                logo.classList.remove('opacity-0');
-            }
-            
-            const revealElements = document.querySelectorAll('.reveal');
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if(entry.isIntersecting){
-                        entry.target.classList.add('active');
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, { threshold: 0.1 });
-            revealElements.forEach(el => observer.observe(el));
-        });
-    </script>
-</body>
-</html>
+                      <div className="mt-3 grid gap-3 md:grid-cols-3">
+                        <div className="space-y-2">
+                          <Label>Nome</Label>
+                          <Input
+                            className="rounded-xl"
+                            value={it.name || ""}
+                            onChange={(e) => {
+                              const nextOps = [...(site.operators || [])];
+                              const nextItems = [...(g.items || [])];
+                              nextItems[itIdx] = { ...it, name: e.target.value };
+                              nextOps[gIdx] = { ...g, items: nextItems };
+           

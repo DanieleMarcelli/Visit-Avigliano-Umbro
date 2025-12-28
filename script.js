@@ -1,25 +1,33 @@
-// CONFIGURAZIONE URL
-const CSV_EVENTS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=0&single=true&output=csv";
-const CSV_CONTENT = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=643581002&single=true&output=csv";
+/**
+ * Visit Avigliano - Main JavaScript
+ * Portale Turistico Ufficiale
+ * Optimized for UX, accessibility, and performance
+ */
 
-// STATO
-let cmsData = {}; 
+// ============================================================
+// CONFIGURATION
+// ============================================================
+const CONFIG = {
+    CSV_EVENTS: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=0&single=true&output=csv",
+    CSV_CONTENT: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIXJyYXgON5vC3u4ri0duZ3MMue3ZeqfvU_j52iVmJMpWfzuzedidIob5KyTw71baMKZXNgTCiaYce/pub?gid=643581002&single=true&output=csv",
+    PLACEHOLDER_IMAGE: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=800",
+    MAX_SLIDER_EVENTS: 6
+};
+
+// ============================================================
+// STATE
+// ============================================================
+let cmsData = {};
 let allEvents = [];
 let filteredEvents = [];
 let currentCategory = 'Tutti';
 
-// SCROLL REVEAL OBSERVER
-const observerOptions = { root: null, rootMargin: '0px', threshold: 0.1 };
-const observer = new IntersectionObserver((entries, observer) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('active');
-            observer.unobserve(entry.target);
-        }
-    });
-}, observerOptions);
+// Expose cmsData globally
+window.cmsData = cmsData;
 
-// PARSER CSV
+// ============================================================
+// UTILITIES
+// ============================================================
 function parseCSV(text) {
     const lines = text.split('\n').filter(l => l.trim() !== '');
     const result = [];
@@ -31,13 +39,13 @@ function parseCSV(text) {
         let insideQuotes = false;
         for (let j = 0; j < line.length; j++) {
             const char = line[j];
-            if (char === '"') { insideQuotes = !insideQuotes; } 
-            else if (char === ',' && !insideQuotes) { row.push(currentCell.trim()); currentCell = ''; } 
+            if (char === '"') { insideQuotes = !insideQuotes; }
+            else if (char === ',' && !insideQuotes) { row.push(currentCell.trim()); currentCell = ''; }
             else { currentCell += char; }
         }
         row.push(currentCell.trim());
         const cleanedRow = row.map(cell => cell.replace(/^"|"$/g, '').replace(/""/g, '"'));
-        if(cleanedRow.length > 0 && cleanedRow[0] !== '') result.push(cleanedRow);
+        if (cleanedRow.length > 0 && cleanedRow[0] !== '') result.push(cleanedRow);
     }
     return result;
 }
@@ -47,45 +55,78 @@ function formatUrl(url) {
     if (url.includes('drive.google.com') || url.includes('/d/')) {
         const idMatch = url.match(/\/d\/(.+?)\/|id=(.+?)&|id=(.+?)$/);
         const id = idMatch ? (idMatch[1] || idMatch[2] || idMatch[3]) : null;
-        if (id) return `https://drive.google.com/thumbnail?id=${id}&sz=w1000`;
+        if (id) return `https://drive.google.com/thumbnail?id=${id}&sz=w1200`;
     }
     return url;
 }
 
-// CARICAMENTO CMS
+function formatDate(dateStr, options = {}) {
+    const date = new Date(dateStr);
+    if (isNaN(date)) return null;
+    const defaultOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    return date.toLocaleDateString('it-IT', { ...defaultOptions, ...options });
+}
+
+function getDateParts(dateStr) {
+    const date = new Date(dateStr);
+    if (isNaN(date)) return { day: '--', month: '---' };
+    return {
+        day: date.getDate(),
+        month: date.toLocaleString('it-IT', { month: 'short' }).toUpperCase()
+    };
+}
+
+// ============================================================
+// CMS LOADER
+// ============================================================
 async function initCMS() {
     try {
-        const resp = await fetch(CSV_CONTENT);
-        if(!resp.ok) throw new Error("Errore CSV Content");
+        const resp = await fetch(CONFIG.CSV_CONTENT);
+        if (!resp.ok) throw new Error("Failed to load CMS");
         const text = await resp.text();
         const rows = parseCSV(text);
+        
         rows.forEach(row => {
             const id = row[0];
             const textContent = row[1];
             const imgUrl = formatUrl(row[2]);
             if (!id) return;
+            
             cmsData[id] = { text: textContent, img: imgUrl };
-            const els = document.querySelectorAll(`[data-content-id="${id}"]`);
-            els.forEach(el => {
+            window.cmsData = cmsData;
+            
+            const elements = document.querySelectorAll(`[data-content-id="${id}"]`);
+            elements.forEach(el => {
                 if (imgUrl) {
-                    if (el.tagName === 'IMG') { el.src = imgUrl; el.onload = () => el.classList.remove('opacity-0'); if(el.complete) el.classList.remove('opacity-0'); } 
-                    else { el.style.backgroundImage = `url('${imgUrl}')`; el.classList.remove('opacity-0'); }
+                    if (el.tagName === 'IMG') {
+                        el.src = imgUrl;
+                        el.onload = () => el.classList.remove('opacity-0');
+                    } else {
+                        el.style.backgroundImage = `url('${imgUrl}')`;
+                    }
                 }
-                if (textContent && !imgUrl) el.innerHTML = textContent;
+                if (textContent && el.tagName !== 'IMG') {
+                    el.innerHTML = textContent;
+                }
             });
         });
-    } catch (err) { console.error("CMS Error:", err); }
+    } catch (err) {
+        console.error("CMS Error:", err);
+    }
 }
 
-// CARICAMENTO EVENTI
+// ============================================================
+// EVENTS MANAGER
+// ============================================================
 async function initEvents() {
     try {
-        const resp = await fetch(CSV_EVENTS);
-        if(!resp.ok) throw new Error("Errore CSV Eventi");
+        const resp = await fetch(CONFIG.CSV_EVENTS);
+        if (!resp.ok) throw new Error("Failed to load events");
         const text = await resp.text();
         const rows = parseCSV(text);
+        
         const today = new Date();
-        today.setHours(0,0,0,0);
+        today.setHours(0, 0, 0, 0);
         
         allEvents = rows.map((row, idx) => ({
             id: `evt-${idx}`,
@@ -96,195 +137,305 @@ async function initEvents() {
             desc: row[4] || '',
             loc: row[5] || 'Avigliano Umbro',
             cat: row[6] || 'Evento',
-            img: formatUrl(row[7]) || 'https://images.unsplash.com/photo-1514525253440-b393452e8d26?q=80&w=800',
-            organizer: row[8] || ''
+            img: formatUrl(row[7]) || CONFIG.PLACEHOLDER_IMAGE,
+            organizer: row[8] || 'Comune di Avigliano Umbro'
         })).filter(e => {
             const d = new Date(e.dateStr);
             return !isNaN(d) && d >= today;
-        }).sort((a,b) => new Date(a.dateStr) - new Date(b.dateStr));
+        }).sort((a, b) => new Date(a.dateStr) - new Date(b.dateStr));
         
         renderFilters();
         filterEvents('Tutti');
-    } catch (err) { 
-        console.error("Events Error:", err); 
+    } catch (err) {
+        console.error("Events Error:", err);
         const slider = document.getElementById('events-slider');
-        if(slider) slider.innerHTML = '<div class="w-full text-center text-stone-400 py-10">Errore caricamento eventi.</div>';
+        if (slider) slider.innerHTML = '<div class="w-full text-center text-white/60 py-10">Errore nel caricamento degli eventi.</div>';
     }
 }
 
-// FILTRI
 function renderFilters() {
     const container = document.getElementById('category-filters');
-    if(!container) return;
+    if (!container) return;
+    
     const categories = ['Tutti', ...new Set(allEvents.map(e => e.cat).filter(c => c))];
-    container.innerHTML = categories.map(cat => `
-        <button onclick="filterEvents('${cat}')" class="filter-btn px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap ${cat === currentCategory ? 'bg-stone-900 text-white border-stone-900' : 'bg-white text-stone-600 border-stone-200 hover:border-bronze-400'}">${cat}</button>
-    `).join('');
+    
+    // Determina se siamo sulla pagina eventi (sfondo chiaro) o homepage (sfondo scuro)
+    const isEventsPage = document.getElementById('events-page-grid') !== null;
+    
+    container.innerHTML = categories.map(cat => {
+        const isActive = cat === currentCategory;
+        let classes;
+        
+        if (isEventsPage) {
+            // Stile per pagina eventi (sfondo chiaro)
+            classes = isActive 
+                ? 'bg-forest text-white border-forest' 
+                : 'bg-white text-stone border-sand hover:border-forest hover:text-forest';
+        } else {
+            // Stile per homepage (sfondo scuro)
+            classes = isActive 
+                ? 'bg-white text-forest border-white' 
+                : 'bg-transparent text-white/60 border-white/20 hover:border-white hover:text-white';
+        }
+        
+        return `
+            <button 
+                onclick="filterEvents('${cat}')" 
+                class="filter-btn px-4 py-2 rounded-full text-xs font-semibold tracking-wider uppercase border transition-all ${classes}"
+                aria-pressed="${isActive}"
+            >
+                ${cat}
+            </button>
+        `;
+    }).join('');
 }
 
 window.filterEvents = (category) => {
     currentCategory = category;
     filteredEvents = category === 'Tutti' ? allEvents : allEvents.filter(e => e.cat === category);
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        if(btn.innerText === category) btn.className = "filter-btn px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap bg-stone-900 text-white border-stone-900";
-        else btn.className = "filter-btn px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap bg-white text-stone-600 border-stone-200 hover:border-bronze-400";
-    });
+    renderFilters();
     renderEvents();
 };
 
-// --- GENERATORE CARD UNIFICATO (CON FIX LEGGIBILITÀ) ---
-function createCardHTML(e, isGrid = false) {
-    const d = new Date(e.dateStr);
-    const day = d.getDate();
-    const month = d.toLocaleString('it-IT', { month: 'short' }).toUpperCase();
+function createEventCard(event, isGrid = false) {
+    const { day, month } = getDateParts(event.dateStr);
+    // Card verticale 7:10 - larghezza fissa per slider, auto per grid
+    const containerClass = isGrid 
+        ? 'w-full aspect-[7/10]' 
+        : 'w-[220px] sm:w-[240px] aspect-[7/10] flex-shrink-0 snap-start';
     
-    const containerClass = isGrid ? 'w-full h-[400px]' : 'w-[280px] h-[400px] shrink-0 snap-center';
+    // Stile bordo diverso per grid (sfondo chiaro) vs slider (sfondo scuro)
+    const borderClass = isGrid 
+        ? 'border-sand hover:border-terracotta shadow-md hover:shadow-xl' 
+        : 'border-white/20 hover:border-gold';
     
     return `
-    <div class="${containerClass} relative rounded-2xl overflow-hidden group cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-500 bg-stone-900 border border-white/20 mx-auto" onclick="openModal('${e.id}')">
+    <article 
+        class="${containerClass} relative rounded-2xl overflow-hidden cursor-pointer border ${borderClass} transition-all duration-500 hover:-translate-y-2 group"
+        onclick="openModal('${event.id}')"
+        role="button"
+        tabindex="0"
+        aria-label="Scopri l'evento: ${event.title}"
+        onkeypress="if(event.key==='Enter')openModal('${event.id}')"
+    >
+        <!-- Immagine full-bleed verticale -->
+        <img 
+            src="${event.img}" 
+            alt="${event.title}"
+            class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            loading="lazy"
+        >
         
-        <img src="${e.img}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-100">
+        <!-- Overlay gradient -->
+        <div class="absolute inset-0 bg-gradient-to-t from-ink via-ink/60 to-transparent"></div>
         
-        <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent z-10 pointer-events-none"></div>
+        <!-- Category badge -->
+        <span class="absolute top-3 right-3 px-3 py-1 rounded-full text-[9px] font-bold tracking-wider uppercase bg-gold text-ink shadow-lg">
+            ${event.cat}
+        </span>
         
-        <div class="absolute top-4 right-4 bg-gold text-ink border border-gold px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest shadow-sm z-20">
-            ${e.cat}
+        <!-- Date badge -->
+        <div class="absolute top-3 left-3 flex flex-col items-center px-3 py-2 rounded-xl bg-white/95 text-ink shadow-lg">
+            <span class="text-2xl font-serif font-semibold leading-none">${day}</span>
+            <span class="text-[9px] font-bold tracking-wider uppercase text-terracotta">${month}</span>
         </div>
-
-        <div class="absolute bottom-0 left-0 w-full p-6 text-white transition-all duration-500 transform translate-y-[10px] group-hover:translate-y-0 z-20">
-            
-            <div class="flex items-start gap-3 mb-2 text-gold">
-                <div class="flex flex-col items-center leading-none border-r border-white/30 pr-3">
-                    <span class="text-3xl font-serif font-bold text-white">${day}</span>
-                    <span class="text-[9px] uppercase tracking-widest text-white/80">${month}</span>
-                </div>
-                <div class="flex flex-col justify-center gap-1">
-                    <div class="flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold text-white/90">
-                        <i data-lucide="clock" class="w-3 h-3 text-gold"></i> ${e.time}
-                    </div>
-                    <div class="flex items-center gap-1 text-[9px] uppercase tracking-wider text-stone-300 line-clamp-1">
-                        <i data-lucide="map-pin" class="w-3 h-3 text-gold"></i> ${e.loc}
-                    </div>
-                </div>
+        
+        <!-- Content overlay -->
+        <div class="absolute bottom-0 left-0 right-0 p-5 text-white">
+            <div class="flex flex-col gap-2 mb-3 text-[11px] text-white/80">
+                <span class="flex items-center gap-1.5">
+                    <i data-lucide="clock" class="w-3 h-3 text-gold"></i>
+                    ${event.time}
+                </span>
+                <span class="flex items-center gap-1.5">
+                    <i data-lucide="map-pin" class="w-3 h-3 text-gold"></i>
+                    ${event.loc}
+                </span>
             </div>
-
-            <h3 class="text-xl font-serif leading-tight mb-1 group-hover:text-gold transition-colors line-clamp-2 drop-shadow-md text-white">${e.title}</h3>
-            ${e.subtitle ? `<p class="text-xs text-stone-300 font-light italic line-clamp-1 mb-2">${e.subtitle}</p>` : ''}
             
-            <div class="h-0 opacity-0 group-hover:h-auto group-hover:opacity-100 transition-all duration-500 overflow-hidden">
-                <p class="text-xs text-stone-300 font-light mb-3 line-clamp-2 border-t border-white/20 pt-2">${e.desc}</p>
-                <span class="text-[10px] font-bold uppercase tracking-widest text-gold border-b border-gold/50 pb-0.5">Leggi tutto</span>
-            </div>
+            <h3 class="text-lg font-serif text-white leading-tight line-clamp-2 group-hover:text-gold transition-colors">${event.title}</h3>
+            ${event.subtitle ? `<p class="text-xs text-white/60 italic line-clamp-1 mt-1">${event.subtitle}</p>` : ''}
         </div>
-    </div>`;
+    </article>`;
 }
 
-// RENDER (Gestisce Home e Pagina Eventi)
 function renderEvents() {
-    const sliderContainer = document.getElementById('events-slider'); // Home Slider
-    const gridContainer = document.getElementById('events-page-grid'); // Eventi Page
-    const homeGridContainer = document.getElementById('all-events-grid'); // Home Expanded
+    const sliderContainer = document.getElementById('events-slider');
+    const gridContainer = document.getElementById('events-page-grid');
     
-    // HOME SLIDER
+    // Home slider
     if (sliderContainer) {
-        sliderContainer.innerHTML = '';
-        const displayEvents = filteredEvents.slice(0, 6);
+        const displayEvents = filteredEvents.slice(0, CONFIG.MAX_SLIDER_EVENTS);
+        
         if (displayEvents.length === 0) {
-            sliderContainer.innerHTML = '<div class="w-full text-center text-stone-400 py-10 font-serif italic">Nessun evento trovato.</div>';
+            sliderContainer.innerHTML = '<div class="w-full text-center text-white/60 py-10 font-serif italic">Nessun evento trovato in questa categoria.</div>';
         } else {
-            displayEvents.forEach(e => sliderContainer.insertAdjacentHTML('beforeend', createCardHTML(e)));
+            sliderContainer.innerHTML = displayEvents.map(e => createEventCard(e)).join('');
         }
         
-        // Bottone "Scopri Tutti"
         const loadBtn = document.getElementById('load-more-btn');
-        if(loadBtn) loadBtn.classList.toggle('hidden', filteredEvents.length <= 6);
-    }
-
-    // PAGINA EVENTI.HTML
-    if (gridContainer) {
-        gridContainer.innerHTML = '';
-        if (filteredEvents.length === 0) {
-            gridContainer.innerHTML = '<div class="col-span-full text-center py-20 text-stone-500 font-serif text-xl">Nessun evento in questa categoria.</div>';
-        } else {
-            filteredEvents.forEach(e => gridContainer.insertAdjacentHTML('beforeend', createCardHTML(e, true)));
-        }
+        if (loadBtn) loadBtn.classList.toggle('hidden', filteredEvents.length <= CONFIG.MAX_SLIDER_EVENTS);
     }
     
-    // Re-inizializza icone
-    if(window.lucide) window.lucide.createIcons();
+    // Events page grid
+    if (gridContainer) {
+        if (filteredEvents.length === 0) {
+            gridContainer.innerHTML = '<div class="col-span-full text-center py-20 text-stone font-serif text-xl">Nessun evento in questa categoria.</div>';
+        } else {
+            gridContainer.innerHTML = filteredEvents.map(e => createEventCard(e, true)).join('');
+        }
+        
+        // Update count
+        const countEl = document.getElementById('events-count');
+        if (countEl) countEl.textContent = filteredEvents.length;
+    }
+    
+    if (window.lucide) lucide.createIcons();
 }
 
-// RENDER ESPANSIONE HOME (VEDI TUTTI)
-window.showAllEvents = () => {
-    const grid = document.getElementById('all-events-grid');
-    if(!grid) return;
-    grid.innerHTML = '';
-    
-    const remaining = filteredEvents.slice(6);
-    remaining.forEach(e => {
-        grid.insertAdjacentHTML('beforeend', createCardHTML(e, true)); 
-    });
-    
-    grid.classList.remove('hidden');
-    document.getElementById('load-more-btn').classList.add('hidden');
-    if(window.lucide) window.lucide.createIcons();
-};
-
+// ============================================================
 // MODAL
+// ============================================================
 window.openModal = (baseId) => {
     let content = {};
-    const evt = allEvents.find(e => e.id === baseId);
+    const event = allEvents.find(e => e.id === baseId);
     
-    if (evt) {
-        const d = new Date(evt.dateStr);
-        const fullDate = d.toLocaleDateString('it-IT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        content = { title: evt.title, desc: evt.desc, img: evt.img, subtitle: evt.subtitle || 'Evento in programma', category: evt.cat, time: `${fullDate} | Ore ${evt.time}`, location: evt.loc, organizer: evt.organizer };
-    } else {
-        const titleKey = baseId + "_title", descKey = baseId + "_desc", imgKey = baseId + "_img";
+    if (event) {
+        const fullDate = formatDate(event.dateStr);
         content = {
-            title: cmsData[baseId]?.text || (cmsData[titleKey]?.text) || "Dettaglio", // Fix: usa .text per titolo base
-            desc: cmsData[baseId]?.text || (cmsData[descKey]?.text) || "",
-            img: cmsData[baseId]?.img || (cmsData[imgKey]?.img) || "",
-            subtitle: "Territorio & Cultura", category: "Info", time: "Sempre aperto", location: "Avigliano Umbro", organizer: "Comune di Avigliano Umbro"
+            title: event.title,
+            desc: event.desc,
+            img: event.img,
+            subtitle: event.subtitle || 'Evento in programma',
+            category: event.cat,
+            time: `${fullDate} | Ore ${event.time}`,
+            location: event.loc,
+            organizer: event.organizer
+        };
+    } else {
+        const titleKey = `${baseId}_title`;
+        const descKey = `${baseId}_desc`;
+        const imgKey = `${baseId}_img`;
+        
+        content = {
+            title: cmsData[titleKey]?.text || cmsData[baseId]?.text || "Dettaglio",
+            desc: cmsData[descKey]?.text || "",
+            img: cmsData[imgKey]?.img || cmsData[baseId]?.img || "",
+            subtitle: "Territorio & Cultura",
+            category: "Info",
+            time: "Sempre accessibile",
+            location: "Avigliano Umbro",
+            organizer: "Comune di Avigliano Umbro"
         };
     }
     
-    if(document.getElementById('modal-title')) {
-        document.getElementById('modal-title').innerHTML = content.title;
-        document.getElementById('modal-subtitle').innerHTML = content.subtitle;
-        document.getElementById('modal-desc').innerHTML = content.desc ? content.desc.replace(/\n/g, '<br>') : '';
-        document.getElementById('modal-category').innerHTML = content.category;
-        
-        const timeEl = document.getElementById('modal-time'); if(timeEl) timeEl.innerHTML = content.time;
-        const locEl = document.getElementById('modal-location'); if(locEl) locEl.innerHTML = content.location;
-        const orgEl = document.getElementById('modal-organizer'); if(orgEl) orgEl.innerHTML = content.organizer;
-        
-        document.getElementById('modal-img').src = content.img || 'https://via.placeholder.com/800x600';
-        document.getElementById('info-modal').classList.remove('hidden');
+    const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.innerHTML = val; };
+    
+    setEl('modal-title', content.title);
+    setEl('modal-subtitle', content.subtitle);
+    setEl('modal-desc', content.desc ? content.desc.replace(/\n/g, '<br>') : '');
+    setEl('modal-category', content.category);
+    setEl('modal-time', content.time);
+    setEl('modal-location', content.location);
+    setEl('modal-organizer', content.organizer);
+    
+    const modalImg = document.getElementById('modal-img');
+    if (modalImg) modalImg.src = content.img || CONFIG.PLACEHOLDER_IMAGE;
+    
+    const modal = document.getElementById('info-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
+        modal.querySelector('button')?.focus();
     }
+    
+    if (window.lucide) lucide.createIcons();
 };
 
 window.closeModal = () => {
-    document.getElementById('info-modal').classList.add('hidden');
-    document.body.style.overflow = '';
+    const modal = document.getElementById('info-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
 };
 
-// INIT
-document.addEventListener('DOMContentLoaded', () => {
-    initCMS();
-    initEvents();
-    const revealElements = document.querySelectorAll('.reveal');
-    const obs = new IntersectionObserver((entries) => {
+// ============================================================
+// MOBILE MENU
+// ============================================================
+window.toggleMobileMenu = () => {
+    const menu = document.getElementById('mobile-menu');
+    const btn = document.getElementById('mobile-menu-btn');
+    const isHidden = menu.classList.contains('hidden');
+    
+    menu.classList.toggle('hidden');
+    if (btn) btn.setAttribute('aria-expanded', isHidden);
+    document.body.style.overflow = isHidden ? 'hidden' : '';
+};
+
+// ============================================================
+// SCROLL EFFECTS
+// ============================================================
+function handleNavScroll() {
+    const nav = document.getElementById('navbar');
+    if (!nav) return;
+    
+    if (window.scrollY > 100) {
+        nav.classList.add('bg-forest/95', 'backdrop-blur-xl', 'shadow-lg');
+    } else {
+        nav.classList.remove('bg-forest/95', 'backdrop-blur-xl', 'shadow-lg');
+    }
+}
+
+function initScrollReveal() {
+    const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('active');
-                obs.unobserve(entry.target);
+                observer.unobserve(entry.target);
             }
         });
-    });
-    revealElements.forEach(el => obs.observe(el));
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
     
-    const logo = document.getElementById('nav_logo');
-    if(logo && cmsData['nav_logo']) logo.src = cmsData['nav_logo'].img;
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+}
+
+// ============================================================
+// KEYBOARD NAVIGATION
+// ============================================================
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('info-modal');
+        const menu = document.getElementById('mobile-menu');
+        
+        if (modal && !modal.classList.contains('hidden')) {
+            closeModal();
+        } else if (menu && !menu.classList.contains('hidden')) {
+            toggleMobileMenu();
+        }
+    }
+});
+
+// ============================================================
+// INITIALIZATION
+// ============================================================
+document.addEventListener('DOMContentLoaded', async () => {
+    // Initialize Lucide icons
+    if (window.lucide) lucide.createIcons();
+    
+    // Scroll effects
+    handleNavScroll();
+    window.addEventListener('scroll', handleNavScroll);
+    
+    // Scroll reveal
+    initScrollReveal();
+    
+    // Load CMS and Events
+    await initCMS();
+    await initEvents();
+    
+    // Final icon refresh
+    if (window.lucide) lucide.createIcons();
+    
+    console.log('✓ Visit Avigliano initialized');
 });

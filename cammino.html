@@ -5,48 +5,67 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cammino del Lago Tiberino | Visit Avigliano</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  
   <script src="https://unpkg.com/lucide@latest"></script>
+  
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            cream:'#FAF8F5', sand:'#E8E2D9', terracotta:'#C4775C', forest:'#1A3D2E',
-            ink:'#1C1C1C', stone:'#6B6B6B', gold:'#B8965A'
+            paper: '#F8F5F2',       
+            ink: '#0F291E',         
+            forest: '#14382C',      
+            gold: '#C5A059',        
+            stone: '#8C8C8C',       
+            sand: '#E8E2D9',
+            white: '#FFFFFF'
           },
           fontFamily: {
-            sans:['Outfit','system-ui','sans-serif'],
-            serif:['Cormorant Garamond','Georgia','serif']
+            sans: ['Barlow', 'sans-serif'], 
+            serif: ['Playfair Display', 'serif'], 
+          },
+          backgroundImage: {
+            'forest-radial': 'radial-gradient(circle at 50% 0%, #1A4D3E 0%, #051A12 80%)',
+            'forest-gradient': 'linear-gradient(to bottom, #14382C, #0F291E)'
           }
         }
       }
     }
   </script>
-  <link rel="stylesheet" href="styles.css">
+
+  <style>
+      .hide-scroll::-webkit-scrollbar { display: none; }
+      .reveal { opacity: 0; transform: translateY(30px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+      .reveal.active { opacity: 1; transform: translateY(0); }
+      .reveal-delay-1 { transition-delay: 0.1s; }
+      .card-lift { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+      .card-lift:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); border-color: #C5A059; }
+  </style>
 </head>
 
-<body class="bg-cream text-ink font-sans antialiased overflow-x-hidden">
+<body class="bg-paper text-ink font-sans antialiased overflow-x-hidden selection:bg-gold selection:text-white">
 
-  <!-- NAV -->
-  <nav id="navbar" class="fixed top-0 w-full z-50 transition-all duration-500 px-4 sm:px-6 lg:px-8 py-4">
+  <nav id="navbar" class="fixed top-0 w-full z-50 transition-all duration-500 px-4 sm:px-6 lg:px-8 py-4 bg-forest/95 backdrop-blur shadow-lg border-b border-white/10">
     <div class="flex justify-between items-center">
       <a href="index.html" class="flex items-center gap-3 group">
-        <div class="w-12 h-12 rounded-full bg-white/90 p-0.5 shadow-lg border-2 border-gold/40 overflow-hidden">
+        <div class="w-12 h-12 rounded-full bg-white/90 p-0.5 shadow-lg border-2 border-gold/40 overflow-hidden group-hover:scale-105 transition-transform">
           <img id="nav_logo" data-content-id="nav_logo" src="" alt="Logo" class="w-full h-full rounded-full object-cover opacity-0 transition-opacity">
         </div>
         <div class="flex flex-col">
-          <span class="text-[10px] font-semibold tracking-[0.2em] uppercase text-gold">Portale Turistico</span>
+          <span class="text-[10px] font-bold tracking-[0.2em] uppercase text-gold">Portale Turistico</span>
           <span class="text-xl font-serif font-medium text-white group-hover:text-gold transition-colors">Visit Avigliano</span>
         </div>
       </a>
-      <div class="hidden lg:flex items-center gap-8">
-        <a href="index.html" class="text-sm font-medium tracking-wide uppercase text-white/90 hover:text-white underline-anim py-2">Home</a>
-        <a href="eventi.html" class="text-sm font-medium tracking-wide uppercase text-white/90 hover:text-white underline-anim py-2">Eventi</a>
-        <a href="index.html#natura" class="text-sm font-medium tracking-wide uppercase text-white/90 hover:text-white underline-anim py-2">Natura</a>
-        <a href="cammino.html" class="flex items-center gap-2 px-6 py-3 bg-gold text-ink text-xs font-bold tracking-wider uppercase rounded-full">
-          <i data-lucide="compass" class="w-4 h-4"></i>Il Cammino
-        </a>
+      <div class="hidden lg:flex items-center gap-8 text-xs font-bold uppercase tracking-widest text-white/80">
+        <a href="index.html" class="hover:text-white transition relative group py-2">Home<span class="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span></a>
+        <a href="eventi.html" class="hover:text-white transition relative group py-2">Eventi<span class="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span></a>
+        <a href="index.html#natura" class="hover:text-white transition relative group py-2">Natura<span class="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span></a>
+        <a href="cammino.html" class="flex items-center gap-2 px-6 py-3 bg-gold text-ink rounded-full hover:bg-white transition-all shadow-lg"><i data-lucide="compass" class="w-4 h-4"></i>Il Cammino</a>
       </div>
       <button id="mobile-menu-btn" onclick="toggleMobileMenu()" class="lg:hidden p-2 text-white hover:text-gold">
         <i data-lucide="menu" class="w-7 h-7"></i>
@@ -54,31 +73,26 @@
     </div>
   </nav>
 
-  <!-- MOBILE MENU -->
-  <div id="mobile-menu" class="fixed inset-0 z-[60] bg-forest-gradient hidden">
+  <div id="mobile-menu" class="fixed inset-0 z-[60] bg-forest-radial hidden transition-all">
     <div class="h-full flex flex-col justify-center items-center gap-8 px-8">
       <button onclick="toggleMobileMenu()" class="absolute top-6 right-6 p-2 text-white hover:text-gold">
         <i data-lucide="x" class="w-8 h-8"></i>
       </button>
       <a href="index.html" class="text-4xl font-serif text-white hover:text-gold">Home</a>
       <a href="eventi.html" class="text-4xl font-serif text-white hover:text-gold">Eventi</a>
-      <a href="index.html#natura" class="text-4xl font-serif text-white hover:text-gold">Natura</a>
       <a href="cammino.html" class="text-4xl font-serif text-gold">Il Cammino</a>
     </div>
   </div>
 
-  <!-- HERO -->
-  <section class="relative min-h-screen flex items-center justify-center text-center overflow-hidden bg-forest-gradient">
-    <div class="absolute inset-0 opacity-25">
-      <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(184,150,90,0.35),transparent_55%),radial-gradient(circle_at_80%_30%,rgba(196,119,92,0.25),transparent_55%),radial-gradient(circle_at_50%_80%,rgba(255,255,255,0.12),transparent_60%)]"></div>
-    </div>
+  <section class="relative min-h-screen flex items-center justify-center text-center overflow-hidden bg-forest-radial">
+    <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
 
-    <div class="relative z-10 max-w-5xl mx-auto px-6 text-white">
+    <div class="relative z-10 max-w-5xl mx-auto px-6 text-white pt-20">
       <div class="w-20 h-20 mx-auto mb-8 rounded-full border-2 border-gold flex items-center justify-center text-gold animate-pulse">
         <i data-lucide="compass" class="w-10 h-10"></i>
       </div>
 
-      <h1 class="text-5xl sm:text-7xl lg:text-8xl font-serif font-light leading-[0.95] mb-6">
+      <h1 class="text-5xl sm:text-7xl lg:text-8xl font-serif font-light leading-[0.95] mb-6 drop-shadow-lg">
         Cammino del<br><em class="italic text-gold">Lago Tiberino</em>
       </h1>
 
@@ -86,9 +100,9 @@
         Un anello nel cuore dell’Umbria rurale: borghi, natura e memoria di un lago scomparso.
       </p>
 
-      <div class="flex flex-wrap justify-center gap-8 lg:gap-16 mb-10">
+      <div class="flex flex-wrap justify-center gap-8 lg:gap-16 mb-12">
         <div class="text-center">
-          <span class="block text-4xl lg:text-5xl font-serif text-gold">~80,9</span>
+          <span class="block text-4xl lg:text-5xl font-serif text-gold">~80</span>
           <span class="text-xs uppercase tracking-widest text-white/50">Km (anello)</span>
         </div>
         <div class="text-center">
@@ -97,607 +111,203 @@
         </div>
         <div class="text-center">
           <span class="block text-4xl lg:text-5xl font-serif text-gold">2–4</span>
-          <span class="text-xs uppercase tracking-widest text-white/50">Notti consigliate</span>
+          <span class="text-xs uppercase tracking-widest text-white/50">Giorni</span>
         </div>
       </div>
 
       <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-        <a href="#pianifica" class="inline-flex items-center gap-2 px-8 py-4 bg-gold text-ink text-sm font-bold tracking-wider uppercase rounded-full hover:bg-white transition-all shadow-lg">
-          <i data-lucide="calendar" class="w-5 h-5"></i>Pianifica
+        <a href="#pianifica" class="inline-flex items-center gap-2 px-8 py-4 bg-gold text-ink text-xs font-bold tracking-widest uppercase rounded-full hover:bg-white transition-all shadow-lg hover:shadow-gold/20">
+          <i data-lucide="calendar" class="w-4 h-4"></i>Pianifica
         </a>
-        <a href="#prenota" class="inline-flex items-center gap-2 px-8 py-4 bg-white/10 border border-white/20 text-white text-sm font-bold tracking-wider uppercase rounded-full hover:bg-white hover:text-ink transition-all">
-          <i data-lucide="bed" class="w-5 h-5"></i>Prenota
+        <a href="#prenota" class="inline-flex items-center gap-2 px-8 py-4 bg-transparent border border-white/30 text-white text-xs font-bold tracking-widest uppercase rounded-full hover:bg-white hover:text-ink transition-all">
+          <i data-lucide="bed" class="w-4 h-4"></i>Prenota
         </a>
-      </div>
-
-      <div class="mt-10 text-xs text-white/50">
-        Nota: i dettagli tecnici (km per tappa, dislivelli, GPX) vanno pubblicati nella sezione “Tracce e mappe”.
       </div>
     </div>
   </section>
 
-  <!-- INTRO -->
-  <section class="py-20 lg:py-28 bg-cream">
+  <section class="py-20 lg:py-28 bg-paper">
     <div class="max-w-6xl mx-auto px-6">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
         <div class="reveal">
-          <h2 class="text-4xl lg:text-5xl font-serif font-light mb-8">Per chi cammina (e vuole fermarsi)</h2>
-          <p class="text-lg text-stone leading-relaxed mb-6">
-            Il Cammino del Lago Tiberino nasce per trasformare un’area rurale in un’esperienza completa: cammino, borghi, visite,
-            enogastronomia, natura e didattica. L’obiettivo è restare sul territorio almeno 2–4 notti, non “fare e tornare”.
+          <h2 class="text-4xl lg:text-5xl font-serif font-light mb-8 text-ink">Per chi cammina <em class="text-gold">(e vuole fermarsi)</em></h2>
+          <p class="text-lg text-stone leading-relaxed mb-6 font-light">
+            Il Cammino del Lago Tiberino non è solo un percorso trekking, è un'esperienza immersiva. Attraversa borghi medievali, siti geologici unici al mondo e paesaggi che raccontano milioni di anni di storia.
           </p>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
-            <div class="p-6 rounded-2xl bg-white border border-sand">
+            <div class="p-6 rounded-2xl bg-white border border-sand shadow-sm">
               <div class="flex items-center gap-3 mb-2">
-                <span class="w-10 h-10 rounded-full bg-cream flex items-center justify-center text-terracotta">
+                <span class="w-10 h-10 rounded-full bg-paper flex items-center justify-center text-gold">
                   <i data-lucide="map" class="w-5 h-5"></i>
                 </span>
-                <h3 class="font-serif text-xl">Un anello, tanti modi</h3>
+                <h3 class="font-serif text-xl text-ink">Modulabile</h3>
               </div>
-              <p class="text-sm text-stone leading-relaxed">Si può fare completo o per tratti, con varianti brevi adatte anche a famiglie e scuole.</p>
+              <p class="text-sm text-stone leading-relaxed">Puoi percorrere l'intero anello o scegliere singole tappe adatte a famiglie e scuole.</p>
             </div>
 
-            <div class="p-6 rounded-2xl bg-white border border-sand">
+            <div class="p-6 rounded-2xl bg-white border border-sand shadow-sm">
               <div class="flex items-center gap-3 mb-2">
-                <span class="w-10 h-10 rounded-full bg-cream flex items-center justify-center text-terracotta">
+                <span class="w-10 h-10 rounded-full bg-paper flex items-center justify-center text-gold">
                   <i data-lucide="users" class="w-5 h-5"></i>
                 </span>
-                <h3 class="font-serif text-xl">Servizi e accoglienza</h3>
+                <h3 class="font-serif text-xl text-ink">Ospitale</h3>
               </div>
-              <p class="text-sm text-stone leading-relaxed">Qui trova cosa serve davvero: dove dormire, dove mangiare, come arrivare, come prenotare.</p>
+              <p class="text-sm text-stone leading-relaxed">Una rete di accoglienza autentica: agriturismi, B&B e piccoli ristoranti locali.</p>
             </div>
           </div>
         </div>
 
         <div class="relative reveal reveal-delay-1">
-          <div class="border-2 border-gold/30 rounded-2xl p-3">
-            <img data-content-id="lago_img_side" src="" alt="Cammino del Lago Tiberino" class="w-full rounded-xl">
-          </div>
-          <div class="mt-4 text-xs text-stone">
-            Suggerimento: impostare questa immagine dal CMS (foglio Google) con un panorama del territorio del Lago Tiberino.
+          <div class="border-2 border-gold/20 rounded-2xl p-2 bg-white shadow-xl rotate-1 hover:rotate-0 transition-transform duration-500">
+            <img src="https://images.unsplash.com/photo-1533602410385-d72b25852926?q=80&w=800" alt="Paesaggio Umbro" class="w-full rounded-xl grayscale hover:grayscale-0 transition-all duration-700">
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- TERRITORIO -->
   <section class="py-20 lg:py-28 bg-white">
     <div class="max-w-7xl mx-auto px-6">
       <div class="text-center mb-14 reveal">
-        <span class="text-terracotta text-xs font-semibold tracking-[0.2em] uppercase mb-4 block">Territorio</span>
-        <h2 class="text-4xl lg:text-5xl font-serif font-light text-ink">I Comuni coinvolti</h2>
-        <p class="text-stone max-w-3xl mx-auto mt-4">Il cammino attraversa un’area ampia: borghi e frazioni tra Avigliano Umbro, Montecastrilli, Amelia, Guardea e Montecchio.</p>
+        <span class="text-gold text-xs font-bold tracking-[0.2em] uppercase mb-4 block">Territorio</span>
+        <h2 class="text-4xl lg:text-5xl font-serif font-light text-ink">I Comuni del Cammino</h2>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div class="card-lift p-8 bg-cream rounded-2xl border border-sand reveal">
+        <div class="card-lift p-8 bg-paper rounded-2xl border border-sand reveal">
           <div class="flex items-center gap-3 mb-4">
-            <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center text-terracotta shadow-sm">
-              <i data-lucide="map-pin" class="w-6 h-6"></i>
-            </div>
-            <h3 class="text-2xl font-serif">Avigliano Umbro</h3>
+            <i data-lucide="map-pin" class="w-6 h-6 text-gold"></i>
+            <h3 class="text-2xl font-serif text-ink">Avigliano Umbro</h3>
           </div>
-          <p class="text-stone text-sm">Dunarobba, Sismano, Toscolano, Santa Restituta.</p>
+          <p class="text-stone text-sm">Capoluogo del progetto, sede della Foresta Fossile e punto nevralgico dell'itinerario.</p>
         </div>
 
-        <div class="card-lift p-8 bg-cream rounded-2xl border border-sand reveal reveal-delay-1">
+        <div class="card-lift p-8 bg-paper rounded-2xl border border-sand reveal reveal-delay-1">
           <div class="flex items-center gap-3 mb-4">
-            <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center text-terracotta shadow-sm">
-              <i data-lucide="map-pin" class="w-6 h-6"></i>
-            </div>
-            <h3 class="text-2xl font-serif">Montecastrilli</h3>
+            <i data-lucide="map-pin" class="w-6 h-6 text-gold"></i>
+            <h3 class="text-2xl font-serif text-ink">Montecastrilli</h3>
           </div>
-          <p class="text-stone text-sm">Farnetta, Castel dell’Aquila.</p>
+          <p class="text-stone text-sm">Terra agricola e di tradizioni, con il borgo di Castel dell'Aquila.</p>
         </div>
 
-        <div class="card-lift p-8 bg-cream rounded-2xl border border-sand reveal reveal-delay-2">
+        <div class="card-lift p-8 bg-paper rounded-2xl border border-sand reveal reveal-delay-2">
           <div class="flex items-center gap-3 mb-4">
-            <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center text-terracotta shadow-sm">
-              <i data-lucide="map-pin" class="w-6 h-6"></i>
-            </div>
-            <h3 class="text-2xl font-serif">Amelia</h3>
+            <i data-lucide="map-pin" class="w-6 h-6 text-gold"></i>
+            <h3 class="text-2xl font-serif text-ink">Amelia</h3>
           </div>
-          <p class="text-stone text-sm">Collicello, Sambuceto.</p>
+          <p class="text-stone text-sm">Città dalle mura ciclopiche, tocca l'itinerario con le sue frazioni boscose.</p>
         </div>
-
-        <div class="card-lift p-8 bg-cream rounded-2xl border border-sand reveal">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center text-terracotta shadow-sm">
-              <i data-lucide="map-pin" class="w-6 h-6"></i>
-            </div>
-            <h3 class="text-2xl font-serif">Guardea</h3>
-          </div>
-          <p class="text-stone text-sm">Frattuccia.</p>
         </div>
-
-        <div class="card-lift p-8 bg-cream rounded-2xl border border-sand reveal reveal-delay-1">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center text-terracotta shadow-sm">
-              <i data-lucide="map-pin" class="w-6 h-6"></i>
-            </div>
-            <h3 class="text-2xl font-serif">Montecchio</h3>
-          </div>
-          <p class="text-stone text-sm">Melezzole.</p>
-        </div>
-
-        <div class="p-8 rounded-2xl border border-sand bg-white reveal reveal-delay-2">
-          <h3 class="text-xl font-serif mb-3">Da pubblicare qui</h3>
-          <ul class="text-sm text-stone space-y-2">
-            <li class="flex gap-2"><span class="mt-2 inline-block w-1.5 h-1.5 rounded-full bg-terracotta"></span><span>Punti tappa con coordinate e parcheggi</span></li>
-            <li class="flex gap-2"><span class="mt-2 inline-block w-1.5 h-1.5 rounded-full bg-terracotta"></span><span>Fontanelle / acqua, punti ristoro, farmacie</span></li>
-            <li class="flex gap-2"><span class="mt-2 inline-block w-1.5 h-1.5 rounded-full bg-terracotta"></span><span>Trasporti: soluzioni ultimo miglio e navette</span></li>
-          </ul>
-        </div>
-      </div>
     </div>
   </section>
 
-  <!-- COSA VEDERE -->
-  <section id="cosa-vedere" class="py-20 lg:py-28 bg-forest-gradient text-white relative overflow-hidden noise">
+  <section id="cosa-vedere" class="py-20 lg:py-28 bg-forest-radial text-white relative overflow-hidden">
     <div class="max-w-7xl mx-auto px-6 relative z-10">
       <div class="text-center mb-16 reveal">
-        <span class="text-gold text-xs font-semibold tracking-[0.2em] uppercase mb-4 block">Lungo il percorso</span>
-        <h2 class="text-4xl lg:text-5xl font-serif font-light">Cosa vedere</h2>
-        <p class="text-white/70 max-w-3xl mx-auto mt-4">I punti di interesse indicati nella presentazione del progetto: natura, storia e panorami.</p>
+        <span class="text-gold text-xs font-bold tracking-[0.2em] uppercase mb-4 block">Highlights</span>
+        <h2 class="text-4xl lg:text-5xl font-serif font-light">Cosa non perdere</h2>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div class="reveal p-8 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-gold transition-all">
-          <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-gold mb-6">
-            <i data-lucide="trees" class="w-6 h-6"></i>
-          </div>
-          <h3 class="text-2xl font-serif mb-2">Foresta Fossile di Dunarobba</h3>
-          <p class="text-white/70 text-sm">Tronchi e resti fossili: un luogo raro, con un centro di paleontologia da valorizzare.</p>
+        <div class="reveal p-8 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-gold transition-all group">
+          <i data-lucide="trees" class="w-8 h-8 text-gold mb-6 group-hover:scale-110 transition-transform"></i>
+          <h3 class="text-2xl font-serif mb-2">Foresta Fossile</h3>
+          <p class="text-white/60 text-sm font-light">Un sito paleontologico unico al mondo a Dunarobba, con tronchi millenari ancora in posizione di vita.</p>
         </div>
 
-        <div class="reveal reveal-delay-1 p-8 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-gold transition-all">
-          <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-gold mb-6">
-            <i data-lucide="castle" class="w-6 h-6"></i>
-          </div>
+        <div class="reveal reveal-delay-1 p-8 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-gold transition-all group">
+          <i data-lucide="castle" class="w-8 h-8 text-gold mb-6 group-hover:scale-110 transition-transform"></i>
           <h3 class="text-2xl font-serif mb-2">Castello di Sismano</h3>
-          <p class="text-white/70 text-sm">Borgo fortificato e scorci panoramici.</p>
+          <p class="text-white/60 text-sm font-light">Imponente borgo fortificato medievale che domina la valle con le sue torri.</p>
         </div>
 
-        <div class="reveal reveal-delay-2 p-8 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-gold transition-all">
-          <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-gold mb-6">
-            <i data-lucide="mountain" class="w-6 h-6"></i>
-          </div>
-          <h3 class="text-2xl font-serif mb-2">Osservatorio panoramico</h3>
-          <p class="text-white/70 text-sm">Belvedere sul paesaggio del “lago che non c’è più”.</p>
-        </div>
-
-        <div class="reveal p-8 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-gold transition-all">
-          <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-gold mb-6">
-            <i data-lucide="church" class="w-6 h-6"></i>
-          </div>
-          <h3 class="text-2xl font-serif mb-2">Lo Speco Francescano</h3>
-          <p class="text-white/70 text-sm">Spiritualità, silenzio e cammino.</p>
-        </div>
-
-        <div class="reveal reveal-delay-1 p-8 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-gold transition-all">
-          <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-gold mb-6">
-            <i data-lucide="landmark" class="w-6 h-6"></i>
-          </div>
-          <h3 class="text-2xl font-serif mb-2">Forte Cesare</h3>
-          <p class="text-white/70 text-sm">Tracce storiche lungo l’itinerario.</p>
-        </div>
-
-        <div class="reveal reveal-delay-2 p-8 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-gold transition-all">
-          <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-gold mb-6">
-            <i data-lucide="cave" class="w-6 h-6"></i>
-          </div>
+        <div class="reveal reveal-delay-2 p-8 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-gold transition-all group">
+          <i data-lucide="mountain" class="w-8 h-8 text-gold mb-6 group-hover:scale-110 transition-transform"></i>
           <h3 class="text-2xl font-serif mb-2">Grotta Bella</h3>
-          <p class="text-white/70 text-sm">Punto naturale da integrare in un circuito visite/guide.</p>
+          <p class="text-white/60 text-sm font-light">Ai piedi del monte, un antro naturale ricco di stalattiti e leggende.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- TRACCE E MAPPE -->
   <section id="tracce" class="py-20 lg:py-28 bg-white">
     <div class="max-w-7xl mx-auto px-6">
       <div class="text-center mb-14 reveal">
-        <span class="text-terracotta text-xs font-semibold tracking-[0.2em] uppercase mb-4 block">Navigazione</span>
-        <h2 class="text-4xl lg:text-5xl font-serif font-light text-ink">Tracce e mappe</h2>
-        <p class="text-stone max-w-3xl mx-auto mt-4">
-          Qui vanno pubblicati: GPX (tappe e traccia completa), PDF per stampa, e una mappa interattiva.
-          È la sezione più importante per chi parte.
-        </p>
+        <span class="text-gold text-xs font-bold tracking-[0.2em] uppercase mb-4 block">Navigazione</span>
+        <h2 class="text-4xl lg:text-5xl font-serif font-light text-ink">Tracce e Mappe</h2>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
         <div class="reveal">
-          <div class="p-8 bg-cream rounded-2xl border border-sand">
-            <h3 class="text-2xl font-serif mb-4">Download</h3>
-            <ul class="space-y-3 text-sm text-stone">
-              <li class="flex items-start gap-3">
-                <span class="mt-1 w-9 h-9 rounded-full bg-white flex items-center justify-center text-terracotta shadow-sm">
-                  <i data-lucide="download" class="w-5 h-5"></i>
-                </span>
+          <div class="p-10 bg-paper rounded-2xl border border-sand">
+            <h3 class="text-2xl font-serif mb-6 text-ink">Scarica i percorsi</h3>
+            <ul class="space-y-4 text-sm text-stone">
+              <li class="flex items-start gap-4">
+                <span class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-gold shadow-sm"><i data-lucide="download" class="w-5 h-5"></i></span>
                 <div>
-                  <div class="font-semibold text-ink">Traccia completa (GPX)</div>
-                  <div>Inserire link al file. Consigliato: un GPX “ufficiale” aggiornato.</div>
+                  <div class="font-bold text-ink uppercase tracking-wide text-xs mb-1">GPX Completo</div>
+                  <div>Traccia unica dell'anello (80km).</div>
                 </div>
               </li>
-              <li class="flex items-start gap-3">
-                <span class="mt-1 w-9 h-9 rounded-full bg-white flex items-center justify-center text-terracotta shadow-sm">
-                  <i data-lucide="file-text" class="w-5 h-5"></i>
-                </span>
+              <li class="flex items-start gap-4">
+                <span class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-gold shadow-sm"><i data-lucide="file-text" class="w-5 h-5"></i></span>
                 <div>
-                  <div class="font-semibold text-ink">Tappe e altimetrie (PDF)</div>
-                  <div>PDF singoli per tappa + PDF riepilogo (stampa A4).</div>
-                </div>
-              </li>
-              <li class="flex items-start gap-3">
-                <span class="mt-1 w-9 h-9 rounded-full bg-white flex items-center justify-center text-terracotta shadow-sm">
-                  <i data-lucide="shield" class="w-5 h-5"></i>
-                </span>
-                <div>
-                  <div class="font-semibold text-ink">Regole e sicurezza</div>
-                  <div>Numeri utili, meteo, raccomandazioni, periodi sconsigliati.</div>
+                  <div class="font-bold text-ink uppercase tracking-wide text-xs mb-1">Schede Tappa (PDF)</div>
+                  <div>Descrizioni dettagliate, altimetrie e punti acqua.</div>
                 </div>
               </li>
             </ul>
 
-            <div class="mt-6 flex flex-col sm:flex-row gap-3">
-              <a href="#prenota" class="inline-flex justify-center items-center gap-2 px-6 py-3 bg-terracotta text-white text-xs font-bold tracking-wider uppercase rounded-full hover:bg-ink transition-all">
-                <i data-lucide="bed" class="w-4 h-4"></i>Prenota
-              </a>
-              <a href="#pianifica" class="inline-flex justify-center items-center gap-2 px-6 py-3 bg-white text-terracotta text-xs font-bold tracking-wider uppercase rounded-full border border-sand hover:border-terracotta transition-all">
-                <i data-lucide="calendar" class="w-4 h-4"></i>Checklist
+            <div class="mt-8 flex flex-col sm:flex-row gap-4">
+              <a href="#" class="inline-flex justify-center items-center gap-2 px-6 py-3 bg-gold text-ink text-xs font-bold tracking-widest uppercase rounded-full hover:bg-forest hover:text-white transition-all">
+                <i data-lucide="download" class="w-4 h-4"></i> Scarica Tutto
               </a>
             </div>
           </div>
         </div>
 
         <div class="reveal reveal-delay-1">
-          <div class="rounded-2xl overflow-hidden border border-sand shadow-sm">
-            <iframe
-              title="Mappa OpenStreetMap"
-              class="w-full h-[420px] bg-white"
-              src="https://www.openstreetmap.org/export/embed.html?bbox=12.29%2C42.63%2C12.63%2C42.87&layer=mapnik"
-              loading="lazy"
-            ></iframe>
-          </div>
-          <div class="mt-3 text-xs text-stone">
-            Suggerimento: sostituire l’iframe con una mappa dedicata (percorso + POI) oppure integrare una mappa interattiva.
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ITINERARI CONSIGLIATI -->
-  <section id="tappe" class="py-20 lg:py-28 bg-cream">
-    <div class="max-w-7xl mx-auto px-6">
-      <div class="text-center mb-14 reveal">
-        <span class="text-terracotta text-xs font-semibold tracking-[0.2em] uppercase mb-4 block">Come farlo</span>
-        <h2 class="text-4xl lg:text-5xl font-serif font-light text-ink">Itinerari consigliati (2–4 notti)</h2>
-        <p class="text-stone max-w-3xl mx-auto mt-4">Tre opzioni “pronte” per chi deve organizzarsi. Appena disponibili, sostituire con tappe ufficiali (km/dislivelli e link GPX).</p>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="card-lift p-8 bg-white rounded-2xl border border-sand reveal">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-2xl font-serif">Weekend</h3>
-            <span class="px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full bg-cream text-stone border border-sand">2 notti</span>
-          </div>
-          <ul class="text-sm text-stone space-y-2">
-            <li class="flex gap-2"><span class="mt-2 inline-block w-1.5 h-1.5 rounded-full bg-terracotta"></span><span>Tratti panoramici + un borgo “base”</span></li>
-            <li class="flex gap-2"><span class="mt-2 inline-block w-1.5 h-1.5 rounded-full bg-terracotta"></span><span>Una visita: Foresta Fossile / Speco Francescano</span></li>
-            <li class="flex gap-2"><span class="mt-2 inline-block w-1.5 h-1.5 rounded-full bg-terracotta"></span><span>Ideale per chi ha poco tempo</span></li>
-          </ul>
-          <a href="#prenota" class="mt-6 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-terracotta hover:text-ink">
-            <i data-lucide="arrow-right" class="w-4 h-4"></i>Chiedi disponibilità
-          </a>
-        </div>
-
-        <div class="card-lift p-8 bg-white rounded-2xl border border-sand reveal reveal-delay-1">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-2xl font-serif">Standard</h3>
-            <span class="px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full bg-cream text-stone border border-sand">3 notti</span>
-          </div>
-          <ul class="text-sm text-stone space-y-2">
-            <li class="flex gap-2"><span class="mt-2 inline-block w-1.5 h-1.5 rounded-full bg-terracotta"></span><span>Più borghi, più tempo per visitare</span></li>
-            <li class="flex gap-2"><span class="mt-2 inline-block w-1.5 h-1.5 rounded-full bg-terracotta"></span><span>Degustazione o visita guidata inclusa</span></li>
-            <li class="flex gap-2"><span class="mt-2 inline-block w-1.5 h-1.5 rounded-full bg-terracotta"></span><span>La soluzione più equilibrata</span></li>
-          </ul>
-          <a href="#prenota" class="mt-6 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-terracotta hover:text-ink">
-            <i data-lucide="arrow-right" class="w-4 h-4"></i>Prenota il pacchetto
-          </a>
-        </div>
-
-        <div class="card-lift p-8 bg-white rounded-2xl border border-sand reveal reveal-delay-2">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-2xl font-serif">Completo</h3>
-            <span class="px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full bg-cream text-stone border border-sand">4 notti</span>
-          </div>
-          <ul class="text-sm text-stone space-y-2">
-            <li class="flex gap-2"><span class="mt-2 inline-block w-1.5 h-1.5 rounded-full bg-terracotta"></span><span>Anello completo con ritmo tranquillo</span></li>
-            <li class="flex gap-2"><span class="mt-2 inline-block w-1.5 h-1.5 rounded-full bg-terracotta"></span><span>Due visite/esperienze (natura + cultura)</span></li>
-            <li class="flex gap-2"><span class="mt-2 inline-block w-1.5 h-1.5 rounded-full bg-terracotta"></span><span>Consigliato per stranieri e turismo esperienziale</span></li>
-          </ul>
-          <a href="#prenota" class="mt-6 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-terracotta hover:text-ink">
-            <i data-lucide="arrow-right" class="w-4 h-4"></i>Organizza con noi
-          </a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- PIANIFICA -->
-  <section id="pianifica" class="py-20 lg:py-28 bg-white">
-    <div class="max-w-7xl mx-auto px-6">
-      <div class="text-center mb-14 reveal">
-        <span class="text-terracotta text-xs font-semibold tracking-[0.2em] uppercase mb-4 block">Prima di partire</span>
-        <h2 class="text-4xl lg:text-5xl font-serif font-light text-ink">Pianifica in 5 minuti</h2>
-        <p class="text-stone max-w-3xl mx-auto mt-4">Questa sezione è costruita come le pagine “planning” dei principali cammini: arrivare, dormire, muoversi, sicurezza.</p>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="p-8 bg-cream rounded-2xl border border-sand reveal">
-          <div class="w-14 h-14 mb-5 rounded-full bg-white flex items-center justify-center text-terracotta shadow-sm">
-            <i data-lucide="car" class="w-6 h-6"></i>
-          </div>
-          <h3 class="text-2xl font-serif mb-3">Come arrivare</h3>
-          <ul class="text-sm text-stone space-y-2">
-            <li>Auto: parcheggi consigliati ai punti partenza/arrivo (da indicare).</li>
-            <li>Treno/Bus: fermate utili + soluzioni ultimo miglio (da indicare).</li>
-            <li>Navetta: servizio su prenotazione tra tappe (se attivo).</li>
-          </ul>
-        </div>
-
-        <div class="p-8 bg-cream rounded-2xl border border-sand reveal reveal-delay-1">
-          <div class="w-14 h-14 mb-5 rounded-full bg-white flex items-center justify-center text-terracotta shadow-sm">
-            <i data-lucide="backpack" class="w-6 h-6"></i>
-          </div>
-          <h3 class="text-2xl font-serif mb-3">Cosa portare</h3>
-          <ul class="text-sm text-stone space-y-2">
-            <li>Scarpe trekking, antipioggia, cappello.</li>
-            <li>Acqua (min 1L) + snack.</li>
-            <li>Power bank, torcia, mini-kit primo soccorso.</li>
-          </ul>
-        </div>
-
-        <div class="p-8 bg-cream rounded-2xl border border-sand reveal reveal-delay-2">
-          <div class="w-14 h-14 mb-5 rounded-full bg-white flex items-center justify-center text-terracotta shadow-sm">
-            <i data-lucide="shield" class="w-6 h-6"></i>
-          </div>
-          <h3 class="text-2xl font-serif mb-3">Sicurezza</h3>
-          <ul class="text-sm text-stone space-y-2">
-            <li>Controllare meteo e eventuali chiusure.</li>
-            <li>Partire presto in estate.</li>
-            <li>Rispettare proprietà private e fauna.</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="p-8 bg-white rounded-2xl border border-sand reveal">
-          <h3 class="text-2xl font-serif mb-4">Accessibilità (famiglie e disabilità)</h3>
-          <p class="text-sm text-stone leading-relaxed">
-            Indicare chiaramente i tratti accessibili: lunghezza, pendenze, fondo, punti sosta e servizi.
-            Se previsti itinerari con joëlette o accompagnamento, inserirli qui con contatti e modalità.
-          </p>
-        </div>
-
-        <div class="p-8 bg-white rounded-2xl border border-sand reveal reveal-delay-1">
-          <h3 class="text-2xl font-serif mb-4">Credenziale e timbri</h3>
-          <p class="text-sm text-stone leading-relaxed">
-            Se volete far “funzionare” il cammino: credenziale, punti timbro, e un piccolo premio finale.
-            È uno standard diffuso nei cammini e aiuta anche la permanenza.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- SERVIZI -->
-  <section class="py-20 lg:py-28 bg-forest-gradient text-white relative overflow-hidden noise">
-    <div class="max-w-7xl mx-auto px-6 relative z-10">
-      <div class="text-center mb-16 reveal">
-        <span class="text-gold text-xs font-semibold tracking-[0.2em] uppercase mb-4 block">Servizi</span>
-        <h2 class="text-4xl lg:text-5xl font-serif font-light">Cosa trova un camminatore</h2>
-        <p class="text-white/70 max-w-3xl mx-auto mt-4">Se manca anche solo una di queste cose, la gente non prenota. Qui vanno pubblicati contatti e regole chiare.</p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div class="reveal p-8 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-gold transition-all">
-          <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-gold mb-6"><i data-lucide="bed" class="w-6 h-6"></i></div>
-          <h3 class="text-2xl font-serif mb-2">Alloggi</h3>
-          <p class="text-white/70 text-sm">B&B, agriturismi, ospitalità diffusa. Elenco aggiornato con link e contatti.</p>
-        </div>
-
-        <div class="reveal reveal-delay-1 p-8 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-gold transition-all">
-          <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-gold mb-6"><i data-lucide="utensils" class="w-6 h-6"></i></div>
-          <h3 class="text-2xl font-serif mb-2">Ristorazione</h3>
-          <p class="text-white/70 text-sm">Dove mangiare lungo il percorso. Opzioni pranzo al sacco e orari.</p>
-        </div>
-
-        <div class="reveal reveal-delay-2 p-8 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-gold transition-all">
-          <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-gold mb-6"><i data-lucide="briefcase" class="w-6 h-6"></i></div>
-          <h3 class="text-2xl font-serif mb-2">Trasporto bagagli</h3>
-          <p class="text-white/70 text-sm">Servizio opzionale: fa la differenza per target senior e internazionali.</p>
-        </div>
-
-        <div class="reveal p-8 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-gold transition-all">
-          <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-gold mb-6"><i data-lucide="map" class="w-6 h-6"></i></div>
-          <h3 class="text-2xl font-serif mb-2">Guide e accompagnatori</h3>
-          <p class="text-white/70 text-sm">Uscite guidate, visite al centro paleontologico, esperienze per gruppi.</p>
-        </div>
-
-        <div class="reveal reveal-delay-1 p-8 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-gold transition-all">
-          <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-gold mb-6"><i data-lucide="school" class="w-6 h-6"></i></div>
-          <h3 class="text-2xl font-serif mb-2">Scuole e didattica</h3>
-          <p class="text-white/70 text-sm">Pacchetti 1–2 giorni: foresta fossile, geologia, storia dei borghi.</p>
-        </div>
-
-        <div class="reveal reveal-delay-2 p-8 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-gold transition-all">
-          <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-gold mb-6"><i data-lucide="info" class="w-6 h-6"></i></div>
-          <h3 class="text-2xl font-serif mb-2">Punti informativi</h3>
-          <p class="text-white/70 text-sm">Orari, numeri utili, segnaletica, emergenze, e assistenza al viaggiatore.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- PRENOTA -->
-  <section id="prenota" class="py-20 lg:py-28 bg-white">
-    <div class="max-w-7xl mx-auto px-6">
-      <div class="text-center mb-14 reveal">
-        <span class="text-terracotta text-xs font-semibold tracking-[0.2em] uppercase mb-4 block">Prenotazioni</span>
-        <h2 class="text-4xl lg:text-5xl font-serif font-light text-ink">Prenota (o chiedi un itinerario)</h2>
-        <p class="text-stone max-w-3xl mx-auto mt-4">Questa è la parte operativa: per funzionare serve un referente unico che risponde in tempi rapidi.</p>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-        <div class="reveal">
-          <div class="p-8 bg-cream rounded-2xl border border-sand">
-            <h3 class="text-2xl font-serif mb-4">Contatto rapido</h3>
-            <div class="space-y-3 text-sm text-stone">
-              <div class="flex items-center gap-3">
-                <span class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-terracotta shadow-sm"><i data-lucide="phone" class="w-5 h-5"></i></span>
-                <div>
-                  <div class="font-semibold text-ink">Telefono</div>
-                  <div>+39 0744 933541 (Ufficio)</div>
-                </div>
-              </div>
-              <div class="flex items-center gap-3">
-                <span class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-terracotta shadow-sm"><i data-lucide="mail" class="w-5 h-5"></i></span>
-                <div>
-                  <div class="font-semibold text-ink">Email</div>
-                  <div>Usare il contatto del portale (footer) o un indirizzo dedicato al cammino.</div>
-                </div>
-              </div>
+          <div class="rounded-2xl overflow-hidden border border-sand shadow-lg h-[400px] relative">
+            <div class="absolute inset-0 bg-stone-100 flex items-center justify-center text-stone-400">
+                <span class="text-xs uppercase tracking-widest font-bold flex flex-col items-center gap-2">
+                    <i data-lucide="map" class="w-8 h-8"></i>
+                    Mappa Interattiva (Coming Soon)
+                </span>
             </div>
-
-            <div class="mt-6 p-5 rounded-2xl bg-white border border-sand">
-              <h4 class="font-serif text-lg mb-2">Dove dormire (da compilare)</h4>
-              <p class="text-sm text-stone">Inserire qui un elenco sintetico: nome, borgo, telefono, link.</p>
-              <ul class="mt-3 text-sm text-stone space-y-2">
-                <li class="flex gap-2"><span class="mt-2 inline-block w-1.5 h-1.5 rounded-full bg-terracotta"></span><span>B&B / Agriturismo 1 — (link)</span></li>
-                <li class="flex gap-2"><span class="mt-2 inline-block w-1.5 h-1.5 rounded-full bg-terracotta"></span><span>B&B / Agriturismo 2 — (link)</span></li>
-                <li class="flex gap-2"><span class="mt-2 inline-block w-1.5 h-1.5 rounded-full bg-terracotta"></span><span>Ospitalità diffusa — (link)</span></li>
-              </ul>
-            </div>
+            <iframe title="Mappa" class="w-full h-full opacity-50 grayscale hover:grayscale-0 transition-all duration-700" src="https://www.openstreetmap.org/export/embed.html?bbox=12.29%2C42.63%2C12.63%2C42.87&layer=mapnik"></iframe>
           </div>
         </div>
-
-        <div class="reveal reveal-delay-1">
-          <form class="p-8 bg-white rounded-2xl border border-sand shadow-sm" action="mailto:info@visitavigliano.it" method="post" enctype="text/plain">
-            <h3 class="text-2xl font-serif mb-4">Richiesta informazioni / disponibilità</h3>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-semibold tracking-widest uppercase text-stone mb-2">Nome e Cognome</label>
-                <input name="nome" required class="w-full px-4 py-3 rounded-xl border border-sand bg-cream focus:outline-none focus:ring-2 focus:ring-terracotta" placeholder="Nome e Cognome">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold tracking-widest uppercase text-stone mb-2">Email</label>
-                <input name="email" type="email" required class="w-full px-4 py-3 rounded-xl border border-sand bg-cream focus:outline-none focus:ring-2 focus:ring-terracotta" placeholder="email@...">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold tracking-widest uppercase text-stone mb-2">Telefono</label>
-                <input name="telefono" class="w-full px-4 py-3 rounded-xl border border-sand bg-cream focus:outline-none focus:ring-2 focus:ring-terracotta" placeholder="+39 ...">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold tracking-widest uppercase text-stone mb-2">Notti</label>
-                <select name="notti" class="w-full px-4 py-3 rounded-xl border border-sand bg-cream focus:outline-none focus:ring-2 focus:ring-terracotta">
-                  <option>2</option><option>3</option><option>4</option><option>Altro</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-xs font-semibold tracking-widest uppercase text-stone mb-2">Arrivo</label>
-                <input name="arrivo" type="date" class="w-full px-4 py-3 rounded-xl border border-sand bg-cream focus:outline-none focus:ring-2 focus:ring-terracotta">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold tracking-widest uppercase text-stone mb-2">Persone</label>
-                <input name="persone" type="number" min="1" class="w-full px-4 py-3 rounded-xl border border-sand bg-cream focus:outline-none focus:ring-2 focus:ring-terracotta" placeholder="2">
-              </div>
-            </div>
-
-            <div class="mt-4">
-              <label class="block text-xs font-semibold tracking-widest uppercase text-stone mb-2">Messaggio</label>
-              <textarea name="messaggio" rows="5" class="w-full px-4 py-3 rounded-xl border border-sand bg-cream focus:outline-none focus:ring-2 focus:ring-terracotta" placeholder="Mi interessa l’itinerario Standard, vorrei dormire in..."></textarea>
-            </div>
-
-            <button class="mt-6 inline-flex items-center justify-center gap-2 px-8 py-4 bg-terracotta text-white text-sm font-bold tracking-wider uppercase rounded-full hover:bg-ink transition-all w-full">
-              <i data-lucide="send" class="w-5 h-5"></i>Invia richiesta
-            </button>
-
-            <p class="mt-3 text-xs text-stone">Nota tecnica: il “mailto” apre il client email. Per una gestione seria usare un form con backend.</p>
-          </form>
-        </div>
       </div>
     </div>
   </section>
 
-  <!-- FAQ -->
-  <section id="faq" class="py-20 lg:py-28 bg-cream">
-    <div class="max-w-6xl mx-auto px-6">
-      <div class="text-center mb-14 reveal">
-        <span class="text-terracotta text-xs font-semibold tracking-[0.2em] uppercase mb-4 block">FAQ</span>
-        <h2 class="text-4xl lg:text-5xl font-serif font-light text-ink">Domande frequenti</h2>
-      </div>
-
-      <div class="grid gap-4">
-        <details class="group bg-white rounded-2xl border border-sand p-6 reveal">
-          <summary class="flex cursor-pointer list-none items-center justify-between gap-4">
-            <span class="font-medium">Serve prenotare?</span>
-            <span class="text-stone group-open:rotate-180 transition"><i data-lucide="chevron-down" class="w-5 h-5"></i></span>
-          </summary>
-          <p class="mt-4 text-sm text-stone leading-relaxed">Per camminare no. Per alloggi, navette, visite e servizi è consigliato prenotare.</p>
-        </details>
-
-        <details class="group bg-white rounded-2xl border border-sand p-6 reveal reveal-delay-1">
-          <summary class="flex cursor-pointer list-none items-center justify-between gap-4">
-            <span class="font-medium">È adatto alle famiglie?</span>
-            <span class="text-stone group-open:rotate-180 transition"><i data-lucide="chevron-down" class="w-5 h-5"></i></span>
-          </summary>
-          <p class="mt-4 text-sm text-stone leading-relaxed">Sì, se si scelgono tratti brevi e percorsi con fondo/pendenza adatti. Pubblicare sempre le varianti “family”.</p>
-        </details>
-
-        <details class="group bg-white rounded-2xl border border-sand p-6 reveal reveal-delay-2">
-          <summary class="flex cursor-pointer list-none items-center justify-between gap-4">
-            <span class="font-medium">Dove trovo i GPX e le tappe?</span>
-            <span class="text-stone group-open:rotate-180 transition"><i data-lucide="chevron-down" class="w-5 h-5"></i></span>
-          </summary>
-          <p class="mt-4 text-sm text-stone leading-relaxed">Nella sezione “Tracce e mappe”. Appena pronti, pubblicare sia la traccia completa sia i file per tappa.</p>
-        </details>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA -->
-  <section class="py-16 lg:py-20 bg-terracotta text-white text-center">
-    <div class="max-w-3xl mx-auto px-6">
-      <h2 class="text-3xl lg:text-4xl font-serif font-light mb-4 reveal">Vuole farlo bene (e farlo funzionare)?</h2>
-      <p class="text-lg text-white/90 mb-8 reveal reveal-delay-1">Il cammino regge se c’è gestione e accoglienza: segnaletica, manutenzione, info point e pacchetti prenotabili.</p>
-      <a href="#prenota" class="inline-flex items-center gap-2 px-8 py-4 bg-white text-terracotta text-sm font-bold tracking-wider uppercase rounded-full hover:bg-ink hover:text-white transition-all reveal reveal-delay-2">
-        <i data-lucide="bed" class="w-5 h-5"></i>Prenota / Contatti
+  <section class="py-20 bg-forest text-white text-center relative overflow-hidden">
+     <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')]"></div>
+    <div class="max-w-3xl mx-auto px-6 relative z-10">
+      <h2 class="text-3xl lg:text-5xl font-serif font-light mb-6 reveal">Pronto a partire?</h2>
+      <p class="text-lg text-white/80 mb-10 reveal reveal-delay-1 font-light">Richiedi la Credenziale del Pellegrino e prenota la tua accoglienza nelle strutture convenzionate.</p>
+      <a href="#contatti" class="inline-flex items-center gap-2 px-8 py-4 bg-white text-forest text-xs font-bold tracking-widest uppercase rounded-full hover:bg-gold hover:text-ink transition-all reveal reveal-delay-2 shadow-xl">
+        <i data-lucide="mail" class="w-4 h-4"></i> Contattaci
       </a>
     </div>
   </section>
 
-  <!-- FOOTER -->
-  <footer class="bg-forest-gradient pt-16 pb-8 text-white">
+  <footer id="contatti" class="bg-ink pt-16 pb-8 text-white border-t border-white/5">
     <div class="max-w-7xl mx-auto px-6">
       <div class="flex flex-col md:flex-row justify-between items-start gap-12 mb-12">
-        <div class="flex items-center gap-3">
-          <img data-content-id="nav_logo" src="" alt="Logo" class="w-12 h-12 rounded-full bg-white p-1 shadow-lg opacity-0 transition-opacity">
-          <span class="text-2xl font-serif">Visit Avigliano</span>
+        <div class="flex items-center gap-4">
+          <img data-content-id="nav_logo" src="" alt="Logo" class="w-14 h-14 rounded-full bg-white p-1 shadow-lg opacity-0 transition-opacity object-contain">
+          <span class="text-3xl font-serif">Visit Avigliano</span>
         </div>
-        <div class="flex gap-8">
-          <a href="index.html" class="text-white/60 hover:text-gold text-sm transition-colors">Home</a>
-          <a href="eventi.html" class="text-white/60 hover:text-gold text-sm transition-colors">Eventi</a>
-          <a href="index.html#territorio" class="text-white/60 hover:text-gold text-sm transition-colors">Borghi</a>
-          <a href="cammino.html" class="text-gold text-sm">Il Cammino</a>
+        <div class="flex gap-8 text-sm font-bold uppercase tracking-widest text-white/50">
+          <a href="index.html" class="hover:text-gold transition-colors">Home</a>
+          <a href="eventi.html" class="hover:text-gold transition-colors">Eventi</a>
+          <a href="cammino.html" class="text-gold">Il Cammino</a>
         </div>
       </div>
       <div class="pt-8 border-t border-white/10 text-center">
-        <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/30">&copy; 2025 Comune di Avigliano Umbro</p>
+        <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">&copy; 2025 Comune di Avigliano Umbro</p>
       </div>
     </div>
   </footer>
@@ -706,10 +316,18 @@
   <script>
     window.addEventListener('scroll', () => {
       const nav = document.getElementById('navbar');
-      if (window.scrollY > 100) nav.classList.add('bg-forest/95','backdrop-blur-xl','shadow-lg');
-      else nav.classList.remove('bg-forest/95','backdrop-blur-xl','shadow-lg');
+      if (window.scrollY > 50) nav.classList.add('py-3', 'bg-forest/98', 'shadow-xl');
+      else nav.classList.remove('py-3', 'bg-forest/98', 'shadow-xl');
+    });
+    
+    // Logo Init
+    document.addEventListener('DOMContentLoaded', () => {
+        const logo = document.getElementById('nav_logo');
+        if(logo && window.cmsData && window.cmsData['nav_logo']) {
+            logo.src = window.cmsData['nav_logo'].img;
+            logo.classList.remove('opacity-0');
+        }
     });
   </script>
 </body>
 </html>
-

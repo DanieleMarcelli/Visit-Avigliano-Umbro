@@ -86,3 +86,4 @@ collections:
               - { label: "Telefono", name: "phone", widget: "string", required: false }
               - { label: "Email", name: "email", widget: "string", required: false }
               - { label: "Indirizzo / info point", name: "address", widget: "string", required: false }
+

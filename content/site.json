@@ -1,0 +1,36 @@
+{
+  "name": "Il Cammino di Avigliano",
+  "tagline": "Un percorso ad anello tra borghi, boschi e panorami.",
+  "heroImage": "",
+  "heroAlt": "",
+  "intro": "Testo introduttivo del cammino, breve e pratico.",
+  "quickFacts": [
+    { "label": "Chilometri", "value": "32" },
+    { "label": "Borghi", "value": "5" },
+    { "label": "Giorni", "value": "2" }
+  ],
+  "map": {
+    "osmEmbedUrl": "",
+    "osmOpenUrl": ""
+  },
+  "downloads": [
+    { "title": "Traccia completa (GPX)", "url": "#", "note": "" },
+    { "title": "Guida (PDF)", "url": "#", "note": "" }
+  ],
+  "stages": [
+    {
+      "title": "Tappa 1 – …",
+      "km": 0,
+      "time": "",
+      "elevation": "",
+      "difficulty": "",
+      "gpx": "#",
+      "highlights": [],
+      "services": [],
+      "image": ""
+    }
+  ],
+  "servicesForWalkers": [],
+  "faq": [],
+  "contacts": { "phone": "", "email": "", "address": "" }
+}

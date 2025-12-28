@@ -1,0 +1,88 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "assets/uploads"
+public_folder: "/assets/uploads"
+
+publish_mode: simple
+
+collections:
+  - name: "site"
+    label: "Contenuti sito (file unico)"
+    files:
+      - name: "site"
+        label: "Site JSON"
+        file: "content/site.json"
+        fields:
+          - { label: "Nome sito", name: "name", widget: "string" }
+          - { label: "Claim", name: "tagline", widget: "string" }
+          - { label: "Hero immagine", name: "heroImage", widget: "image", required: false }
+          - { label: "Hero alt", name: "heroAlt", widget: "string", required: false }
+
+          - label: "Dati rapidi"
+            name: "quickFacts"
+            widget: "list"
+            fields:
+              - { label: "Etichetta", name: "label", widget: "string" }
+              - { label: "Valore", name: "value", widget: "string" }
+
+          - label: "Testo intro"
+            name: "intro"
+            widget: "text"
+            required: false
+
+          - label: "Mappa"
+            name: "map"
+            widget: "object"
+            fields:
+              - { label: "OSM iframe URL", name: "osmEmbedUrl", widget: "string", required: false }
+              - { label: "Apri mappa URL", name: "osmOpenUrl", widget: "string", required: false }
+
+          - label: "Download"
+            name: "downloads"
+            widget: "list"
+            fields:
+              - { label: "Titolo", name: "title", widget: "string" }
+              - { label: "Link", name: "url", widget: "string" }
+              - { label: "Nota", name: "note", widget: "string", required: false }
+
+          - label: "Tappe"
+            name: "stages"
+            widget: "list"
+            fields:
+              - { label: "Titolo tappa", name: "title", widget: "string" }
+              - { label: "Km", name: "km", widget: "number", value_type: "float", required: false }
+              - { label: "Tempo", name: "time", widget: "string", required: false }
+              - { label: "Dislivello", name: "elevation", widget: "string", required: false }
+              - { label: "Difficoltà", name: "difficulty", widget: "string", required: false }
+              - { label: "GPX link", name: "gpx", widget: "string", required: false }
+              - { label: "Punti di interesse", name: "highlights", widget: "list", required: false }
+              - { label: "Servizi", name: "services", widget: "list", required: false }
+              - { label: "Immagine tappa", name: "image", widget: "image", required: false }
+
+          - label: "Servizi per camminatori"
+            name: "servicesForWalkers"
+            widget: "list"
+            fields:
+              - { label: "Categoria (Dormire/Mangiare/Guide/Trasporti)", name: "category", widget: "string" }
+              - { label: "Nome", name: "name", widget: "string" }
+              - { label: "Località", name: "place", widget: "string", required: false }
+              - { label: "Telefono", name: "phone", widget: "string", required: false }
+              - { label: "Email", name: "email", widget: "string", required: false }
+              - { label: "Link prenotazione/sito", name: "url", widget: "string", required: false }
+
+          - label: "FAQ"
+            name: "faq"
+            widget: "list"
+            fields:
+              - { label: "Domanda", name: "q", widget: "string" }
+              - { label: "Risposta", name: "a", widget: "text" }
+
+          - label: "Contatti"
+            name: "contacts"
+            widget: "object"
+            fields:
+              - { label: "Telefono", name: "phone", widget: "string", required: false }
+              - { label: "Email", name: "email", widget: "string", required: false }
+              - { label: "Indirizzo / info point", name: "address", widget: "string", required: false }

@@ -43,6 +43,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<!-- Illustrazioni premium di Gnut (WebP ottimizzate, in assets/gnut/) -->
+<link rel="preload" as="image" href="assets/gnut/gnut-saluto.webp">
 
 <style>
 /* ============================================================================
@@ -97,7 +99,10 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--paleolago); out
 #splash .sole{position:absolute; top:26px; right:26px; width:72px; height:72px; border-radius:50%;
   background:radial-gradient(circle,#ffe89a,#f4c14f 70%); box-shadow:0 0 40px 14px rgba(244,193,79,.5); animation:respira 4s ease-in-out infinite;}
 @keyframes respira{50%{transform:scale(1.08);}}
-#splash .tumbo-big{width:min(54vw,240px); animation:fluttua 3.2s ease-in-out infinite; filter:drop-shadow(0 12px 14px var(--ombra));}
+#splash img.tumbo-big{width:min(66vw,300px); aspect-ratio:1; object-fit:cover; border-radius:30px;
+  border:5px solid rgba(255,255,255,.9); box-shadow:0 16px 34px var(--ombra);
+  animation:fluttua 3.4s ease-in-out infinite;}
+#splash svg.tumbo-big{width:min(54vw,240px); animation:fluttua 3.2s ease-in-out infinite; filter:drop-shadow(0 12px 14px var(--ombra));}
 @keyframes fluttua{50%{transform:translateY(-12px) rotate(-2deg);}}
 #splash .kicker{font-size:12px; font-weight:800; letter-spacing:3px; color:var(--bosco); background:rgba(255,255,255,.7);
   padding:5px 14px; border-radius:20px; margin-bottom:8px;}
@@ -187,7 +192,7 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
 #ar-bolla{position:absolute; left:50%; top:11%; transform:translateX(-50%); max-width:82vw;
   background:#fff; border:3px solid var(--arancio); border-radius:18px; padding:10px 14px;
   font-weight:700; font-size:15px; line-height:1.35; box-shadow:0 8px 22px rgba(0,0,0,.35);}
-#ar-bolla .chi{display:block; font-size:10px; letter-spacing:1.5px; color:var(--arancio); margin-bottom:2px;}
+#ar-bolla .chi{display:flex; align-items:center; gap:4px; font-size:10px; letter-spacing:1.5px; color:var(--arancio); margin-bottom:3px;}
 #ar-hint{position:absolute; left:50%; bottom:calc(116px + var(--safe-b)); transform:translateX(-50%);
   color:#fff; font-size:12px; font-weight:700; text-shadow:0 1px 4px rgba(0,0,0,.7); white-space:nowrap;}
 #ar-scatta{position:absolute; left:50%; bottom:calc(26px + var(--safe-b)); transform:translateX(-50%);
@@ -228,8 +233,10 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
 /* ============================================================================
    MASCOTTE + FUMETTO — espressioni facciali via classi
    ============================================================================ */
-#mascotte{position:fixed; right:8px; bottom:calc(var(--nav-h) + 8px); z-index:1100; width:118px; cursor:pointer;}
-#mascotte svg{width:100%;height:auto;display:block;filter:drop-shadow(0 6px 8px var(--ombra));}
+#mascotte{position:fixed; right:10px; bottom:calc(var(--nav-h) + 8px); z-index:1100; width:104px; height:104px; cursor:pointer;}
+#mascotte img{width:100%; height:100%; object-fit:cover; border-radius:50%;
+  border:4px solid #fff; box-shadow:0 6px 16px var(--ombra); display:block;}
+#mascotte svg{display:none; width:100%; height:auto; filter:drop-shadow(0 6px 8px var(--ombra));}
 #mascotte.festante{animation:salto .6s ease infinite;}
 #mascotte.pensieroso{animation:oscilla 1.2s ease-in-out infinite;}
 @keyframes salto{0%,100%{transform:translateY(0) rotate(0);}30%{transform:translateY(-16px) rotate(-4deg);}60%{transform:translateY(-4px) rotate(3deg);}}
@@ -247,7 +254,8 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
   border-radius:20px 20px 6px 20px; padding:10px 14px 12px; font-size:14px; font-weight:700; line-height:1.35;
   box-shadow:0 8px 20px var(--ombra); transition:opacity .3s, transform .3s; transform-origin:bottom right; cursor:pointer;
 }
-#fumetto .chi{display:block; font-size:10px; letter-spacing:1.5px; color:var(--arancio); margin-bottom:2px;}
+#fumetto .chi{display:flex; align-items:center; gap:4px; font-size:10px; letter-spacing:1.5px; color:var(--arancio); margin-bottom:3px;}
+.chi-av{width:20px; height:20px; border-radius:50%; object-fit:cover; border:1.5px solid var(--arancio); flex:none;}
 #fumetto:after{content:'';position:absolute;right:24px;bottom:-14px;border:8px solid transparent;border-top-color:var(--arancio);}
 #fumetto.hidden{opacity:0;transform:scale(.7);pointer-events:none;}
 
@@ -425,7 +433,8 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
 #finale.show{display:block;}
 #finale h1{font-size:27px;color:var(--terra-scuro);margin:10px 0 2px;}
 #finale p.sub{font-size:15px;font-weight:800;color:var(--bosco);margin:0 0 8px;}
-.scena-foresta{width:100%;max-width:460px;margin:8px auto;animation:fluttua 4s ease-in-out infinite;}
+.scena-foresta{width:100%; max-width:420px; margin:8px auto; display:block; animation:fluttua 4s ease-in-out infinite;}
+img.scena-foresta{aspect-ratio:1; object-fit:cover; border-radius:22px; border:5px solid #fff; box-shadow:0 12px 28px var(--ombra);}
 .diploma{max-width:460px;margin:14px auto;background:#fffdf7;border:6px double var(--oro);border-radius:14px;
   padding:22px 20px;box-shadow:0 8px 24px var(--ombra);}
 .diploma h2{font-size:22px;color:var(--terra);margin:4px 0;}
@@ -511,7 +520,9 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
 <div id="splash">
   <div class="nuvola n1"></div><div class="nuvola n2"></div><div class="nuvola n3"></div>
   <div class="sole"></div>
-  <svg class="tumbo-big" viewBox="0 0 160 150"><use href="#svg-tumbo"/></svg>
+  <img class="tumbo-big" src="assets/gnut/gnut-saluto.webp" alt="Gnut, il mammut del Lago Tiberino"
+       onerror="this.nextElementSibling.style.display='block'; this.style.display='none';" />
+  <svg class="tumbo-big tumbo-fallback" viewBox="0 0 160 150" style="display:none"><use href="#svg-tumbo"/></svg>
   <div class="kicker">VISIT AVIGLIANO UMBRO</div>
   <h1>Riporta <b id="splash-nome-mascotte">Gnut</b> a casa!</h1>
   <p class="sotto" id="splash-sotto"></p>
@@ -563,7 +574,9 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
 </nav>
 
 <!-- ============================ MASCOTTE (con espressioni) =============== -->
-<div id="mascotte" title="Tocca Tumbo!">
+<div id="mascotte" title="Tocca Gnut!">
+  <img id="mascotte-img" src="assets/gnut/gnut-avatar.webp" alt="Gnut"
+       onerror="this.remove(); const s=document.querySelector('#mascotte svg'); if(s) s.style.display='block';" />
   <svg viewBox="0 0 160 150">
     <ellipse cx="80" cy="103" rx="50" ry="42" fill="url(#gradCorpo)"/>
     <path d="M40 120 q4 10 10 3 M55 128 q4 9 10 3 M105 128 q-4 9 -10 3 M120 120 q-4 10 -10 3"
@@ -649,7 +662,7 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
   <video id="ar-video" autoplay playsinline muted></video>
   <div id="ar-scena"></div>
   <div id="ar-gnut"><svg viewBox="0 0 160 150"><use href="#svg-tumbo"/></svg></div>
-  <div id="ar-bolla"><span class="chi">🐘 GNUT</span><span id="ar-bolla-testo"></span></div>
+  <div id="ar-bolla"><span class="chi"><img class="chi-av" src="assets/gnut/gnut-avatar.webp" alt=""/> GNUT</span><span id="ar-bolla-testo"></span></div>
   <div id="ar-hint">Inquadra il luogo e tocca 📸 per la foto con Gnut</div>
   <button id="ar-scatta" aria-label="Scatta foto">📸</button>
   <button id="ar-chiudi" aria-label="Chiudi">✕</button>
@@ -659,7 +672,9 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
 
 <!-- ============================ FINALE =================================== -->
 <div id="finale">
-  <svg class="scena-foresta" viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg">
+  <img class="scena-foresta" src="assets/gnut/gnut-fossile.webp" alt="Gnut nella foresta fossile di Dunarobba"
+       onerror="this.nextElementSibling.style.display='block'; this.style.display='none';" />
+  <svg class="scena-foresta" viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg" style="display:none">
     <rect width="400" height="220" fill="#bfe3f2"/>
     <ellipse cx="200" cy="150" rx="220" ry="46" fill="#4a9fc4"/>
     <ellipse cx="200" cy="146" rx="220" ry="40" fill="#7cc4e0"/>
@@ -1759,7 +1774,7 @@ document.getElementById('splash-nome-mascotte').textContent = MASCOTTE_NOME;
 document.getElementById('splash-sotto').textContent =
   `${MASCOTTE_NOME} è un cucciolo di mammut del Lago Tiberino e si è perso ai giorni nostri. Riportalo alla sua foresta di 2 milioni di anni fa, una tappa alla volta!`;
 document.getElementById('splash-nome').value = stato.nomeBambino || "";
-document.querySelector('#fumetto .chi').textContent = `🐘 ${MASCOTTE_NOME.toUpperCase()}`;
+document.querySelector('#fumetto .chi').innerHTML = `<img class="chi-av" src="assets/gnut/gnut-avatar.webp" alt=""/> ${MASCOTTE_NOME.toUpperCase()}`;
 elMascotte.title = `Tocca ${MASCOTTE_NOME}!`;
 
 document.getElementById('btn-gioca').onclick = ()=>{

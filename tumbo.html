@@ -558,6 +558,7 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
 <!-- ============================ BOTTOM NAV ================================ -->
 <nav id="nav">
   <button id="tab-mappa" class="active" aria-label="Mappa"><span class="ic">🗺️</span>Mappa</button>
+  <button id="tab-ar" aria-label="Incontra Gnut in realtà aumentata"><span class="ic">📸</span>Gnut AR</button>
   <button id="tab-zaino" aria-label="Zaino dei ricordi"><span class="ic">🎒</span>Zaino</button>
 </nav>
 
@@ -940,6 +941,22 @@ function initMappa(){
     { color:'#e07a2f', weight:4, dashArray:'2 12', opacity:.85, lineCap:'round' }).addTo(map);
   disegnaMarker();
   ricentra();
+  // La mappa nasce dietro lo splash: forziamo il ricalcolo dimensioni più volte
+  // così le tile non restano grigie (problema classico di Leaflet su mobile).
+  [200,600,1200].forEach(ms=>setTimeout(()=>{ if(map){ map.invalidateSize(); } }, ms));
+}
+
+/* Assicura che Leaflet sia disponibile: se il primo CDN è stato bloccato,
+   prova un CDN di riserva (unpkg) prima di rinunciare. */
+function assicuraLeaflet(cb){
+  if(typeof L !== "undefined") return cb();
+  const css = document.createElement('link');
+  css.rel = "stylesheet"; css.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+  document.head.appendChild(css);
+  const s = document.createElement('script');
+  s.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+  s.onload = cb; s.onerror = cb;
+  document.head.appendChild(s);
 }
 function iconaPer(i){
   const st = statoTappa(i);
@@ -1641,6 +1658,11 @@ function mostraTab(quale){
 }
 tabMappa.onclick = ()=>{ suono("pop"); mostraTab("mappa"); };
 tabZaino.onclick = ()=>{ suono("pop"); mostraTab("zaino"); };
+// Pulsante AR sempre accessibile: incontra Gnut ovunque tu sia
+document.getElementById('tab-ar').onclick = ()=>{
+  suono("pop");
+  apriAR(`Ciao! Sono ${MASCOTTE_NOME}. Inquadra quello che ti circonda e facciamoci una foto insieme! 📸`);
+};
 
 /* ============================================================================
    FINALE + coriandoli + diploma
@@ -1705,7 +1727,11 @@ document.addEventListener('click', e=>{
   if(!menu.contains(e.target) && e.target.id !== 'menu-btn') menu.classList.remove('open');
 });
 document.getElementById('btn-aiuto').onclick = ()=>{ menu.classList.remove('open'); suggerimentoCorrente(); };
-document.getElementById('btn-ricentra').onclick = ()=>{ menu.classList.remove('open'); mostraTab("mappa"); ricentra(); };
+document.getElementById('btn-ricentra').onclick = ()=>{
+  menu.classList.remove('open'); mostraTab("mappa");
+  if(!map){ assicuraLeaflet(()=>{ try{ initMappa(); }catch(e){} }); }   // riprova se non era partita
+  else{ map.invalidateSize(); ricentra(); }
+};
 document.getElementById('btn-audio').onclick = function(){
   stato.audio = !stato.audio; salvaStato();
   this.textContent = stato.audio ? "🔊 Suoni: attivi" : "🔇 Suoni: spenti";
@@ -1741,7 +1767,8 @@ document.getElementById('btn-gioca').onclick = ()=>{
   salvaStato();
   suono("ok"); vibra(40);
   document.getElementById('splash').classList.add('away');
-  if(map) setTimeout(()=>map.invalidateSize(), 350);
+  // Rivelata la mappa: ricalcola le dimensioni più volte (evita tile grigie)
+  if(map){ [300,700,1300].forEach(ms=>setTimeout(()=>{ map.invalidateSize(); ricentra(); }, ms)); }
 
   setTimeout(()=>{
     const nome = stato.nomeBambino ? ` ${stato.nomeBambino}` : "";
@@ -1761,7 +1788,11 @@ if(stato.completate.length > 0)
   document.getElementById('btn-gioca').innerHTML = "▶ &nbsp;Continua l'avventura";
 
 aggiornaHud(); aggiornaTimeline();
-try{ initMappa(); }catch(e){ console.warn("Mappa non inizializzata:", e); }
+// Carica la mappa (con CDN di riserva) senza bloccare il resto del gioco
+assicuraLeaflet(()=>{ try{ initMappa(); }catch(e){ console.warn("Mappa:", e); } });
+// La mappa deve ridimensionarsi quando cambia lo schermo o si ruota il telefono
+window.addEventListener('resize', ()=>{ if(map) map.invalidateSize(); });
+window.addEventListener('orientationchange', ()=>setTimeout(()=>{ if(map) map.invalidateSize(); }, 300));
 </script>
 </body>
 </html>

@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#e07a2f" />
 <title>Il viaggio di Tumbo · Visit Avigliano Umbro</title>
 
@@ -18,26 +18,29 @@
   Risorse esterne: Leaflet (cdnjs) + tile OpenStreetMap + font Baloo 2
   (Google Fonts, con fallback: il gioco funziona anche senza).
 
-  FEATURES "GAME":
+  FEATURES:
    · splash screen animata con nome giocatore
-   · XP + livelli da esploratore (Cucciolo Curioso → Guardiano del Tempo)
-   · stelle per quiz (3 = al primo colpo), zaino/album dei ricordi
+   · 5 MINI-GIOCHI diversi: quiz, memory, trova l'intruso, ordina la storia,
+     acchiappa-cibo a tempo — configurabili per tappa (campo "gioco")
+   · XP + livelli esploratore, stelle per mini-gioco, zaino/album ricordi
    · PORTALE DEL TEMPO: transizione animata con contatore degli anni
-   · effetti sonori sintetizzati in WebAudio (zero file audio) + vibrazione
-   · geolocalizzazione: distanza reale dalla prossima tappa (territoriale!)
-   · mascotte SVG "viva" (sbatte le palpebre, muove la proboscide - SMIL)
+     (tocca lo schermo per saltarla)
+   · mascotte SVG disegnata a mano con espressioni facciali reali
+     (normale / festante / pensierosa) + palpebre e proboscide animate
+   · effetti sonori WebAudio (zero file audio) + vibrazione
+   · geolocalizzazione: distanza reale dalla prossima tappa
+   · UX mobile: swipe per chiudere le schede, timeline tappabile,
+     safe-area iPhone, prefers-reduced-motion rispettato
 
   Da evolvere (cerca "TODO" nel codice):
    · verifica QR reale / geofencing sul pulsante "Sono arrivato!"
-   · backend per attivare/disattivare tappe da remoto (ora: campo "attiva")
+   · backend per attivare/disattivare tappe da remoto (campo "attiva")
    · multilingua (ora: tutti i testi in italiano dentro la config)
   ============================================================================
 -->
 
-<!-- Leaflet da cdnjs (nessuna API key richiesta) -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<!-- Font arrotondato per bambini (fallback: Comic Sans / system) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
 
@@ -54,9 +57,9 @@
   --oro:#e8b04b; --notte:#131c3a;
   --testo:#3a2b1a; --ombra:rgba(74,47,24,.18);
   --font:'Baloo 2','Comic Sans MS','Trebuchet MS',system-ui,sans-serif;
-  --nav-h:64px;
+  --safe-b:env(safe-area-inset-bottom, 0px);
+  --nav-h:calc(64px + var(--safe-b));
 }
-/* Codice colore per era (badge, bande, timeline) */
 .era-oggi{background:#5aa9e6;} .era-900{background:#8e7cc3;}
 .era-medioevo{background:#a9564a;} .era-romana{background:#c9992e;}
 .era-preistoria{background:#7d6b52;} .era-fossile{background:#2f6b46;}
@@ -69,6 +72,12 @@ body{
   -webkit-font-smoothing:antialiased; user-select:none;
 }
 input,button{font-family:var(--font);}
+button:focus-visible,input:focus-visible{outline:3px solid var(--paleolago); outline-offset:2px;}
+
+/* Rispetta chi preferisce meno animazioni */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important;}
+}
 
 /* ============================================================================
    SPLASH SCREEN
@@ -88,14 +97,12 @@ input,button{font-family:var(--font);}
 #splash .sole{position:absolute; top:26px; right:26px; width:72px; height:72px; border-radius:50%;
   background:radial-gradient(circle,#ffe89a,#f4c14f 70%); box-shadow:0 0 40px 14px rgba(244,193,79,.5); animation:respira 4s ease-in-out infinite;}
 @keyframes respira{50%{transform:scale(1.08);}}
-#splash .tumbo-big{width:min(52vw,230px); animation:fluttua 3.2s ease-in-out infinite; filter:drop-shadow(0 12px 14px var(--ombra));}
+#splash .tumbo-big{width:min(54vw,240px); animation:fluttua 3.2s ease-in-out infinite; filter:drop-shadow(0 12px 14px var(--ombra));}
 @keyframes fluttua{50%{transform:translateY(-12px) rotate(-2deg);}}
 #splash .kicker{font-size:12px; font-weight:800; letter-spacing:3px; color:var(--bosco); background:rgba(255,255,255,.7);
   padding:5px 14px; border-radius:20px; margin-bottom:8px;}
-#splash h1{
-  margin:6px 0 2px; font-size:clamp(30px,9vw,44px); line-height:1.02; color:var(--terra-scuro); font-weight:800;
-  text-shadow:0 3px 0 rgba(255,255,255,.6);
-}
+#splash h1{margin:6px 0 2px; font-size:clamp(30px,9vw,44px); line-height:1.02; color:var(--terra-scuro); font-weight:800;
+  text-shadow:0 3px 0 rgba(255,255,255,.6);}
 #splash h1 b{color:var(--arancio); display:block;}
 #splash .sotto{font-size:15px; font-weight:700; color:var(--terra); margin:8px 0 18px; max-width:320px;}
 #splash .nome-box{width:min(78vw,300px); background:#fff; border:3px solid var(--arancio-chiaro); border-radius:18px;
@@ -108,10 +115,10 @@ input,button{font-family:var(--font);}
   box-shadow:0 6px 0 #a84f1c, 0 14px 24px var(--ombra); transition:transform .1s, box-shadow .1s;
 }
 #btn-gioca:active{transform:translateY(5px); box-shadow:0 1px 0 #a84f1c;}
-#splash .credit{position:absolute; bottom:14px; font-size:11px; font-weight:700; color:var(--terra); opacity:.75;}
+#splash .credit{position:absolute; bottom:calc(14px + var(--safe-b)); font-size:11px; font-weight:700; color:var(--terra); opacity:.75;}
 
 /* ============================================================================
-   HEADER + HUD (XP / livello)
+   HEADER + HUD
    ============================================================================ */
 header{
   position:fixed; top:0; left:0; right:0; height:58px; z-index:1200;
@@ -123,17 +130,14 @@ header .logo{display:flex; flex-direction:column; line-height:1.05; min-width:0;
 header .logo b{font-size:13px; letter-spacing:.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
 header .logo small{font-size:9.5px; opacity:.9; font-weight:700; white-space:nowrap;}
 #hud{display:flex; align-items:center; gap:5px; flex:none;}
-.pill{
-  display:flex; align-items:center; gap:3px; background:rgba(255,255,255,.16);
+.pill{display:flex; align-items:center; gap:3px; background:rgba(255,255,255,.16);
   border:1.5px solid rgba(255,255,255,.35); border-radius:20px; padding:4px 9px;
-  font-size:12px; font-weight:800; white-space:nowrap;
-}
-/* Su schermi stretti il livello mostra solo l'icona */
+  font-size:12px; font-weight:800; white-space:nowrap;}
 @media (max-width:400px){ #pill-livello .liv-txt{display:none;} }
 header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background:rgba(255,255,255,.18);color:#fff;font-size:19px;cursor:pointer;flex:none;}
 
 /* ============================================================================
-   TIMELINE DEL VIAGGIO NEL TEMPO
+   TIMELINE DEL VIAGGIO NEL TEMPO (tappabile!)
    ============================================================================ */
 #timeline-wrap{
   position:fixed; top:58px; left:0; right:0; z-index:900;
@@ -146,8 +150,9 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
   width:0%; transition:width .9s cubic-bezier(.2,.8,.2,1); border-radius:8px;}
 .tl-dots{display:flex; justify-content:space-between; margin-top:6px;}
 .tl-dot{
-  width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-size:13px;background:#fff;border:2.5px solid var(--crema-scuro);box-shadow:0 1px 3px var(--ombra);transition:.3s;
+  width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:14px;background:#fff;border:2.5px solid var(--crema-scuro);box-shadow:0 1px 3px var(--ombra);
+  transition:.3s; cursor:pointer; border-style:solid; padding:0;
 }
 .tl-dot.future{filter:grayscale(1); opacity:.55;}
 .tl-dot.done{border-color:var(--bosco); background:#e6f5ec;}
@@ -155,94 +160,97 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
 @keyframes pulse{0%,100%{box-shadow:0 1px 3px var(--ombra),0 0 0 0 rgba(224,122,47,.55);}50%{box-shadow:0 1px 3px var(--ombra),0 0 0 10px rgba(224,122,47,0);}}
 
 /* ============================================================================
-   MAPPA (con look "gioco": tile leggermente calde)
+   MAPPA
    ============================================================================ */
 #map{position:absolute; top:58px; bottom:var(--nav-h); left:0; right:0; z-index:1; background:var(--crema);}
 .leaflet-tile-pane{filter:sepia(.28) saturate(1.15) hue-rotate(-8deg) brightness(1.03);}
 #btn-locate{
-  position:fixed; right:12px; top:158px; z-index:901; width:46px; height:46px; border-radius:50%;
-  border:none; background:#fff; box-shadow:0 4px 12px var(--ombra); font-size:21px; cursor:pointer;
+  position:fixed; right:12px; top:162px; z-index:901; width:48px; height:48px; border-radius:50%;
+  border:none; background:#fff; box-shadow:0 4px 12px var(--ombra); font-size:22px; cursor:pointer;
 }
 #btn-locate:active{transform:scale(.92);}
 
-/* Marker mappa */
-.marker-pin{
-  width:40px;height:40px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 3px 8px var(--ombra);border:3px solid #fff;
-}
+.marker-pin{width:40px;height:40px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+  display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px var(--ombra);border:3px solid #fff;}
 .marker-pin>*{transform:rotate(45deg);font-size:19px;}
 .marker-done{background:var(--bosco);}
 .marker-future{background:#9c9c9c;}
 .marker-current{background:var(--arancio);animation:pulse 1.4s infinite;}
 .marker-current>*{animation:balza .9s ease-in-out infinite;}
 @keyframes balza{50%{transform:rotate(45deg) translateY(-4px);}}
-.dot-utente{width:18px;height:18px;border-radius:50%;background:var(--paleolago);border:3px solid #fff;box-shadow:0 0 0 0 rgba(74,159,196,.5);animation:pulse 1.6s infinite;}
+.dot-utente{width:18px;height:18px;border-radius:50%;background:var(--paleolago);border:3px solid #fff;animation:pulse 1.6s infinite;}
 
 /* ============================================================================
-   BOTTOM NAV (tab da app mobile)
+   BOTTOM NAV
    ============================================================================ */
 #nav{
   position:fixed; left:0; right:0; bottom:0; height:var(--nav-h); z-index:1150;
   display:flex; background:#fff; box-shadow:0 -4px 16px var(--ombra);
-  border-radius:20px 20px 0 0; overflow:hidden;
+  border-radius:20px 20px 0 0; overflow:hidden; padding-bottom:var(--safe-b);
 }
-#nav button{
-  flex:1; border:none; background:none; cursor:pointer; font-size:11px; font-weight:800;
-  color:#9b8a72; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
-}
+#nav button{flex:1; border:none; background:none; cursor:pointer; font-size:11px; font-weight:800;
+  color:#9b8a72; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;}
 #nav button .ic{font-size:22px; transition:transform .15s;}
 #nav button.active{color:var(--arancio);}
 #nav button.active .ic{transform:translateY(-2px) scale(1.15);}
-#nav .nav-badge{position:absolute; margin-left:34px; margin-top:-30px; background:#d0563e; color:#fff; font-size:10px; border-radius:10px; padding:1px 6px;}
 
 /* ============================================================================
-   MASCOTTE + FUMETTO
+   MASCOTTE + FUMETTO — espressioni facciali via classi
    ============================================================================ */
-#mascotte{position:fixed; right:10px; bottom:calc(var(--nav-h) + 8px); z-index:1100; width:112px; cursor:pointer;}
+#mascotte{position:fixed; right:8px; bottom:calc(var(--nav-h) + 8px); z-index:1100; width:118px; cursor:pointer;}
 #mascotte svg{width:100%;height:auto;display:block;filter:drop-shadow(0 6px 8px var(--ombra));}
 #mascotte.festante{animation:salto .6s ease infinite;}
 #mascotte.pensieroso{animation:oscilla 1.2s ease-in-out infinite;}
 @keyframes salto{0%,100%{transform:translateY(0) rotate(0);}30%{transform:translateY(-16px) rotate(-4deg);}60%{transform:translateY(-4px) rotate(3deg);}}
 @keyframes oscilla{0%,100%{transform:rotate(-3deg);}50%{transform:rotate(3deg);}}
+
+/* Espressioni: mostra/nascondi bocche e sopracciglia in base allo stato */
+#mascotte .exp{transition:opacity .18s;}
+#mascotte .exp-f, #mascotte .exp-t{opacity:0;}
+#mascotte.festante .exp-n{opacity:0;}   #mascotte.festante .exp-f{opacity:1;}
+#mascotte.pensieroso .exp-n{opacity:0;} #mascotte.pensieroso .exp-t{opacity:1;}
+
 #fumetto{
-  position:fixed; right:12px; bottom:calc(var(--nav-h) + 128px); z-index:1100;
+  position:fixed; right:12px; bottom:calc(var(--nav-h) + 134px); z-index:1100;
   max-width:min(76vw,320px); background:#fff; border:3px solid var(--arancio);
-  border-radius:20px 20px 6px 20px; padding:12px 14px; font-size:14px; font-weight:700; line-height:1.35;
-  box-shadow:0 8px 20px var(--ombra); transition:opacity .3s, transform .3s; transform-origin:bottom right;
+  border-radius:20px 20px 6px 20px; padding:10px 14px 12px; font-size:14px; font-weight:700; line-height:1.35;
+  box-shadow:0 8px 20px var(--ombra); transition:opacity .3s, transform .3s; transform-origin:bottom right; cursor:pointer;
 }
+#fumetto .chi{display:block; font-size:10px; letter-spacing:1.5px; color:var(--arancio); margin-bottom:2px;}
 #fumetto:after{content:'';position:absolute;right:24px;bottom:-14px;border:8px solid transparent;border-top-color:var(--arancio);}
 #fumetto.hidden{opacity:0;transform:scale(.7);pointer-events:none;}
 
-/* XP flottante ("+80 ✨") */
 .xp-float{
-  position:fixed; right:60px; bottom:calc(var(--nav-h) + 120px); z-index:1160;
+  position:fixed; right:60px; bottom:calc(var(--nav-h) + 126px); z-index:1160;
   font-size:22px; font-weight:800; color:var(--arancio); text-shadow:0 2px 0 #fff;
   animation:salexp 1.4s ease forwards; pointer-events:none;
 }
 @keyframes salexp{0%{opacity:0;transform:translateY(10px) scale(.6);}20%{opacity:1;transform:translateY(0) scale(1.15);}100%{opacity:0;transform:translateY(-70px) scale(1);}}
 
 /* ============================================================================
-   BOTTOM SHEET (scheda tappa)
+   BOTTOM SHEET
    ============================================================================ */
 .overlay-bg{position:fixed;inset:0;z-index:1250;background:rgba(58,43,26,.4);display:none;}
 .overlay-bg.show{display:block;}
 .sheet{
-  position:fixed; left:0; right:0; bottom:0; z-index:1300; max-height:88vh; overflow-y:auto;
+  position:fixed; left:0; right:0; bottom:0; z-index:1300; max-height:90vh; overflow-y:auto;
   background:var(--crema); border-radius:26px 26px 0 0; box-shadow:0 -8px 30px var(--ombra);
-  transform:translateY(103%); transition:transform .38s cubic-bezier(.2,.9,.25,1.1); padding:0 18px 28px;
+  transform:translateY(103%); transition:transform .38s cubic-bezier(.2,.9,.25,1.1);
+  padding:0 18px calc(28px + var(--safe-b)); overscroll-behavior:contain;
 }
 .sheet.open{transform:translateY(0);}
-.sheet .banda{margin:0 -18px; padding:16px 18px 12px; border-radius:26px 26px 0 0; color:#fff;}
-.sheet .banda .grip{width:44px;height:5px;border-radius:3px;background:rgba(255,255,255,.5);margin:0 auto 10px;}
-.sheet .banda h2{margin:2px 0 0;font-size:22px;text-shadow:0 1px 3px rgba(0,0,0,.2);}
+.sheet .banda{margin:0 -18px; padding:14px 18px 12px; border-radius:26px 26px 0 0; color:#fff; position:relative; touch-action:none;}
+.sheet .banda .grip{width:44px;height:5px;border-radius:3px;background:rgba(255,255,255,.55);margin:0 auto 10px;}
+.sheet .banda h2{margin:2px 0 0;font-size:22px;text-shadow:0 1px 3px rgba(0,0,0,.2);padding-right:36px;}
+.sheet .chiudi{
+  position:absolute; top:14px; right:14px; width:34px; height:34px; border:none; border-radius:50%;
+  background:rgba(255,255,255,.25); color:#fff; font-size:17px; font-weight:800; cursor:pointer;
+}
 .badge-epoca{display:inline-block;background:rgba(255,255,255,.25);border:1.5px solid rgba(255,255,255,.5);
   color:#fff;font-size:12px;font-weight:800;padding:3px 12px;border-radius:20px;letter-spacing:.5px;}
 .racconto{font-size:15px;line-height:1.5;margin:14px 0;background:#fff;border-radius:16px;padding:14px;border-left:5px solid var(--arancio-chiaro);}
 .curiosita{font-size:13.5px;line-height:1.45;margin:10px 0;background:#fff8e8;border-radius:14px;padding:12px;border-left:5px solid var(--oro);font-weight:600;}
-.dist-info{text-align:center;font-size:13px;font-weight:800;color:var(--paleolago);margin:4px 0;}
 
-/* Bottoni */
 .btn{display:block;width:100%;border:none;border-radius:18px;padding:16px;font-size:17px;font-weight:800;cursor:pointer;
   margin-top:12px;box-shadow:0 4px 0 rgba(0,0,0,.16);transition:transform .1s, box-shadow .1s;}
 .btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.16);}
@@ -252,24 +260,71 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
 .btn-viola{background:linear-gradient(160deg,#5a6fd6,#3c4ea8);color:#fff;box-shadow:0 4px 0 #2a3778;}
 .btn-ghost{background:#fff;color:var(--terra);box-shadow:0 2px 0 var(--crema-scuro);}
 
+/* ============================================================================
+   MINI-GIOCHI
+   ============================================================================ */
+.gioco-titolo{font-size:17px;margin:16px 0 4px;color:var(--terra-scuro);font-weight:800;}
+.gioco-istruzioni{font-weight:700;font-size:14px;color:var(--terra);margin:0 0 10px;}
+.stelle-earned{text-align:center;font-size:34px;letter-spacing:4px;margin:8px 0 0;animation:pop .5s;}
+@keyframes pop{0%{transform:scale(0);}70%{transform:scale(1.3);}100%{transform:scale(1);}}
+
 /* Quiz */
-.quiz h3{font-size:17px;margin:16px 0 6px;color:var(--terra-scuro);}
 .opzione{display:block;width:100%;text-align:left;background:#fff;border:3px solid var(--crema-scuro);border-radius:16px;
   padding:15px;font-size:16px;font-weight:700;color:var(--testo);margin-top:10px;cursor:pointer;transition:.15s;}
 .opzione:active{transform:scale(.98);}
 .opzione.giusta{border-color:var(--bosco);background:#e6f5ec;}
 .opzione.sbagliata{border-color:#d0563e;background:#fbe4de;animation:shake .4s;}
 @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
-.stelle-earned{text-align:center;font-size:34px;letter-spacing:4px;margin:8px 0 0;animation:pop .5s;}
-@keyframes pop{0%{transform:scale(0);}70%{transform:scale(1.3);}100%{transform:scale(1);}}
+
+/* Memory */
+.memory-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px;}
+.mcard{aspect-ratio:3/4;border:none;border-radius:12px;cursor:pointer;perspective:400px;background:none;padding:0;}
+.mcard .inner{position:relative;width:100%;height:100%;transition:transform .35s;transform-style:preserve-3d;}
+.mcard.girata .inner{transform:rotateY(180deg);}
+.mcard .faccia{position:absolute;inset:0;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font-size:clamp(22px,7vw,32px);backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.mcard .retro{background:linear-gradient(140deg,var(--arancio-chiaro),var(--arancio));color:#fff;font-size:20px;box-shadow:0 3px 0 #a84f1c;}
+.mcard .fronte{background:#fff;border:3px solid var(--crema-scuro);transform:rotateY(180deg);}
+.mcard.trovata .fronte{border-color:var(--bosco);background:#e6f5ec;animation:pop .4s;}
+
+/* Intruso */
+.intruso-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px;}
+.intruso-item{background:#fff;border:3px solid var(--crema-scuro);border-radius:14px;padding:12px 8px;text-align:center;
+  font-size:15px;font-weight:700;cursor:pointer;transition:.15s;}
+.intruso-item .em{display:block;font-size:30px;margin-bottom:2px;}
+.intruso-item.sbagliata{border-color:#d0563e;background:#fbe4de;animation:shake .4s;}
+.intruso-item.giusta{border-color:var(--bosco);background:#e6f5ec;animation:pop .4s;}
+
+/* Ordina la storia */
+.ordina-slots{display:flex;gap:6px;margin:8px 0;}
+.ordina-slot{flex:1;min-height:58px;border:3px dashed var(--crema-scuro);border-radius:12px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#b5a284;background:#fffdf6;padding:4px 2px;text-align:center;}
+.ordina-slot.pieno{border-style:solid;border-color:var(--bosco);background:#e6f5ec;color:var(--terra-scuro);animation:pop .35s;}
+.ordina-slot .em{font-size:22px;}
+.ordina-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+.ordina-chip{border:3px solid var(--crema-scuro);background:#fff;border-radius:14px;padding:8px 12px;font-size:14px;
+  font-weight:800;cursor:pointer;transition:.15s;color:var(--testo);}
+.ordina-chip .em{font-size:20px;margin-right:4px;}
+.ordina-chip.usata{opacity:.25;pointer-events:none;}
+.ordina-chip.sbagliata{border-color:#d0563e;background:#fbe4de;animation:shake .4s;}
+
+/* Acchiappa (gioco a tempo) */
+.acchiappa-hud{display:flex;justify-content:space-between;font-weight:800;font-size:14px;color:var(--terra);margin:6px 0 4px;}
+.acchiappa-area{
+  position:relative; height:300px; border-radius:16px; overflow:hidden; touch-action:none;
+  background:linear-gradient(180deg,#bfe3f2 0%,#dff0e4 70%,#9dc98a 100%); border:3px solid var(--crema-scuro);
+}
+.acchiappa-item{position:absolute; font-size:34px; cursor:pointer; user-select:none; transition:transform .1s; will-change:top; z-index:2;}
+.acchiappa-item:active{transform:scale(1.3);}
+.acchiappa-timerbar{height:8px;border-radius:6px;background:var(--crema-scuro);overflow:hidden;margin-top:8px;}
+.acchiappa-timerbar>div{height:100%;background:linear-gradient(90deg,var(--bosco-chiaro),var(--bosco));width:100%;}
+.punto-float{position:absolute;font-size:18px;font-weight:800;pointer-events:none;animation:salexp 0.8s ease forwards;z-index:3;}
 
 /* ============================================================================
    ZAINO / ALBUM
    ============================================================================ */
-#album{
-  position:fixed; top:58px; bottom:var(--nav-h); left:0; right:0; z-index:800;
-  overflow-y:auto; background:var(--crema); padding:14px 14px 90px; display:none;
-}
+#album{position:fixed; top:58px; bottom:var(--nav-h); left:0; right:0; z-index:800;
+  overflow-y:auto; background:var(--crema); padding:14px 14px 100px; display:none;}
 #album.show{display:block;}
 #album h2{margin:4px 0 10px; font-size:21px; color:var(--terra-scuro);}
 .card-livello{background:linear-gradient(140deg,#fff,#fff8ec); border-radius:20px; padding:16px; box-shadow:0 4px 14px var(--ombra); margin-bottom:14px;}
@@ -289,16 +344,15 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
 .card-ricordo.bloccato .em{filter:blur(2px);}
 
 /* ============================================================================
-   PORTALE DEL TEMPO (transizione tra epoche)
+   PORTALE DEL TEMPO
    ============================================================================ */
 #timeportal{
   position:fixed; inset:0; z-index:2500; display:none; flex-direction:column;
-  align-items:center; justify-content:center; text-align:center; overflow:hidden;
-  background:radial-gradient(circle at 50% 45%, #2a3c72 0%, var(--notte) 65%, #05081a 100%);
-  color:#fff;
+  align-items:center; justify-content:center; text-align:center; overflow:hidden; cursor:pointer;
+  background:radial-gradient(circle at 50% 45%, #2a3c72 0%, var(--notte) 65%, #05081a 100%); color:#fff;
 }
 #timeportal.show{display:flex;}
-.ring{position:absolute; left:50%; top:45%; border-radius:50%; border-style:dashed; translate:-50% -50%;}
+.ring{position:absolute; left:50%; top:45%; border-radius:50%; translate:-50% -50%;}
 .r1{width:76vmin;height:76vmin;border:3px dashed rgba(124,196,224,.5);animation:gira 6s linear infinite;}
 .r2{width:56vmin;height:56vmin;border:3px dashed rgba(232,176,75,.55);animation:gira 4s linear infinite reverse;}
 .r3{width:38vmin;height:38vmin;border:4px dashed rgba(244,162,89,.7);animation:gira 2.6s linear infinite;}
@@ -307,10 +361,10 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
 @keyframes vortice{0%,100%{transform:rotate(-8deg) scale(1);}50%{transform:rotate(8deg) scale(1.1);}}
 #portal-anno{font-size:clamp(30px,9vw,52px);font-weight:800;letter-spacing:1px;margin-top:20px;text-shadow:0 0 24px rgba(124,196,224,.8);font-variant-numeric:tabular-nums;}
 #portal-dest{font-size:16px;font-weight:800;color:var(--arancio-chiaro);margin-top:6px;min-height:22px;}
+#portal-skip{font-size:11px;font-weight:700;color:rgba(255,255,255,.55);margin-top:18px;}
 .stellina{position:absolute;background:#fff;border-radius:50%;opacity:.8;animation:brilla 2s ease-in-out infinite;}
 @keyframes brilla{50%{opacity:.15;transform:scale(.6);}}
 
-/* Toast livello */
 #toast-livello{
   position:fixed; top:74px; left:50%; transform:translate(-50%,-200%); z-index:2600;
   background:linear-gradient(140deg,#fff,#fff3da); border:3px solid var(--oro); border-radius:20px;
@@ -334,11 +388,9 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
 /* ============================================================================
    FINALE + DIPLOMA
    ============================================================================ */
-#finale{
-  position:fixed; inset:0; z-index:2000; display:none; overflow-y:auto;
+#finale{position:fixed; inset:0; z-index:2000; display:none; overflow-y:auto;
   background:linear-gradient(180deg,#bfe3f2 0%,#dff0e4 55%,#e9dcc0 100%);
-  text-align:center; padding:24px 18px 40px;
-}
+  text-align:center; padding:24px 18px calc(40px + var(--safe-b));}
 #finale.show{display:block;}
 #finale h1{font-size:27px;color:var(--terra-scuro);margin:10px 0 2px;}
 #finale p.sub{font-size:15px;font-weight:800;color:var(--bosco);margin:0 0 8px;}
@@ -350,9 +402,8 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
   border:none;border-bottom:3px dashed var(--arancio-chiaro);background:transparent;padding:6px;margin:10px 0;outline:none;}
 .diploma .sigillo{font-size:44px;margin:6px 0;}
 .diploma .data{font-size:13px;color:var(--terra);font-weight:700;}
-.diploma .statistiche{display:flex;justify-content:center;gap:14px;margin:8px 0 2px;font-size:13px;font-weight:800;color:var(--terra);}
+.diploma .statistiche{display:flex;justify-content:center;gap:14px;margin:8px 0 2px;font-size:13px;font-weight:800;color:var(--terra);flex-wrap:wrap;}
 
-/* Coriandoli */
 .coriandolo{position:fixed;top:-24px;z-index:2100;font-size:18px;animation:cade linear forwards;pointer-events:none;}
 @keyframes cade{to{transform:translateY(112vh) rotate(720deg);}}
 
@@ -371,39 +422,57 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
 </head>
 <body>
 
-<!-- ==================== SVG SYMBOL: TUMBO (definito una volta sola) =========
-     Palpebre e proboscide animate con SMIL: la mascotte è "viva" ovunque. -->
+<!-- ==================== SVG: TUMBO ==========================================
+     Mascotte disegnata a mano, due copie:
+     1) <symbol id="svg-tumbo">: versione "neutra" per splash e portale
+     2) SVG completo inline dentro #mascotte: con i gruppi-espressione
+        (.exp-n normale / .exp-f felice / .exp-t pensieroso) pilotati via CSS.
+     Palpebre, orecchie e proboscide si muovono da sole (SMIL). -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <symbol id="svg-tumbo" viewBox="0 0 140 140">
-    <ellipse cx="70" cy="88" rx="46" ry="40" fill="#c9772f"/>
-    <ellipse cx="70" cy="92" rx="46" ry="36" fill="#e07a2f"/>
-    <path d="M46 54 q6 -16 12 -2 q6 -16 12 -2 q6 -16 12 -2 q6 -14 10 2" fill="none" stroke="#a85e22" stroke-width="6" stroke-linecap="round"/>
-    <ellipse cx="70" cy="66" rx="34" ry="30" fill="#e07a2f"/>
-    <ellipse cx="40" cy="60" rx="10" ry="13" fill="#c9772f"/>
-    <ellipse cx="100" cy="60" rx="10" ry="13" fill="#c9772f"/>
-    <circle cx="58" cy="62" r="10" fill="#fff"/>
-    <circle cx="82" cy="62" r="10" fill="#fff"/>
-    <!-- pupille: sbattono le palpebre (animazione SMIL su ry) -->
-    <ellipse cx="60" cy="64" rx="5" ry="5" fill="#3a2b1a">
-      <animate attributeName="ry" values="5;5;.6;5;5" keyTimes="0;.45;.5;.55;1" dur="4.2s" repeatCount="indefinite"/>
-    </ellipse>
-    <ellipse cx="84" cy="64" rx="5" ry="5" fill="#3a2b1a">
-      <animate attributeName="ry" values="5;5;.6;5;5" keyTimes="0;.45;.5;.55;1" dur="4.2s" repeatCount="indefinite"/>
-    </ellipse>
-    <circle cx="62" cy="62" r="1.6" fill="#fff"/>
-    <circle cx="86" cy="62" r="1.6" fill="#fff"/>
-    <!-- zanne piccole -->
-    <path d="M60 86 q-6 10 -2 16" fill="none" stroke="#fff6e0" stroke-width="6" stroke-linecap="round"/>
-    <path d="M80 86 q6 10 2 16" fill="none" stroke="#fff6e0" stroke-width="6" stroke-linecap="round"/>
-    <!-- proboscide: dondola da sola -->
-    <g>
-      <animateTransform attributeName="transform" type="rotate" values="0 70 74;5 70 74;0 70 74;-5 70 74;0 70 74" dur="5s" repeatCount="indefinite"/>
-      <path d="M70 74 q-2 22 -12 30 q-8 8 -2 14" fill="none" stroke="#e07a2f" stroke-width="12" stroke-linecap="round"/>
-    </g>
-    <circle cx="48" cy="74" r="5" fill="#f4a25955"/>
-    <circle cx="92" cy="74" r="5" fill="#f4a25955"/>
-    <ellipse cx="50" cy="122" rx="12" ry="7" fill="#c9772f"/>
-    <ellipse cx="90" cy="122" rx="12" ry="7" fill="#c9772f"/>
+  <defs>
+    <radialGradient id="gradCorpo" cx="50%" cy="38%" r="75%">
+      <stop offset="0%" stop-color="#f4a259"/>
+      <stop offset="55%" stop-color="#e07a2f"/>
+      <stop offset="100%" stop-color="#c9772f"/>
+    </radialGradient>
+  </defs>
+  <symbol id="svg-tumbo" viewBox="0 0 160 150">
+    <ellipse cx="80" cy="103" rx="50" ry="42" fill="url(#gradCorpo)"/>
+    <path d="M40 120 q4 10 10 3 M55 128 q4 9 10 3 M105 128 q-4 9 -10 3 M120 120 q-4 10 -10 3"
+          fill="none" stroke="#b5651d" stroke-width="4" stroke-linecap="round" opacity=".6"/>
+    <path d="M128 100 q12 3 10 13" fill="none" stroke="#c9772f" stroke-width="6" stroke-linecap="round"/>
+    <g><animateTransform attributeName="transform" type="rotate" values="0 32 58;-5 32 58;0 32 58" dur="4.6s" repeatCount="indefinite"/>
+      <ellipse cx="30" cy="60" rx="15" ry="19" fill="#c9772f" transform="rotate(-14 30 60)"/>
+      <ellipse cx="32" cy="61" rx="9" ry="12" fill="#f2b27a" transform="rotate(-14 32 61)" opacity=".85"/></g>
+    <g><animateTransform attributeName="transform" type="rotate" values="0 128 58;5 128 58;0 128 58" dur="4.6s" repeatCount="indefinite" begin="1s"/>
+      <ellipse cx="130" cy="60" rx="15" ry="19" fill="#c9772f" transform="rotate(14 130 60)"/>
+      <ellipse cx="128" cy="61" rx="9" ry="12" fill="#f2b27a" transform="rotate(14 128 61)" opacity=".85"/></g>
+    <circle cx="80" cy="62" r="43" fill="url(#gradCorpo)"/>
+    <path d="M60 25 q4 -13 11 -4 q3 -11 11 -6 q7 -8 11 1 q9 -4 8 7" fill="none" stroke="#a85e22" stroke-width="5" stroke-linecap="round"/>
+    <ellipse cx="63" cy="58" rx="12" ry="13" fill="#fff"/>
+    <ellipse cx="97" cy="58" rx="12" ry="13" fill="#fff"/>
+    <ellipse cx="65" cy="60" rx="6" ry="6" fill="#2e2018">
+      <animate attributeName="ry" values="6;6;.7;6;6" keyTimes="0;.45;.5;.55;1" dur="4.2s" repeatCount="indefinite"/></ellipse>
+    <ellipse cx="99" cy="60" rx="6" ry="6" fill="#2e2018">
+      <animate attributeName="ry" values="6;6;.7;6;6" keyTimes="0;.45;.5;.55;1" dur="4.2s" repeatCount="indefinite"/></ellipse>
+    <circle cx="67.5" cy="57" r="2.4" fill="#fff"/><circle cx="101.5" cy="57" r="2.4" fill="#fff"/>
+    <circle cx="62" cy="63" r="1.3" fill="#fff" opacity=".8"/><circle cx="96" cy="63" r="1.3" fill="#fff" opacity=".8"/>
+    <path d="M53 44 q8 -6 17 -3" fill="none" stroke="#a85e22" stroke-width="3.5" stroke-linecap="round"/>
+    <path d="M90 41 q9 -3 17 3" fill="none" stroke="#a85e22" stroke-width="3.5" stroke-linecap="round"/>
+    <ellipse cx="50" cy="76" rx="7.5" ry="5" fill="#f78d5b" opacity=".55"/>
+    <ellipse cx="110" cy="76" rx="7.5" ry="5" fill="#f78d5b" opacity=".55"/>
+    <path d="M62 88 q-9 13 -3 22" fill="none" stroke="#fff3dc" stroke-width="7" stroke-linecap="round"/>
+    <path d="M98 88 q9 13 3 22" fill="none" stroke="#fff3dc" stroke-width="7" stroke-linecap="round"/>
+    <path d="M88 90 q5 4 10 0" fill="none" stroke="#8a4d1d" stroke-width="3" stroke-linecap="round"/>
+    <g><animateTransform attributeName="transform" type="rotate" values="0 80 72;5 80 72;0 80 72;-5 80 72;0 80 72" dur="5s" repeatCount="indefinite"/>
+      <path d="M80 70 C78 86 72 94 64 100 C58 105 58 111 63 115" fill="none" stroke="#e07a2f" stroke-width="13" stroke-linecap="round"/>
+      <path d="M79 74 C77 87 73 93 67 98" fill="none" stroke="#f4a259" stroke-width="4" stroke-linecap="round" opacity=".8"/>
+      <ellipse cx="64" cy="116" rx="7" ry="5.5" fill="#c9772f"/>
+      <circle cx="61.5" cy="116" r="1.4" fill="#8a4d1d"/><circle cx="66.5" cy="116" r="1.4" fill="#8a4d1d"/></g>
+    <ellipse cx="58" cy="139" rx="15" ry="9" fill="#c9772f"/>
+    <ellipse cx="102" cy="139" rx="15" ry="9" fill="#c9772f"/>
+    <ellipse cx="52" cy="142" rx="4" ry="3" fill="#f2d8b8"/><ellipse cx="62" cy="143" rx="4" ry="3" fill="#f2d8b8"/>
+    <ellipse cx="96" cy="143" rx="4" ry="3" fill="#f2d8b8"/><ellipse cx="106" cy="142" rx="4" ry="3" fill="#f2d8b8"/>
   </symbol>
 </svg>
 
@@ -411,7 +480,7 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
 <div id="splash">
   <div class="nuvola n1"></div><div class="nuvola n2"></div><div class="nuvola n3"></div>
   <div class="sole"></div>
-  <svg class="tumbo-big"><use href="#svg-tumbo"/></svg>
+  <svg class="tumbo-big" viewBox="0 0 160 150"><use href="#svg-tumbo"/></svg>
   <div class="kicker">VISIT AVIGLIANO UMBRO</div>
   <h1>Riporta <b id="splash-nome-mascotte">Tumbo</b> a casa!</h1>
   <p class="sotto" id="splash-sotto"></p>
@@ -433,7 +502,6 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
   </div>
 </header>
 
-<!-- Menu -->
 <div id="menu">
   <button id="btn-aiuto">💬 Cosa devo fare?</button>
   <button id="btn-ricentra">🗺️ Mostra tutta la mappa</button>
@@ -450,22 +518,77 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
 
 <!-- ============================ MAPPA + LOCATE ============================ -->
 <div id="map"></div>
-<button id="btn-locate" title="Quanto sei lontano dalla tappa?">🧭</button>
+<button id="btn-locate" title="Quanto sei lontano dalla tappa?" aria-label="Mostra distanza dalla tappa">🧭</button>
 
 <!-- ============================ ZAINO / ALBUM ============================= -->
 <div id="album"></div>
 
 <!-- ============================ BOTTOM NAV ================================ -->
 <nav id="nav">
-  <button id="tab-mappa" class="active"><span class="ic">🗺️</span>Mappa</button>
-  <button id="tab-zaino"><span class="ic">🎒</span>Zaino</button>
+  <button id="tab-mappa" class="active" aria-label="Mappa"><span class="ic">🗺️</span>Mappa</button>
+  <button id="tab-zaino" aria-label="Zaino dei ricordi"><span class="ic">🎒</span>Zaino</button>
 </nav>
 
-<!-- ============================ MASCOTTE ================================= -->
+<!-- ============================ MASCOTTE (con espressioni) =============== -->
 <div id="mascotte" title="Tocca Tumbo!">
-  <svg viewBox="0 0 140 140"><use href="#svg-tumbo"/></svg>
+  <svg viewBox="0 0 160 150">
+    <ellipse cx="80" cy="103" rx="50" ry="42" fill="url(#gradCorpo)"/>
+    <path d="M40 120 q4 10 10 3 M55 128 q4 9 10 3 M105 128 q-4 9 -10 3 M120 120 q-4 10 -10 3"
+          fill="none" stroke="#b5651d" stroke-width="4" stroke-linecap="round" opacity=".6"/>
+    <path d="M128 100 q12 3 10 13" fill="none" stroke="#c9772f" stroke-width="6" stroke-linecap="round"/>
+    <g><animateTransform attributeName="transform" type="rotate" values="0 32 58;-5 32 58;0 32 58" dur="4.6s" repeatCount="indefinite"/>
+      <ellipse cx="30" cy="60" rx="15" ry="19" fill="#c9772f" transform="rotate(-14 30 60)"/>
+      <ellipse cx="32" cy="61" rx="9" ry="12" fill="#f2b27a" transform="rotate(-14 32 61)" opacity=".85"/></g>
+    <g><animateTransform attributeName="transform" type="rotate" values="0 128 58;5 128 58;0 128 58" dur="4.6s" repeatCount="indefinite" begin="1s"/>
+      <ellipse cx="130" cy="60" rx="15" ry="19" fill="#c9772f" transform="rotate(14 130 60)"/>
+      <ellipse cx="128" cy="61" rx="9" ry="12" fill="#f2b27a" transform="rotate(14 128 61)" opacity=".85"/></g>
+    <circle cx="80" cy="62" r="43" fill="url(#gradCorpo)"/>
+    <path d="M60 25 q4 -13 11 -4 q3 -11 11 -6 q7 -8 11 1 q9 -4 8 7" fill="none" stroke="#a85e22" stroke-width="5" stroke-linecap="round"/>
+    <!-- occhi -->
+    <ellipse cx="63" cy="58" rx="12" ry="13" fill="#fff"/>
+    <ellipse cx="97" cy="58" rx="12" ry="13" fill="#fff"/>
+    <ellipse cx="65" cy="60" rx="6" ry="6" fill="#2e2018">
+      <animate attributeName="ry" values="6;6;.7;6;6" keyTimes="0;.45;.5;.55;1" dur="4.2s" repeatCount="indefinite"/></ellipse>
+    <ellipse cx="99" cy="60" rx="6" ry="6" fill="#2e2018">
+      <animate attributeName="ry" values="6;6;.7;6;6" keyTimes="0;.45;.5;.55;1" dur="4.2s" repeatCount="indefinite"/></ellipse>
+    <circle cx="67.5" cy="57" r="2.4" fill="#fff"/><circle cx="101.5" cy="57" r="2.4" fill="#fff"/>
+    <circle cx="62" cy="63" r="1.3" fill="#fff" opacity=".8"/><circle cx="96" cy="63" r="1.3" fill="#fff" opacity=".8"/>
+    <!-- sopracciglia: 3 espressioni -->
+    <g class="exp exp-n">
+      <path d="M53 44 q8 -6 17 -3" fill="none" stroke="#a85e22" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M90 41 q9 -3 17 3" fill="none" stroke="#a85e22" stroke-width="3.5" stroke-linecap="round"/></g>
+    <g class="exp exp-f">
+      <path d="M52 40 q9 -8 18 -4" fill="none" stroke="#a85e22" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M90 36 q9 -4 18 4" fill="none" stroke="#a85e22" stroke-width="3.5" stroke-linecap="round"/></g>
+    <g class="exp exp-t">
+      <path d="M54 48 q8 -5 16 -6" fill="none" stroke="#a85e22" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M90 42 q8 1 16 6" fill="none" stroke="#a85e22" stroke-width="3.5" stroke-linecap="round"/></g>
+    <!-- guance -->
+    <ellipse cx="50" cy="76" rx="7.5" ry="5" fill="#f78d5b" opacity=".55"/>
+    <ellipse cx="110" cy="76" rx="7.5" ry="5" fill="#f78d5b" opacity=".55"/>
+    <!-- zanne -->
+    <path d="M62 88 q-9 13 -3 22" fill="none" stroke="#fff3dc" stroke-width="7" stroke-linecap="round"/>
+    <path d="M98 88 q9 13 3 22" fill="none" stroke="#fff3dc" stroke-width="7" stroke-linecap="round"/>
+    <!-- bocche: 3 espressioni -->
+    <path class="exp exp-n" d="M88 90 q5 4 10 0" fill="none" stroke="#8a4d1d" stroke-width="3" stroke-linecap="round"/>
+    <g class="exp exp-f">
+      <path d="M85 88 Q93 102 103 88 Z" fill="#7a3f16"/>
+      <ellipse cx="94" cy="94" rx="4.5" ry="3" fill="#e8654f"/></g>
+    <path class="exp exp-t" d="M88 94 q5 -4 10 0" fill="none" stroke="#8a4d1d" stroke-width="3" stroke-linecap="round"/>
+    <!-- proboscide -->
+    <g><animateTransform attributeName="transform" type="rotate" values="0 80 72;5 80 72;0 80 72;-5 80 72;0 80 72" dur="5s" repeatCount="indefinite"/>
+      <path d="M80 70 C78 86 72 94 64 100 C58 105 58 111 63 115" fill="none" stroke="#e07a2f" stroke-width="13" stroke-linecap="round"/>
+      <path d="M79 74 C77 87 73 93 67 98" fill="none" stroke="#f4a259" stroke-width="4" stroke-linecap="round" opacity=".8"/>
+      <ellipse cx="64" cy="116" rx="7" ry="5.5" fill="#c9772f"/>
+      <circle cx="61.5" cy="116" r="1.4" fill="#8a4d1d"/><circle cx="66.5" cy="116" r="1.4" fill="#8a4d1d"/></g>
+    <!-- piedi -->
+    <ellipse cx="58" cy="139" rx="15" ry="9" fill="#c9772f"/>
+    <ellipse cx="102" cy="139" rx="15" ry="9" fill="#c9772f"/>
+    <ellipse cx="52" cy="142" rx="4" ry="3" fill="#f2d8b8"/><ellipse cx="62" cy="143" rx="4" ry="3" fill="#f2d8b8"/>
+    <ellipse cx="96" cy="143" rx="4" ry="3" fill="#f2d8b8"/><ellipse cx="106" cy="142" rx="4" ry="3" fill="#f2d8b8"/>
+  </svg>
 </div>
-<div id="fumetto"></div>
+<div id="fumetto"><span class="chi">🐘 TUMBO</span><span id="fumetto-testo"></span></div>
 
 <!-- ============================ SHEET TAPPA =============================== -->
 <div class="overlay-bg" id="overlay-bg"></div>
@@ -474,17 +597,16 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
 <!-- ============================ PORTALE DEL TEMPO ========================= -->
 <div id="timeportal">
   <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
-  <svg class="tumbo-mini" viewBox="0 0 140 140"><use href="#svg-tumbo"/></svg>
+  <svg class="tumbo-mini" viewBox="0 0 160 150"><use href="#svg-tumbo"/></svg>
   <div id="portal-anno">OGGI</div>
   <div id="portal-dest"></div>
+  <div id="portal-skip">tocca per saltare ⏩</div>
 </div>
 
-<!-- Toast level-up -->
 <div id="toast-livello"></div>
 
 <!-- ============================ FINALE =================================== -->
 <div id="finale">
-  <!-- Scena SVG: la foresta viva ritrovata (sequoie + paleolago Tiberino) -->
   <svg class="scena-foresta" viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg">
     <rect width="400" height="220" fill="#bfe3f2"/>
     <ellipse cx="200" cy="150" rx="220" ry="46" fill="#4a9fc4"/>
@@ -533,10 +655,10 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
 const MASCOTTE_NOME = "Tumbo";
 
 /* ============================================================================
-   GAMIFICATION: XP e LIVELLI da esploratore
+   GAMIFICATION: XP e LIVELLI
    ============================================================================ */
-const XP_BASE_TAPPA = 60;      // XP per tappa completata
-const XP_PER_STELLA = 20;      // bonus per ogni stella del quiz
+const XP_BASE_TAPPA = 60;
+const XP_PER_STELLA = 20;
 const LIVELLI = [
   { xp: 0,   nome: "Cucciolo Curioso",    icona: "🐣" },
   { xp: 150, nome: "Esploratore in Erba", icona: "🌱" },
@@ -547,9 +669,13 @@ const LIVELLI = [
 /* ============================================================================
    CONFIGURAZIONE TAPPE (tutto il contenuto vive QUI, mai nel markup)
    ----------------------------------------------------------------------------
-   Ordine di gioco = dal presente al passato profondo.
-   "anno" serve al contatore del Portale del Tempo (negativo = anni fa).
-   "attiva" accende/spegne la tappa.
+   Ogni tappa ha un MINI-GIOCO diverso nel campo "gioco":
+     quiz      → domanda con 3 opzioni (opzioni mescolate a ogni tentativo)
+     memory    → trova le coppie (campo "coppie": 4 emoji)
+     intruso   → trova l'oggetto che NON appartiene all'epoca
+     ordina    → metti in fila le epoche dal passato a oggi
+     acchiappa → gioco a tempo: tocca le cose giuste, evita le altre
+   "anno" serve al contatore del Portale del Tempo. "attiva" accende/spegne.
    TODO(backend): in produzione questo array arriverà da un backend che potrà
    attivare/disattivare le tappe da remoto (campo "attiva").
    TODO(multilingua): duplicare i campi testuali per lingua (es. testo_racconto_en).
@@ -560,54 +686,85 @@ const TAPPE = [
     lat: 42.6555, lon: 12.4270, ricordo: "🎈", anno: 2026, anno_label: "OGGI",
     testo_racconto: "Ciao! Mi sono perso e sono finito nella tua piazza, ai giorni nostri! Che confusione: auto, gelati, tanta gente. Ma io vengo da tantissimo tempo fa... Aiutami a tornare a casa viaggiando indietro nel tempo!",
     curiosita: "Avigliano Umbro è diventato un Comune indipendente solo nel 1975: è uno dei Comuni più giovani dell'Umbria!",
-    domanda_quiz: "In che epoca ci troviamo adesso, nella piazza?",
-    opzioni: ["Oggi, ai giorni nostri", "Nel Medioevo", "Un milione di anni fa"],
-    risposta_corretta: 0, attiva: true
+    gioco: {
+      tipo: "quiz",
+      domanda: "In che epoca ci troviamo adesso, nella piazza?",
+      opzioni: ["Oggi, ai giorni nostri", "Nel Medioevo", "Un milione di anni fa"],
+      corretta: 0
+    },
+    attiva: true
   },
   {
     id: 2, nome: "Teatro Comunale di Avigliano", epoca: "IL '900", eraClass: "era-900",
     lat: 42.6550, lon: 12.4265, ricordo: "🎭", anno: 1920, anno_label: "ANNO 1920",
     testo_racconto: "Che bello questo teatro! Qui, circa cento anni fa, la gente veniva la sera a vedere spettacoli e sentire la musica. Non c'era la televisione: ci si divertiva tutti insieme sotto il palco. Facciamo un passo ancora più indietro?",
     curiosita: "Cento anni fa non esistevano gli smartphone: gli spettacoli dal vivo erano il divertimento più grande del paese!",
-    domanda_quiz: "Cosa facevano le persone al teatro cento anni fa?",
-    opzioni: ["Guardavano spettacoli e musica dal vivo", "Caricavano il telefonino", "Cacciavano i mammut"],
-    risposta_corretta: 0, attiva: true
+    gioco: {
+      tipo: "memory",
+      istruzioni: "Dietro il sipario si nascondono le coppie del teatro: trovale tutte!",
+      coppie: ["🎭","🎺","🎻","🥁"]
+    },
+    attiva: true
   },
   {
     id: 3, nome: "Castello di Sismano", epoca: "MEDIOEVO", eraClass: "era-medioevo",
     lat: 42.6280, lon: 12.4180, ricordo: "🏰", anno: 1300, anno_label: "ANNO 1300",
     testo_racconto: "Uh, un castello vero! Siamo nel Medioevo. Vedi le torri e le mura? Servivano a difendere il borgo. Ho un po' paura dei cavalieri con l'armatura... ma con te al mio fianco sono coraggioso! Andiamo ancora più indietro.",
     curiosita: "Nel Medioevo i castelli come Sismano proteggevano contadini e animali: quando arrivava un pericolo, tutti correvano dentro le mura!",
-    domanda_quiz: "A cosa servivano le mura e le torri del castello?",
-    opzioni: ["A difendere il borgo dai nemici", "A giocare a nascondino", "A parcheggiare le auto"],
-    risposta_corretta: 0, attiva: true
+    gioco: {
+      tipo: "intruso",
+      domanda: "Una di queste cose NON esisteva nel Medioevo. Quale?",
+      oggetti: [
+        { e: "⚔️", n: "Spada" }, { e: "🏹", n: "Arco e frecce" },
+        { e: "📱", n: "Telefonino" }, { e: "🛡️", n: "Scudo" },
+        { e: "🐴", n: "Cavallo" }, { e: "🕯️", n: "Candela" }
+      ],
+      intruso: 2
+    },
+    attiva: true
   },
   {
     id: 4, nome: "Santa Restituta", epoca: "ETÀ ROMANA", eraClass: "era-romana",
     lat: 42.6310, lon: 12.3560, ricordo: "🏛️", anno: 100, anno_label: "100 d.C.",
     testo_racconto: "Adesso siamo nell'antica età romana, tantissimi anni fa! Qui vicino ci sono grotte e antiche storie. I Romani costruivano strade dritte e ponti robusti per viaggiare in tutto il territorio. Bravissimo, stiamo tornando a casa!",
     curiosita: "Vicino a Santa Restituta c'è la Grotta Bella, frequentata dall'uomo fin dalla preistoria e poi usata anche in epoca romana!",
-    domanda_quiz: "Per cosa erano famosi gli antichi Romani?",
-    opzioni: ["Costruire strade e ponti robusti", "Inventare i videogiochi", "Guidare le automobili"],
-    risposta_corretta: 0, attiva: true
+    gioco: {
+      tipo: "ordina",
+      istruzioni: "Metti in fila la storia: tocca le epoche dalla più ANTICA alla più recente!",
+      sequenza: [
+        { e: "🦣", n: "Preistoria" }, { e: "🏛️", n: "Antichi Romani" },
+        { e: "🏰", n: "Medioevo" }, { e: "🏠", n: "Oggi" }
+      ]
+    },
+    attiva: true
   },
   {
     id: 5, nome: "Borgo di Dunarobba", epoca: "PREISTORIA", eraClass: "era-preistoria",
     lat: 42.6780, lon: 12.4370, ricordo: "🔥", anno: -10000, anno_label: "10.000 ANNI FA",
     testo_racconto: "Siamo quasi arrivati! Qui, tantissimo tempo fa, gli uomini della preistoria vivevano nella natura: accendevano il fuoco, cacciavano e raccoglievano frutti. Sento odore di casa mia... la mia foresta è vicina!",
     curiosita: "Gli uomini preistorici conoscevano benissimo i mammut: li disegnavano perfino sulle pareti delle caverne!",
-    domanda_quiz: "Cosa avevano imparato a fare gli uomini della preistoria?",
-    opzioni: ["Accendere e usare il fuoco", "Scrivere messaggi al telefono", "Costruire castelli di pietra"],
-    risposta_corretta: 0, attiva: true
+    gioco: {
+      tipo: "acchiappa",
+      istruzioni: "Nella preistoria non c'erano merendine! Tocca solo il cibo che si trovava in natura, evita le cose moderne!",
+      buoni: ["🍇","🌰","🐟","🍄","🫐"],
+      cattivi: ["📱","🍔","🥤"],
+      durata: 20,
+      obiettivo: 10
+    },
+    attiva: true
   },
   {
     id: 6, nome: "Foresta Fossile di Dunarobba", epoca: "2 MILIONI DI ANNI FA", eraClass: "era-fossile",
     lat: 42.6800, lon: 12.4300, ricordo: "🌲", anno: -2000000, anno_label: "2.000.000 DI ANNI FA",
     testo_racconto: "CE L'ABBIAMO FATTA! Questa è casa mia: la Foresta Fossile di Dunarobba, due milioni di anni fa! Vedi questi giganteschi tronchi di sequoia? Crescevano sulle rive di un enorme lago antico, il Paleolago Tiberino. Grazie di cuore, piccolo esploratore!",
     curiosita: "I tronchi di Dunarobba sono ancora di LEGNO, non di pietra: è una cosa rarissima al mondo per fossili così antichi!",
-    domanda_quiz: "Cosa sono i famosi tronchi della Foresta Fossile di Dunarobba?",
-    opzioni: ["Antichissimi alberi (sequoie) di 2 milioni di anni fa", "Tronchi di plastica", "Alberi piantati l'anno scorso"],
-    risposta_corretta: 0, attiva: true
+    gioco: {
+      tipo: "quiz",
+      domanda: "Cosa sono i famosi tronchi della Foresta Fossile di Dunarobba?",
+      opzioni: ["Antichissimi alberi (sequoie) di 2 milioni di anni fa", "Tronchi di plastica", "Alberi piantati l'anno scorso"],
+      corretta: 0
+    },
+    attiva: true
   }
 ];
 
@@ -640,18 +797,11 @@ function statoTappa(i){
   return i === indiceCorrente() ? "current" : "future";
 }
 function stelleTotali(){ return Object.values(stato.stelle).reduce((a,b)=>a+b,0); }
-function livelloAttuale(){
-  let L0 = LIVELLI[0];
-  for(const l of LIVELLI) if(stato.xp >= l.xp) L0 = l;
-  return L0;
-}
-function livelloProssimo(){
-  for(const l of LIVELLI) if(stato.xp < l.xp) return l;
-  return null;
-}
+function livelloAttuale(){ let L0 = LIVELLI[0]; for(const l of LIVELLI) if(stato.xp >= l.xp) L0 = l; return L0; }
+function livelloProssimo(){ for(const l of LIVELLI) if(stato.xp < l.xp) return l; return null; }
 
 /* ============================================================================
-   AUDIO — effetti sintetizzati in WebAudio (nessun file esterno)
+   AUDIO WebAudio + vibrazione
    ============================================================================ */
 let audioCtx = null;
 function nota(freq, start, dur, tipo, vol){
@@ -672,6 +822,7 @@ function suono(tipo){
     if(tipo === "ok"){ [523,659,784,1047].forEach((f,i)=>nota(f, t+i*.09, .22, "triangle", .2)); }
     else if(tipo === "no"){ nota(196, t, .25, "sawtooth", .12); nota(147, t+.16, .3, "sawtooth", .12); }
     else if(tipo === "pop"){ nota(880, t, .08, "sine", .15); }
+    else if(tipo === "tic"){ nota(660, t, .06, "sine", .1); }
     else if(tipo === "lock"){ nota(220, t, .1, "square", .08); nota(180, t+.1, .12, "square", .08); }
     else if(tipo === "portal"){ for(let i=0;i<14;i++) nota(300 + i*90, t + i*.11, .3, "sine", .1); }
     else if(tipo === "level"){ [392,523,659,784,1047,1319].forEach((f,i)=>nota(f, t+i*.08, .25, "triangle", .18)); }
@@ -689,7 +840,6 @@ function vibra(pat){ try{ navigator.vibrate && navigator.vibrate(pat); }catch(e)
 let map = null, markers = [], markerUtente = null;
 
 function initMappa(){
-  // Se Leaflet non carica (offline), avvisa senza bloccare il resto del gioco.
   if(typeof L === "undefined"){
     document.getElementById('map').innerHTML =
       '<div style="padding:40px 20px;text-align:center;font-weight:700;color:var(--terra);">' +
@@ -700,24 +850,18 @@ function initMappa(){
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19, attribution: '&copy; OpenStreetMap'
   }).addTo(map);
-
-  // Sentiero tratteggiato del viaggio nel tempo
   L.polyline(tappeAttive.map(t=>[t.lat,t.lon]),
     { color:'#e07a2f', weight:4, dashArray:'2 12', opacity:.85, lineCap:'round' }).addTo(map);
-
   disegnaMarker();
   ricentra();
 }
-
 function iconaPer(i){
   const st = statoTappa(i);
   let cls = "marker-future", inner = "🔒";
   if(st === "done"){ cls = "marker-done"; inner = "✔️"; }
   else if(st === "current"){ cls = "marker-current"; inner = "🐘"; }
-  return L.divIcon({
-    className:'', html:`<div class="marker-pin ${cls}"><span>${inner}</span></div>`,
-    iconSize:[40,40], iconAnchor:[20,40]
-  });
+  return L.divIcon({ className:'', html:`<div class="marker-pin ${cls}"><span>${inner}</span></div>`,
+    iconSize:[40,40], iconAnchor:[20,40] });
 }
 function disegnaMarker(){
   if(!map) return;
@@ -744,7 +888,7 @@ function ricentra(){
     map.fitBounds(L.latLngBounds(tappeAttive.map(t=>[t.lat,t.lon])).pad(0.22));
 }
 
-/* ---- Geolocalizzazione: distanza reale dalla tappa (gamification territoriale) ---- */
+/* ---- Geolocalizzazione: distanza reale dalla tappa ---- */
 function distanzaKm(lat1,lon1,lat2,lon2){
   const R=6371, rad=Math.PI/180;
   const dLat=(lat2-lat1)*rad, dLon=(lon2-lon1)*rad;
@@ -777,14 +921,14 @@ document.getElementById('btn-locate').onclick = ()=>{
 };
 
 /* ============================================================================
-   SCHEDA TAPPA + QUIZ (con stelle)
+   SCHEDA TAPPA
    ============================================================================ */
 const sheet = document.getElementById('sheet');
 const overlayBg = document.getElementById('overlay-bg');
-let schedaCorrente = null, tentativiQuiz = 0;
+let schedaCorrente = null;
 
 function apriScheda(i){
-  schedaCorrente = i; tentativiQuiz = 0;
+  schedaCorrente = i;
   const t = tappeAttive[i];
   const gia = stato.completate.includes(t.id);
 
@@ -792,8 +936,9 @@ function apriScheda(i){
   parla(t.testo_racconto);
 
   sheet.innerHTML = `
-    <div class="banda ${t.eraClass}">
+    <div class="banda ${t.eraClass}" id="sheet-banda">
       <div class="grip"></div>
+      <button class="chiudi" id="sheet-chiudi" aria-label="Chiudi">✕</button>
       <span class="badge-epoca">⏳ ${t.epoca}</span>
       <h2>${t.nome}</h2>
     </div>
@@ -803,21 +948,23 @@ function apriScheda(i){
       <button class="btn btn-arancio" id="btn-arrivato">Sono arrivato! 📍</button>` }
   `;
   sheet.classList.add('open'); overlayBg.classList.add('show');
+  document.getElementById('sheet-chiudi').onclick = ()=>{ suono("pop"); chiudiSheet(); };
+  abilitaSwipeChiusura();
   cablaScheda(i, gia);
 }
 
-function renderQuiz(t){
-  // Le opzioni vengono mescolate a ogni tentativo (data-ok marca quella giusta)
-  const ordine = t.opzioni.map((_,idx)=>idx).sort(()=>Math.random()-.5);
-  const opz = ordine.map(idx =>
-    `<button class="opzione" data-ok="${idx === t.risposta_corretta ? 1 : 0}">${t.opzioni[idx]}</button>`).join("");
-  return `
-    <div class="quiz" id="quiz-box">
-      <h3>🧠 Indovinello dell'epoca</h3>
-      <p style="font-weight:700;">${t.domanda_quiz}</p>
-      ${opz}
-    </div>`;
+/* Swipe verso il basso sulla banda = chiudi (UX da app) */
+function abilitaSwipeChiusura(){
+  const banda = document.getElementById('sheet-banda');
+  if(!banda) return;
+  let y0 = null;
+  banda.addEventListener('touchstart', e=>{ y0 = e.touches[0].clientY; }, { passive:true });
+  banda.addEventListener('touchmove', e=>{
+    if(y0 !== null && e.touches[0].clientY - y0 > 55){ y0 = null; chiudiSheet(); }
+  }, { passive:true });
+  banda.addEventListener('touchend', ()=>{ y0 = null; });
 }
+
 function stelleHtml(n){ return "⭐".repeat(n) + "☆".repeat(3-n); }
 function renderCompletata(t){
   const st = stato.stelle[t.id] || 1;
@@ -837,45 +984,251 @@ function cablaScheda(i, gia){
     if(b) b.onclick = ()=>{ suono("pop"); chiudiSheet(); vaiAllaCorrente(); };
     return;
   }
-  const btnArr = document.getElementById('btn-arrivato');
-  btnArr.onclick = ()=>{
+  document.getElementById('btn-arrivato').onclick = (ev)=>{
     // TODO(QR/geofencing): qui va la verifica reale dell'arrivo.
     //  - QR: scansione del codice sul cartello fisico e confronto con t.id
     //  - Geofencing: navigator.geolocation + distanzaKm(...) < 0.15
-    // Nel prototipo sblocchiamo direttamente il quiz.
+    // Nel prototipo sblocchiamo direttamente il mini-gioco.
     suono("pop"); vibra(30);
     setStatoMascotte("normale");
-    parla("Perfetto, sei qui con me! Rispondi all'indovinello per accendere il Portale del Tempo!");
-    const box = document.createElement('div');
-    box.innerHTML = renderQuiz(t);
-    btnArr.replaceWith(box.firstElementChild);
-    cablaQuiz(i);
+    parla("Perfetto, sei qui con me! Supera il mini-gioco per accendere il Portale del Tempo!");
+    const wrap = document.createElement('div');
+    ev.target.replaceWith(wrap);
+    avviaGioco(t, wrap, (stelle)=>vittoriaGioco(i, stelle));
   };
 }
 
-function cablaQuiz(i){
-  const t = tappeAttive[i];
-  document.querySelectorAll('#quiz-box .opzione').forEach(btn=>{
-    btn.onclick = ()=>{
-      if(btn.dataset.ok === "1"){
-        btn.classList.add('giusta');
-        rispostaGiusta(i);
-      }else{
-        tentativiQuiz++;
-        btn.classList.add('sbagliata');
-        suono("no"); vibra([70,40,70]);
-        setStatoMascotte("pensieroso");
-        parla("Ohh, quasi! Non è quella. Riprova, ci riusciamo insieme! 💪");
-        setTimeout(()=>btn.classList.remove('sbagliata'), 600);   // nessuna penalità: si ritenta subito
+function chiudiSheet(){ sheet.classList.remove('open'); overlayBg.classList.remove('show'); schedaCorrente = null; fermaAcchiappa(); }
+overlayBg.onclick = chiudiSheet;
+
+/* ============================================================================
+   MOTORE MINI-GIOCHI
+   ----------------------------------------------------------------------------
+   Ogni gioco riceve (tappa, contenitore, fine) e chiama fine(stelle 1..3).
+   ============================================================================ */
+function avviaGioco(t, box, fine){
+  const g = t.gioco || { tipo:"quiz", domanda:"?", opzioni:["Sì"], corretta:0 };
+  if(g.tipo === "memory") giocoMemory(g, box, fine);
+  else if(g.tipo === "intruso") giocoIntruso(g, box, fine);
+  else if(g.tipo === "ordina") giocoOrdina(g, box, fine);
+  else if(g.tipo === "acchiappa") giocoAcchiappa(g, box, fine);
+  else giocoQuiz(g, box, fine);
+}
+
+/* ---- QUIZ ------------------------------------------------------------- */
+function giocoQuiz(g, box, fine){
+  let errori = 0;
+  function render(){
+    const ordine = g.opzioni.map((_,idx)=>idx).sort(()=>Math.random()-.5);
+    box.innerHTML = `
+      <div class="gioco-titolo">🧠 Indovinello dell'epoca</div>
+      <p class="gioco-istruzioni">${g.domanda}</p>
+      ${ordine.map(idx=>`<button class="opzione" data-ok="${idx===g.corretta?1:0}">${g.opzioni[idx]}</button>`).join("")}
+    `;
+    box.querySelectorAll('.opzione').forEach(btn=>{
+      btn.onclick = ()=>{
+        if(btn.dataset.ok === "1"){
+          btn.classList.add('giusta');
+          fine(errori === 0 ? 3 : errori === 1 ? 2 : 1);
+        }else{
+          errori++;
+          btn.classList.add('sbagliata');
+          incoraggia();
+          setTimeout(()=>btn.classList.remove('sbagliata'), 600);
+        }
+      };
+    });
+  }
+  render();
+}
+
+/* ---- MEMORY: trova le coppie ------------------------------------------ */
+function giocoMemory(g, box, fine){
+  const valori = [...g.coppie, ...g.coppie].sort(()=>Math.random()-.5);
+  let girate = [], blocco = false, trovate = 0, mosse = 0;
+  box.innerHTML = `
+    <div class="gioco-titolo">🃏 Memory dell'epoca</div>
+    <p class="gioco-istruzioni">${g.istruzioni || "Trova tutte le coppie!"}</p>
+    <div class="memory-grid">
+      ${valori.map((v,k)=>`
+        <button class="mcard" data-v="${v}" aria-label="Carta coperta">
+          <div class="inner">
+            <div class="faccia retro">❔</div>
+            <div class="faccia fronte">${v}</div>
+          </div>
+        </button>`).join("")}
+    </div>`;
+  box.querySelectorAll('.mcard').forEach(c=>{
+    c.onclick = ()=>{
+      if(blocco || c.classList.contains('girata')) return;
+      suono("tic");
+      c.classList.add('girata');
+      girate.push(c);
+      if(girate.length === 2){
+        mosse++; blocco = true;
+        const [a,b] = girate;
+        if(a.dataset.v === b.dataset.v){
+          trovate++;
+          a.classList.add('trovata'); b.classList.add('trovata');
+          suono("pop"); vibra(30);
+          girate = []; blocco = false;
+          if(trovate === g.coppie.length){
+            fine(mosse <= g.coppie.length + 1 ? 3 : mosse <= g.coppie.length + 3 ? 2 : 1);
+          }
+        }else{
+          incoraggia(true);
+          setTimeout(()=>{ a.classList.remove('girata'); b.classList.remove('girata'); girate = []; blocco = false; }, 750);
+        }
       }
     };
   });
 }
 
-function rispostaGiusta(i){
-  const t = tappeAttive[i];
-  const stelle = tentativiQuiz === 0 ? 3 : tentativiQuiz === 1 ? 2 : 1;
+/* ---- INTRUSO: cosa non appartiene all'epoca? --------------------------- */
+function giocoIntruso(g, box, fine){
+  let errori = 0;
+  const ordine = g.oggetti.map((_,idx)=>idx).sort(()=>Math.random()-.5);
+  box.innerHTML = `
+    <div class="gioco-titolo">🔍 Trova l'intruso</div>
+    <p class="gioco-istruzioni">${g.domanda}</p>
+    <div class="intruso-grid">
+      ${ordine.map(idx=>`
+        <button class="intruso-item" data-ok="${idx===g.intruso?1:0}">
+          <span class="em">${g.oggetti[idx].e}</span>${g.oggetti[idx].n}
+        </button>`).join("")}
+    </div>`;
+  box.querySelectorAll('.intruso-item').forEach(el=>{
+    el.onclick = ()=>{
+      if(el.dataset.ok === "1"){
+        el.classList.add('giusta');
+        fine(errori === 0 ? 3 : errori === 1 ? 2 : 1);
+      }else{
+        errori++;
+        el.classList.add('sbagliata');
+        incoraggia();
+        setTimeout(()=>el.classList.remove('sbagliata'), 600);
+      }
+    };
+  });
+}
 
+/* ---- ORDINA: metti in fila la storia ----------------------------------- */
+function giocoOrdina(g, box, fine){
+  let prossimo = 0, errori = 0;
+  const ordine = g.sequenza.map((_,idx)=>idx).sort(()=>Math.random()-.5);
+  box.innerHTML = `
+    <div class="gioco-titolo">⏳ Ordina la storia</div>
+    <p class="gioco-istruzioni">${g.istruzioni}</p>
+    <div class="ordina-slots">
+      ${g.sequenza.map((_,k)=>`<div class="ordina-slot" data-slot="${k}">${k+1}°</div>`).join("")}
+    </div>
+    <div class="ordina-chips">
+      ${ordine.map(idx=>`
+        <button class="ordina-chip" data-pos="${idx}">
+          <span class="em">${g.sequenza[idx].e}</span>${g.sequenza[idx].n}
+        </button>`).join("")}
+    </div>`;
+  box.querySelectorAll('.ordina-chip').forEach(chip=>{
+    chip.onclick = ()=>{
+      const pos = parseInt(chip.dataset.pos,10);
+      if(pos === prossimo){
+        suono("tic"); vibra(20);
+        const slot = box.querySelector(`.ordina-slot[data-slot="${pos}"]`);
+        slot.classList.add('pieno');
+        slot.innerHTML = `<span class="em">${g.sequenza[pos].e}</span>${g.sequenza[pos].n}`;
+        chip.classList.add('usata');
+        prossimo++;
+        if(prossimo === g.sequenza.length){
+          fine(errori === 0 ? 3 : errori <= 2 ? 2 : 1);
+        }
+      }else{
+        errori++;
+        chip.classList.add('sbagliata');
+        incoraggia();
+        setTimeout(()=>chip.classList.remove('sbagliata'), 600);
+      }
+    };
+  });
+}
+
+/* ---- ACCHIAPPA: gioco a tempo ------------------------------------------ */
+let acchiappaTimers = [];
+function fermaAcchiappa(){ acchiappaTimers.forEach(t=>clearInterval(t)); acchiappaTimers = []; }
+function giocoAcchiappa(g, box, fine){
+  let punti = 0, finito = false;
+  const durata = g.durata || 20;
+  box.innerHTML = `
+    <div class="gioco-titolo">🎯 Acchiappa!</div>
+    <p class="gioco-istruzioni">${g.istruzioni}</p>
+    <div class="acchiappa-hud"><span id="acch-punti">Punti: 0</span><span id="acch-tempo">⏱ ${durata}s</span></div>
+    <div class="acchiappa-area" id="acch-area"></div>
+    <div class="acchiappa-timerbar"><div id="acch-bar"></div></div>`;
+  const area = document.getElementById('acch-area');
+  const elPunti = document.getElementById('acch-punti');
+  const elTempo = document.getElementById('acch-tempo');
+  const elBar = document.getElementById('acch-bar');
+  let resta = durata;
+
+  function spawna(){
+    if(finito) return;
+    const buono = Math.random() < .62;
+    const lista = buono ? g.buoni : g.cattivi;
+    const el = document.createElement('div');
+    el.className = 'acchiappa-item';
+    el.textContent = lista[Math.floor(Math.random()*lista.length)];
+    el.style.left = (5 + Math.random()*80) + "%";
+    el.style.top = "-44px";
+    const caduta = 2600 + Math.random()*1400;
+    el.style.transition = `top ${caduta}ms linear`;
+    area.appendChild(el);
+    requestAnimationFrame(()=>{ el.style.top = "300px"; });
+    const cleanup = setTimeout(()=>el.remove(), caduta + 100);
+    el.onpointerdown = ()=>{
+      if(finito) return;
+      clearTimeout(cleanup);
+      const r = el.getBoundingClientRect(), ar = area.getBoundingClientRect();
+      const f = document.createElement('div');
+      f.className = 'punto-float';
+      f.style.left = (r.left - ar.left) + "px";
+      f.style.top = (r.top - ar.top) + "px";
+      if(buono){ punti++; suono("pop"); vibra(20); f.textContent = "+1"; f.style.color = "#2f6b46"; }
+      else{ punti = Math.max(0, punti - 1); suono("no"); vibra([60,30,60]); f.textContent = "-1"; f.style.color = "#c0392b"; }
+      area.appendChild(f); setTimeout(()=>f.remove(), 800);
+      elPunti.textContent = "Punti: " + punti;
+      el.remove();
+    };
+  }
+
+  acchiappaTimers.push(setInterval(spawna, 620));
+  acchiappaTimers.push(setInterval(()=>{
+    resta--;
+    elTempo.textContent = "⏱ " + resta + "s";
+    elBar.style.width = (resta/durata*100) + "%";
+    if(resta <= 5 && resta > 0) suono("tic");
+    if(resta <= 0){
+      finito = true; fermaAcchiappa();
+      area.querySelectorAll('.acchiappa-item').forEach(e=>e.remove());
+      const stelle = punti >= g.obiettivo ? 3 : punti >= Math.ceil(g.obiettivo*.6) ? 2 : 1;
+      fine(stelle);
+    }
+  }, 1000));
+}
+
+/* Il mammut incoraggia dopo un errore (nessuna penalità) */
+function incoraggia(soft){
+  suono("no"); vibra([70,40,70]);
+  setStatoMascotte("pensieroso");
+  const frasi = soft
+    ? ["Mmm, non era una coppia... memoria da mammut, riprova!", "Quasi! Dove le ho viste quelle carte?"]
+    : ["Ohh, quasi! Non è quella. Riprova, ci riusciamo insieme! 💪", "Mmm, non credo... prova ancora, tu ce la fai!", "Uh, no! Ma i grandi esploratori non mollano mai!"];
+  parla(frasi[Math.floor(Math.random()*frasi.length)]);
+}
+
+/* ============================================================================
+   VITTORIA MINI-GIOCO
+   ============================================================================ */
+function vittoriaGioco(i, stelle){
+  const t = tappeAttive[i];
   if(!stato.completate.includes(t.id)) stato.completate.push(t.id);
   stato.stelle[t.id] = Math.max(stato.stelle[t.id] || 0, stelle);
   const xpGuadagnati = XP_BASE_TAPPA + stelle * XP_PER_STELLA;
@@ -885,34 +1238,37 @@ function rispostaGiusta(i){
 
   suono("ok"); vibra([40,30,40,30,120]);
   setStatoMascotte("festante");
-  parla(`EVVIVA! Risposta giusta! ${stelleHtml(stelle)} Il Portale del Tempo si sta accendendo!`);
+  parla(`EVVIVA! Ce l'hai fatta! ${stelleHtml(stelle)} Il Portale del Tempo si sta accendendo!`);
   mostraXpFloat("+" + xpGuadagnati + " ✨");
 
   aggiornaHud(); aggiornaTimeline(); disegnaMarker();
 
-  // Level-up?
   const livDopo = livelloAttuale();
   if(livDopo !== livPrima) setTimeout(()=>toastLivello(livDopo), 1200);
 
   const ultima = indiceCorrente() >= tappeAttive.length;
-  const box = document.getElementById('quiz-box');
-  if(box){
-    box.innerHTML = `
+  // Sostituisce il contenuto del gioco con il riepilogo vittoria
+  const banda = document.getElementById('sheet-banda');
+  const dopoBanda = banda ? banda.nextElementSibling : null;
+  if(dopoBanda){
+    let n = dopoBanda.nextElementSibling;
+    while(n){ const nx = n.nextElementSibling; n.remove(); n = nx; }
+    const div = document.createElement('div');
+    div.innerHTML = `
       <div class="stelle-earned">${stelleHtml(stelle)}</div>
       <div class="racconto" style="border-left-color:var(--bosco);background:#e6f5ec;">
         🎒 Nuovo ricordo nello zaino: <b style="font-size:22px;">${t.ricordo}</b> &nbsp;·&nbsp; +${xpGuadagnati} ✨
       </div>
       <div class="curiosita">💡 <b>Lo sapevi?</b> ${t.curiosita}</div>
       <button class="btn btn-viola" id="btn-viaggia">${ultima ? "🌲 Torna a casa!" : "🌀 Viaggia nel tempo!"}</button>`;
+    sheet.appendChild(div);
     document.getElementById('btn-viaggia').onclick = ()=>{
       chiudiSheet();
       if(ultima){
         portale(t.anno, t.anno, t.anno_label, ()=>mostraFinale());
       }else{
         const prossima = tappeAttive[indiceCorrente()];
-        portale(t.anno, prossima.anno, prossima.anno_label, ()=>{
-          vaiAllaCorrente();
-        });
+        portale(t.anno, prossima.anno, prossima.anno_label, ()=>vaiAllaCorrente());
       }
     };
   }
@@ -927,12 +1283,10 @@ function vaiAllaCorrente(){
   parla(`Prossima tappa: ${t.nome} (${t.epoca}). Tocca il mio marker 🐘 sulla mappa! Usa 🧭 per sapere quanto manca.`);
 }
 
-function chiudiSheet(){ sheet.classList.remove('open'); overlayBg.classList.remove('show'); schedaCorrente = null; }
-overlayBg.onclick = chiudiSheet;
-
 /* ============================================================================
-   PORTALE DEL TEMPO — transizione animata con contatore degli anni
+   PORTALE DEL TEMPO (tocca per saltare)
    ============================================================================ */
+let portaleSkip = null;
 function testoAnno(v){
   v = Math.round(v);
   if(v >= 1500) return "ANNO " + v;
@@ -944,7 +1298,6 @@ function portale(daAnno, adAnno, labelFinale, done){
   const elAnno = document.getElementById('portal-anno');
   const elDest = document.getElementById('portal-dest');
 
-  // Stelline casuali di sfondo
   el.querySelectorAll('.stellina').forEach(s=>s.remove());
   for(let k=0;k<26;k++){
     const s = document.createElement('div');
@@ -957,26 +1310,34 @@ function portale(daAnno, adAnno, labelFinale, done){
   el.classList.add('show');
   suono("portal"); vibra([20,30,20,30,20,30,80]);
 
+  let saltato = false, chiuso = false;
+  function chiudi(){
+    if(chiuso) return; chiuso = true;
+    elAnno.textContent = labelFinale;
+    elDest.textContent = "✨ Siamo arrivati! ✨";
+    setTimeout(()=>{ el.classList.remove('show'); done && done(); }, saltato ? 350 : 900);
+  }
+  portaleSkip = ()=>{ saltato = true; chiudi(); };
+
   const DUR = 2300, t0 = performance.now();
   function anim(now){
+    if(chiuso) return;
     const p = Math.min(1, (now - t0) / DUR);
-    const ease = p < .5 ? 4*p*p*p : 1 - Math.pow(-2*p + 2, 3)/2;   // easeInOutCubic
+    const ease = p < .5 ? 4*p*p*p : 1 - Math.pow(-2*p + 2, 3)/2;
     elAnno.textContent = testoAnno(daAnno + (adAnno - daAnno) * ease);
     if(p < 1) requestAnimationFrame(anim);
-    else{
-      elAnno.textContent = labelFinale;
-      elDest.textContent = "✨ Siamo arrivati! ✨";
-      setTimeout(()=>{ el.classList.remove('show'); done && done(); }, 900);
-    }
+    else chiudi();
   }
   requestAnimationFrame(anim);
 }
+document.getElementById('timeportal').onclick = ()=>{ if(portaleSkip) portaleSkip(); };
 
 /* ============================================================================
    MASCOTTE: stati + fumetto + XP float
    ============================================================================ */
 const elMascotte = document.getElementById('mascotte');
 const elFumetto = document.getElementById('fumetto');
+const elFumettoTesto = document.getElementById('fumetto-testo');
 let fumettoTimer = null;
 
 function setStatoMascotte(s){
@@ -985,11 +1346,12 @@ function setStatoMascotte(s){
   else if(s === "pensieroso") elMascotte.classList.add('pensieroso');
 }
 function parla(testo){
-  elFumetto.textContent = testo;
+  elFumettoTesto.textContent = testo;
   elFumetto.classList.remove('hidden');
   if(fumettoTimer) clearTimeout(fumettoTimer);
   fumettoTimer = setTimeout(()=>elFumetto.classList.add('hidden'), 9000);
 }
+elFumetto.onclick = ()=>elFumetto.classList.add('hidden');
 elMascotte.onclick = ()=>{
   suono("pop");
   if(elFumetto.classList.contains('hidden')) suggerimentoCorrente();
@@ -1011,7 +1373,7 @@ function mostraXpFloat(txt){
 }
 
 /* ============================================================================
-   HUD, TIMELINE, TOAST LIVELLO
+   HUD, TIMELINE (tappabile), TOAST
    ============================================================================ */
 function aggiornaHud(){
   const liv = livelloAttuale();
@@ -1026,10 +1388,12 @@ function aggiornaTimeline(){
   dots.innerHTML = "";
   tappeAttive.forEach((t,i)=>{
     const st = statoTappa(i);
-    const d = document.createElement('div');
+    const d = document.createElement('button');
     d.className = "tl-dot " + st;
     d.textContent = t.ricordo;
-    d.title = t.epoca;
+    d.title = t.nome + " — " + t.epoca;
+    d.setAttribute('aria-label', t.nome);
+    d.onclick = ()=>onMarkerClick(i);   // la timeline è tappabile come i marker
     dots.appendChild(d);
   });
 }
@@ -1079,7 +1443,6 @@ function renderAlbum(){
   if(bd) bd.onclick = ()=>{ suono("pop"); mostraFinale(false); };
 }
 
-/* Bottom nav */
 const tabMappa = document.getElementById('tab-mappa');
 const tabZaino = document.getElementById('tab-zaino');
 function mostraTab(quale){
@@ -1133,7 +1496,6 @@ document.getElementById('btn-torna-mappa').onclick = ()=>{
   mostraTab("mappa");
 };
 document.getElementById('btn-nuova-avventura').onclick = ()=>reset();
-// Condivisione nativa (solo dove supportata, es. smartphone)
 if(navigator.share){
   const bc = document.getElementById('btn-condividi');
   bc.style.display = "block";
@@ -1165,7 +1527,7 @@ document.getElementById('btn-reset').onclick = ()=>{
   if(confirm("Vuoi ricominciare l'avventura da capo? I progressi verranno cancellati.")) reset();
 };
 function reset(){
-  const nome = stato.nomeBambino;   // il nome resta: è il suo gioco
+  const nome = stato.nomeBambino;
   stato = statoIniziale(); stato.nomeBambino = nome;
   salvaStato();
   document.getElementById('finale').classList.remove('show');
@@ -1182,6 +1544,7 @@ document.getElementById('splash-nome-mascotte').textContent = MASCOTTE_NOME;
 document.getElementById('splash-sotto').textContent =
   `Un cucciolo di mammut si è perso ai giorni nostri. Riportalo alla sua foresta di 2 milioni di anni fa, una tappa alla volta!`;
 document.getElementById('splash-nome').value = stato.nomeBambino || "";
+document.querySelector('#fumetto .chi').textContent = `🐘 ${MASCOTTE_NOME.toUpperCase()}`;
 elMascotte.title = `Tocca ${MASCOTTE_NOME}!`;
 
 document.getElementById('btn-gioca').onclick = ()=>{
@@ -1205,13 +1568,10 @@ document.getElementById('btn-gioca').onclick = ()=>{
   }, 600);
 };
 
-// Pulsante splash: "Continua" se c'è già un viaggio iniziato
 if(stato.completate.length > 0)
   document.getElementById('btn-gioca').innerHTML = "▶ &nbsp;Continua l'avventura";
 
-// UI di base sempre attiva (indipendente dalla mappa)
 aggiornaHud(); aggiornaTimeline();
-// La mappa è best-effort: un errore non deve bloccare il gioco
 try{ initMappa(); }catch(e){ console.warn("Mappa non inizializzata:", e); }
 </script>
 </body>

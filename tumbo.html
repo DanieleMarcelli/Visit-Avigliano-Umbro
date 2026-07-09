@@ -8,348 +8,493 @@
 
 <!--
   ============================================================================
-  "Riporta Tumbo a casa" — prototipo single-file
+  "RIPORTA TUMBO A CASA" — prototipo single-file, edizione "gioco mobile"
   ----------------------------------------------------------------------------
-  Gioco turistico per bambini (6-11) del territorio di Avigliano Umbro (TR).
-  Un cucciolo di mammut si è perso nel presente: i bambini lo riportano a casa
-  viaggiando indietro nel tempo, tappa dopo tappa, fino alla Foresta Fossile
-  di Dunarobba (2 milioni di anni fa).
+  Gioco turistico gamificato per bambini (6-11) su Avigliano Umbro (TR).
+  Un cucciolo di mammut si è perso nel presente: lo si riporta a casa
+  viaggiando indietro nel tempo fino alla Foresta Fossile di Dunarobba.
 
   TUTTO in un unico file: nessun build, nessuna dipendenza npm.
-  Unica risorsa esterna: Leaflet (CSS+JS) + tile OpenStreetMap (no API key).
+  Risorse esterne: Leaflet (cdnjs) + tile OpenStreetMap + font Baloo 2
+  (Google Fonts, con fallback: il gioco funziona anche senza).
 
-  Come evolvere il prototipo (cerca i commenti "TODO" nel codice):
-    - verifica QR reale / geofencing sul pulsante "Sono arrivato!"
-    - backend per attivare/disattivare tappe da remoto (ora: campo "attiva")
-    - multilingua (ora: tutti i testi in italiano dentro la config)
+  FEATURES "GAME":
+   · splash screen animata con nome giocatore
+   · XP + livelli da esploratore (Cucciolo Curioso → Guardiano del Tempo)
+   · stelle per quiz (3 = al primo colpo), zaino/album dei ricordi
+   · PORTALE DEL TEMPO: transizione animata con contatore degli anni
+   · effetti sonori sintetizzati in WebAudio (zero file audio) + vibrazione
+   · geolocalizzazione: distanza reale dalla prossima tappa (territoriale!)
+   · mascotte SVG "viva" (sbatte le palpebre, muove la proboscide - SMIL)
+
+  Da evolvere (cerca "TODO" nel codice):
+   · verifica QR reale / geofencing sul pulsante "Sono arrivato!"
+   · backend per attivare/disattivare tappe da remoto (ora: campo "attiva")
+   · multilingua (ora: tutti i testi in italiano dentro la config)
   ============================================================================
 -->
 
 <!-- Leaflet da cdnjs (nessuna API key richiesta) -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<!-- Font arrotondato per bambini (fallback: Comic Sans / system) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
 
 <style>
 /* ============================================================================
-   PALETTE & TOKEN — calda e naturale: terra, arancio, verde bosco, azzurro paleolago
+   TOKEN — palette calda e naturale: terra, arancio, verde bosco, azzurro lago
    ============================================================================ */
 :root{
-  --terra:      #6b4423;   /* marrone terra          */
-  --terra-scuro:#4a2f18;
-  --arancio:    #e07a2f;   /* mammut / accento caldo */
-  --arancio-chiaro:#f4a259;
-  --crema:      #fbf3e4;   /* sfondo carta           */
-  --crema-scuro:#f2e5cf;
-  --bosco:      #2f6b46;   /* verde bosco            */
-  --bosco-chiaro:#4f9d6b;
-  --paleolago:  #4a9fc4;   /* azzurro del lago       */
-  --paleolago-chiaro:#7cc4e0;
-  --oro:        #e8b04b;
-  --testo:      #3a2b1a;
-  --ombra:      rgba(74,47,24,.18);
-  --raggio:     22px;
-  --font: 'Baloo 2','Comic Sans MS','Trebuchet MS',system-ui,sans-serif;
+  --terra:#6b4423; --terra-scuro:#4a2f18;
+  --arancio:#e07a2f; --arancio-chiaro:#f4a259;
+  --crema:#fbf3e4; --crema-scuro:#f0e2c8;
+  --bosco:#2f6b46; --bosco-chiaro:#4f9d6b;
+  --paleolago:#4a9fc4; --paleolago-chiaro:#7cc4e0;
+  --oro:#e8b04b; --notte:#131c3a;
+  --testo:#3a2b1a; --ombra:rgba(74,47,24,.18);
+  --font:'Baloo 2','Comic Sans MS','Trebuchet MS',system-ui,sans-serif;
+  --nav-h:64px;
 }
+/* Codice colore per era (badge, bande, timeline) */
+.era-oggi{background:#5aa9e6;} .era-900{background:#8e7cc3;}
+.era-medioevo{background:#a9564a;} .era-romana{background:#c9992e;}
+.era-preistoria{background:#7d6b52;} .era-fossile{background:#2f6b46;}
 
-/* Codice colore per era (badge epoca) */
-.era-oggi      { background:#5aa9e6; }
-.era-900       { background:#8e7cc3; }
-.era-medioevo  { background:#a9564a; }
-.era-romana    { background:#c9992e; }
-.era-preistoria{ background:#7d6b52; }
-.era-fossile   { background:#2f6b46; }
-
-*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-html,body{ margin:0; padding:0; height:100%; }
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;height:100%;}
 body{
-  font-family:var(--font);
-  color:var(--testo);
-  background:var(--crema);
-  overflow:hidden;
-  position:fixed; width:100%;
-  touch-action:manipulation;
-  -webkit-font-smoothing:antialiased;
+  font-family:var(--font); color:var(--testo); background:var(--crema);
+  overflow:hidden; position:fixed; width:100%; touch-action:manipulation;
+  -webkit-font-smoothing:antialiased; user-select:none;
 }
-
-/* ---- Header ---------------------------------------------------------------*/
-header{
-  position:fixed; top:0; left:0; right:0; height:56px; z-index:1200;
-  display:flex; align-items:center; justify-content:space-between;
-  padding:0 14px;
-  background:linear-gradient(120deg,var(--bosco),var(--bosco-chiaro));
-  color:#fff; box-shadow:0 2px 12px var(--ombra);
-}
-header .logo{ display:flex; flex-direction:column; line-height:1.05; }
-header .logo b{ font-size:15px; letter-spacing:.3px; }
-header .logo small{ font-size:10px; opacity:.9; font-weight:600; }
-header .menu-btn{
-  width:40px; height:40px; border:none; border-radius:50%;
-  background:rgba(255,255,255,.18); color:#fff; font-size:20px; cursor:pointer;
-}
-
-/* ---- Layout schermate -----------------------------------------------------*/
-#map{ position:absolute; top:56px; bottom:0; left:0; right:0; z-index:1; background:var(--crema); }
-
-/* Timeline progresso (viaggio nel tempo) */
-#timeline-wrap{
-  position:fixed; top:56px; left:0; right:0; z-index:900;
-  background:rgba(251,243,228,.94); backdrop-filter:blur(4px);
-  padding:8px 12px 10px; box-shadow:0 2px 8px var(--ombra);
-}
-#timeline-wrap .tl-labels{ display:flex; justify-content:space-between; font-size:10px; font-weight:700; color:var(--terra); margin-bottom:4px; }
-.tl-track{ position:relative; height:12px; border-radius:8px; background:var(--crema-scuro); overflow:hidden; border:1px solid var(--crema-scuro); }
-.tl-fill{
-  position:absolute; top:0; left:0; height:100%;
-  background:linear-gradient(90deg,var(--arancio),var(--oro),var(--bosco));
-  width:0%; transition:width .8s cubic-bezier(.2,.8,.2,1); border-radius:8px;
-}
-.tl-dots{ display:flex; justify-content:space-between; margin-top:6px; }
-.tl-dot{ width:14px; height:14px; border-radius:50%; background:var(--crema-scuro); border:2px solid #fff; box-shadow:0 1px 3px var(--ombra); transition:.3s; }
-.tl-dot.done{ background:var(--bosco); }
-.tl-dot.current{ background:var(--arancio); transform:scale(1.25); animation:pulse 1.4s infinite; }
-
-/* ---- Marker mappa ---------------------------------------------------------*/
-.marker-pin{
-  width:38px; height:38px; border-radius:50% 50% 50% 0; transform:rotate(-45deg);
-  display:flex; align-items:center; justify-content:center;
-  box-shadow:0 3px 8px var(--ombra); border:3px solid #fff;
-}
-.marker-pin > *{ transform:rotate(45deg); font-size:18px; }
-.marker-done   { background:var(--bosco); }
-.marker-future { background:#9c9c9c; }
-.marker-current{ background:var(--arancio); animation:pulse 1.4s infinite; }
-@keyframes pulse{ 0%,100%{ box-shadow:0 3px 8px var(--ombra),0 0 0 0 rgba(224,122,47,.55);} 50%{ box-shadow:0 3px 8px var(--ombra),0 0 0 12px rgba(224,122,47,0);} }
-
-/* ---- Widget mascotte flottante -------------------------------------------*/
-#mascotte{
-  position:fixed; right:12px; bottom:14px; z-index:1100;
-  width:120px; cursor:pointer; user-select:none;
-}
-#mascotte svg{ width:100%; height:auto; display:block; filter:drop-shadow(0 6px 8px var(--ombra)); transition:transform .2s; }
-#mascotte.festante svg{ animation:salto .6s ease infinite; }
-#mascotte.pensieroso svg{ animation:oscilla 1.2s ease-in-out infinite; }
-@keyframes salto{ 0%,100%{ transform:translateY(0) rotate(0);} 30%{ transform:translateY(-16px) rotate(-4deg);} 60%{ transform:translateY(-4px) rotate(3deg);} }
-@keyframes oscilla{ 0%,100%{ transform:rotate(-3deg);} 50%{ transform:rotate(3deg);} }
-
-/* Fumetto */
-#fumetto{
-  position:fixed; right:12px; bottom:150px; z-index:1100;
-  max-width:min(78vw,320px); background:#fff; color:var(--testo);
-  border:3px solid var(--arancio); border-radius:20px 20px 6px 20px;
-  padding:12px 14px; font-size:14px; font-weight:600; line-height:1.35;
-  box-shadow:0 8px 20px var(--ombra);
-  transition:opacity .3s, transform .3s; transform-origin:bottom right;
-}
-#fumetto:after{ content:''; position:absolute; right:24px; bottom:-14px; border:8px solid transparent; border-top-color:var(--arancio); }
-#fumetto.hidden{ opacity:0; transform:scale(.7); pointer-events:none; }
-
-/* ---- Pannello / schede (bottom sheet) ------------------------------------*/
-.sheet{
-  position:fixed; left:0; right:0; bottom:0; z-index:1300;
-  max-height:88vh; overflow-y:auto;
-  background:var(--crema); border-radius:26px 26px 0 0;
-  box-shadow:0 -8px 30px var(--ombra);
-  transform:translateY(102%); transition:transform .35s cubic-bezier(.2,.8,.2,1);
-  padding:10px 18px 26px;
-}
-.sheet.open{ transform:translateY(0); }
-.sheet .grip{ width:44px; height:5px; border-radius:3px; background:var(--crema-scuro); margin:4px auto 12px; }
-.sheet h2{ margin:6px 0 4px; font-size:22px; color:var(--terra-scuro); }
-.badge-epoca{ display:inline-block; color:#fff; font-size:12px; font-weight:800; padding:4px 12px; border-radius:20px; letter-spacing:.5px; box-shadow:0 2px 5px var(--ombra); }
-.racconto{ font-size:15px; line-height:1.5; margin:14px 0; background:#fff; border-radius:16px; padding:14px; border-left:5px solid var(--arancio-chiaro); }
-
-/* Bottoni */
-.btn{
-  display:block; width:100%; border:none; border-radius:16px;
-  padding:16px; font-family:var(--font); font-size:17px; font-weight:800;
-  cursor:pointer; margin-top:12px; box-shadow:0 4px 0 rgba(0,0,0,.14); transition:transform .1s, box-shadow .1s;
-}
-.btn:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.14); }
-.btn-arancio{ background:var(--arancio); color:#fff; }
-.btn-bosco{ background:var(--bosco); color:#fff; }
-.btn-oro{ background:var(--oro); color:var(--terra-scuro); }
-.btn-ghost{ background:#fff; color:var(--terra); box-shadow:0 2px 0 var(--crema-scuro); }
-
-/* Quiz */
-.quiz h3{ font-size:17px; margin:18px 0 6px; color:var(--terra-scuro); }
-.opzione{
-  display:block; width:100%; text-align:left; background:#fff; border:3px solid var(--crema-scuro);
-  border-radius:16px; padding:15px; font-family:var(--font); font-size:16px; font-weight:700; color:var(--testo);
-  margin-top:10px; cursor:pointer; transition:.15s;
-}
-.opzione:active{ transform:scale(.98); }
-.opzione.giusta{ border-color:var(--bosco); background:#e6f5ec; }
-.opzione.sbagliata{ border-color:#d0563e; background:#fbe4de; animation:shake .4s; }
-@keyframes shake{ 0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);} 75%{transform:translateX(6px);} }
-
-/* Collezione ricordi */
-#ricordi-bar{
-  position:fixed; bottom:14px; left:12px; z-index:1000;
-  display:flex; gap:5px; background:rgba(255,255,255,.9); padding:6px 8px; border-radius:16px; box-shadow:0 3px 10px var(--ombra); max-width:56vw; flex-wrap:wrap;
-}
-.ricordo-slot{ width:30px; height:30px; border-radius:9px; background:var(--crema-scuro); display:flex; align-items:center; justify-content:center; font-size:18px; }
-.ricordo-slot.pieno{ background:var(--oro); box-shadow:0 0 0 2px #fff inset; animation:pop .4s; }
-@keyframes pop{ 0%{ transform:scale(0);} 70%{ transform:scale(1.3);} 100%{ transform:scale(1);} }
-
-/* Menu a scomparsa */
-#menu{
-  position:fixed; top:56px; right:8px; z-index:1400; background:#fff; border-radius:16px;
-  box-shadow:0 8px 24px var(--ombra); padding:8px; width:220px; display:none;
-}
-#menu.open{ display:block; }
-#menu button{ width:100%; text-align:left; background:none; border:none; padding:12px; font-family:var(--font); font-size:15px; font-weight:700; color:var(--testo); border-radius:10px; cursor:pointer; }
-#menu button:active{ background:var(--crema); }
-#menu .danger{ color:#c0392b; }
-
-/* ---- Finale (schermata celebrativa) --------------------------------------*/
-#finale{
-  position:fixed; inset:0; z-index:2000; display:none; overflow-y:auto;
-  background:linear-gradient(180deg,#bfe3f2 0%, #dff0e4 55%, #e9dcc0 100%);
-  text-align:center; padding:24px 18px 40px;
-}
-#finale.show{ display:block; }
-#finale h1{ font-size:26px; color:var(--terra-scuro); margin:10px 0 2px; }
-#finale p.sub{ font-size:15px; font-weight:700; color:var(--bosco); margin:0 0 8px; }
-.scena-foresta{ width:100%; max-width:460px; margin:8px auto; }
-
-/* Diploma */
-.diploma{
-  max-width:460px; margin:14px auto; background:#fffdf7; border:6px double var(--oro);
-  border-radius:14px; padding:22px 20px; box-shadow:0 8px 24px var(--ombra);
-}
-.diploma h2{ font-size:22px; color:var(--terra); margin:4px 0; }
-.diploma .nome-input{
-  width:100%; text-align:center; font-family:var(--font); font-size:22px; font-weight:800;
-  color:var(--arancio); border:none; border-bottom:3px dashed var(--arancio-chiaro);
-  background:transparent; padding:6px; margin:10px 0;
-}
-.diploma .nome-input:focus{ outline:none; border-bottom-color:var(--arancio); }
-.diploma .sigillo{ font-size:44px; margin:6px 0; }
-.diploma .data{ font-size:13px; color:var(--terra); font-weight:700; }
-
-/* Coriandoli */
-.coriandolo{ position:fixed; top:-20px; width:11px; height:16px; z-index:2100; opacity:.9; animation:cade linear forwards; }
-@keyframes cade{ to{ transform:translateY(110vh) rotate(720deg); opacity:.8; } }
-
-/* Overlay generico */
-.overlay-bg{ position:fixed; inset:0; z-index:1250; background:rgba(58,43,26,.35); display:none; }
-.overlay-bg.show{ display:block; }
+input,button{font-family:var(--font);}
 
 /* ============================================================================
-   CSS DI STAMPA — solo il diploma finisce sulla carta
+   SPLASH SCREEN
+   ============================================================================ */
+#splash{
+  position:fixed; inset:0; z-index:3000; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center; padding:24px;
+  background:linear-gradient(180deg,#8ecbe8 0%,#bfe3f2 45%,#dff0e4 75%,#e9dcc0 100%);
+  transition:opacity .5s, transform .5s;
+}
+#splash.away{opacity:0; transform:scale(1.08); pointer-events:none;}
+.nuvola{position:absolute; background:#fff; border-radius:50px; opacity:.85; filter:blur(2px); animation:vaga linear infinite;}
+.n1{width:120px;height:36px;top:9%;left:-130px;animation-duration:34s;}
+.n2{width:80px;height:26px;top:20%;left:-90px;animation-duration:26s;animation-delay:-12s;}
+.n3{width:150px;height:42px;top:5%;left:-160px;animation-duration:44s;animation-delay:-25s;}
+@keyframes vaga{to{transform:translateX(130vw);}}
+#splash .sole{position:absolute; top:26px; right:26px; width:72px; height:72px; border-radius:50%;
+  background:radial-gradient(circle,#ffe89a,#f4c14f 70%); box-shadow:0 0 40px 14px rgba(244,193,79,.5); animation:respira 4s ease-in-out infinite;}
+@keyframes respira{50%{transform:scale(1.08);}}
+#splash .tumbo-big{width:min(52vw,230px); animation:fluttua 3.2s ease-in-out infinite; filter:drop-shadow(0 12px 14px var(--ombra));}
+@keyframes fluttua{50%{transform:translateY(-12px) rotate(-2deg);}}
+#splash .kicker{font-size:12px; font-weight:800; letter-spacing:3px; color:var(--bosco); background:rgba(255,255,255,.7);
+  padding:5px 14px; border-radius:20px; margin-bottom:8px;}
+#splash h1{
+  margin:6px 0 2px; font-size:clamp(30px,9vw,44px); line-height:1.02; color:var(--terra-scuro); font-weight:800;
+  text-shadow:0 3px 0 rgba(255,255,255,.6);
+}
+#splash h1 b{color:var(--arancio); display:block;}
+#splash .sotto{font-size:15px; font-weight:700; color:var(--terra); margin:8px 0 18px; max-width:320px;}
+#splash .nome-box{width:min(78vw,300px); background:#fff; border:3px solid var(--arancio-chiaro); border-radius:18px;
+  padding:12px 16px; font-size:18px; font-weight:800; text-align:center; color:var(--terra-scuro); outline:none;}
+#splash .nome-box:focus{border-color:var(--arancio);}
+#btn-gioca{
+  margin-top:14px; width:min(78vw,300px); border:none; border-radius:22px; padding:18px;
+  font-size:22px; font-weight:800; color:#fff; cursor:pointer;
+  background:linear-gradient(160deg,var(--arancio),#d0662a);
+  box-shadow:0 6px 0 #a84f1c, 0 14px 24px var(--ombra); transition:transform .1s, box-shadow .1s;
+}
+#btn-gioca:active{transform:translateY(5px); box-shadow:0 1px 0 #a84f1c;}
+#splash .credit{position:absolute; bottom:14px; font-size:11px; font-weight:700; color:var(--terra); opacity:.75;}
+
+/* ============================================================================
+   HEADER + HUD (XP / livello)
+   ============================================================================ */
+header{
+  position:fixed; top:0; left:0; right:0; height:58px; z-index:1200;
+  display:flex; align-items:center; justify-content:space-between; gap:8px; padding:0 10px 0 14px;
+  background:linear-gradient(120deg,var(--bosco),var(--bosco-chiaro)); color:#fff;
+  box-shadow:0 2px 12px var(--ombra);
+}
+header .logo{display:flex; flex-direction:column; line-height:1.05; min-width:0; overflow:hidden;}
+header .logo b{font-size:13px; letter-spacing:.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+header .logo small{font-size:9.5px; opacity:.9; font-weight:700; white-space:nowrap;}
+#hud{display:flex; align-items:center; gap:5px; flex:none;}
+.pill{
+  display:flex; align-items:center; gap:3px; background:rgba(255,255,255,.16);
+  border:1.5px solid rgba(255,255,255,.35); border-radius:20px; padding:4px 9px;
+  font-size:12px; font-weight:800; white-space:nowrap;
+}
+/* Su schermi stretti il livello mostra solo l'icona */
+@media (max-width:400px){ #pill-livello .liv-txt{display:none;} }
+header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background:rgba(255,255,255,.18);color:#fff;font-size:19px;cursor:pointer;flex:none;}
+
+/* ============================================================================
+   TIMELINE DEL VIAGGIO NEL TEMPO
+   ============================================================================ */
+#timeline-wrap{
+  position:fixed; top:58px; left:0; right:0; z-index:900;
+  background:rgba(251,243,228,.95); backdrop-filter:blur(5px);
+  padding:7px 12px 9px; box-shadow:0 2px 8px var(--ombra);
+}
+#timeline-wrap .tl-labels{display:flex; justify-content:space-between; font-size:10px; font-weight:800; color:var(--terra); margin-bottom:4px;}
+.tl-track{position:relative; height:11px; border-radius:8px; background:var(--crema-scuro); overflow:hidden;}
+.tl-fill{position:absolute; inset:0 auto 0 0; background:linear-gradient(90deg,var(--arancio),var(--oro),var(--bosco));
+  width:0%; transition:width .9s cubic-bezier(.2,.8,.2,1); border-radius:8px;}
+.tl-dots{display:flex; justify-content:space-between; margin-top:6px;}
+.tl-dot{
+  width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:13px;background:#fff;border:2.5px solid var(--crema-scuro);box-shadow:0 1px 3px var(--ombra);transition:.3s;
+}
+.tl-dot.future{filter:grayscale(1); opacity:.55;}
+.tl-dot.done{border-color:var(--bosco); background:#e6f5ec;}
+.tl-dot.current{border-color:var(--arancio); transform:scale(1.28); animation:pulse 1.4s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 1px 3px var(--ombra),0 0 0 0 rgba(224,122,47,.55);}50%{box-shadow:0 1px 3px var(--ombra),0 0 0 10px rgba(224,122,47,0);}}
+
+/* ============================================================================
+   MAPPA (con look "gioco": tile leggermente calde)
+   ============================================================================ */
+#map{position:absolute; top:58px; bottom:var(--nav-h); left:0; right:0; z-index:1; background:var(--crema);}
+.leaflet-tile-pane{filter:sepia(.28) saturate(1.15) hue-rotate(-8deg) brightness(1.03);}
+#btn-locate{
+  position:fixed; right:12px; top:158px; z-index:901; width:46px; height:46px; border-radius:50%;
+  border:none; background:#fff; box-shadow:0 4px 12px var(--ombra); font-size:21px; cursor:pointer;
+}
+#btn-locate:active{transform:scale(.92);}
+
+/* Marker mappa */
+.marker-pin{
+  width:40px;height:40px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 3px 8px var(--ombra);border:3px solid #fff;
+}
+.marker-pin>*{transform:rotate(45deg);font-size:19px;}
+.marker-done{background:var(--bosco);}
+.marker-future{background:#9c9c9c;}
+.marker-current{background:var(--arancio);animation:pulse 1.4s infinite;}
+.marker-current>*{animation:balza .9s ease-in-out infinite;}
+@keyframes balza{50%{transform:rotate(45deg) translateY(-4px);}}
+.dot-utente{width:18px;height:18px;border-radius:50%;background:var(--paleolago);border:3px solid #fff;box-shadow:0 0 0 0 rgba(74,159,196,.5);animation:pulse 1.6s infinite;}
+
+/* ============================================================================
+   BOTTOM NAV (tab da app mobile)
+   ============================================================================ */
+#nav{
+  position:fixed; left:0; right:0; bottom:0; height:var(--nav-h); z-index:1150;
+  display:flex; background:#fff; box-shadow:0 -4px 16px var(--ombra);
+  border-radius:20px 20px 0 0; overflow:hidden;
+}
+#nav button{
+  flex:1; border:none; background:none; cursor:pointer; font-size:11px; font-weight:800;
+  color:#9b8a72; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
+}
+#nav button .ic{font-size:22px; transition:transform .15s;}
+#nav button.active{color:var(--arancio);}
+#nav button.active .ic{transform:translateY(-2px) scale(1.15);}
+#nav .nav-badge{position:absolute; margin-left:34px; margin-top:-30px; background:#d0563e; color:#fff; font-size:10px; border-radius:10px; padding:1px 6px;}
+
+/* ============================================================================
+   MASCOTTE + FUMETTO
+   ============================================================================ */
+#mascotte{position:fixed; right:10px; bottom:calc(var(--nav-h) + 8px); z-index:1100; width:112px; cursor:pointer;}
+#mascotte svg{width:100%;height:auto;display:block;filter:drop-shadow(0 6px 8px var(--ombra));}
+#mascotte.festante{animation:salto .6s ease infinite;}
+#mascotte.pensieroso{animation:oscilla 1.2s ease-in-out infinite;}
+@keyframes salto{0%,100%{transform:translateY(0) rotate(0);}30%{transform:translateY(-16px) rotate(-4deg);}60%{transform:translateY(-4px) rotate(3deg);}}
+@keyframes oscilla{0%,100%{transform:rotate(-3deg);}50%{transform:rotate(3deg);}}
+#fumetto{
+  position:fixed; right:12px; bottom:calc(var(--nav-h) + 128px); z-index:1100;
+  max-width:min(76vw,320px); background:#fff; border:3px solid var(--arancio);
+  border-radius:20px 20px 6px 20px; padding:12px 14px; font-size:14px; font-weight:700; line-height:1.35;
+  box-shadow:0 8px 20px var(--ombra); transition:opacity .3s, transform .3s; transform-origin:bottom right;
+}
+#fumetto:after{content:'';position:absolute;right:24px;bottom:-14px;border:8px solid transparent;border-top-color:var(--arancio);}
+#fumetto.hidden{opacity:0;transform:scale(.7);pointer-events:none;}
+
+/* XP flottante ("+80 ✨") */
+.xp-float{
+  position:fixed; right:60px; bottom:calc(var(--nav-h) + 120px); z-index:1160;
+  font-size:22px; font-weight:800; color:var(--arancio); text-shadow:0 2px 0 #fff;
+  animation:salexp 1.4s ease forwards; pointer-events:none;
+}
+@keyframes salexp{0%{opacity:0;transform:translateY(10px) scale(.6);}20%{opacity:1;transform:translateY(0) scale(1.15);}100%{opacity:0;transform:translateY(-70px) scale(1);}}
+
+/* ============================================================================
+   BOTTOM SHEET (scheda tappa)
+   ============================================================================ */
+.overlay-bg{position:fixed;inset:0;z-index:1250;background:rgba(58,43,26,.4);display:none;}
+.overlay-bg.show{display:block;}
+.sheet{
+  position:fixed; left:0; right:0; bottom:0; z-index:1300; max-height:88vh; overflow-y:auto;
+  background:var(--crema); border-radius:26px 26px 0 0; box-shadow:0 -8px 30px var(--ombra);
+  transform:translateY(103%); transition:transform .38s cubic-bezier(.2,.9,.25,1.1); padding:0 18px 28px;
+}
+.sheet.open{transform:translateY(0);}
+.sheet .banda{margin:0 -18px; padding:16px 18px 12px; border-radius:26px 26px 0 0; color:#fff;}
+.sheet .banda .grip{width:44px;height:5px;border-radius:3px;background:rgba(255,255,255,.5);margin:0 auto 10px;}
+.sheet .banda h2{margin:2px 0 0;font-size:22px;text-shadow:0 1px 3px rgba(0,0,0,.2);}
+.badge-epoca{display:inline-block;background:rgba(255,255,255,.25);border:1.5px solid rgba(255,255,255,.5);
+  color:#fff;font-size:12px;font-weight:800;padding:3px 12px;border-radius:20px;letter-spacing:.5px;}
+.racconto{font-size:15px;line-height:1.5;margin:14px 0;background:#fff;border-radius:16px;padding:14px;border-left:5px solid var(--arancio-chiaro);}
+.curiosita{font-size:13.5px;line-height:1.45;margin:10px 0;background:#fff8e8;border-radius:14px;padding:12px;border-left:5px solid var(--oro);font-weight:600;}
+.dist-info{text-align:center;font-size:13px;font-weight:800;color:var(--paleolago);margin:4px 0;}
+
+/* Bottoni */
+.btn{display:block;width:100%;border:none;border-radius:18px;padding:16px;font-size:17px;font-weight:800;cursor:pointer;
+  margin-top:12px;box-shadow:0 4px 0 rgba(0,0,0,.16);transition:transform .1s, box-shadow .1s;}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.16);}
+.btn-arancio{background:linear-gradient(160deg,var(--arancio),#d0662a);color:#fff;box-shadow:0 4px 0 #a84f1c;}
+.btn-bosco{background:linear-gradient(160deg,var(--bosco-chiaro),var(--bosco));color:#fff;box-shadow:0 4px 0 #1d472e;}
+.btn-oro{background:linear-gradient(160deg,#f2c25e,var(--oro));color:var(--terra-scuro);box-shadow:0 4px 0 #b8862e;}
+.btn-viola{background:linear-gradient(160deg,#5a6fd6,#3c4ea8);color:#fff;box-shadow:0 4px 0 #2a3778;}
+.btn-ghost{background:#fff;color:var(--terra);box-shadow:0 2px 0 var(--crema-scuro);}
+
+/* Quiz */
+.quiz h3{font-size:17px;margin:16px 0 6px;color:var(--terra-scuro);}
+.opzione{display:block;width:100%;text-align:left;background:#fff;border:3px solid var(--crema-scuro);border-radius:16px;
+  padding:15px;font-size:16px;font-weight:700;color:var(--testo);margin-top:10px;cursor:pointer;transition:.15s;}
+.opzione:active{transform:scale(.98);}
+.opzione.giusta{border-color:var(--bosco);background:#e6f5ec;}
+.opzione.sbagliata{border-color:#d0563e;background:#fbe4de;animation:shake .4s;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+.stelle-earned{text-align:center;font-size:34px;letter-spacing:4px;margin:8px 0 0;animation:pop .5s;}
+@keyframes pop{0%{transform:scale(0);}70%{transform:scale(1.3);}100%{transform:scale(1);}}
+
+/* ============================================================================
+   ZAINO / ALBUM
+   ============================================================================ */
+#album{
+  position:fixed; top:58px; bottom:var(--nav-h); left:0; right:0; z-index:800;
+  overflow-y:auto; background:var(--crema); padding:14px 14px 90px; display:none;
+}
+#album.show{display:block;}
+#album h2{margin:4px 0 10px; font-size:21px; color:var(--terra-scuro);}
+.card-livello{background:linear-gradient(140deg,#fff,#fff8ec); border-radius:20px; padding:16px; box-shadow:0 4px 14px var(--ombra); margin-bottom:14px;}
+.card-livello .liv-top{display:flex; align-items:center; gap:12px;}
+.card-livello .liv-ic{font-size:40px;}
+.card-livello .liv-nome{font-size:19px; font-weight:800; color:var(--terra-scuro); line-height:1.1;}
+.card-livello .liv-xp{font-size:12px; font-weight:700; color:var(--terra);}
+.liv-bar{height:12px;border-radius:8px;background:var(--crema-scuro);overflow:hidden;margin-top:10px;}
+.liv-bar>div{height:100%;background:linear-gradient(90deg,var(--oro),var(--arancio));border-radius:8px;transition:width .6s;}
+.griglia-ricordi{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.card-ricordo{background:#fff;border-radius:18px;padding:14px 10px;text-align:center;box-shadow:0 3px 10px var(--ombra);}
+.card-ricordo .em{font-size:38px;line-height:1;}
+.card-ricordo .nm{font-size:12.5px;font-weight:800;margin-top:6px;color:var(--terra-scuro);line-height:1.15;}
+.card-ricordo .ep{font-size:10px;font-weight:800;color:#fff;border-radius:10px;padding:2px 8px;display:inline-block;margin-top:5px;}
+.card-ricordo .st{font-size:13px;letter-spacing:1px;margin-top:3px;}
+.card-ricordo.bloccato{opacity:.55;filter:grayscale(.9);}
+.card-ricordo.bloccato .em{filter:blur(2px);}
+
+/* ============================================================================
+   PORTALE DEL TEMPO (transizione tra epoche)
+   ============================================================================ */
+#timeportal{
+  position:fixed; inset:0; z-index:2500; display:none; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center; overflow:hidden;
+  background:radial-gradient(circle at 50% 45%, #2a3c72 0%, var(--notte) 65%, #05081a 100%);
+  color:#fff;
+}
+#timeportal.show{display:flex;}
+.ring{position:absolute; left:50%; top:45%; border-radius:50%; border-style:dashed; translate:-50% -50%;}
+.r1{width:76vmin;height:76vmin;border:3px dashed rgba(124,196,224,.5);animation:gira 6s linear infinite;}
+.r2{width:56vmin;height:56vmin;border:3px dashed rgba(232,176,75,.55);animation:gira 4s linear infinite reverse;}
+.r3{width:38vmin;height:38vmin;border:4px dashed rgba(244,162,89,.7);animation:gira 2.6s linear infinite;}
+@keyframes gira{to{transform:rotate(360deg);}}
+#timeportal .tumbo-mini{width:120px;animation:vortice 2.4s ease-in-out infinite;filter:drop-shadow(0 0 22px rgba(244,162,89,.7));}
+@keyframes vortice{0%,100%{transform:rotate(-8deg) scale(1);}50%{transform:rotate(8deg) scale(1.1);}}
+#portal-anno{font-size:clamp(30px,9vw,52px);font-weight:800;letter-spacing:1px;margin-top:20px;text-shadow:0 0 24px rgba(124,196,224,.8);font-variant-numeric:tabular-nums;}
+#portal-dest{font-size:16px;font-weight:800;color:var(--arancio-chiaro);margin-top:6px;min-height:22px;}
+.stellina{position:absolute;background:#fff;border-radius:50%;opacity:.8;animation:brilla 2s ease-in-out infinite;}
+@keyframes brilla{50%{opacity:.15;transform:scale(.6);}}
+
+/* Toast livello */
+#toast-livello{
+  position:fixed; top:74px; left:50%; transform:translate(-50%,-200%); z-index:2600;
+  background:linear-gradient(140deg,#fff,#fff3da); border:3px solid var(--oro); border-radius:20px;
+  padding:12px 22px; text-align:center; box-shadow:0 10px 30px var(--ombra);
+  transition:transform .45s cubic-bezier(.2,.9,.3,1.2), opacity .3s;
+  font-weight:800; color:var(--terra-scuro); opacity:0; pointer-events:none;
+}
+#toast-livello.show{transform:translate(-50%,0); opacity:1;}
+#toast-livello .big{font-size:28px;}
+
+/* ============================================================================
+   MENU
+   ============================================================================ */
+#menu{position:fixed; top:58px; right:8px; z-index:1400; background:#fff; border-radius:16px;
+  box-shadow:0 8px 24px var(--ombra); padding:8px; width:240px; display:none;}
+#menu.open{display:block;}
+#menu button{width:100%;text-align:left;background:none;border:none;padding:12px;font-size:15px;font-weight:700;color:var(--testo);border-radius:10px;cursor:pointer;}
+#menu button:active{background:var(--crema);}
+#menu .danger{color:#c0392b;}
+
+/* ============================================================================
+   FINALE + DIPLOMA
+   ============================================================================ */
+#finale{
+  position:fixed; inset:0; z-index:2000; display:none; overflow-y:auto;
+  background:linear-gradient(180deg,#bfe3f2 0%,#dff0e4 55%,#e9dcc0 100%);
+  text-align:center; padding:24px 18px 40px;
+}
+#finale.show{display:block;}
+#finale h1{font-size:27px;color:var(--terra-scuro);margin:10px 0 2px;}
+#finale p.sub{font-size:15px;font-weight:800;color:var(--bosco);margin:0 0 8px;}
+.scena-foresta{width:100%;max-width:460px;margin:8px auto;animation:fluttua 4s ease-in-out infinite;}
+.diploma{max-width:460px;margin:14px auto;background:#fffdf7;border:6px double var(--oro);border-radius:14px;
+  padding:22px 20px;box-shadow:0 8px 24px var(--ombra);}
+.diploma h2{font-size:22px;color:var(--terra);margin:4px 0;}
+.diploma .nome-input{width:100%;text-align:center;font-size:22px;font-weight:800;color:var(--arancio);
+  border:none;border-bottom:3px dashed var(--arancio-chiaro);background:transparent;padding:6px;margin:10px 0;outline:none;}
+.diploma .sigillo{font-size:44px;margin:6px 0;}
+.diploma .data{font-size:13px;color:var(--terra);font-weight:700;}
+.diploma .statistiche{display:flex;justify-content:center;gap:14px;margin:8px 0 2px;font-size:13px;font-weight:800;color:var(--terra);}
+
+/* Coriandoli */
+.coriandolo{position:fixed;top:-24px;z-index:2100;font-size:18px;animation:cade linear forwards;pointer-events:none;}
+@keyframes cade{to{transform:translateY(112vh) rotate(720deg);}}
+
+/* ============================================================================
+   STAMPA — sulla carta va SOLO il diploma
    ============================================================================ */
 @media print{
-  body{ position:static; overflow:visible; background:#fff; }
-  header,#map,#mascotte,#fumetto,#ricordi-bar,#timeline-wrap,#menu,.sheet,.overlay-bg,.scena-foresta,#finale .btn,#finale h1,#finale p.sub,.coriandolo{ display:none !important; }
-  #finale{ position:static; display:block !important; background:#fff; padding:0; }
-  .diploma{ box-shadow:none; margin:0 auto; border-color:#b8860b; }
-  .diploma .nome-input{ border-bottom:none; }
+  body{position:static;overflow:visible;background:#fff;}
+  header,#map,#mascotte,#fumetto,#timeline-wrap,#menu,#nav,#album,#splash,#timeportal,#toast-livello,#btn-locate,
+  .sheet,.overlay-bg,.scena-foresta,#finale .btn,#finale h1,#finale p.sub,#finale p.testo,.coriandolo{display:none !important;}
+  #finale{position:static;display:block !important;background:#fff;padding:0;}
+  .diploma{box-shadow:none;margin:0 auto;border-color:#b8860b;}
+  .diploma .nome-input{border-bottom:none;}
 }
 </style>
 </head>
 <body>
 
-<!-- ============================ HEADER ==================================== -->
-<header>
-  <div class="logo">
-    <b>Visit Avigliano Umbro</b>
-    <small id="logo-sub">· Il viaggio di Tumbo</small>
-  </div>
-  <button class="menu-btn" id="menu-btn" aria-label="Menu">☰</button>
-</header>
-
-<!-- Menu a scomparsa (contiene "ricomincia avventura") -->
-<div id="menu">
-  <button id="btn-aiuto">💬 Cosa devo fare?</button>
-  <button id="btn-ricentra">🗺️ Mostra tutta la mappa</button>
-  <button class="danger" id="btn-reset">🔄 Ricomincia l'avventura</button>
-</div>
-
-<!-- ============================ TIMELINE ================================== -->
-<div id="timeline-wrap">
-  <div class="tl-labels"><span>OGGI</span><span id="tl-mid">↩ viaggio nel tempo</span><span>2 MILIONI DI ANNI FA</span></div>
-  <div class="tl-track"><div class="tl-fill" id="tl-fill"></div></div>
-  <div class="tl-dots" id="tl-dots"></div>
-</div>
-
-<!-- ============================ MAPPA ==================================== -->
-<div id="map"></div>
-
-<!-- ============================ RICORDI =================================== -->
-<div id="ricordi-bar" title="I tuoi ricordi del viaggio"></div>
-
-<!-- ============================ MASCOTTE ================================= -->
-<!-- SVG inline disegnato a mano: cucciolo di mammut cartoon.
-     Gli stati (normale/festante/pensieroso) sono gestiti via classi CSS sul contenitore. -->
-<div id="mascotte" title="Tocca Tumbo!">
-  <svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" aria-label="Tumbo il mammut">
-    <!-- pelo/corpo tondo -->
+<!-- ==================== SVG SYMBOL: TUMBO (definito una volta sola) =========
+     Palpebre e proboscide animate con SMIL: la mascotte è "viva" ovunque. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="svg-tumbo" viewBox="0 0 140 140">
     <ellipse cx="70" cy="88" rx="46" ry="40" fill="#c9772f"/>
     <ellipse cx="70" cy="92" rx="46" ry="36" fill="#e07a2f"/>
-    <!-- ciuffo di pelo in testa -->
     <path d="M46 54 q6 -16 12 -2 q6 -16 12 -2 q6 -16 12 -2 q6 -14 10 2" fill="none" stroke="#a85e22" stroke-width="6" stroke-linecap="round"/>
-    <!-- testa -->
     <ellipse cx="70" cy="66" rx="34" ry="30" fill="#e07a2f"/>
-    <!-- orecchie -->
     <ellipse cx="40" cy="60" rx="10" ry="13" fill="#c9772f"/>
     <ellipse cx="100" cy="60" rx="10" ry="13" fill="#c9772f"/>
-    <!-- occhi grandi -->
     <circle cx="58" cy="62" r="10" fill="#fff"/>
     <circle cx="82" cy="62" r="10" fill="#fff"/>
-    <circle id="pupilla-sx" cx="60" cy="64" r="5" fill="#3a2b1a"/>
-    <circle id="pupilla-dx" cx="84" cy="64" r="5" fill="#3a2b1a"/>
+    <!-- pupille: sbattono le palpebre (animazione SMIL su ry) -->
+    <ellipse cx="60" cy="64" rx="5" ry="5" fill="#3a2b1a">
+      <animate attributeName="ry" values="5;5;.6;5;5" keyTimes="0;.45;.5;.55;1" dur="4.2s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="84" cy="64" rx="5" ry="5" fill="#3a2b1a">
+      <animate attributeName="ry" values="5;5;.6;5;5" keyTimes="0;.45;.5;.55;1" dur="4.2s" repeatCount="indefinite"/>
+    </ellipse>
     <circle cx="62" cy="62" r="1.6" fill="#fff"/>
     <circle cx="86" cy="62" r="1.6" fill="#fff"/>
     <!-- zanne piccole -->
     <path d="M60 86 q-6 10 -2 16" fill="none" stroke="#fff6e0" stroke-width="6" stroke-linecap="round"/>
     <path d="M80 86 q6 10 2 16" fill="none" stroke="#fff6e0" stroke-width="6" stroke-linecap="round"/>
-    <!-- proboscide espressiva -->
-    <path id="proboscide" d="M70 74 q-2 22 -12 30 q-8 8 -2 14" fill="none" stroke="#e07a2f" stroke-width="12" stroke-linecap="round"/>
-    <!-- guance -->
+    <!-- proboscide: dondola da sola -->
+    <g>
+      <animateTransform attributeName="transform" type="rotate" values="0 70 74;5 70 74;0 70 74;-5 70 74;0 70 74" dur="5s" repeatCount="indefinite"/>
+      <path d="M70 74 q-2 22 -12 30 q-8 8 -2 14" fill="none" stroke="#e07a2f" stroke-width="12" stroke-linecap="round"/>
+    </g>
     <circle cx="48" cy="74" r="5" fill="#f4a25955"/>
     <circle cx="92" cy="74" r="5" fill="#f4a25955"/>
-    <!-- piedini -->
     <ellipse cx="50" cy="122" rx="12" ry="7" fill="#c9772f"/>
     <ellipse cx="90" cy="122" rx="12" ry="7" fill="#c9772f"/>
-  </svg>
+  </symbol>
+</svg>
+
+<!-- ============================ SPLASH ==================================== -->
+<div id="splash">
+  <div class="nuvola n1"></div><div class="nuvola n2"></div><div class="nuvola n3"></div>
+  <div class="sole"></div>
+  <svg class="tumbo-big"><use href="#svg-tumbo"/></svg>
+  <div class="kicker">VISIT AVIGLIANO UMBRO</div>
+  <h1>Riporta <b id="splash-nome-mascotte">Tumbo</b> a casa!</h1>
+  <p class="sotto" id="splash-sotto"></p>
+  <input class="nome-box" id="splash-nome" placeholder="Come ti chiami, esploratore?" maxlength="24" autocomplete="off"/>
+  <button id="btn-gioca">▶ &nbsp;Inizia l'avventura</button>
+  <div class="credit">Un viaggio nel tempo fino alla Foresta Fossile di Dunarobba</div>
 </div>
 
-<!-- Fumetto della mascotte -->
+<!-- ============================ HEADER + HUD ============================== -->
+<header>
+  <div class="logo">
+    <b>Visit Avigliano Umbro</b>
+    <small id="logo-sub">· Il viaggio di Tumbo</small>
+  </div>
+  <div id="hud">
+    <div class="pill" id="pill-livello" title="Il tuo livello">🐣</div>
+    <div class="pill" id="pill-xp" title="Punti esperienza">✨ 0</div>
+    <button class="menu-btn" id="menu-btn" aria-label="Menu">☰</button>
+  </div>
+</header>
+
+<!-- Menu -->
+<div id="menu">
+  <button id="btn-aiuto">💬 Cosa devo fare?</button>
+  <button id="btn-ricentra">🗺️ Mostra tutta la mappa</button>
+  <button id="btn-audio">🔊 Suoni: attivi</button>
+  <button class="danger" id="btn-reset">🔄 Ricomincia l'avventura</button>
+</div>
+
+<!-- ============================ TIMELINE ================================== -->
+<div id="timeline-wrap">
+  <div class="tl-labels"><span>OGGI</span><span>↩ viaggio nel tempo</span><span>2 MILIONI DI ANNI FA</span></div>
+  <div class="tl-track"><div class="tl-fill" id="tl-fill"></div></div>
+  <div class="tl-dots" id="tl-dots"></div>
+</div>
+
+<!-- ============================ MAPPA + LOCATE ============================ -->
+<div id="map"></div>
+<button id="btn-locate" title="Quanto sei lontano dalla tappa?">🧭</button>
+
+<!-- ============================ ZAINO / ALBUM ============================= -->
+<div id="album"></div>
+
+<!-- ============================ BOTTOM NAV ================================ -->
+<nav id="nav">
+  <button id="tab-mappa" class="active"><span class="ic">🗺️</span>Mappa</button>
+  <button id="tab-zaino"><span class="ic">🎒</span>Zaino</button>
+</nav>
+
+<!-- ============================ MASCOTTE ================================= -->
+<div id="mascotte" title="Tocca Tumbo!">
+  <svg viewBox="0 0 140 140"><use href="#svg-tumbo"/></svg>
+</div>
 <div id="fumetto"></div>
 
-<!-- ============================ OVERLAY + SCHEDA TAPPA =================== -->
+<!-- ============================ SHEET TAPPA =============================== -->
 <div class="overlay-bg" id="overlay-bg"></div>
 <div class="sheet" id="sheet"></div>
 
+<!-- ============================ PORTALE DEL TEMPO ========================= -->
+<div id="timeportal">
+  <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
+  <svg class="tumbo-mini" viewBox="0 0 140 140"><use href="#svg-tumbo"/></svg>
+  <div id="portal-anno">OGGI</div>
+  <div id="portal-dest"></div>
+</div>
+
+<!-- Toast level-up -->
+<div id="toast-livello"></div>
+
 <!-- ============================ FINALE =================================== -->
 <div id="finale">
-  <!-- Scena SVG: foresta viva ritrovata (sequoie + paleolago Tiberino sullo sfondo) -->
+  <!-- Scena SVG: la foresta viva ritrovata (sequoie + paleolago Tiberino) -->
   <svg class="scena-foresta" viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg">
     <rect width="400" height="220" fill="#bfe3f2"/>
-    <!-- paleolago Tiberino -->
     <ellipse cx="200" cy="150" rx="220" ry="46" fill="#4a9fc4"/>
     <ellipse cx="200" cy="146" rx="220" ry="40" fill="#7cc4e0"/>
-    <!-- colline -->
     <path d="M0 150 q100 -60 200 -10 q100 40 200 -10 V220 H0 Z" fill="#4f9d6b"/>
-    <!-- sequoie (foresta fossile viva) -->
-    <g>
-      <rect x="60" y="70" width="16" height="110" rx="6" fill="#6b4423"/>
-      <ellipse cx="68" cy="66" rx="34" ry="42" fill="#2f6b46"/>
-      <ellipse cx="68" cy="40" rx="24" ry="30" fill="#3c8557"/>
-    </g>
-    <g>
-      <rect x="320" y="60" width="18" height="120" rx="6" fill="#6b4423"/>
-      <ellipse cx="329" cy="58" rx="38" ry="46" fill="#2f6b46"/>
-      <ellipse cx="329" cy="30" rx="26" ry="32" fill="#3c8557"/>
-    </g>
-    <g>
-      <rect x="188" y="86" width="14" height="94" rx="6" fill="#6b4423"/>
-      <ellipse cx="195" cy="80" rx="30" ry="38" fill="#2f6b46"/>
-    </g>
-    <!-- Tumbo felice a casa -->
+    <g><rect x="60" y="70" width="16" height="110" rx="6" fill="#6b4423"/><ellipse cx="68" cy="66" rx="34" ry="42" fill="#2f6b46"/><ellipse cx="68" cy="40" rx="24" ry="30" fill="#3c8557"/></g>
+    <g><rect x="320" y="60" width="18" height="120" rx="6" fill="#6b4423"/><ellipse cx="329" cy="58" rx="38" ry="46" fill="#2f6b46"/><ellipse cx="329" cy="30" rx="26" ry="32" fill="#3c8557"/></g>
+    <g><rect x="188" y="86" width="14" height="94" rx="6" fill="#6b4423"/><ellipse cx="195" cy="80" rx="30" ry="38" fill="#2f6b46"/></g>
     <g transform="translate(150,120)">
-      <ellipse cx="40" cy="44" rx="34" ry="28" fill="#e07a2f"/>
-      <ellipse cx="40" cy="26" rx="24" ry="22" fill="#e07a2f"/>
+      <ellipse cx="40" cy="44" rx="34" ry="28" fill="#e07a2f"/><ellipse cx="40" cy="26" rx="24" ry="22" fill="#e07a2f"/>
       <circle cx="32" cy="24" r="6" fill="#fff"/><circle cx="48" cy="24" r="6" fill="#fff"/>
       <circle cx="33" cy="25" r="3" fill="#3a2b1a"/><circle cx="49" cy="25" r="3" fill="#3a2b1a"/>
       <path d="M40 32 q-2 16 -10 22" fill="none" stroke="#e07a2f" stroke-width="8" stroke-linecap="round"/>
@@ -360,21 +505,22 @@ header .menu-btn{
 
   <p class="sub">🎉 EVVIVA! 🎉</p>
   <h1 id="finale-titolo">Tumbo è tornato a casa!</h1>
-  <p style="max-width:440px;margin:6px auto 0;font-weight:600;" id="finale-testo"></p>
+  <p class="testo" style="max-width:440px;margin:6px auto 0;font-weight:700;" id="finale-testo"></p>
 
-  <!-- Diploma -->
   <div class="diploma">
     <div class="sigillo">🏅</div>
     <p class="data" style="letter-spacing:2px;">DIPLOMA DI</p>
     <h2>Esploratore del Tempo</h2>
     <p style="font-weight:700;font-size:13px;margin:2px 0;">rilasciato a</p>
-    <input class="nome-input" id="nome-bambino" placeholder="scrivi il tuo nome" maxlength="24" />
+    <input class="nome-input" id="nome-bambino" placeholder="scrivi il tuo nome" maxlength="24"/>
     <p style="font-weight:600;font-size:13px;margin:6px 0;">per aver riportato Tumbo il mammut<br>alla Foresta Fossile di Dunarobba,<br>viaggiando fino a <b>2 milioni di anni fa</b>.</p>
+    <div class="statistiche" id="diploma-stat"></div>
     <p class="data" id="diploma-data"></p>
   </div>
 
   <div style="max-width:440px;margin:0 auto;">
     <button class="btn btn-oro" id="btn-stampa">🖨️ Stampa / Salva il diploma</button>
+    <button class="btn btn-viola" id="btn-condividi" style="display:none;">📤 Racconta l'avventura</button>
     <button class="btn btn-ghost" id="btn-torna-mappa">🗺️ Torna alla mappa</button>
     <button class="btn btn-ghost" id="btn-nuova-avventura" style="margin-top:8px;">🔄 Nuova avventura</button>
   </div>
@@ -387,103 +533,92 @@ header .menu-btn{
 const MASCOTTE_NOME = "Tumbo";
 
 /* ============================================================================
-   CONFIGURAZIONE TAPPE  (tutto il contenuto vive QUI, mai nel markup)
+   GAMIFICATION: XP e LIVELLI da esploratore
+   ============================================================================ */
+const XP_BASE_TAPPA = 60;      // XP per tappa completata
+const XP_PER_STELLA = 20;      // bonus per ogni stella del quiz
+const LIVELLI = [
+  { xp: 0,   nome: "Cucciolo Curioso",    icona: "🐣" },
+  { xp: 150, nome: "Esploratore in Erba", icona: "🌱" },
+  { xp: 350, nome: "Cacciatore di Epoche",icona: "🧭" },
+  { xp: 600, nome: "Guardiano del Tempo", icona: "⏳" },
+];
+
+/* ============================================================================
+   CONFIGURAZIONE TAPPE (tutto il contenuto vive QUI, mai nel markup)
    ----------------------------------------------------------------------------
    Ordine di gioco = dal presente al passato profondo.
-   Modifica liberamente lat/lon, testi, quiz. "attiva" accende/spegne la tappa.
-   TODO(backend): in produzione questo array arriverà da un backend, che potrà
+   "anno" serve al contatore del Portale del Tempo (negativo = anni fa).
+   "attiva" accende/spegne la tappa.
+   TODO(backend): in produzione questo array arriverà da un backend che potrà
    attivare/disattivare le tappe da remoto (campo "attiva").
    TODO(multilingua): duplicare i campi testuali per lingua (es. testo_racconto_en).
    ============================================================================ */
 const TAPPE = [
   {
-    id: 1,
-    nome: "Piazza di Avigliano Umbro",
-    epoca: "OGGI",
-    eraClass: "era-oggi",
-    lat: 42.6555, lon: 12.4270,
-    ricordo: "🎈",
+    id: 1, nome: "Piazza di Avigliano Umbro", epoca: "OGGI", eraClass: "era-oggi",
+    lat: 42.6555, lon: 12.4270, ricordo: "🎈", anno: 2026, anno_label: "OGGI",
     testo_racconto: "Ciao! Mi sono perso e sono finito nella tua piazza, ai giorni nostri! Che confusione: auto, gelati, tanta gente. Ma io vengo da tantissimo tempo fa... Aiutami a tornare a casa viaggiando indietro nel tempo!",
+    curiosita: "Avigliano Umbro è diventato un Comune indipendente solo nel 1975: è uno dei Comuni più giovani dell'Umbria!",
     domanda_quiz: "In che epoca ci troviamo adesso, nella piazza?",
     opzioni: ["Oggi, ai giorni nostri", "Nel Medioevo", "Un milione di anni fa"],
-    risposta_corretta: 0,
-    attiva: true
+    risposta_corretta: 0, attiva: true
   },
   {
-    id: 2,
-    nome: "Teatro Comunale di Avigliano",
-    epoca: "IL '900",
-    eraClass: "era-900",
-    lat: 42.6550, lon: 12.4265,
-    ricordo: "🎭",
+    id: 2, nome: "Teatro Comunale di Avigliano", epoca: "IL '900", eraClass: "era-900",
+    lat: 42.6550, lon: 12.4265, ricordo: "🎭", anno: 1920, anno_label: "ANNO 1920",
     testo_racconto: "Che bello questo teatro! Qui, circa cento anni fa, la gente veniva la sera a vedere spettacoli e sentire la musica. Non c'era la televisione: ci si divertiva tutti insieme sotto il palco. Facciamo un passo ancora più indietro?",
+    curiosita: "Cento anni fa non esistevano gli smartphone: gli spettacoli dal vivo erano il divertimento più grande del paese!",
     domanda_quiz: "Cosa facevano le persone al teatro cento anni fa?",
     opzioni: ["Guardavano spettacoli e musica dal vivo", "Caricavano il telefonino", "Cacciavano i mammut"],
-    risposta_corretta: 0,
-    attiva: true
+    risposta_corretta: 0, attiva: true
   },
   {
-    id: 3,
-    nome: "Castello di Sismano",
-    epoca: "MEDIOEVO",
-    eraClass: "era-medioevo",
-    lat: 42.6280, lon: 12.4180,
-    ricordo: "🏰",
+    id: 3, nome: "Castello di Sismano", epoca: "MEDIOEVO", eraClass: "era-medioevo",
+    lat: 42.6280, lon: 12.4180, ricordo: "🏰", anno: 1300, anno_label: "ANNO 1300",
     testo_racconto: "Uh, un castello vero! Siamo nel Medioevo. Vedi le torri e le mura? Servivano a difendere il borgo. Ho un po' paura dei cavalieri con l'armatura... ma con te al mio fianco sono coraggioso! Andiamo ancora più indietro.",
+    curiosita: "Nel Medioevo i castelli come Sismano proteggevano contadini e animali: quando arrivava un pericolo, tutti correvano dentro le mura!",
     domanda_quiz: "A cosa servivano le mura e le torri del castello?",
     opzioni: ["A difendere il borgo dai nemici", "A giocare a nascondino", "A parcheggiare le auto"],
-    risposta_corretta: 0,
-    attiva: true
+    risposta_corretta: 0, attiva: true
   },
   {
-    id: 4,
-    nome: "Santa Restituta",
-    epoca: "ETÀ ROMANA",
-    eraClass: "era-romana",
-    lat: 42.6310, lon: 12.3560,
-    ricordo: "🏛️",
+    id: 4, nome: "Santa Restituta", epoca: "ETÀ ROMANA", eraClass: "era-romana",
+    lat: 42.6310, lon: 12.3560, ricordo: "🏛️", anno: 100, anno_label: "100 d.C.",
     testo_racconto: "Adesso siamo nell'antica età romana, tantissimi anni fa! Qui vicino ci sono grotte e antiche storie. I Romani costruivano strade dritte e ponti robusti per viaggiare in tutto il territorio. Bravissimo, stiamo tornando a casa!",
+    curiosita: "Vicino a Santa Restituta c'è la Grotta Bella, frequentata dall'uomo fin dalla preistoria e poi usata anche in epoca romana!",
     domanda_quiz: "Per cosa erano famosi gli antichi Romani?",
     opzioni: ["Costruire strade e ponti robusti", "Inventare i videogiochi", "Guidare le automobili"],
-    risposta_corretta: 0,
-    attiva: true
+    risposta_corretta: 0, attiva: true
   },
   {
-    id: 5,
-    nome: "Borgo di Dunarobba",
-    epoca: "PREISTORIA",
-    eraClass: "era-preistoria",
-    lat: 42.6780, lon: 12.4370,
-    ricordo: "🔥",
+    id: 5, nome: "Borgo di Dunarobba", epoca: "PREISTORIA", eraClass: "era-preistoria",
+    lat: 42.6780, lon: 12.4370, ricordo: "🔥", anno: -10000, anno_label: "10.000 ANNI FA",
     testo_racconto: "Siamo quasi arrivati! Qui, tantissimo tempo fa, gli uomini della preistoria vivevano nella natura: accendevano il fuoco, cacciavano e raccoglievano frutti. Sento odore di casa mia... la mia foresta è vicina!",
+    curiosita: "Gli uomini preistorici conoscevano benissimo i mammut: li disegnavano perfino sulle pareti delle caverne!",
     domanda_quiz: "Cosa avevano imparato a fare gli uomini della preistoria?",
     opzioni: ["Accendere e usare il fuoco", "Scrivere messaggi al telefono", "Costruire castelli di pietra"],
-    risposta_corretta: 0,
-    attiva: true
+    risposta_corretta: 0, attiva: true
   },
   {
-    id: 6,
-    nome: "Foresta Fossile di Dunarobba",
-    epoca: "2 MILIONI DI ANNI FA",
-    eraClass: "era-fossile",
-    lat: 42.6800, lon: 12.4300,
-    ricordo: "🌲",
+    id: 6, nome: "Foresta Fossile di Dunarobba", epoca: "2 MILIONI DI ANNI FA", eraClass: "era-fossile",
+    lat: 42.6800, lon: 12.4300, ricordo: "🌲", anno: -2000000, anno_label: "2.000.000 DI ANNI FA",
     testo_racconto: "CE L'ABBIAMO FATTA! Questa è casa mia: la Foresta Fossile di Dunarobba, due milioni di anni fa! Vedi questi giganteschi tronchi di sequoia? Crescevano sulle rive di un enorme lago antico, il Paleolago Tiberino. Grazie di cuore, piccolo esploratore!",
+    curiosita: "I tronchi di Dunarobba sono ancora di LEGNO, non di pietra: è una cosa rarissima al mondo per fossili così antichi!",
     domanda_quiz: "Cosa sono i famosi tronchi della Foresta Fossile di Dunarobba?",
     opzioni: ["Antichissimi alberi (sequoie) di 2 milioni di anni fa", "Tronchi di plastica", "Alberi piantati l'anno scorso"],
-    risposta_corretta: 0,
-    attiva: true
+    risposta_corretta: 0, attiva: true
   }
 ];
 
 /* ============================================================================
    STATO DI GIOCO + localStorage
    ============================================================================ */
-const STORAGE_KEY = "tumbo_avventura_v1";
+const STORAGE_KEY = "tumbo_avventura_v2";
 let stato = caricaStato();
 
 function statoIniziale(){
-  return { completate: [], ricordi: [], nomeBambino: "", finaleVisto:false };
+  return { completate: [], stelle: {}, xp: 0, nomeBambino: "", audio: true, finaleVisto: false };
 }
 function caricaStato(){
   try{
@@ -492,49 +627,83 @@ function caricaStato(){
   }catch(e){}
   return statoIniziale();
 }
-function salvaStato(){
-  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(stato)); }catch(e){}
-}
+function salvaStato(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(stato)); }catch(e){} }
 
-/* Solo le tappe attive entrano nel gioco */
 const tappeAttive = TAPPE.filter(t => t.attiva);
 
-/* Indice della tappa corrente = prima tappa attiva non ancora completata */
 function indiceCorrente(){
-  for(let i=0;i<tappeAttive.length;i++){
-    if(!stato.completate.includes(tappeAttive[i].id)) return i;
-  }
-  return tappeAttive.length; // tutte completate
+  for(let i=0;i<tappeAttive.length;i++) if(!stato.completate.includes(tappeAttive[i].id)) return i;
+  return tappeAttive.length;
 }
 function statoTappa(i){
-  const t = tappeAttive[i];
-  if(stato.completate.includes(t.id)) return "done";
-  if(i === indiceCorrente()) return "current";
-  return "future";
+  if(stato.completate.includes(tappeAttive[i].id)) return "done";
+  return i === indiceCorrente() ? "current" : "future";
 }
+function stelleTotali(){ return Object.values(stato.stelle).reduce((a,b)=>a+b,0); }
+function livelloAttuale(){
+  let L0 = LIVELLI[0];
+  for(const l of LIVELLI) if(stato.xp >= l.xp) L0 = l;
+  return L0;
+}
+function livelloProssimo(){
+  for(const l of LIVELLI) if(stato.xp < l.xp) return l;
+  return null;
+}
+
+/* ============================================================================
+   AUDIO — effetti sintetizzati in WebAudio (nessun file esterno)
+   ============================================================================ */
+let audioCtx = null;
+function nota(freq, start, dur, tipo, vol){
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type = tipo || "triangle"; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, start);
+  g.gain.linearRampToValueAtTime(vol || .18, start + .015);
+  g.gain.exponentialRampToValueAtTime(.0001, start + dur);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(start); o.stop(start + dur + .05);
+}
+function suono(tipo){
+  if(!stato.audio) return;
+  try{
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state === "suspended") audioCtx.resume();
+    const t = audioCtx.currentTime;
+    if(tipo === "ok"){ [523,659,784,1047].forEach((f,i)=>nota(f, t+i*.09, .22, "triangle", .2)); }
+    else if(tipo === "no"){ nota(196, t, .25, "sawtooth", .12); nota(147, t+.16, .3, "sawtooth", .12); }
+    else if(tipo === "pop"){ nota(880, t, .08, "sine", .15); }
+    else if(tipo === "lock"){ nota(220, t, .1, "square", .08); nota(180, t+.1, .12, "square", .08); }
+    else if(tipo === "portal"){ for(let i=0;i<14;i++) nota(300 + i*90, t + i*.11, .3, "sine", .1); }
+    else if(tipo === "level"){ [392,523,659,784,1047,1319].forEach((f,i)=>nota(f, t+i*.08, .25, "triangle", .18)); }
+    else if(tipo === "fanfare"){
+      [523,523,523,659,784,784,1047].forEach((f,i)=>nota(f, t+i*.14, .3, "triangle", .2));
+      [262,330,392].forEach((f)=>nota(f, t+.9, .8, "sine", .1));
+    }
+  }catch(e){}
+}
+function vibra(pat){ try{ navigator.vibrate && navigator.vibrate(pat); }catch(e){} }
 
 /* ============================================================================
    MAPPA LEAFLET
    ============================================================================ */
-let map, markers = [], linea;
+let map = null, markers = [], markerUtente = null;
 
 function initMappa(){
-  // Se Leaflet non è disponibile (rete assente), mostra un avviso e non blocca il resto del gioco.
+  // Se Leaflet non carica (offline), avvisa senza bloccare il resto del gioco.
   if(typeof L === "undefined"){
     document.getElementById('map').innerHTML =
       '<div style="padding:40px 20px;text-align:center;font-weight:700;color:var(--terra);">' +
       '🗺️ Serve una connessione a internet per caricare la mappa.<br>Controlla la rete e ricarica la pagina.</div>';
     return;
   }
-  map = L.map('map', { zoomControl:true, attributionControl:true });
+  map = L.map('map', { zoomControl:false, attributionControl:true });
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; OpenStreetMap'
+    maxZoom: 19, attribution: '&copy; OpenStreetMap'
   }).addTo(map);
 
-  // Linea tratteggiata = sentiero del viaggio nel tempo
-  const punti = tappeAttive.map(t => [t.lat, t.lon]);
-  linea = L.polyline(punti, { color:'#e07a2f', weight:4, dashArray:'2 12', opacity:.8, lineCap:'round' }).addTo(map);
+  // Sentiero tratteggiato del viaggio nel tempo
+  L.polyline(tappeAttive.map(t=>[t.lat,t.lon]),
+    { color:'#e07a2f', weight:4, dashArray:'2 12', opacity:.85, lineCap:'round' }).addTo(map);
 
   disegnaMarker();
   ricentra();
@@ -542,137 +711,162 @@ function initMappa(){
 
 function iconaPer(i){
   const st = statoTappa(i);
-  let cls = "marker-future", emoji = "🔒";
-  if(st === "done"){ cls = "marker-done"; emoji = "✔️"; }
-  else if(st === "current"){ cls = "marker-current"; emoji = "🐘"; }
+  let cls = "marker-future", inner = "🔒";
+  if(st === "done"){ cls = "marker-done"; inner = "✔️"; }
+  else if(st === "current"){ cls = "marker-current"; inner = "🐘"; }
   return L.divIcon({
-    className:'', html:`<div class="marker-pin ${cls}"><span>${emoji}</span></div>`,
-    iconSize:[38,38], iconAnchor:[19,38], popupAnchor:[0,-36]
+    className:'', html:`<div class="marker-pin ${cls}"><span>${inner}</span></div>`,
+    iconSize:[40,40], iconAnchor:[20,40]
   });
 }
-
 function disegnaMarker(){
   if(!map) return;
-  markers.forEach(m => map.removeLayer(m));
-  markers = [];
-  tappeAttive.forEach((t,i) => {
+  markers.forEach(m=>map.removeLayer(m)); markers = [];
+  tappeAttive.forEach((t,i)=>{
     const m = L.marker([t.lat,t.lon], { icon: iconaPer(i) }).addTo(map);
-    m.on('click', () => onMarkerClick(i));
+    m.on('click', ()=>onMarkerClick(i));
     markers.push(m);
   });
 }
-
 function onMarkerClick(i){
   const st = statoTappa(i);
   if(st === "future"){
-    // Tappa bloccata: il mammut spiega che va in ordine
-    setStato("pensieroso");
-    parla(`Aspetta! Prima dobbiamo completare le tappe più vicine a oggi. Le tappe si aprono in ordine, dal presente al passato! 🔒`);
+    suono("lock"); vibra(60);
+    setStatoMascotte("pensieroso");
+    parla("Aspetta! Le tappe si aprono in ordine, dal presente al passato. Prima completiamo quella col mio marker 🐘!");
     return;
   }
+  suono("pop");
   apriScheda(i);
 }
-
 function ricentra(){
-  if(map && tappeAttive.length){
-    map.fitBounds(L.latLngBounds(tappeAttive.map(t => [t.lat,t.lon])).pad(0.25));
-  }
+  if(map && tappeAttive.length)
+    map.fitBounds(L.latLngBounds(tappeAttive.map(t=>[t.lat,t.lon])).pad(0.22));
 }
 
+/* ---- Geolocalizzazione: distanza reale dalla tappa (gamification territoriale) ---- */
+function distanzaKm(lat1,lon1,lat2,lon2){
+  const R=6371, rad=Math.PI/180;
+  const dLat=(lat2-lat1)*rad, dLon=(lon2-lon1)*rad;
+  const a=Math.sin(dLat/2)**2 + Math.cos(lat1*rad)*Math.cos(lat2*rad)*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function formattaDist(km){ return km < 1 ? Math.round(km*1000)+" metri" : km.toFixed(1).replace(".",",")+" km"; }
+
+document.getElementById('btn-locate').onclick = ()=>{
+  suono("pop");
+  if(!navigator.geolocation){ parla("Il tuo telefono non mi dice dove siamo... chiedi a un adulto di attivare la posizione!"); return; }
+  parla("Sto annusando l'aria per capire dove siamo... 👃");
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const { latitude:la, longitude:lo } = pos.coords;
+    if(map){
+      if(markerUtente) map.removeLayer(markerUtente);
+      markerUtente = L.marker([la,lo], { icon: L.divIcon({ className:'', html:'<div class="dot-utente"></div>', iconSize:[18,18], iconAnchor:[9,9] }) }).addTo(map);
+    }
+    const i = indiceCorrente();
+    if(i >= tappeAttive.length){ parla("Siamo già a casa! Che bello essere tornati nella mia foresta. 🌲"); return; }
+    const t = tappeAttive[i];
+    const km = distanzaKm(la, lo, t.lat, t.lon);
+    setStatoMascotte("normale");
+    if(km < 0.15) parla(`Siamo ARRIVATI a ${t.nome}! 🎉 Tocca il mio marker sulla mappa!`);
+    else parla(`Siamo a circa ${formattaDist(km)} da "${t.nome}". In marcia, esploratore! 🥾`);
+  }, ()=>{
+    setStatoMascotte("pensieroso");
+    parla("Non riesco a capire dove siamo... controlla che la posizione sia attiva!");
+  }, { enableHighAccuracy:true, timeout:8000 });
+};
+
 /* ============================================================================
-   SCHEDA TAPPA + QUIZ
+   SCHEDA TAPPA + QUIZ (con stelle)
    ============================================================================ */
 const sheet = document.getElementById('sheet');
 const overlayBg = document.getElementById('overlay-bg');
-let schedaCorrente = null;
+let schedaCorrente = null, tentativiQuiz = 0;
 
 function apriScheda(i){
-  schedaCorrente = i;
+  schedaCorrente = i; tentativiQuiz = 0;
   const t = tappeAttive[i];
   const gia = stato.completate.includes(t.id);
 
-  // Il mammut racconta l'epoca
-  setStato("normale");
+  setStatoMascotte("normale");
   parla(t.testo_racconto);
 
   sheet.innerHTML = `
-    <div class="grip"></div>
-    <span class="badge-epoca ${t.eraClass}">${t.epoca}</span>
-    <h2>${t.nome}</h2>
+    <div class="banda ${t.eraClass}">
+      <div class="grip"></div>
+      <span class="badge-epoca">⏳ ${t.epoca}</span>
+      <h2>${t.nome}</h2>
+    </div>
     <div class="racconto">🐘 «${t.testo_racconto}»</div>
-    ${ gia ? renderQuizFatto(t) : renderArrivo(t) }
+    ${ gia ? renderCompletata(t) : `
+      <p style="font-weight:800;text-align:center;color:var(--terra);margin:4px 0;">Sei arrivato in questo luogo?</p>
+      <button class="btn btn-arancio" id="btn-arrivato">Sono arrivato! 📍</button>` }
   `;
-  aprSheet();
+  sheet.classList.add('open'); overlayBg.classList.add('show');
   cablaScheda(i, gia);
 }
 
-/* Fase 1: "Sono arrivato" (simula scansione QR).  */
-function renderArrivo(t){
-  return `
-    <p style="font-weight:700;text-align:center;color:var(--terra);">Sei arrivato in questo luogo?</p>
-    <button class="btn btn-arancio" id="btn-arrivato">Sono arrivato! 📍</button>
-  `;
-}
 function renderQuiz(t){
-  const opz = t.opzioni.map((o,idx) =>
-    `<button class="opzione" data-idx="${idx}">${o}</button>`).join("");
+  // Le opzioni vengono mescolate a ogni tentativo (data-ok marca quella giusta)
+  const ordine = t.opzioni.map((_,idx)=>idx).sort(()=>Math.random()-.5);
+  const opz = ordine.map(idx =>
+    `<button class="opzione" data-ok="${idx === t.risposta_corretta ? 1 : 0}">${t.opzioni[idx]}</button>`).join("");
   return `
     <div class="quiz" id="quiz-box">
       <h3>🧠 Indovinello dell'epoca</h3>
       <p style="font-weight:700;">${t.domanda_quiz}</p>
       ${opz}
-    </div>
-  `;
+    </div>`;
 }
-function renderQuizFatto(t){
+function stelleHtml(n){ return "⭐".repeat(n) + "☆".repeat(3-n); }
+function renderCompletata(t){
+  const st = stato.stelle[t.id] || 1;
   return `
     <div class="racconto" style="border-left-color:var(--bosco);background:#e6f5ec;">
-      ✅ Tappa completata! Ricordo raccolto: <b style="font-size:20px;">${t.ricordo}</b>
+      ✅ Tappa completata! Ricordo: <b style="font-size:20px;">${t.ricordo}</b>
+      <div style="font-size:20px;letter-spacing:3px;margin-top:4px;">${stelleHtml(st)}</div>
     </div>
-    <button class="btn btn-bosco" id="btn-prossima">Continua il viaggio →</button>
-  `;
+    <div class="curiosita">💡 <b>Lo sapevi?</b> ${t.curiosita}</div>
+    <button class="btn btn-bosco" id="btn-prossima">Continua il viaggio →</button>`;
 }
 
 function cablaScheda(i, gia){
   const t = tappeAttive[i];
-
   if(gia){
     const b = document.getElementById('btn-prossima');
-    if(b) b.onclick = () => { chiudiSheet(); vaiAllaCorrente(); };
+    if(b) b.onclick = ()=>{ suono("pop"); chiudiSheet(); vaiAllaCorrente(); };
     return;
   }
-
   const btnArr = document.getElementById('btn-arrivato');
-  if(btnArr){
-    btnArr.onclick = () => {
-      // TODO(QR/geolocalizzazione): qui, in produzione, va la verifica reale.
-      //   - QR: leggere il codice del cartello fisico e confrontarlo con t.id
-      //   - Geofencing: navigator.geolocation + distanza da (t.lat,t.lon) < soglia
-      // Nel prototipo sblocchiamo direttamente il quiz.
-      setStato("normale");
-      parla(`Perfetto, sei qui con me! Ora rispondi all'indovinello per aiutarmi a viaggiare nel tempo.`);
-      const box = document.createElement('div');
-      box.innerHTML = renderQuiz(t);
-      btnArr.replaceWith(box.firstElementChild);
-      cablaQuiz(i);
-    };
-  }
+  btnArr.onclick = ()=>{
+    // TODO(QR/geofencing): qui va la verifica reale dell'arrivo.
+    //  - QR: scansione del codice sul cartello fisico e confronto con t.id
+    //  - Geofencing: navigator.geolocation + distanzaKm(...) < 0.15
+    // Nel prototipo sblocchiamo direttamente il quiz.
+    suono("pop"); vibra(30);
+    setStatoMascotte("normale");
+    parla("Perfetto, sei qui con me! Rispondi all'indovinello per accendere il Portale del Tempo!");
+    const box = document.createElement('div');
+    box.innerHTML = renderQuiz(t);
+    btnArr.replaceWith(box.firstElementChild);
+    cablaQuiz(i);
+  };
 }
 
 function cablaQuiz(i){
   const t = tappeAttive[i];
-  document.querySelectorAll('#quiz-box .opzione').forEach(btn => {
-    btn.onclick = () => {
-      const idx = parseInt(btn.dataset.idx,10);
-      if(idx === t.risposta_corretta){
+  document.querySelectorAll('#quiz-box .opzione').forEach(btn=>{
+    btn.onclick = ()=>{
+      if(btn.dataset.ok === "1"){
         btn.classList.add('giusta');
         rispostaGiusta(i);
       }else{
+        tentativiQuiz++;
         btn.classList.add('sbagliata');
-        setStato("pensieroso");
-        parla(`Ohh, quasi! Non è quella la risposta. Riprova, ci riusciamo insieme! 💪`);
-        // Nessuna penalità: si può ritentare subito
-        setTimeout(()=>btn.classList.remove('sbagliata'), 600);
+        suono("no"); vibra([70,40,70]);
+        setStatoMascotte("pensieroso");
+        parla("Ohh, quasi! Non è quella. Riprova, ci riusciamo insieme! 💪");
+        setTimeout(()=>btn.classList.remove('sbagliata'), 600);   // nessuna penalità: si ritenta subito
       }
     };
   });
@@ -680,36 +874,47 @@ function cablaQuiz(i){
 
 function rispostaGiusta(i){
   const t = tappeAttive[i];
-  // Registra completamento + ricordo
+  const stelle = tentativiQuiz === 0 ? 3 : tentativiQuiz === 1 ? 2 : 1;
+
   if(!stato.completate.includes(t.id)) stato.completate.push(t.id);
-  if(!stato.ricordi.includes(t.ricordo)) stato.ricordi.push(t.ricordo);
+  stato.stelle[t.id] = Math.max(stato.stelle[t.id] || 0, stelle);
+  const xpGuadagnati = XP_BASE_TAPPA + stelle * XP_PER_STELLA;
+  const livPrima = livelloAttuale();
+  stato.xp += xpGuadagnati;
   salvaStato();
 
-  // Mammut festeggia
-  setStato("festante");
-  parla(`EVVIVA! Risposta giusta! Ho un nuovo ricordo: ${t.ricordo} — e si è aperta la prossima tappa!`);
+  suono("ok"); vibra([40,30,40,30,120]);
+  setStatoMascotte("festante");
+  parla(`EVVIVA! Risposta giusta! ${stelleHtml(stelle)} Il Portale del Tempo si sta accendendo!`);
+  mostraXpFloat("+" + xpGuadagnati + " ✨");
 
-  aggiornaTimeline();
-  aggiornaRicordi();
-  disegnaMarker();
+  aggiornaHud(); aggiornaTimeline(); disegnaMarker();
 
-  // Aggiorna la scheda a "completata"
-  setTimeout(()=>{
-    if(schedaCorrente === i){
-      const box = document.getElementById('quiz-box');
-      if(box){
-        const done = document.createElement('div');
-        done.innerHTML = renderQuizFatto(t);
-        box.replaceWith(...done.childNodes);
-        const b = document.getElementById('btn-prossima');
-        if(b) b.onclick = () => { chiudiSheet(); vaiAllaCorrente(); };
+  // Level-up?
+  const livDopo = livelloAttuale();
+  if(livDopo !== livPrima) setTimeout(()=>toastLivello(livDopo), 1200);
+
+  const ultima = indiceCorrente() >= tappeAttive.length;
+  const box = document.getElementById('quiz-box');
+  if(box){
+    box.innerHTML = `
+      <div class="stelle-earned">${stelleHtml(stelle)}</div>
+      <div class="racconto" style="border-left-color:var(--bosco);background:#e6f5ec;">
+        🎒 Nuovo ricordo nello zaino: <b style="font-size:22px;">${t.ricordo}</b> &nbsp;·&nbsp; +${xpGuadagnati} ✨
+      </div>
+      <div class="curiosita">💡 <b>Lo sapevi?</b> ${t.curiosita}</div>
+      <button class="btn btn-viola" id="btn-viaggia">${ultima ? "🌲 Torna a casa!" : "🌀 Viaggia nel tempo!"}</button>`;
+    document.getElementById('btn-viaggia').onclick = ()=>{
+      chiudiSheet();
+      if(ultima){
+        portale(t.anno, t.anno, t.anno_label, ()=>mostraFinale());
+      }else{
+        const prossima = tappeAttive[indiceCorrente()];
+        portale(t.anno, prossima.anno, prossima.anno_label, ()=>{
+          vaiAllaCorrente();
+        });
       }
-    }
-  }, 700);
-
-  // Ultima tappa completata → finale
-  if(indiceCorrente() >= tappeAttive.length){
-    setTimeout(()=>{ chiudiSheet(); mostraFinale(); }, 1600);
+    };
   }
 }
 
@@ -717,181 +922,297 @@ function vaiAllaCorrente(){
   const i = indiceCorrente();
   if(i >= tappeAttive.length){ mostraFinale(); return; }
   const t = tappeAttive[i];
-  if(map) map.flyTo([t.lat,t.lon], 15, { duration:1 });
-  setStato("normale");
-  parla(`La prossima tappa è: ${t.nome} (${t.epoca}). Tocca il mio marker 🐘 sulla mappa per continuare!`);
+  if(map) map.flyTo([t.lat,t.lon], 15, { duration:1.2 });
+  setStatoMascotte("normale");
+  parla(`Prossima tappa: ${t.nome} (${t.epoca}). Tocca il mio marker 🐘 sulla mappa! Usa 🧭 per sapere quanto manca.`);
 }
 
-/* Bottom sheet open/close */
-function aprSheet(){ sheet.classList.add('open'); overlayBg.classList.add('show'); }
-function chiudiSheet(){ sheet.classList.remove('open'); overlayBg.classList.remove('show'); schedaCorrente=null; }
+function chiudiSheet(){ sheet.classList.remove('open'); overlayBg.classList.remove('show'); schedaCorrente = null; }
 overlayBg.onclick = chiudiSheet;
 
 /* ============================================================================
-   MASCOTTE: stati + fumetto
+   PORTALE DEL TEMPO — transizione animata con contatore degli anni
+   ============================================================================ */
+function testoAnno(v){
+  v = Math.round(v);
+  if(v >= 1500) return "ANNO " + v;
+  if(v > 0) return v + " d.C.";
+  return Math.abs(v).toLocaleString("it-IT") + " ANNI FA";
+}
+function portale(daAnno, adAnno, labelFinale, done){
+  const el = document.getElementById('timeportal');
+  const elAnno = document.getElementById('portal-anno');
+  const elDest = document.getElementById('portal-dest');
+
+  // Stelline casuali di sfondo
+  el.querySelectorAll('.stellina').forEach(s=>s.remove());
+  for(let k=0;k<26;k++){
+    const s = document.createElement('div');
+    s.className = 'stellina';
+    const sz = 1.5 + Math.random()*2.5;
+    s.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*2}s;`;
+    el.appendChild(s);
+  }
+  elDest.textContent = "Viaggio nel tempo in corso…";
+  el.classList.add('show');
+  suono("portal"); vibra([20,30,20,30,20,30,80]);
+
+  const DUR = 2300, t0 = performance.now();
+  function anim(now){
+    const p = Math.min(1, (now - t0) / DUR);
+    const ease = p < .5 ? 4*p*p*p : 1 - Math.pow(-2*p + 2, 3)/2;   // easeInOutCubic
+    elAnno.textContent = testoAnno(daAnno + (adAnno - daAnno) * ease);
+    if(p < 1) requestAnimationFrame(anim);
+    else{
+      elAnno.textContent = labelFinale;
+      elDest.textContent = "✨ Siamo arrivati! ✨";
+      setTimeout(()=>{ el.classList.remove('show'); done && done(); }, 900);
+    }
+  }
+  requestAnimationFrame(anim);
+}
+
+/* ============================================================================
+   MASCOTTE: stati + fumetto + XP float
    ============================================================================ */
 const elMascotte = document.getElementById('mascotte');
-const elFumetto  = document.getElementById('fumetto');
+const elFumetto = document.getElementById('fumetto');
 let fumettoTimer = null;
 
-function setStato(s){
+function setStatoMascotte(s){
   elMascotte.classList.remove('festante','pensieroso');
   if(s === "festante") elMascotte.classList.add('festante');
   else if(s === "pensieroso") elMascotte.classList.add('pensieroso');
-  // "normale" = nessuna classe extra
 }
-
 function parla(testo){
   elFumetto.textContent = testo;
   elFumetto.classList.remove('hidden');
   if(fumettoTimer) clearTimeout(fumettoTimer);
-  // Il fumetto resta a lungo (bambini piccoli), poi si nasconde
   fumettoTimer = setTimeout(()=>elFumetto.classList.add('hidden'), 9000);
 }
-
-// Tap sul mammut = ripete l'indicazione utile del momento
-elMascotte.onclick = () => {
+elMascotte.onclick = ()=>{
+  suono("pop");
   if(elFumetto.classList.contains('hidden')) suggerimentoCorrente();
   else elFumetto.classList.add('hidden');
 };
-
 function suggerimentoCorrente(){
   const i = indiceCorrente();
-  setStato("normale");
-  if(i >= tappeAttive.length){
-    parla(`Ce l'abbiamo fatta insieme! Sono a casa, nella mia foresta. Grazie! 🌲`);
-    return;
-  }
+  setStatoMascotte("normale");
+  const nome = stato.nomeBambino ? `, ${stato.nomeBambino}` : "";
+  if(i >= tappeAttive.length){ parla(`Ce l'abbiamo fatta insieme${nome}! Sono a casa, nella mia foresta 🌲 Apri lo 🎒 Zaino per rivedere i ricordi!`); return; }
   const t = tappeAttive[i];
-  parla(`Portami a: ${t.nome} — ${t.epoca}. Tocca il mio marker 🐘 che pulsa sulla mappa!`);
+  parla(`Portami a: ${t.nome} — ${t.epoca}. Tocca il mio marker 🐘 che pulsa sulla mappa${nome}!`);
+}
+function mostraXpFloat(txt){
+  const d = document.createElement('div');
+  d.className = 'xp-float'; d.textContent = txt;
+  document.body.appendChild(d);
+  setTimeout(()=>d.remove(), 1500);
 }
 
 /* ============================================================================
-   TIMELINE (viaggio nel tempo) + RICORDI
+   HUD, TIMELINE, TOAST LIVELLO
    ============================================================================ */
+function aggiornaHud(){
+  const liv = livelloAttuale();
+  document.getElementById('pill-livello').innerHTML = liv.icona + '<span class="liv-txt">&nbsp;' + liv.nome.split(" ")[0] + '</span>';
+  document.getElementById('pill-xp').textContent = "✨ " + stato.xp;
+}
 function aggiornaTimeline(){
   const tot = tappeAttive.length;
-  const fatte = stato.completate.filter(id => tappeAttive.some(t=>t.id===id)).length;
+  const fatte = stato.completate.filter(id=>tappeAttive.some(t=>t.id===id)).length;
   document.getElementById('tl-fill').style.width = (fatte/tot*100) + "%";
-
   const dots = document.getElementById('tl-dots');
   dots.innerHTML = "";
   tappeAttive.forEach((t,i)=>{
+    const st = statoTappa(i);
     const d = document.createElement('div');
-    d.className = "tl-dot " + (statoTappa(i)==="done"?"done":statoTappa(i)==="current"?"current":"");
+    d.className = "tl-dot " + st;
+    d.textContent = t.ricordo;
     d.title = t.epoca;
     dots.appendChild(d);
   });
 }
-
-function aggiornaRicordi(){
-  const bar = document.getElementById('ricordi-bar');
-  bar.innerHTML = "";
-  tappeAttive.forEach(t=>{
-    const s = document.createElement('div');
-    const preso = stato.ricordi.includes(t.ricordo);
-    s.className = "ricordo-slot " + (preso?"pieno":"");
-    s.textContent = preso ? t.ricordo : "";
-    s.title = preso ? `Ricordo: ${t.nome}` : "Ricordo da scoprire";
-    bar.appendChild(s);
-  });
+function toastLivello(liv){
+  suono("level"); vibra([50,50,50,50,150]);
+  const el = document.getElementById('toast-livello');
+  el.innerHTML = `<div class="big">${liv.icona}</div>LIVELLO SU!<br>Ora sei <b>${liv.nome}</b>`;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 3200);
 }
+
+/* ============================================================================
+   ZAINO / ALBUM
+   ============================================================================ */
+function renderAlbum(){
+  const liv = livelloAttuale(), next = livelloProssimo();
+  const pct = next ? Math.min(100, Math.round((stato.xp - liv.xp) / (next.xp - liv.xp) * 100)) : 100;
+  const tutte = indiceCorrente() >= tappeAttive.length;
+
+  const cards = tappeAttive.map((t,i)=>{
+    const done = stato.completate.includes(t.id);
+    return `
+      <div class="card-ricordo ${done ? "" : "bloccato"}">
+        <div class="em">${done ? t.ricordo : "❓"}</div>
+        <div class="nm">${done ? t.nome : "Ricordo misterioso"}</div>
+        <div class="ep ${t.eraClass}">${t.epoca}</div>
+        <div class="st">${done ? stelleHtml(stato.stelle[t.id] || 1) : "☆☆☆"}</div>
+      </div>`;
+  }).join("");
+
+  document.getElementById('album').innerHTML = `
+    <h2>🎒 Zaino dell'Esploratore${stato.nomeBambino ? " di " + stato.nomeBambino : ""}</h2>
+    <div class="card-livello">
+      <div class="liv-top">
+        <div class="liv-ic">${liv.icona}</div>
+        <div>
+          <div class="liv-nome">${liv.nome}</div>
+          <div class="liv-xp">✨ ${stato.xp} XP ${next ? "· al prossimo livello: " + next.xp + " XP" : "· livello massimo!"} &nbsp; ⭐ ${stelleTotali()}/18</div>
+        </div>
+      </div>
+      <div class="liv-bar"><div style="width:${pct}%"></div></div>
+    </div>
+    <div class="griglia-ricordi">${cards}</div>
+    ${ tutte ? `<button class="btn btn-oro" id="btn-rivedi-diploma" style="margin-top:16px;">🎓 Rivedi il tuo diploma</button>` : "" }
+  `;
+  const bd = document.getElementById('btn-rivedi-diploma');
+  if(bd) bd.onclick = ()=>{ suono("pop"); mostraFinale(false); };
+}
+
+/* Bottom nav */
+const tabMappa = document.getElementById('tab-mappa');
+const tabZaino = document.getElementById('tab-zaino');
+function mostraTab(quale){
+  const album = document.getElementById('album');
+  if(quale === "zaino"){ renderAlbum(); album.classList.add('show'); tabZaino.classList.add('active'); tabMappa.classList.remove('active'); }
+  else{ album.classList.remove('show'); tabMappa.classList.add('active'); tabZaino.classList.remove('active'); }
+}
+tabMappa.onclick = ()=>{ suono("pop"); mostraTab("mappa"); };
+tabZaino.onclick = ()=>{ suono("pop"); mostraTab("zaino"); };
 
 /* ============================================================================
    FINALE + coriandoli + diploma
    ============================================================================ */
-function mostraFinale(){
+function mostraFinale(conFesta = true){
   stato.finaleVisto = true; salvaStato();
   document.getElementById('finale-titolo').textContent = `${MASCOTTE_NOME} è tornato a casa!`;
   document.getElementById('finale-testo').textContent =
     `Hai riportato ${MASCOTTE_NOME} indietro nel tempo fino alla sua foresta di 2 milioni di anni fa. Sei un vero Esploratore del Tempo!`;
   document.getElementById('nome-bambino').value = stato.nomeBambino || "";
   document.getElementById('diploma-data').textContent = "Avigliano Umbro, " + dataOggi();
+  document.getElementById('diploma-stat').innerHTML =
+    `<span>⭐ ${stelleTotali()}/18 stelle</span><span>✨ ${stato.xp} XP</span><span>${livelloAttuale().icona} ${livelloAttuale().nome}</span>`;
   document.getElementById('finale').classList.add('show');
   elFumetto.classList.add('hidden');
-  coriandoli();
+  if(conFesta){ suono("fanfare"); vibra([60,60,60,60,200]); coriandoli(); }
 }
-
 function dataOggi(){
-  const d = new Date();
-  return d.toLocaleDateString('it-IT', { day:'numeric', month:'long', year:'numeric' });
+  return new Date().toLocaleDateString('it-IT', { day:'numeric', month:'long', year:'numeric' });
 }
-
 function coriandoli(){
-  const colori = ['#e07a2f','#e8b04b','#2f6b46','#4a9fc4','#f4a259','#a9564a'];
-  for(let k=0;k<90;k++){
+  const pezzi = ['🍂','🍃','⭐','🎉','🧡','💚'];
+  for(let k=0;k<70;k++){
     const c = document.createElement('div');
     c.className = 'coriandolo';
+    c.textContent = pezzi[k % pezzi.length];
     c.style.left = Math.random()*100 + 'vw';
-    c.style.background = colori[k % colori.length];
+    c.style.fontSize = (14 + Math.random()*14) + 'px';
     c.style.animationDuration = (2.5 + Math.random()*2.5) + 's';
     c.style.animationDelay = (Math.random()*1.5) + 's';
     document.body.appendChild(c);
-    setTimeout(()=>c.remove(), 6000);
+    setTimeout(()=>c.remove(), 6500);
   }
 }
-
-/* Salva il nome del bambino mentre scrive */
 document.getElementById('nome-bambino').addEventListener('input', e=>{
   stato.nomeBambino = e.target.value; salvaStato();
 });
-document.getElementById('btn-stampa').onclick = ()=> window.print();
+document.getElementById('btn-stampa').onclick = ()=>window.print();
 document.getElementById('btn-torna-mappa').onclick = ()=>{
+  suono("pop");
   document.getElementById('finale').classList.remove('show');
+  mostraTab("mappa");
 };
-document.getElementById('btn-nuova-avventura').onclick = ()=> reset();
+document.getElementById('btn-nuova-avventura').onclick = ()=>reset();
+// Condivisione nativa (solo dove supportata, es. smartphone)
+if(navigator.share){
+  const bc = document.getElementById('btn-condividi');
+  bc.style.display = "block";
+  bc.onclick = ()=>{
+    navigator.share({
+      title: "Il viaggio di " + MASCOTTE_NOME,
+      text: `Ho riportato ${MASCOTTE_NOME} il mammut a casa, alla Foresta Fossile di Dunarobba! ⭐ ${stelleTotali()}/18 stelle, ${stato.xp} XP. Vieni a giocare ad Avigliano Umbro!`
+    }).catch(()=>{});
+  };
+}
 
 /* ============================================================================
-   MENU (aiuto, ricentra, reset)
+   MENU
    ============================================================================ */
 const menu = document.getElementById('menu');
-document.getElementById('menu-btn').onclick = ()=> menu.classList.toggle('open');
+document.getElementById('menu-btn').onclick = ()=>menu.classList.toggle('open');
 document.addEventListener('click', e=>{
-  if(!menu.contains(e.target) && e.target.id!=='menu-btn') menu.classList.remove('open');
+  if(!menu.contains(e.target) && e.target.id !== 'menu-btn') menu.classList.remove('open');
 });
 document.getElementById('btn-aiuto').onclick = ()=>{ menu.classList.remove('open'); suggerimentoCorrente(); };
-document.getElementById('btn-ricentra').onclick = ()=>{ menu.classList.remove('open'); ricentra(); };
+document.getElementById('btn-ricentra').onclick = ()=>{ menu.classList.remove('open'); mostraTab("mappa"); ricentra(); };
+document.getElementById('btn-audio').onclick = function(){
+  stato.audio = !stato.audio; salvaStato();
+  this.textContent = stato.audio ? "🔊 Suoni: attivi" : "🔇 Suoni: spenti";
+  if(stato.audio) suono("pop");
+};
 document.getElementById('btn-reset').onclick = ()=>{
   menu.classList.remove('open');
   if(confirm("Vuoi ricominciare l'avventura da capo? I progressi verranno cancellati.")) reset();
 };
-
 function reset(){
-  stato = statoIniziale();
+  const nome = stato.nomeBambino;   // il nome resta: è il suo gioco
+  stato = statoIniziale(); stato.nomeBambino = nome;
   salvaStato();
   document.getElementById('finale').classList.remove('show');
-  chiudiSheet();
-  disegnaMarker();
-  aggiornaTimeline();
-  aggiornaRicordi();
-  ricentra();
-  vaiAllaCorrente();
+  chiudiSheet(); mostraTab("mappa");
+  disegnaMarker(); aggiornaTimeline(); aggiornaHud(); ricentra();
+  document.getElementById('splash').classList.remove('away');
 }
 
 /* ============================================================================
-   AVVIO
+   SPLASH + AVVIO
    ============================================================================ */
 document.getElementById('logo-sub').textContent = `· Il viaggio di ${MASCOTTE_NOME}`;
+document.getElementById('splash-nome-mascotte').textContent = MASCOTTE_NOME;
+document.getElementById('splash-sotto').textContent =
+  `Un cucciolo di mammut si è perso ai giorni nostri. Riportalo alla sua foresta di 2 milioni di anni fa, una tappa alla volta!`;
+document.getElementById('splash-nome').value = stato.nomeBambino || "";
 elMascotte.title = `Tocca ${MASCOTTE_NOME}!`;
 
+document.getElementById('btn-gioca').onclick = ()=>{
+  stato.nomeBambino = document.getElementById('splash-nome').value.trim();
+  salvaStato();
+  suono("ok"); vibra(40);
+  document.getElementById('splash').classList.add('away');
+  if(map) setTimeout(()=>map.invalidateSize(), 350);
+
+  setTimeout(()=>{
+    const nome = stato.nomeBambino ? ` ${stato.nomeBambino}` : "";
+    if(indiceCorrente() >= tappeAttive.length){
+      parla(`Bentornato${nome}! Sono a casa grazie a te 🌲 Apri lo 🎒 Zaino per rivedere ricordi e diploma!`);
+    }else if(stato.completate.length > 0){
+      parla(`Bentornato${nome}! Riprendiamo il viaggio da dove eravamo. Tocca il mio marker 🐘 sulla mappa!`);
+      vaiAllaCorrente();
+    }else{
+      parla(`Ciao${nome}! Sono ${MASCOTTE_NOME} e mi sono perso ai giorni nostri! Aiutami a tornare a casa: si parte dalla piazza. Tocca il mio marker 🐘!`);
+      vaiAllaCorrente();
+    }
+  }, 600);
+};
+
+// Pulsante splash: "Continua" se c'è già un viaggio iniziato
+if(stato.completate.length > 0)
+  document.getElementById('btn-gioca').innerHTML = "▶ &nbsp;Continua l'avventura";
+
 // UI di base sempre attiva (indipendente dalla mappa)
-aggiornaTimeline();
-aggiornaRicordi();
+aggiornaHud(); aggiornaTimeline();
 // La mappa è best-effort: un errore non deve bloccare il gioco
 try{ initMappa(); }catch(e){ console.warn("Mappa non inizializzata:", e); }
-
-// Messaggio di benvenuto / ripresa
-window.setTimeout(()=>{
-  if(indiceCorrente() >= tappeAttive.length && stato.finaleVisto){
-    parla(`Bentornato! Vuoi rivedere il finale? Apri il menu ☰ per ricominciare, oppure guarda la mappa completata!`);
-  }else if(stato.completate.length > 0){
-    setStato("normale");
-    parla(`Bentornato, esploratore! Riprendiamo il viaggio da dove eravamo. Tocca il mio marker 🐘 sulla mappa!`);
-  }else{
-    setStato("normale");
-    parla(`Ciao! Sono ${MASCOTTE_NOME}, un cucciolo di mammut, e mi sono perso ai giorni nostri! Aiutami a tornare a casa viaggiando indietro nel tempo. Iniziamo dalla piazza: tocca il mio marker 🐘!`);
-  }
-}, 700);
 </script>
 </body>
 </html>

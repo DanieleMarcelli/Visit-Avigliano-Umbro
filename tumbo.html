@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#e07a2f" />
-<title>Il viaggio di Tumbo · Visit Avigliano Umbro</title>
+<title>Il viaggio di Gnut · Visit Avigliano Umbro</title>
 
 <!--
   ============================================================================
@@ -482,7 +482,7 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
   <div class="sole"></div>
   <svg class="tumbo-big" viewBox="0 0 160 150"><use href="#svg-tumbo"/></svg>
   <div class="kicker">VISIT AVIGLIANO UMBRO</div>
-  <h1>Riporta <b id="splash-nome-mascotte">Tumbo</b> a casa!</h1>
+  <h1>Riporta <b id="splash-nome-mascotte">Gnut</b> a casa!</h1>
   <p class="sotto" id="splash-sotto"></p>
   <input class="nome-box" id="splash-nome" placeholder="Come ti chiami, esploratore?" maxlength="24" autocomplete="off"/>
   <button id="btn-gioca">▶ &nbsp;Inizia l'avventura</button>
@@ -635,7 +635,7 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
     <h2>Esploratore del Tempo</h2>
     <p style="font-weight:700;font-size:13px;margin:2px 0;">rilasciato a</p>
     <input class="nome-input" id="nome-bambino" placeholder="scrivi il tuo nome" maxlength="24"/>
-    <p style="font-weight:600;font-size:13px;margin:6px 0;">per aver riportato Tumbo il mammut<br>alla Foresta Fossile di Dunarobba,<br>viaggiando fino a <b>2 milioni di anni fa</b>.</p>
+    <p style="font-weight:600;font-size:13px;margin:6px 0;">per aver riportato Gnut, il mammut<br>del Lago Tiberino, alla Foresta Fossile<br>di Dunarobba, fino a <b>2 milioni di anni fa</b>.</p>
     <div class="statistiche" id="diploma-stat"></div>
     <p class="data" id="diploma-data"></p>
   </div>
@@ -652,7 +652,7 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
 /* ============================================================================
    COSTANTE NOME MASCOTTE — cambiala qui per rinominare ovunque
    ============================================================================ */
-const MASCOTTE_NOME = "Tumbo";
+const MASCOTTE_NOME = "Gnut";   // Gnut, il mammut del Lago Tiberino
 
 /* ============================================================================
    GAMIFICATION: XP e LIVELLI
@@ -1542,7 +1542,7 @@ function reset(){
 document.getElementById('logo-sub').textContent = `· Il viaggio di ${MASCOTTE_NOME}`;
 document.getElementById('splash-nome-mascotte').textContent = MASCOTTE_NOME;
 document.getElementById('splash-sotto').textContent =
-  `Un cucciolo di mammut si è perso ai giorni nostri. Riportalo alla sua foresta di 2 milioni di anni fa, una tappa alla volta!`;
+  `${MASCOTTE_NOME} è un cucciolo di mammut del Lago Tiberino e si è perso ai giorni nostri. Riportalo alla sua foresta di 2 milioni di anni fa, una tappa alla volta!`;
 document.getElementById('splash-nome').value = stato.nomeBambino || "";
 document.querySelector('#fumetto .chi').textContent = `🐘 ${MASCOTTE_NOME.toUpperCase()}`;
 elMascotte.title = `Tocca ${MASCOTTE_NOME}!`;

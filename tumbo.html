@@ -206,6 +206,26 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
 #ar-flash.go{animation:flash .5s ease;}
 @keyframes flash{0%{opacity:0;}18%{opacity:.9;}100%{opacity:0;}}
 
+/* ---- Gnut in 3D (model-viewer) + AR reale ------------------------------ */
+#gnut3d{position:fixed; inset:0; z-index:2450; display:none;
+  background:radial-gradient(circle at 50% 35%, #dff0e4 0%, #bfe3f2 60%, #8ecbe8 100%);}
+#gnut3d.show{display:block;}
+#g3d-mv{width:100%; height:100%; --poster-color:transparent;
+  background:radial-gradient(circle at 50% 35%, #dff0e4 0%, #bfe3f2 60%, #8ecbe8 100%);}
+#g3d-titolo{position:absolute; top:calc(14px + env(safe-area-inset-top,0px)); left:0; right:0; text-align:center;
+  font-weight:800; font-size:18px; color:var(--terra-scuro); text-shadow:0 1px 4px rgba(255,255,255,.7); pointer-events:none; z-index:2;}
+#g3d-hint{position:absolute; top:calc(42px + env(safe-area-inset-top,0px)); left:0; right:0; text-align:center;
+  font-weight:700; font-size:12px; color:var(--terra); pointer-events:none; z-index:2;}
+#g3d-chiudi{position:absolute; top:calc(12px + env(safe-area-inset-top,0px)); right:14px; z-index:3;
+  width:42px; height:42px; border:none; border-radius:50%; background:rgba(255,255,255,.85); color:var(--terra-scuro);
+  font-size:20px; font-weight:800; cursor:pointer; box-shadow:0 4px 12px var(--ombra);}
+#g3d-arbtn{position:absolute; left:50%; bottom:calc(28px + var(--safe-b)); transform:translateX(-50%);
+  border:none; border-radius:22px; padding:15px 22px; font-family:var(--font); font-size:16px; font-weight:800;
+  color:#fff; background:linear-gradient(160deg,var(--arancio),#d0662a); box-shadow:0 6px 0 #a84f1c,0 10px 22px var(--ombra); cursor:pointer;}
+#g3d-arbtn:active{transform:translateX(-50%) translateY(4px); box-shadow:0 2px 0 #a84f1c;}
+#g3d-loader{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-weight:800; color:var(--terra); font-size:15px; z-index:1;}
+
 .marker-pin{width:40px;height:40px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
   display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px var(--ombra);border:3px solid #fff;}
 .marker-pin>*{transform:rotate(45deg);font-size:19px;}
@@ -569,7 +589,7 @@ img.scena-foresta{aspect-ratio:1; object-fit:cover; border-radius:22px; border:5
 <!-- ============================ BOTTOM NAV ================================ -->
 <nav id="nav">
   <button id="tab-mappa" class="active" aria-label="Mappa"><span class="ic">🗺️</span>Mappa</button>
-  <button id="tab-ar" aria-label="Incontra Gnut in realtà aumentata"><span class="ic">📸</span>Gnut AR</button>
+  <button id="tab-3d" aria-label="Vedi Gnut in 3D"><span class="ic">🦣</span>Gnut 3D</button>
   <button id="tab-zaino" aria-label="Zaino dei ricordi"><span class="ic">🎒</span>Zaino</button>
 </nav>
 
@@ -668,6 +688,28 @@ img.scena-foresta{aspect-ratio:1; object-fit:cover; border-radius:22px; border:5
   <button id="ar-chiudi" aria-label="Chiudi">✕</button>
   <div id="ar-flash"></div>
   <canvas id="ar-canvas" style="display:none"></canvas>
+</div>
+
+<!-- ============================ GNUT IN 3D + AR REALE ====================
+     model-viewer (vendorizzato in assets/vendor) mostra il modello 3D generato
+     dalla foto: Gnut ruota in 3D e, sui telefoni compatibili, appare in AR nella
+     stanza (Scene Viewer Android / WebXR). Lo script viene caricato solo quando
+     serve, per non appesantire l'avvio.
+     TODO(iOS): per l'AR su iPhone (Quick Look) aggiungere un file .usdz e
+     l'attributo ios-src sul model-viewer. -->
+<div id="gnut3d">
+  <div id="g3d-titolo">Gnut in 3D</div>
+  <div id="g3d-hint">Trascina per girarlo · pizzica per zoomare</div>
+  <button id="g3d-chiudi" aria-label="Chiudi">✕</button>
+  <div id="g3d-loader">Sto arrivando in 3D… 🦣</div>
+  <model-viewer id="g3d-mv" alt="Gnut il mammut in 3D"
+     camera-controls auto-rotate rotation-per-second="18deg"
+     touch-action="pan-y" interaction-prompt="none"
+     shadow-intensity="1" exposure="1.05" environment-image="neutral"
+     ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto"
+     poster="assets/gnut/gnut-saluto.webp">
+    <button slot="ar-button" id="g3d-arbtn">👀 Portami nella tua stanza (AR)</button>
+  </model-viewer>
 </div>
 
 <!-- ============================ FINALE =================================== -->
@@ -1161,7 +1203,7 @@ function apriScheda(i){
       <h2>${t.nome}</h2>
     </div>
     <div class="racconto">🐘 «${t.testo_racconto}»</div>
-    <button class="btn btn-viola" id="btn-ar">📸 Incontra ${MASCOTTE_NOME} qui!</button>
+    <button class="btn btn-viola" id="btn-ar">📸 Foto-ricordo con ${MASCOTTE_NOME}</button>
     ${ gia ? renderCompletata(t) : `
       <p style="font-weight:800;text-align:center;color:var(--terra);margin:4px 0;">Sei arrivato in questo luogo?</p>
       <button class="btn btn-arancio" id="btn-arrivato">Sono arrivato! 📍</button>` }
@@ -1673,11 +1715,29 @@ function mostraTab(quale){
 }
 tabMappa.onclick = ()=>{ suono("pop"); mostraTab("mappa"); };
 tabZaino.onclick = ()=>{ suono("pop"); mostraTab("zaino"); };
-// Pulsante AR sempre accessibile: incontra Gnut ovunque tu sia
-document.getElementById('tab-ar').onclick = ()=>{
-  suono("pop");
-  apriAR(`Ciao! Sono ${MASCOTTE_NOME}. Inquadra quello che ti circonda e facciamoci una foto insieme! 📸`);
-};
+// ---- Gnut in 3D + AR reale (model-viewer, caricato in modo pigro) ----
+let mvCaricato = false;
+function apri3D(){
+  const scr = document.getElementById('gnut3d');
+  const mv = document.getElementById('g3d-mv');
+  const loader = document.getElementById('g3d-loader');
+  scr.classList.add('show');
+  setStatoMascotte("festante");
+  if(!mvCaricato){
+    mvCaricato = true;
+    const s = document.createElement('script');
+    s.type = 'module'; s.src = 'assets/vendor/model-viewer.min.js';
+    s.onerror = ()=>{ loader.textContent = "Per il 3D serve la connessione a internet 📶"; };
+    document.head.appendChild(s);
+    mv.addEventListener('load', ()=>{ loader.style.display = 'none'; });
+    mv.addEventListener('error', ()=>{ loader.textContent = "Ops, non riesco a caricare il 3D."; });
+    setTimeout(()=>{ loader.style.display = 'none'; }, 9000); // fallback
+  }
+  if(!mv.getAttribute('src')) mv.setAttribute('src', 'assets/gnut/gnut.glb');
+}
+function chiudi3D(){ document.getElementById('gnut3d').classList.remove('show'); }
+document.getElementById('g3d-chiudi').onclick = ()=>{ suono("pop"); chiudi3D(); };
+document.getElementById('tab-3d').onclick = ()=>{ suono("pop"); apri3D(); };
 
 /* ============================================================================
    FINALE + coriandoli + diploma

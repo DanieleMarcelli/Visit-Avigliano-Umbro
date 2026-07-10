@@ -241,6 +241,7 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
 .marker-pin img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
 .marker-done{background:var(--bosco);}
 .marker-future{background:#9c9c9c;}
+.marker-bonus{background:var(--oro);} .marker-bonus.fatto{background:var(--bosco);}
 .marker-current{background:var(--arancio);animation:pulse 1.4s infinite;}
 .marker-current>*{animation:balza .9s ease-in-out infinite;}
 @keyframes balza{50%{transform:rotate(45deg) translateY(-4px);}}
@@ -924,6 +925,49 @@ const TAPPE = [
       corretta: 0
     },
     attiva: true
+  },
+
+  /* ------------------------------------------------------------------------
+     TAPPE BONUS (campo "bonus:true") — luoghi VERI del territorio, deviazioni
+     opzionali che NON bloccano il viaggio nel tempo: danno ricordi e stelle
+     extra. Contenuti verificati (Toscolano, Grotta Bella, Fortezza Dunarobba).
+     Coordinate indicative — da confermare col Comune prima della pubblicazione.
+     ------------------------------------------------------------------------ */
+  {
+    id: 101, nome: "Toscolano — Affreschi di Pier Matteo", epoca: "RINASCIMENTO", eraClass: "era-romana",
+    bonus: true, attiva: true, lat: 42.6470, lon: 12.4030, ricordo: "🎨",
+    testo_racconto: "Appena fuori dal borgo di Toscolano c'è una chiesetta con un tesoro dipinto sul muro: un angelo, una colomba e la Madonna, con colori vivi di più di 500 anni fa!",
+    curiosita: "Li dipinse Pier Matteo d'Amelia, lo stesso artista che dipinse il soffitto della Cappella Sistina PRIMA di Michelangelo: un cielo azzurro pieno di stelle d'oro!",
+    gioco: {
+      tipo: "quiz",
+      domanda: "Cosa c'era dipinto sul soffitto della Cappella Sistina prima di Michelangelo?",
+      opzioni: ["Un cielo azzurro con stelle d'oro", "Un grande drago", "Una partita di calcio"],
+      corretta: 0
+    }
+  },
+  {
+    id: 102, nome: "Grotta Bella", epoca: "GROTTA MILLENARIA", eraClass: "era-preistoria",
+    bonus: true, attiva: true, lat: 42.6250, lon: 12.3600, ricordo: "🕯️",
+    testo_racconto: "Sul fianco di un monte, nel bosco, si apre una grotta segreta. Qui gli uomini sono venuti per migliaia di anni: prima cacciatori, poi persone che lasciavano piccoli doni agli dei.",
+    curiosita: "Dentro la Grotta Bella le persone antiche lasciavano piccole statuette di bronzo come regalo agli dei per oltre mille anni: una gigantesca cassetta dei desideri sotto la montagna!",
+    gioco: {
+      tipo: "quiz",
+      domanda: "Cosa lasciavano gli antichi dentro la Grotta Bella come dono?",
+      opzioni: ["Piccole statuette di bronzo", "Monete di cioccolato", "Palloni da calcio"],
+      corretta: 0
+    }
+  },
+  {
+    id: 103, nome: "Fortezza di Dunarobba", epoca: "RINASCIMENTO", eraClass: "era-medioevo",
+    bonus: true, attiva: true, lat: 42.6785, lon: 12.4360, ricordo: "🏯",
+    testo_racconto: "A Dunarobba c'è una fortezza con torri rotonde agli angoli, robusta come un dado di pietra. Serviva a difendere il borgo: dall'alto si vedevano arrivare da lontano gli amici... e i nemici!",
+    curiosita: "La Fortezza Alta di Dunarobba è in piedi da più di 500 anni (dal 1482) e ha quattro torri tonde, una per ogni angolo!",
+    gioco: {
+      tipo: "quiz",
+      domanda: "Quante torri agli angoli ha la Fortezza Alta di Dunarobba?",
+      opzioni: ["Quattro", "Una sola", "Dieci"],
+      corretta: 0
+    }
   }
 ];
 
@@ -945,7 +989,8 @@ function caricaStato(){
 }
 function salvaStato(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(stato)); }catch(e){} }
 
-const tappeAttive = TAPPE.filter(t => t.attiva);
+const tappeAttive = TAPPE.filter(t => t.attiva && !t.bonus);   // la SPINA del viaggio nel tempo
+const tappeBonus  = TAPPE.filter(t => t.attiva && t.bonus);    // deviazioni opzionali (side-quest)
 
 function indiceCorrente(){
   for(let i=0;i<tappeAttive.length;i++) if(!stato.completate.includes(tappeAttive[i].id)) return i;
@@ -956,7 +1001,7 @@ function statoTappa(i){
   return i === indiceCorrente() ? "current" : "future";
 }
 function stelleTotali(){ return Object.values(stato.stelle).reduce((a,b)=>a+b,0); }
-function stelleMax(){ return tappeAttive.length * 3; }   // denominatore dinamico (non più "18" fisso)
+function stelleMax(){ return (tappeAttive.length + tappeBonus.length) * 3; }   // include i bonus
 function livelloAttuale(){ let L0 = LIVELLI[0]; for(const l of LIVELLI) if(stato.xp >= l.xp) L0 = l; return L0; }
 function livelloProssimo(){ for(const l of LIVELLI) if(stato.xp < l.xp) return l; return null; }
 
@@ -1071,6 +1116,16 @@ function disegnaMarker(){
   tappeAttive.forEach((t,i)=>{
     const m = L.marker([t.lat,t.lon], { icon: iconaPer(i) }).addTo(map);
     m.on('click', ()=>onMarkerClick(i));
+    markers.push(m);
+  });
+  // Marker BONUS (sempre sbloccati, stella dorata): side-quest facoltative
+  tappeBonus.forEach(t=>{
+    const done = stato.completate.includes(t.id);
+    const icon = L.divIcon({ className:'',
+      html:`<div class="marker-pin marker-bonus ${done?'fatto':''}"><span>${done?'✔️':'⭐'}</span></div>`,
+      iconSize:[38,38], iconAnchor:[19,38] });
+    const m = L.marker([t.lat,t.lon], { icon }).addTo(map);
+    m.on('click', ()=>apriSchedaBonus(t));
     markers.push(m);
   });
 }
@@ -1310,6 +1365,74 @@ function cablaScheda(i, gia){
 
 function chiudiSheet(){ sheet.classList.remove('open'); overlayBg.classList.remove('show'); schedaCorrente = null; fermaAcchiappa(); }
 overlayBg.onclick = chiudiSheet;
+
+/* ---- Tappe BONUS (side-quest): scheda + vittoria, senza Portale del Tempo ---- */
+function apriSchedaBonus(t){
+  const gia = stato.completate.includes(t.id);
+  setStatoMascotte("normale");
+  parla(t.testo_racconto);
+  sheet.innerHTML = `
+    <div class="banda ${t.eraClass}" id="sheet-banda">
+      <div class="grip"></div>
+      <button class="chiudi" id="sheet-chiudi" aria-label="Chiudi">✕</button>
+      <span class="badge-epoca">⭐ TAPPA BONUS · ${t.epoca}</span>
+      <h2>${t.nome}</h2>
+    </div>
+    <div class="racconto">🐘 «${t.testo_racconto}»</div>
+    <button class="btn btn-viola" id="btn-ar">📸 Foto-ricordo con ${MASCOTTE_NOME}</button>
+    ${ gia ? renderCompletata(t) : `
+      <p style="font-weight:800;text-align:center;color:var(--terra);margin:4px 0;">Sei arrivato in questo luogo?</p>
+      <button class="btn btn-arancio" id="btn-arrivato">Sono arrivato! 📍</button>` }
+  `;
+  sheet.classList.add('open'); overlayBg.classList.add('show');
+  document.getElementById('sheet-chiudi').onclick = ()=>{ suono("pop"); chiudiSheet(); };
+  document.getElementById('btn-ar').onclick = ()=>
+    apriAR(`Eccomi a ${t.nome}! Un posto speciale del nostro territorio. Facciamoci una foto! 📸`);
+  abilitaSwipeChiusura();
+  if(gia){
+    const b = document.getElementById('btn-prossima');
+    if(b){ b.textContent = "Chiudi ✓"; b.onclick = ()=>{ suono("pop"); chiudiSheet(); }; }
+    return;
+  }
+  document.getElementById('btn-arrivato').onclick = (ev)=>{
+    suono("pop"); vibra(30); setStatoMascotte("normale");
+    parla("Che bello esplorare fuori percorso! Supera il mini-gioco per il ricordo bonus!");
+    const wrap = document.createElement('div');
+    ev.target.replaceWith(wrap);
+    avviaGioco(t, wrap, (stelle)=>vittoriaBonus(t, stelle));
+  };
+}
+function vittoriaBonus(t, stelle){
+  const nuovo = !stato.completate.includes(t.id);
+  if(nuovo) stato.completate.push(t.id);
+  stato.stelle[t.id] = Math.max(stato.stelle[t.id] || 0, stelle);
+  const xp = nuovo ? (XP_BASE_TAPPA + stelle * XP_PER_STELLA) : 0;
+  const livPrima = livelloAttuale();
+  stato.xp += xp; salvaStato();
+  suono("s" + stelle); vibra([40,30,40,30,120]);
+  setStatoMascotte("festante");
+  parla(`Bravissimo esploratore! Tappa bonus superata! ${stelleHtml(stelle)}`);
+  if(xp) mostraXpFloat("+" + xp + " ✨");
+  aggiornaHud(); disegnaMarker();
+  const livDopo = livelloAttuale();
+  if(livDopo !== livPrima) setTimeout(()=>toastLivello(livDopo), 1200);
+  const banda = document.getElementById('sheet-banda');
+  const dopoBanda = banda ? banda.nextElementSibling : null;
+  if(dopoBanda){
+    let n = dopoBanda.nextElementSibling;
+    while(n){ const nx = n.nextElementSibling; n.remove(); n = nx; }
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <div class="stelle-earned">${stelleHtml(stelle)}</div>
+      <div class="racconto" style="border-left-color:var(--oro);background:#fff8e8;">
+        🎒 Ricordo bonus: <b style="font-size:22px;">${t.ricordo}</b>${xp ? ` &nbsp;·&nbsp; +${xp} ✨` : ""}
+      </div>
+      <div class="curiosita">💡 <b>Lo sapevi?</b> ${t.curiosita}</div>
+      <button class="btn btn-bosco" id="btn-chiudi-bonus">Continua l'esplorazione →</button>`;
+    sheet.appendChild(div);
+    document.getElementById('btn-chiudi-bonus').onclick = ()=>{ suono("pop"); chiudiSheet(); };
+  }
+}
 
 /* ============================================================================
    MOTORE MINI-GIOCHI
@@ -1734,16 +1857,18 @@ function renderAlbum(){
   const pct = next ? Math.min(100, Math.round((stato.xp - liv.xp) / (next.xp - liv.xp) * 100)) : 100;
   const tutte = indiceCorrente() >= tappeAttive.length;
 
-  const cards = tappeAttive.map((t,i)=>{
+  const cardHtml = (t, misterioso)=>{
     const done = stato.completate.includes(t.id);
     return `
       <div class="card-ricordo ${done ? "" : "bloccato"}">
         <div class="em">${done ? t.ricordo : "❓"}</div>
-        <div class="nm">${done ? t.nome : "Ricordo misterioso"}</div>
+        <div class="nm">${done ? t.nome : misterioso}</div>
         <div class="ep ${t.eraClass}">${t.epoca}</div>
         <div class="st">${done ? stelleHtml(stato.stelle[t.id] || 1) : "☆☆☆"}</div>
       </div>`;
-  }).join("");
+  };
+  const cards = tappeAttive.map(t=>cardHtml(t, "Ricordo misterioso")).join("");
+  const bonusCards = tappeBonus.map(t=>cardHtml(t, "Luogo segreto da scoprire")).join("");
 
   document.getElementById('album').innerHTML = `
     <h2>🎒 Zaino dell'Esploratore${stato.nomeBambino ? " di " + stato.nomeBambino : ""}</h2>
@@ -1758,6 +1883,9 @@ function renderAlbum(){
       <div class="liv-bar"><div style="width:${pct}%"></div></div>
     </div>
     <div class="griglia-ricordi">${cards}</div>
+    ${ tappeBonus.length ? `
+      <h2 style="margin-top:20px;">⭐ Luoghi Bonus del territorio</h2>
+      <div class="griglia-ricordi">${bonusCards}</div>` : "" }
     ${ tutte ? `<button class="btn btn-oro" id="btn-rivedi-diploma" style="margin-top:16px;">🎓 Rivedi il tuo diploma</button>` : "" }
   `;
   const bd = document.getElementById('btn-rivedi-diploma');

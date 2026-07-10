@@ -41,6 +41,8 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<!-- Dati geografici REALI: Paleolago Tiberino (da KMZ) + Cammino del Lago (Wikiloc) -->
+<script src="assets/geo/geo-data.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
 <!-- Illustrazioni premium di Gnut (WebP ottimizzate, in assets/gnut/) -->
@@ -178,14 +180,16 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
   display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg,#dff0e4,#e9dcc0);
   font-weight:800; color:var(--terra); font-size:15px; transition:opacity .6s; pointer-events:none;}
 #map-loader.via{opacity:0;}
-#btn-locate,#btn-lago{
+#btn-locate,#btn-lago,#btn-cammino{
   position:fixed; right:12px; z-index:901; width:48px; height:48px; border-radius:50%;
   border:none; background:#fff; box-shadow:0 4px 12px var(--ombra); font-size:22px; cursor:pointer;
 }
 #btn-locate{ top:162px; }
 #btn-lago{ top:220px; }
-#btn-locate:active,#btn-lago:active{transform:scale(.92);}
+#btn-cammino{ top:278px; }
+#btn-locate:active,#btn-lago:active,#btn-cammino:active{transform:scale(.92);}
 #btn-lago.attivo{ background:var(--paleolago); box-shadow:0 0 0 3px rgba(74,159,196,.4),0 4px 12px var(--ombra); }
+#btn-cammino.attivo{ background:var(--arancio-chiaro); box-shadow:0 0 0 3px rgba(224,122,47,.35),0 4px 12px var(--ombra); }
 
 /* ---- AR "Incontra Gnut" (fotocamera + overlay) ------------------------- */
 #ar{position:fixed; inset:0; z-index:2400; display:none; background:#000; overflow:hidden;}
@@ -211,6 +215,11 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
 #ar-chiudi{position:absolute; top:calc(14px + env(safe-area-inset-top,0px)); right:14px;
   width:42px; height:42px; border:none; border-radius:50%; background:rgba(0,0,0,.5); color:#fff;
   font-size:20px; font-weight:800; cursor:pointer;}
+#ar-flip{position:absolute; top:calc(14px + env(safe-area-inset-top,0px)); left:14px; z-index:2;
+  width:42px; height:42px; border:none; border-radius:50%; background:rgba(0,0,0,.5); color:#fff;
+  font-size:19px; cursor:pointer;}
+#ar-flip:active{transform:scale(.9);}
+#ar.selfie #ar-video{transform:scaleX(-1);}   /* anteprima specchiata per il selfie */
 #ar-flash{position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none;}
 #ar-flash.go{animation:flash .5s ease;}
 @keyframes flash{0%{opacity:0;}18%{opacity:.9;}100%{opacity:0;}}
@@ -598,6 +607,7 @@ img.scena-foresta{aspect-ratio:1; object-fit:cover; border-radius:22px; border:5
 <div id="map-loader">🗺️ Sto disegnando la mappa…</div>
 <button id="btn-locate" title="Quanto sei lontano dalla tappa?" aria-label="Mostra distanza dalla tappa">🧭</button>
 <button id="btn-lago" title="Rivela il Paleolago Tiberino" aria-label="Rivela il Paleolago Tiberino">🌊</button>
+<button id="btn-cammino" title="Il Cammino del Lago Tiberino" aria-label="Mostra il Cammino del Lago Tiberino">🥾</button>
 
 <!-- ============================ ZAINO / ALBUM ============================= -->
 <div id="album"></div>
@@ -701,6 +711,7 @@ img.scena-foresta{aspect-ratio:1; object-fit:cover; border-radius:22px; border:5
   <div id="ar-bolla"><span class="chi"><img class="chi-av" src="assets/gnut/gnut-avatar.webp" alt=""/> GNUT</span><span id="ar-bolla-testo"></span></div>
   <div id="ar-hint">Inquadra il luogo e tocca 📸 per la foto con Gnut</div>
   <button id="ar-scatta" aria-label="Scatta foto">📸</button>
+  <button id="ar-flip" aria-label="Cambia fotocamera (interna/esterna)">🔄</button>
   <button id="ar-chiudi" aria-label="Chiudi">✕</button>
   <div id="ar-flash"></div>
   <canvas id="ar-canvas" style="display:none"></canvas>
@@ -781,17 +792,15 @@ const MASCOTTE_NOME = "Gnut";   // Gnut, il mammut del Lago Tiberino
 const NOME_GIOCO = "Gnut e il Lago Perduto";
 
 /* ============================================================================
-   PALEOLAGO TIBERINO — sagoma INDICATIVA da mostrare sulla mappa
+   PALEOLAGO TIBERINO + CAMMINO DEL LAGO — dati geografici
    ----------------------------------------------------------------------------
-   Forma a "Y rovesciata": ~2-3 milioni di anni fa l'acqua copriva gran parte
-   dell'Umbria, da Città di Castello fino a Spoleto e alla conca ternana.
-   La foresta di Dunarobba cresceva sul ramo occidentale, tra Monti Amerini e
-   Martani. Coordinate [lon, lat] — questa è una sagoma SCHEMATICA per il gioco.
-   TODO(dati reali): sostituire con il perimetro fornito dai geologi / Centro di
-   Paleontologia di Dunarobba. Si può incollare un GeoJSON qui, oppure caricare
-   un file .kml con kmlToGeoJSON() (vedi sotto) — es. da un export di Google Earth.
+   I dati REALI arrivano da assets/geo/geo-data.js (window.GEO_*): il perimetro
+   del Paleolago (dal KMZ "blu effetto acqua") e la traccia del Cammino del Lago
+   Tiberino (Wikiloc). Se quel file non si carica (offline), si usa la sagoma
+   SCHEMATICA di riserva qui sotto. Forma a "Y rovesciata": l'acqua copriva gran
+   parte dell'Umbria, da Città di Castello fino a Spoleto e alla conca ternana.
    ============================================================================ */
-const LAGO_TIBERINO = {
+const LAGO_SCHEMATICO = {
   type: "Polygon",
   coordinates: [[
     [12.21,43.46],[12.31,43.40],[12.40,43.18],[12.46,43.02],[12.55,42.90],
@@ -800,6 +809,9 @@ const LAGO_TIBERINO = {
     [12.23,43.32],[12.21,43.46]
   ]]
 };
+const LAGO_TIBERINO = (typeof window !== "undefined" && window.GEO_LAGO) ? window.GEO_LAGO : LAGO_SCHEMATICO;
+const CAMMINO = (typeof window !== "undefined" && window.GEO_CAMMINO) ? window.GEO_CAMMINO : null;
+const CAMMINO_START = (typeof window !== "undefined" && window.GEO_CAMMINO_START) ? window.GEO_CAMMINO_START : null;
 /* Converte un KML (Google Earth) nella geometria del lago.
    Uso: fetch('paleolago.kml').then(r=>r.text()).then(t=>{ lago = kmlToGeoJSON(t); }); */
 function kmlToGeoJSON(kmlText){
@@ -1199,21 +1211,61 @@ document.getElementById('btn-lago').onclick = ()=>{
   parla("Ecco il mio Lago Tiberino! Tanto tempo fa l'acqua copriva gran parte dell'Umbria, da Città di Castello fino a Spoleto e Terni. La mia foresta cresceva proprio sulla sua riva! 🌊");
 };
 
+/* ---- Cammino del Lago Tiberino: traccia reale (Wikiloc) attivabile ---- */
+let camminoLayer = null;
+document.getElementById('btn-cammino').onclick = ()=>{
+  suono("pop"); vibra(30);
+  const btn = document.getElementById('btn-cammino');
+  if(!map){ parla("La mappa non è disponibile senza connessione, ma il Cammino è bellissimo!"); return; }
+  if(!CAMMINO){ parla("La traccia del Cammino non si è caricata. Riprova online!"); return; }
+  if(camminoLayer){   // già visibile → nascondi
+    map.removeLayer(camminoLayer); camminoLayer = null;
+    btn.classList.remove('attivo'); ricentra();
+    setStatoMascotte("normale");
+    parla("Ho riposto la mappa del Cammino. Torniamo alle nostre tappe! 🗺️");
+    return;
+  }
+  const g = L.layerGroup();
+  L.geoJSON(CAMMINO, { style:{ color:'#d0662a', weight:4, opacity:.95, dashArray:'1 9', lineCap:'round' } }).addTo(g);
+  if(CAMMINO_START){
+    L.marker([CAMMINO_START[1], CAMMINO_START[0]], { icon: L.divIcon({ className:'',
+      html:'<div class="marker-pin marker-bonus"><span>🥾</span></div>', iconSize:[38,38], iconAnchor:[19,38] }) }).addTo(g);
+  }
+  g.addTo(map); camminoLayer = g;
+  try{ map.fitBounds(L.geoJSON(CAMMINO).getBounds().pad(0.15)); }catch(e){}
+  btn.classList.add('attivo');
+  setStatoMascotte("festante");
+  parla("Questo è il Cammino del Lago Tiberino: un vero sentiero che puoi percorrere a piedi, seguendo le tracce del mio antico lago! 🥾");
+};
+
 /* ============================================================================
    AR "INCONTRA GNUT" — fotocamera + overlay + foto-ricordo
    ============================================================================ */
-let arStream = null;
+let arStream = null, arFacing = 'environment';   // 'environment' = posteriore, 'user' = interna (selfie)
+function avviaCamera(){
+  const el = document.getElementById('ar');
+  el.classList.toggle('selfie', arFacing === 'user');   // specchia l'anteprima del selfie
+  if(!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)){ el.classList.add('no-cam'); return; }
+  if(arStream){ arStream.getTracks().forEach(t=>t.stop()); arStream = null; }
+  navigator.mediaDevices.getUserMedia({ video:{ facingMode: arFacing }, audio:false })
+    .then(s=>{ el.classList.remove('no-cam'); arStream = s; document.getElementById('ar-video').srcObject = s; })
+    .catch(()=>{ el.classList.add('no-cam'); parlaAR("Non riesco ad accendere la fotocamera, ma resto qui con te! Tocca 📸 per la foto."); });
+}
 function apriAR(testo){
   const el = document.getElementById('ar');
   parlaAR(testo || `Eccomi! Siamo insieme in questo posto magico. Facciamoci una foto-ricordo!`);
   el.classList.remove('no-cam'); el.classList.add('show');
   suono("pop"); vibra(30);
+  arFacing = 'environment';   // di default la posteriore per inquadrare il luogo
   // In produzione questa schermata si aprirà dal QR sul cartello della tappa.
-  if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
-    navigator.mediaDevices.getUserMedia({ video:{ facingMode:'environment' }, audio:false })
-      .then(s=>{ arStream = s; document.getElementById('ar-video').srcObject = s; })
-      .catch(()=>{ el.classList.add('no-cam'); parlaAR("Non riesco ad accendere la fotocamera, ma resto qui con te! Tocca 📸 per la foto."); });
-  }else{ el.classList.add('no-cam'); }
+  avviaCamera();
+}
+function flipCamera(){
+  suono("pop"); vibra(20);
+  arFacing = (arFacing === 'environment') ? 'user' : 'environment';
+  parlaAR(arFacing === 'user' ? "Fotocamera interna: facciamoci un selfie insieme! 🤳"
+                              : "Fotocamera posteriore: inquadra il posto! 📸");
+  avviaCamera();
 }
 function chiudiAR(){
   const el = document.getElementById('ar');
@@ -1239,7 +1291,13 @@ function scattaFoto(){
     let sw, sh, sx, sy;
     if(vr > cr){ sh = v.videoHeight; sw = sh*cr; sx = (v.videoWidth-sw)/2; sy = 0; }
     else{ sw = v.videoWidth; sh = sw/cr; sx = 0; sy = (v.videoHeight-sh)/2; }
-    ctx.drawImage(v, sx, sy, sw, sh, 0, 0, W, H);
+    if(arFacing === 'user'){   // selfie: ribalta il fotogramma come nell'anteprima
+      ctx.save(); ctx.translate(W,0); ctx.scale(-1,1);
+      ctx.drawImage(v, sx, sy, sw, sh, 0, 0, W, H);
+      ctx.restore();
+    }else{
+      ctx.drawImage(v, sx, sy, sw, sh, 0, 0, W, H);
+    }
   }else{
     const g = ctx.createLinearGradient(0,0,0,H);
     g.addColorStop(0,'#8ecbe8'); g.addColorStop(.6,'#dff0e4'); g.addColorStop(1,'#9dc98a');
@@ -1281,6 +1339,7 @@ function scattaFoto(){
 }
 document.getElementById('ar-chiudi').onclick = chiudiAR;
 document.getElementById('ar-scatta').onclick = scattaFoto;
+document.getElementById('ar-flip').onclick = flipCamera;
 
 /* ============================================================================
    SCHEDA TAPPA

@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#e07a2f" />
 <title>Gnut e il Lago Perduto · Visit Avigliano Umbro</title>
 
@@ -45,6 +45,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
 <!-- Illustrazioni premium di Gnut (WebP ottimizzate, in assets/gnut/) -->
 <link rel="preload" as="image" href="assets/gnut/gnut-saluto.webp">
+<link rel="preload" as="image" href="assets/gnut/gnut-avatar.webp">
+<link rel="preload" as="image" href="assets/gnut/gnut-fossile.webp">
 
 <style>
 /* ============================================================================
@@ -167,8 +169,15 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
 /* ============================================================================
    MAPPA
    ============================================================================ */
-#map{position:absolute; top:58px; bottom:var(--nav-h); left:0; right:0; z-index:1; background:var(--crema);}
-.leaflet-tile-pane{filter:sepia(.28) saturate(1.15) hue-rotate(-8deg) brightness(1.03);}
+#map{position:absolute; top:58px; bottom:var(--nav-h); left:0; right:0; z-index:1; background:#dfeef0;}
+.leaflet-tile-pane{filter:saturate(1.08) brightness(1.02) contrast(1.02);}
+/* Cornice "mappa del tesoro" + loader */
+#map-frame{position:absolute; top:58px; bottom:var(--nav-h); left:0; right:0; z-index:2; pointer-events:none;
+  box-shadow:inset 0 0 55px rgba(74,47,24,.30), inset 0 0 0 4px rgba(251,243,228,.65);}
+#map-loader{position:absolute; top:58px; bottom:var(--nav-h); left:0; right:0; z-index:3;
+  display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg,#dff0e4,#e9dcc0);
+  font-weight:800; color:var(--terra); font-size:15px; transition:opacity .6s; pointer-events:none;}
+#map-loader.via{opacity:0;}
 #btn-locate,#btn-lago{
   position:fixed; right:12px; z-index:901; width:48px; height:48px; border-radius:50%;
   border:none; background:#fff; box-shadow:0 4px 12px var(--ombra); font-size:22px; cursor:pointer;
@@ -186,9 +195,9 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
   background:linear-gradient(180deg,#8ecbe8 0%,#dff0e4 60%,#9dc98a 100%);}
 #ar.no-cam #ar-scena{display:block;}
 #ar.no-cam #ar-video{display:none;}
-#ar-gnut{position:absolute; left:50%; bottom:13%; width:min(62vw,300px); transform:translateX(-50%);
+#ar-gnut{position:absolute; left:50%; bottom:14%; width:min(52vw,230px); aspect-ratio:1; transform:translateX(-50%);
   filter:drop-shadow(0 12px 16px rgba(0,0,0,.45));}
-#ar-gnut svg{width:100%; height:auto; display:block; animation:fluttua 3s ease-in-out infinite;}
+#ar-gnut img{width:100%; height:100%; object-fit:cover; border-radius:50%; border:5px solid #fff; display:block; animation:fluttua 3s ease-in-out infinite;}
 #ar-bolla{position:absolute; left:50%; top:11%; transform:translateX(-50%); max-width:82vw;
   background:#fff; border:3px solid var(--arancio); border-radius:18px; padding:10px 14px;
   font-weight:700; font-size:15px; line-height:1.35; box-shadow:0 8px 22px rgba(0,0,0,.35);}
@@ -229,6 +238,7 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
 .marker-pin{width:40px;height:40px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
   display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px var(--ombra);border:3px solid #fff;}
 .marker-pin>*{transform:rotate(45deg);font-size:19px;}
+.marker-pin img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
 .marker-done{background:var(--bosco);}
 .marker-future{background:#9c9c9c;}
 .marker-current{background:var(--arancio);animation:pulse 1.4s infinite;}
@@ -416,11 +426,14 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
 .r2{width:56vmin;height:56vmin;border:3px dashed rgba(232,176,75,.55);animation:gira 4s linear infinite reverse;}
 .r3{width:38vmin;height:38vmin;border:4px dashed rgba(244,162,89,.7);animation:gira 2.6s linear infinite;}
 @keyframes gira{to{transform:rotate(360deg);}}
-#timeportal .tumbo-mini{width:120px;animation:vortice 2.4s ease-in-out infinite;filter:drop-shadow(0 0 22px rgba(244,162,89,.7));}
+#timeportal .tumbo-mini{width:150px; height:150px; object-fit:cover; border-radius:50%;
+  border:5px solid rgba(255,255,255,.85); animation:vortice 2.4s ease-in-out infinite;
+  box-shadow:0 0 45px rgba(244,162,89,.85), 0 0 0 3px rgba(232,176,75,.5);}
 @keyframes vortice{0%,100%{transform:rotate(-8deg) scale(1);}50%{transform:rotate(8deg) scale(1.1);}}
 #portal-anno{font-size:clamp(30px,9vw,52px);font-weight:800;letter-spacing:1px;margin-top:20px;text-shadow:0 0 24px rgba(124,196,224,.8);font-variant-numeric:tabular-nums;}
 #portal-dest{font-size:16px;font-weight:800;color:var(--arancio-chiaro);margin-top:6px;min-height:22px;}
-#portal-skip{font-size:11px;font-weight:700;color:rgba(255,255,255,.55);margin-top:18px;}
+#portal-skip{font-size:12px;font-weight:800;color:rgba(255,255,255,.85);margin-top:18px;animation:pulse-skip 1.6s ease-in-out infinite;}
+@keyframes pulse-skip{50%{opacity:.45;}}
 .stellina{position:absolute;background:#fff;border-radius:50%;opacity:.8;animation:brilla 2s ease-in-out infinite;}
 @keyframes brilla{50%{opacity:.15;transform:scale(.6);}}
 
@@ -555,7 +568,7 @@ img.scena-foresta{aspect-ratio:1; object-fit:cover; border-radius:22px; border:5
 <header>
   <div class="logo">
     <b>Visit Avigliano Umbro</b>
-    <small id="logo-sub">· Il viaggio di Tumbo</small>
+    <small id="logo-sub">· Gnut e il Lago Perduto</small>
   </div>
   <div id="hud">
     <div class="pill" id="pill-livello" title="Il tuo livello">🐣</div>
@@ -580,6 +593,8 @@ img.scena-foresta{aspect-ratio:1; object-fit:cover; border-radius:22px; border:5
 
 <!-- ============================ MAPPA + LOCATE ============================ -->
 <div id="map"></div>
+<div id="map-frame"></div>
+<div id="map-loader">🗺️ Sto disegnando la mappa…</div>
 <button id="btn-locate" title="Quanto sei lontano dalla tappa?" aria-label="Mostra distanza dalla tappa">🧭</button>
 <button id="btn-lago" title="Rivela il Paleolago Tiberino" aria-label="Rivela il Paleolago Tiberino">🌊</button>
 
@@ -654,7 +669,7 @@ img.scena-foresta{aspect-ratio:1; object-fit:cover; border-radius:22px; border:5
     <ellipse cx="96" cy="143" rx="4" ry="3" fill="#f2d8b8"/><ellipse cx="106" cy="142" rx="4" ry="3" fill="#f2d8b8"/>
   </svg>
 </div>
-<div id="fumetto"><span class="chi">🐘 TUMBO</span><span id="fumetto-testo"></span></div>
+<div id="fumetto" aria-live="polite"><span class="chi"><img class="chi-av" src="assets/gnut/gnut-avatar.webp" alt=""/> GNUT</span><span id="fumetto-testo"></span></div>
 
 <!-- ============================ SHEET TAPPA =============================== -->
 <div class="overlay-bg" id="overlay-bg"></div>
@@ -663,13 +678,13 @@ img.scena-foresta{aspect-ratio:1; object-fit:cover; border-radius:22px; border:5
 <!-- ============================ PORTALE DEL TEMPO ========================= -->
 <div id="timeportal">
   <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
-  <svg class="tumbo-mini" viewBox="0 0 160 150"><use href="#svg-tumbo"/></svg>
+  <img class="tumbo-mini" src="assets/gnut/gnut-face-corsa.webp" alt="Gnut nel vortice del tempo"/>
   <div id="portal-anno">OGGI</div>
   <div id="portal-dest"></div>
   <div id="portal-skip">tocca per saltare ⏩</div>
 </div>
 
-<div id="toast-livello"></div>
+<div id="toast-livello" aria-live="assertive"></div>
 
 <!-- ============================ AR "INCONTRA GNUT" =======================
      Prototipo di realtà aumentata: fotocamera del telefono + Gnut in
@@ -681,7 +696,7 @@ img.scena-foresta{aspect-ratio:1; object-fit:cover; border-radius:22px; border:5
 <div id="ar">
   <video id="ar-video" autoplay playsinline muted></video>
   <div id="ar-scena"></div>
-  <div id="ar-gnut"><svg viewBox="0 0 160 150"><use href="#svg-tumbo"/></svg></div>
+  <div id="ar-gnut"><img src="assets/gnut/gnut-avatar.webp" alt="Gnut"/></div>
   <div id="ar-bolla"><span class="chi"><img class="chi-av" src="assets/gnut/gnut-avatar.webp" alt=""/> GNUT</span><span id="ar-bolla-testo"></span></div>
   <div id="ar-hint">Inquadra il luogo e tocca 📸 per la foto con Gnut</div>
   <button id="ar-scatta" aria-label="Scatta foto">📸</button>
@@ -941,6 +956,7 @@ function statoTappa(i){
   return i === indiceCorrente() ? "current" : "future";
 }
 function stelleTotali(){ return Object.values(stato.stelle).reduce((a,b)=>a+b,0); }
+function stelleMax(){ return tappeAttive.length * 3; }   // denominatore dinamico (non più "18" fisso)
 function livelloAttuale(){ let L0 = LIVELLI[0]; for(const l of LIVELLI) if(stato.xp >= l.xp) L0 = l; return L0; }
 function livelloProssimo(){ for(const l of LIVELLI) if(stato.xp < l.xp) return l; return null; }
 
@@ -970,6 +986,9 @@ function suono(tipo){
     else if(tipo === "lock"){ nota(220, t, .1, "square", .08); nota(180, t+.1, .12, "square", .08); }
     else if(tipo === "portal"){ for(let i=0;i<14;i++) nota(300 + i*90, t + i*.11, .3, "sine", .1); }
     else if(tipo === "level"){ [392,523,659,784,1047,1319].forEach((f,i)=>nota(f, t+i*.08, .25, "triangle", .18)); }
+    else if(tipo === "s1"){ [523,659].forEach((f,i)=>nota(f, t+i*.1, .2, "triangle", .2)); }
+    else if(tipo === "s2"){ [523,659,784].forEach((f,i)=>nota(f, t+i*.09, .2, "triangle", .2)); }
+    else if(tipo === "s3"){ [523,659,784,1047,1319].forEach((f,i)=>nota(f, t+i*.08, .22, "triangle", .2)); }
     else if(tipo === "fanfare"){
       [523,523,523,659,784,784,1047].forEach((f,i)=>nota(f, t+i*.14, .3, "triangle", .2));
       [262,330,392].forEach((f)=>nota(f, t+.9, .8, "sine", .1));
@@ -977,6 +996,27 @@ function suono(tipo){
   }catch(e){}
 }
 function vibra(pat){ try{ navigator.vibrate && navigator.vibrate(pat); }catch(e){} }
+
+/* Musica/ambiente di sottofondo: melodia pentatonica dolce in loop.
+   Rispetta l'interruttore audio (ogni battuta controlla stato.audio). */
+let musicaTimer = null;
+function avviaMusica(){
+  if(musicaTimer) return;
+  const scala = [261.63, 293.66, 329.63, 392.0, 440.0, 523.25]; // do re mi sol la do'
+  let step = 0;
+  musicaTimer = setInterval(()=>{
+    if(!stato.audio) return;
+    try{
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if(audioCtx.state === "suspended") audioCtx.resume();
+      const t = audioCtx.currentTime;
+      const f = scala[step % scala.length];
+      nota(f, t, 1.7, "sine", .05);                         // melodia soffusa
+      if(step % 4 === 0) nota(f/2, t, 2.6, "triangle", .035); // basso morbido
+      step++;
+    }catch(e){}
+  }, 1400);
+}
 
 /* ============================================================================
    MAPPA LEAFLET
@@ -991,9 +1031,11 @@ function initMappa(){
     return;
   }
   map = L.map('map', { zoomControl:false, attributionControl:true });
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19, attribution: '&copy; OpenStreetMap'
+  // Tile "storybook" CARTO Voyager (senza API key) — più caldo di OSM
+  const tl = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    maxZoom: 20, subdomains:'abcd', attribution: '&copy; OpenStreetMap &copy; CARTO'
   }).addTo(map);
+  tl.on('load', ()=>{ const ld = document.getElementById('map-loader'); if(ld) ld.classList.add('via'); });
   L.polyline(tappeAttive.map(t=>[t.lat,t.lon]),
     { color:'#e07a2f', weight:4, dashArray:'2 12', opacity:.85, lineCap:'round' }).addTo(map);
   disegnaMarker();
@@ -1017,11 +1059,11 @@ function assicuraLeaflet(cb){
 }
 function iconaPer(i){
   const st = statoTappa(i);
-  let cls = "marker-future", inner = "🔒";
-  if(st === "done"){ cls = "marker-done"; inner = "✔️"; }
-  else if(st === "current"){ cls = "marker-current"; inner = "🐘"; }
-  return L.divIcon({ className:'', html:`<div class="marker-pin ${cls}"><span>${inner}</span></div>`,
-    iconSize:[40,40], iconAnchor:[20,40] });
+  let cls = "marker-future", inner = "<span>🔒</span>";
+  if(st === "done"){ cls = "marker-done"; inner = "<span>✔️</span>"; }
+  else if(st === "current"){ cls = "marker-current"; inner = '<img src="assets/gnut/gnut-avatar.webp" alt="Gnut"/>'; }
+  return L.divIcon({ className:'', html:`<div class="marker-pin ${cls}">${inner}</div>`,
+    iconSize:[44,44], iconAnchor:[22,44] });
 }
 function disegnaMarker(){
   if(!map) return;
@@ -1074,9 +1116,10 @@ document.getElementById('btn-locate').onclick = ()=>{
     setStatoMascotte("normale");
     if(km < 0.15) parla(`Siamo ARRIVATI a ${t.nome}! 🎉 Tocca il mio marker sulla mappa!`);
     else parla(`Siamo a circa ${formattaDist(km)} da "${t.nome}". In marcia, esploratore! 🥾`);
-  }, ()=>{
+  }, (err)=>{
     setStatoMascotte("pensieroso");
-    parla("Non riesco a capire dove siamo... controlla che la posizione sia attiva!");
+    if(err && err.code === 1) parla("Per sapere quanto manca, chiedi a un adulto di dare il permesso alla posizione! 📍");
+    else parla("Non riesco a capire dove siamo... riprova tra un momento!");
   }, { enableHighAccuracy:true, timeout:8000 });
 };
 
@@ -1148,34 +1191,38 @@ function scattaFoto(){
     ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
   }
 
-  // Gnut: rasterizzo l'SVG della mascotte (con gradiente, solo faccia "normale")
-  const clone = document.querySelector('#mascotte svg').cloneNode(true);
-  clone.querySelectorAll('.exp-f, .exp-t').forEach(n=>n.remove());
-  clone.setAttribute('xmlns','http://www.w3.org/2000/svg');
-  clone.insertAdjacentHTML('afterbegin',
-    '<defs><radialGradient id="gradCorpo" cx="50%" cy="38%" r="75%">' +
-    '<stop offset="0%" stop-color="#f4a259"/><stop offset="55%" stop-color="#e07a2f"/>' +
-    '<stop offset="100%" stop-color="#c9772f"/></radialGradient></defs>');
-  const xml = new XMLSerializer().serializeToString(clone);
+  // Gnut premium: disegno il medaglione circolare sulla foto (illustrazione, non più SVG)
   const img = new Image();
   img.onload = ()=>{
-    const gw = W*0.52, gh = gw*(150/160);
-    ctx.drawImage(img, W/2 - gw/2, H - gh - 130, gw, gh);
+    const d = W*0.46, cx = W/2, cy = H - d/2 - 150;
+    ctx.save();
+    ctx.beginPath(); ctx.arc(cx, cy, d/2, 0, Math.PI*2); ctx.closePath(); ctx.clip();
+    ctx.drawImage(img, cx-d/2, cy-d/2, d, d);
+    ctx.restore();
+    ctx.lineWidth = 12; ctx.strokeStyle = '#fff';
+    ctx.beginPath(); ctx.arc(cx, cy, d/2, 0, Math.PI*2); ctx.stroke();
     ctx.fillStyle = 'rgba(224,122,47,.92)'; ctx.fillRect(0, H-96, W, 96);
     ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
     ctx.font = 'bold 46px "Baloo 2",sans-serif';
     ctx.fillText('Io e Gnut · Visit Avigliano Umbro', W/2, H-34);
     canvas.toBlob(b=>{
       if(!b){ parlaAR("Che bello scatto! (Per salvarlo servono i permessi del telefono.)"); return; }
-      const url = URL.createObjectURL(b);
-      const a = document.createElement('a'); a.href = url; a.download = 'io-e-gnut.png';
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(()=>URL.revokeObjectURL(url), 1500);
-      parlaAR("Che bella foto insieme! L'ho salvata per te. 📸 Mostrala a mamma e papà!");
+      const file = new File([b], 'io-e-gnut.png', { type:'image/png' });
+      // iOS spesso non salva col download programmatico → usa la condivisione nativa
+      if(navigator.canShare && navigator.canShare({ files:[file] })){
+        navigator.share({ files:[file], title:'Io e Gnut' }).catch(()=>{});
+        parlaAR("Ecco la nostra foto! Salvala o inviala a mamma e papà. 📸");
+      }else{
+        const url = URL.createObjectURL(b);
+        const a = document.createElement('a'); a.href = url; a.download = 'io-e-gnut.png';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url), 1500);
+        parlaAR("Che bella foto insieme! L'ho salvata per te. 📸 Mostrala a mamma e papà!");
+      }
     }, 'image/png');
   };
   img.onerror = ()=>parlaAR("Ci siamo divertiti! (La foto non si è salvata qui.)");
-  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
+  img.src = 'assets/gnut/gnut-avatar.webp';
 }
 document.getElementById('ar-chiudi').onclick = chiudiAR;
 document.getElementById('ar-scatta').onclick = scattaFoto;
@@ -1499,7 +1546,7 @@ function vittoriaGioco(i, stelle){
   stato.xp += xpGuadagnati;
   salvaStato();
 
-  suono("ok"); vibra([40,30,40,30,120]);
+  suono("s" + stelle); vibra([40,30,40,30,120]);
   setStatoMascotte("festante");
   parla(`EVVIVA! Ce l'hai fatta! ${stelleHtml(stelle)} Il Portale del Tempo si sta accendendo!`);
   mostraXpFloat("+" + xpGuadagnati + " ✨");
@@ -1603,16 +1650,27 @@ const elFumetto = document.getElementById('fumetto');
 const elFumettoTesto = document.getElementById('fumetto-testo');
 let fumettoTimer = null;
 
+// Il medaglione della mascotte cambia posa in base allo stato d'animo
+const MASC_IMG = {
+  normale:    'assets/gnut/gnut-avatar.webp',
+  festante:   'assets/gnut/gnut-face-corsa.webp',
+  pensieroso: 'assets/gnut/gnut-face-seduto.webp'
+};
 function setStatoMascotte(s){
   elMascotte.classList.remove('festante','pensieroso');
   if(s === "festante") elMascotte.classList.add('festante');
   else if(s === "pensieroso") elMascotte.classList.add('pensieroso');
+  const img = document.getElementById('mascotte-img');
+  const src = MASC_IMG[s] || MASC_IMG.normale;
+  if(img && !img.src.endsWith(src)) img.src = src;
 }
 function parla(testo){
   elFumettoTesto.textContent = testo;
   elFumetto.classList.remove('hidden');
   if(fumettoTimer) clearTimeout(fumettoTimer);
-  fumettoTimer = setTimeout(()=>elFumetto.classList.add('hidden'), 9000);
+  // Durata proporzionale alla lunghezza: i lettori piccoli hanno tempo di leggere
+  const dur = Math.max(4500, Math.min(14000, testo.length * 95));
+  fumettoTimer = setTimeout(()=>elFumetto.classList.add('hidden'), dur);
 }
 elFumetto.onclick = ()=>elFumetto.classList.add('hidden');
 elMascotte.onclick = ()=>{
@@ -1694,7 +1752,7 @@ function renderAlbum(){
         <div class="liv-ic">${liv.icona}</div>
         <div>
           <div class="liv-nome">${liv.nome}</div>
-          <div class="liv-xp">✨ ${stato.xp} XP ${next ? "· al prossimo livello: " + next.xp + " XP" : "· livello massimo!"} &nbsp; ⭐ ${stelleTotali()}/18</div>
+          <div class="liv-xp">✨ ${stato.xp} XP ${next ? "· al prossimo livello: " + next.xp + " XP" : "· livello massimo!"} &nbsp; ⭐ ${stelleTotali()}/${stelleMax()}</div>
         </div>
       </div>
       <div class="liv-bar"><div style="width:${pct}%"></div></div>
@@ -1729,9 +1787,14 @@ function apri3D(){
     s.type = 'module'; s.src = 'assets/vendor/model-viewer.min.js';
     s.onerror = ()=>{ loader.textContent = "Per il 3D serve la connessione a internet 📶"; };
     document.head.appendChild(s);
-    mv.addEventListener('load', ()=>{ loader.style.display = 'none'; });
-    mv.addEventListener('error', ()=>{ loader.textContent = "Ops, non riesco a caricare il 3D."; });
-    setTimeout(()=>{ loader.style.display = 'none'; }, 9000); // fallback
+    let caricato = false;
+    mv.addEventListener('load', ()=>{ caricato = true; loader.style.display = 'none'; });
+    mv.addEventListener('error', ()=>{ loader.textContent = "Ops, non riesco a caricare il 3D. Controlla la connessione."; });
+    // Fallback: se dopo un po' non è caricato, NON cancello il messaggio d'errore
+    setTimeout(()=>{
+      if(caricato) loader.style.display = 'none';
+      else if(loader.textContent.indexOf('Sto arrivando') === 0) loader.textContent = "Ci metto un pochino… (connessione lenta)";
+    }, 12000);
   }
   if(!mv.getAttribute('src')) mv.setAttribute('src', 'assets/gnut/gnut.glb');
 }
@@ -1750,7 +1813,7 @@ function mostraFinale(conFesta = true){
   document.getElementById('nome-bambino').value = stato.nomeBambino || "";
   document.getElementById('diploma-data').textContent = "Avigliano Umbro, " + dataOggi();
   document.getElementById('diploma-stat').innerHTML =
-    `<span>⭐ ${stelleTotali()}/18 stelle</span><span>✨ ${stato.xp} XP</span><span>${livelloAttuale().icona} ${livelloAttuale().nome}</span>`;
+    `<span>⭐ ${stelleTotali()}/${stelleMax()} stelle</span><span>✨ ${stato.xp} XP</span><span>${livelloAttuale().icona} ${livelloAttuale().nome}</span>`;
   document.getElementById('finale').classList.add('show');
   elFumetto.classList.add('hidden');
   if(conFesta){ suono("fanfare"); vibra([60,60,60,60,200]); coriandoli(); }
@@ -1788,7 +1851,7 @@ if(navigator.share){
   bc.onclick = ()=>{
     navigator.share({
       title: "Il viaggio di " + MASCOTTE_NOME,
-      text: `Ho riportato ${MASCOTTE_NOME} il mammut a casa, alla Foresta Fossile di Dunarobba! ⭐ ${stelleTotali()}/18 stelle, ${stato.xp} XP. Vieni a giocare ad Avigliano Umbro!`
+      text: `Ho riportato ${MASCOTTE_NOME} il mammut a casa, alla Foresta Fossile di Dunarobba! ⭐ ${stelleTotali()}/${stelleMax()} stelle, ${stato.xp} XP. Vieni a giocare ad Avigliano Umbro!`
     }).catch(()=>{});
   };
 }
@@ -1821,7 +1884,10 @@ function reset(){
   stato = statoIniziale(); stato.nomeBambino = nome;
   salvaStato();
   document.getElementById('finale').classList.remove('show');
-  chiudiSheet(); mostraTab("mappa");
+  document.getElementById('gnut3d').classList.remove('show');
+  chiudiAR(); chiudiSheet(); mostraTab("mappa");
+  document.getElementById('btn-audio').textContent = stato.audio ? "🔊 Suoni: attivi" : "🔇 Suoni: spenti";
+  document.getElementById('btn-gioca').innerHTML = "▶ &nbsp;Inizia l'avventura";
   disegnaMarker(); aggiornaTimeline(); aggiornaHud(); ricentra();
   document.getElementById('splash').classList.remove('away');
 }
@@ -1840,7 +1906,7 @@ elMascotte.title = `Tocca ${MASCOTTE_NOME}!`;
 document.getElementById('btn-gioca').onclick = ()=>{
   stato.nomeBambino = document.getElementById('splash-nome').value.trim();
   salvaStato();
-  suono("ok"); vibra(40);
+  suono("ok"); vibra(40); avviaMusica();   // la musica parte col primo tocco (policy audio)
   document.getElementById('splash').classList.add('away');
   // Rivelata la mappa: ricalcola le dimensioni più volte (evita tile grigie)
   if(map){ [300,700,1300].forEach(ms=>setTimeout(()=>{ map.invalidateSize(); ricentra(); }, ms)); }

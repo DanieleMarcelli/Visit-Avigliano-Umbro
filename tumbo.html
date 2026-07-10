@@ -48,6 +48,7 @@
 <!-- Illustrazioni premium di Gnut (WebP ottimizzate, in assets/gnut/) -->
 <link rel="preload" as="image" href="assets/gnut/gnut-saluto.webp">
 <link rel="preload" as="image" href="assets/gnut/gnut-avatar.webp">
+<link rel="preload" as="image" href="assets/gnut/ui-logo.webp">
 <link rel="preload" as="image" href="assets/gnut/gnut-fossile.webp">
 
 <style>
@@ -96,6 +97,7 @@
   --timeline-h:56px;
   --chrome-top:calc(var(--header-h) + var(--timeline-h));
   --nav-h:calc(64px + var(--safe-b));
+  --quest-h:104px;   /* altezza del pannello missione in pergamena */
   /* Alias retro-compatibilità (le vecchie regole/inline-style continuano a funzionare) */
   --terra:var(--ink-2); --terra-scuro:var(--ink);
   --arancio:var(--brand-500); --arancio-chiaro:var(--brand-400);
@@ -156,6 +158,9 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--paleolago); out
 #splash h1{margin:var(--sp-3) 0 var(--sp-1); font-size:var(--fs-display); line-height:1.04;
   color:var(--ink); font-weight:800; text-shadow:0 2px 0 rgba(255,255,255,.65);}
 #splash h1 b{color:var(--brand-600);}
+#splash .logo-img{width:min(80vw,340px); margin:var(--sp-3) 0 var(--sp-1);
+  filter:drop-shadow(0 10px 18px rgba(59,42,24,.35));}
+.visually-hidden{position:absolute; clip:rect(0 0 0 0); width:1px; height:1px; overflow:hidden;}
 #splash .sotto{font-family:var(--font-body); font-size:var(--fs-body-sm); font-weight:700;
   color:var(--ink-2); margin:0 0 var(--sp-4); max-width:340px;}
 #splash .nome-box{width:min(84vw,340px); background:var(--card); border:2.5px solid var(--line);
@@ -250,7 +255,7 @@ header .menu-btn{width:36px;height:36px;border:1.5px solid var(--line);border-ra
 #btn-cammino.attivo{background:var(--brand-500); border-color:var(--brand-700); color:#fff;}
 /* Bussola: unico FAB, in basso a sinistra (l'angolo destro è di Gnut) */
 #btn-locate{
-  position:fixed; left:var(--sp-3); bottom:calc(var(--nav-h) + var(--sp-3)); z-index:901;
+  position:fixed; left:var(--sp-3); bottom:calc(var(--nav-h) + var(--quest-h) + var(--sp-3)*2); z-index:901;
   width:52px; height:52px; border-radius:50%; border:1.5px solid var(--line);
   background:var(--card); color:var(--ink); box-shadow:var(--e2); cursor:pointer;
   display:grid; place-items:center; transition:transform var(--t-fast);
@@ -328,27 +333,53 @@ header .menu-btn{width:36px;height:36px;border:1.5px solid var(--line);border-ra
    ============================================================================ */
 #nav{
   position:fixed; left:0; right:0; bottom:0; height:var(--nav-h); z-index:1150;
-  display:flex; background:rgba(255,255,255,.94); backdrop-filter:blur(12px);
-  box-shadow:var(--e3); border-radius:var(--r-xl) var(--r-xl) 0 0; overflow:hidden;
+  display:flex; background:#5B3A21 url('assets/gnut/ui-legno.webp') center/cover no-repeat;
+  box-shadow:var(--e3), inset 0 2px 0 rgba(255,255,255,.12);
+  border-radius:var(--r-xl) var(--r-xl) 0 0; overflow:hidden;
   padding:6px 8px var(--safe-b);
 }
 #nav button{flex:1; border:none; background:none; cursor:pointer; font-size:11px; font-weight:800;
-  color:var(--ink-3); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+  color:#E9D5AE; text-shadow:0 1px 2px rgba(0,0,0,.35);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
   border-radius:var(--r-md); position:relative; transition:color var(--t-base) var(--ease-out);}
-#nav button .ic{width:26px; height:26px; transition:transform var(--t-base) var(--ease-spring);}
+#nav button .ic{width:26px; height:26px; transition:transform var(--t-base) var(--ease-spring);
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.4));}
 #nav button::before{content:''; position:absolute; top:5px; left:50%; translate:-50% 0;
-  width:0; height:32px; border-radius:var(--r-pill); background:var(--brand-100);
+  width:0; height:32px; border-radius:var(--r-pill); background:rgba(255,215,138,.22);
   transition:width var(--t-base) var(--ease-spring);}
 #nav button > *{position:relative;}
-#nav button.active{color:var(--brand-600);}
+#nav button.active{color:#FFD98A;}
 #nav button.active::before{width:58px;}
 #nav button.active .ic{transform:translateY(-1px) scale(1.08);}
 #nav button:active .ic{transform:scale(.88);}
 
+/* ---- Pannello missione "La tua avventura" (pergamena + GIOCA) ---------- */
+#quest{
+  position:fixed; left:var(--sp-3); right:var(--sp-3); bottom:calc(var(--nav-h) + var(--sp-3)); z-index:940;
+  display:flex; align-items:center; gap:8px; padding:16px 14px 18px 6px;
+  background:url('assets/gnut/ui-pergamena.webp'); background-size:100% 100%;
+  filter:drop-shadow(0 8px 16px rgba(89,60,32,.28));
+}
+#quest .q-gnut{width:74px; height:74px; object-fit:contain; flex:none;
+  transform:translateY(-10px); filter:drop-shadow(0 4px 6px rgba(59,42,24,.3));}
+#quest .q-body{flex:1; min-width:0; text-align:left;}
+#quest .q-kicker{font-size:9.5px; letter-spacing:1.8px; font-weight:800; color:var(--lago-700); font-family:var(--font-display);}
+#quest .q-testo{font-family:var(--font-body); font-weight:800; font-size:13.5px; line-height:1.3; color:#5B4425;}
+#quest .q-gioca{
+  flex:none; border:none; border-radius:var(--r-pill); padding:13px 18px;
+  font-family:var(--font-display); font-weight:800; font-size:16px; letter-spacing:.8px; color:#fff;
+  background:linear-gradient(180deg,#FFB347,var(--brand-500));
+  box-shadow:0 4px 0 var(--brand-700), inset 0 2px 0 rgba(255,255,255,.45), 0 4px 12px rgba(236,122,46,.4);
+  cursor:pointer; animation:gioca-glow 2.2s ease-in-out infinite;
+  transition:transform var(--t-fast);
+}
+#quest .q-gioca:active{transform:translateY(3px); box-shadow:0 1px 0 var(--brand-700);}
+@keyframes gioca-glow{50%{box-shadow:0 4px 0 var(--brand-700), inset 0 2px 0 rgba(255,255,255,.45), 0 4px 22px rgba(236,122,46,.75);}}
+
 /* ============================================================================
    MASCOTTE + FUMETTO — espressioni facciali via classi
    ============================================================================ */
-#mascotte{position:fixed; right:var(--sp-3); bottom:calc(var(--nav-h) + var(--sp-3)); z-index:1100; width:84px; height:84px; cursor:pointer;}
+#mascotte{position:fixed; right:var(--sp-3); bottom:calc(var(--nav-h) + var(--quest-h) + var(--sp-3)*2); z-index:1100; width:84px; height:84px; cursor:pointer;}
 #mascotte img{width:100%; height:100%; object-fit:cover; border-radius:50%;
   border:3px solid #fff; outline:2.5px solid var(--brand-400); box-shadow:var(--e2); display:block;
   transition:opacity var(--t-base);}
@@ -365,7 +396,7 @@ header .menu-btn{width:36px;height:36px;border:1.5px solid var(--line);border-ra
 #mascotte.pensieroso .exp-n{opacity:0;} #mascotte.pensieroso .exp-t{opacity:1;}
 
 #fumetto{
-  position:fixed; right:var(--sp-3); bottom:calc(var(--nav-h) + 84px + var(--sp-5)); z-index:1100;
+  position:fixed; right:var(--sp-3); bottom:calc(var(--nav-h) + var(--quest-h) + 84px + var(--sp-6)); z-index:1100;
   max-width:min(78vw,330px); background:var(--card-warm); border:none;
   border-radius:var(--r-lg) var(--r-lg) var(--r-sm) var(--r-lg);
   padding:var(--sp-3) var(--sp-4); font-family:var(--font-body);
@@ -381,7 +412,7 @@ header .menu-btn{width:36px;height:36px;border:1.5px solid var(--line);border-ra
 #fumetto.hidden{opacity:0;transform:scale(.7);pointer-events:none;}
 
 .xp-float{
-  position:fixed; right:48px; bottom:calc(var(--nav-h) + 110px); z-index:1160;
+  position:fixed; right:48px; bottom:calc(var(--nav-h) + var(--quest-h) + 100px); z-index:1160;
   font-size:22px; font-weight:800; color:var(--brand-600); text-shadow:0 2px 0 #fff;
   animation:salexp 1.4s ease forwards; pointer-events:none;
 }
@@ -515,7 +546,10 @@ header .menu-btn{width:36px;height:36px;border:1.5px solid var(--line);border-ra
    ZAINO / ALBUM
    ============================================================================ */
 #album{position:fixed; top:calc(var(--chrome-top) + var(--safe-t)); bottom:var(--nav-h); left:0; right:0; z-index:800;
-  overflow-y:auto; background:var(--paper); padding:var(--sp-4) var(--sp-4) 110px;
+  overflow-y:auto;
+  background:linear-gradient(rgba(253,247,235,.86), rgba(253,247,235,.93)),
+             url('assets/gnut/ui-mappa-illustrata.webp') center/cover no-repeat var(--paper);
+  padding:var(--sp-4) var(--sp-4) 110px;
   opacity:0; transform:translateY(14px); pointer-events:none;
   transition:opacity var(--t-base) var(--ease-out), transform var(--t-base) var(--ease-out);
   display:block;}
@@ -646,7 +680,7 @@ svg.scena-foresta{width:100%; max-width:420px; margin:var(--sp-4) auto;}
    ============================================================================ */
 @media print{
   body{position:static;overflow:visible;background:#fff;}
-  header,#map,#map-frame,#map-loader,#map-chips,#mascotte,#fumetto,#timeline-wrap,#menu,#nav,#album,#splash,#timeportal,#toast-livello,#btn-locate,
+  header,#map,#map-frame,#map-loader,#map-chips,#quest,#mascotte,#fumetto,#timeline-wrap,#menu,#nav,#album,#splash,#timeportal,#toast-livello,#btn-locate,
   .sheet,.overlay-bg,.scena-foresta,#finale .btn,#finale h1,#finale p.sub,#finale p.testo,.coriandolo{display:none !important;}
   #finale{position:static;display:block !important;background:#fff;padding:0;}
   .diploma{box-shadow:none;margin:0 auto;border-color:#b8860b;}
@@ -744,7 +778,9 @@ svg.scena-foresta{width:100%; max-width:420px; margin:var(--sp-4) auto;}
   </div>
   <div class="panel">
     <div class="kicker">VISIT AVIGLIANO UMBRO</div>
-    <h1>Riporta <b id="splash-nome-mascotte">Gnut</b> a casa!</h1>
+    <img class="logo-img" src="assets/gnut/ui-logo.webp" alt="Gnut e il Lago Perduto — Avigliano Umbro"
+         onerror="this.style.display='none'; this.nextElementSibling.style.position='static'; this.nextElementSibling.style.clip='auto';"/>
+    <h1 class="visually-hidden">Riporta <b id="splash-nome-mascotte">Gnut</b> a casa!</h1>
     <p class="sotto" id="splash-sotto"></p>
     <input class="nome-box" id="splash-nome" placeholder="Come ti chiami, esploratore?" maxlength="24" autocomplete="off"/>
     <button id="btn-gioca">▶ &nbsp;Inizia l'avventura</button>
@@ -783,6 +819,17 @@ svg.scena-foresta{width:100%; max-width:420px; margin:var(--sp-4) auto;}
 <div id="map"></div>
 <div id="map-frame"></div>
 <div id="map-loader">🗺️ Sto disegnando la mappa…</div>
+
+<!-- Pannello missione: dice sempre al bambino cosa fare adesso -->
+<div id="quest" aria-live="polite">
+  <img class="q-gnut" src="assets/gnut/gnut-zaino-av.webp" alt=""
+       onerror="this.src='assets/gnut/gnut-avatar.webp'; this.style.borderRadius='50%';"/>
+  <div class="q-body">
+    <div class="q-kicker">LA TUA AVVENTURA</div>
+    <div class="q-testo" id="quest-testo">…</div>
+  </div>
+  <button class="q-gioca" id="quest-gioca">GIOCA</button>
+</div>
 <div id="map-chips">
   <button id="btn-lago" title="Rivela il Paleolago Tiberino" aria-label="Rivela il Paleolago Tiberino"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-onde"/></svg>Paleolago</button>
   <button id="btn-cammino" title="Il Cammino del Lago Tiberino" aria-label="Mostra il Cammino del Lago Tiberino"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-sentiero"/></svg>Cammino</button>
@@ -1913,7 +1960,7 @@ function vittoriaGioco(i, stelle){
   parla(`EVVIVA! Ce l'hai fatta! ${stelleHtml(stelle)} Il Portale del Tempo si sta accendendo!`);
   mostraXpFloat("+" + xpGuadagnati + " ✨");
 
-  aggiornaHud(); aggiornaTimeline(); disegnaMarker();
+  aggiornaHud(); aggiornaTimeline(); disegnaMarker(); aggiornaQuest();
 
   const livDopo = livelloAttuale();
   if(livDopo !== livPrima) setTimeout(()=>toastLivello(livDopo), 1200);
@@ -2058,6 +2105,24 @@ function mostraXpFloat(txt){
 /* ============================================================================
    HUD, TIMELINE (tappabile), TOAST
    ============================================================================ */
+/* Pannello missione: dice sempre qual è il prossimo passo, con GIOCA diretto */
+function aggiornaQuest(){
+  const el = document.getElementById('quest-testo');
+  const btn = document.getElementById('quest-gioca');
+  if(!el || !btn) return;
+  const i = indiceCorrente();
+  if(i >= tappeAttive.length){
+    el.textContent = `Hai riportato ${MASCOTTE_NOME} a casa! Rivedi il tuo diploma.`;
+    btn.textContent = "DIPLOMA";
+    btn.onclick = ()=>{ suono("pop"); mostraFinale(false); };
+  }else{
+    const t = tappeAttive[i];
+    el.textContent = `Raggiungi ${t.nome} e supera la prova!`;
+    btn.textContent = "GIOCA";
+    btn.onclick = ()=>{ suono("pop"); apriScheda(i); };
+  }
+}
+
 function aggiornaHud(){
   const liv = livelloAttuale();
   document.getElementById('pill-livello').innerHTML = liv.icona + '<span class="liv-txt">&nbsp;' + liv.nome.split(" ")[0] + '</span>';
@@ -2140,8 +2205,10 @@ function mostraTab(quale){
   else{ album.classList.remove('show'); tabMappa.classList.add('active'); tabZaino.classList.remove('active'); }
   // I controlli della mappa non devono galleggiare sopra lo Zaino
   const chips = document.getElementById('map-chips'), loc = document.getElementById('btn-locate');
+  const quest = document.getElementById('quest');
   if(chips) chips.style.display = suMappa ? 'flex' : 'none';
   if(loc) loc.style.display = suMappa ? 'grid' : 'none';
+  if(quest) quest.style.display = suMappa ? 'flex' : 'none';
 }
 tabMappa.onclick = ()=>{ suono("pop"); mostraTab("mappa"); };
 tabZaino.onclick = ()=>{ suono("pop"); mostraTab("zaino"); };
@@ -2264,7 +2331,7 @@ function reset(){
   chiudiAR(); chiudiSheet(); mostraTab("mappa");
   aggiornaBtnAudio();
   document.getElementById('btn-gioca').innerHTML = "▶ &nbsp;Inizia l'avventura";
-  disegnaMarker(); aggiornaTimeline(); aggiornaHud(); ricentra();
+  disegnaMarker(); aggiornaTimeline(); aggiornaHud(); aggiornaQuest(); ricentra();
   document.getElementById('splash').classList.remove('away');
 }
 
@@ -2304,7 +2371,7 @@ document.getElementById('btn-gioca').onclick = ()=>{
 if(stato.completate.length > 0)
   document.getElementById('btn-gioca').innerHTML = "▶ &nbsp;Continua l'avventura";
 
-aggiornaHud(); aggiornaTimeline(); aggiornaBtnAudio();
+aggiornaHud(); aggiornaTimeline(); aggiornaBtnAudio(); aggiornaQuest();
 // Carica la mappa (con CDN di riserva) senza bloccare il resto del gioco
 assicuraLeaflet(()=>{ try{ initMappa(); }catch(e){ console.warn("Mappa:", e); } });
 // La mappa deve ridimensionarsi quando cambia lo schermo o si ruota il telefono

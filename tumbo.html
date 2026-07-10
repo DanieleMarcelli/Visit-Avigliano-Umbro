@@ -44,7 +44,7 @@
 <!-- Dati geografici REALI: Paleolago Tiberino (da KMZ) + Cammino del Lago (Wikiloc) -->
 <script src="assets/geo/geo-data.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
 <!-- Illustrazioni premium di Gnut (WebP ottimizzate, in assets/gnut/) -->
 <link rel="preload" as="image" href="assets/gnut/gnut-saluto.webp">
 <link rel="preload" as="image" href="assets/gnut/gnut-avatar.webp">
@@ -52,23 +52,68 @@
 
 <style>
 /* ============================================================================
-   TOKEN — palette calda e naturale: terra, arancio, verde bosco, azzurro lago
+   DESIGN TOKENS — "Storybook moderno": carta calda + componenti chunky
    ============================================================================ */
 :root{
-  --terra:#6b4423; --terra-scuro:#4a2f18;
-  --arancio:#e07a2f; --arancio-chiaro:#f4a259;
-  --crema:#fbf3e4; --crema-scuro:#f0e2c8;
-  --bosco:#2f6b46; --bosco-chiaro:#4f9d6b;
-  --paleolago:#4a9fc4; --paleolago-chiaro:#7cc4e0;
-  --oro:#e8b04b; --notte:#131c3a;
-  --testo:#3a2b1a; --ombra:rgba(74,47,24,.18);
-  --font:'Baloo 2','Comic Sans MS','Trebuchet MS',system-ui,sans-serif;
+  /* Superfici (carta calda, mai bianco freddo) */
+  --paper:#FDF7EB; --paper-2:#F6ECD8; --card:#FFFFFF; --card-warm:#FFFBF2;
+  --line:#EADFC9; --scrim:rgba(59,42,24,.45);
+  /* Inchiostro */
+  --ink:#42301D; --ink-2:#7B6A52; --ink-3:#A9987D; --ink-inverse:#FFF9EF;
+  /* Brand (arancio Gnut) */
+  --brand-100:#FDEBD9; --brand-200:#F9CFA4; --brand-400:#F49B54;
+  --brand-500:#EC7A2E; --brand-600:#D2621D; --brand-700:#A84F1C;
+  /* Lago / Bosco / Oro */
+  --lago-100:#E3F3FA; --lago-300:#8FD0E8; --lago-500:#3FA3CC; --lago-700:#25738F;
+  --bosco-100:#E4F3E9; --bosco-300:#7FC49A; --bosco-500:#2F8352; --bosco-700:#1D5636;
+  --oro-100:#FCF3DC; --oro-400:#F2C25E; --oro-500:#E3A93C; --oro-700:#A97B22;
+  /* Stato */
+  --ok:#2F8352; --ok-bg:#E4F3E9; --no:#D0563E; --no-bg:#FBE7E1;
+  --notte:#141B38; --notte-2:#2A3C72;
+  /* Tipografia: Baloo 2 = display/UI · Nunito = lettura bambini */
+  --font-display:'Baloo 2','Trebuchet MS',system-ui,sans-serif;
+  --font-body:'Nunito','Baloo 2',system-ui,sans-serif;
+  --fs-display:clamp(32px,8.5vw,42px); --fs-title:24px; --fs-h3:18px;
+  --fs-body:16px; --fs-body-sm:14px; --fs-label:13px; --fs-caption:12px; --fs-overline:11px;
+  /* Spazio (base 4) */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px; --sp-6:24px; --sp-7:32px;
+  /* Raggi */
+  --r-sm:10px; --r-md:16px; --r-lg:22px; --r-xl:30px; --r-pill:999px;
+  /* Elevazione (ombra calda) + edge "chunky" */
+  --e1:0 1px 2px rgba(89,60,32,.06), 0 2px 6px rgba(89,60,32,.06);
+  --e2:0 2px 4px rgba(89,60,32,.07), 0 10px 24px rgba(89,60,32,.11);
+  --e3:0 6px 12px rgba(89,60,32,.10), 0 24px 48px rgba(89,60,32,.18);
+  --edge:0 4px 0;
+  /* Motion */
+  --ease-out:cubic-bezier(.22,1,.36,1);
+  --ease-spring:cubic-bezier(.34,1.56,.64,1);
+  --ease-inout:cubic-bezier(.65,0,.35,1);
+  --t-fast:120ms; --t-base:220ms; --t-slow:360ms; --t-scene:600ms;
+  /* Layout chrome (tokenizzato: mai più top hard-coded) */
   --safe-b:env(safe-area-inset-bottom, 0px);
+  --safe-t:env(safe-area-inset-top, 0px);
+  --header-h:48px;
+  --timeline-h:56px;
+  --chrome-top:calc(var(--header-h) + var(--timeline-h));
   --nav-h:calc(64px + var(--safe-b));
+  /* Alias retro-compatibilità (le vecchie regole/inline-style continuano a funzionare) */
+  --terra:var(--ink-2); --terra-scuro:var(--ink);
+  --arancio:var(--brand-500); --arancio-chiaro:var(--brand-400);
+  --crema:var(--paper); --crema-scuro:var(--paper-2);
+  --bosco:var(--bosco-500); --bosco-chiaro:var(--bosco-300);
+  --paleolago:var(--lago-500); --paleolago-chiaro:var(--lago-300);
+  --oro:var(--oro-500); --testo:var(--ink); --ombra:rgba(89,60,32,.14);
+  --font:var(--font-display);
 }
-.era-oggi{background:#5aa9e6;} .era-900{background:#8e7cc3;}
-.era-medioevo{background:#a9564a;} .era-romana{background:#c9992e;}
-.era-preistoria{background:#7d6b52;} .era-fossile{background:#2f6b46;}
+/* Colori epoca: rampa armonica (badge, bande, timeline) */
+.era-oggi{background:#3E9BDE;} .era-900{background:#9A6FD0;}
+.era-medioevo{background:#CE5F49;} .era-romana{background:#D99A2E;}
+.era-preistoria{background:#A5794B;} .era-fossile{background:#2F8352;}
+
+/* Icone SVG di sistema (sprite in fondo al body) */
+.ic{width:24px;height:24px;flex:none;fill:none;stroke:currentColor;
+  stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.ic-sm{width:19px;height:19px;} .ic-lg{width:28px;height:28px;}
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{margin:0;padding:0;height:100%;}
@@ -130,66 +175,85 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--paleolago); out
    HEADER + HUD
    ============================================================================ */
 header{
-  position:fixed; top:0; left:0; right:0; height:58px; z-index:1200;
-  display:flex; align-items:center; justify-content:space-between; gap:8px; padding:0 10px 0 14px;
-  background:linear-gradient(120deg,var(--bosco),var(--bosco-chiaro)); color:#fff;
-  box-shadow:0 2px 12px var(--ombra);
+  position:fixed; top:0; left:0; right:0; height:calc(var(--header-h) + var(--safe-t)); z-index:1200;
+  display:flex; align-items:center; justify-content:space-between; gap:var(--sp-2);
+  padding:var(--safe-t) var(--sp-3) 0 var(--sp-4);
+  background:rgba(253,247,235,.9); backdrop-filter:blur(10px) saturate(1.2);
+  color:var(--ink); box-shadow:0 1px 0 var(--line);
 }
 header .logo{display:flex; flex-direction:column; line-height:1.05; min-width:0; overflow:hidden;}
-header .logo b{font-size:13px; letter-spacing:.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-header .logo small{font-size:9.5px; opacity:.9; font-weight:700; white-space:nowrap;}
-#hud{display:flex; align-items:center; gap:5px; flex:none;}
-.pill{display:flex; align-items:center; gap:3px; background:rgba(255,255,255,.16);
-  border:1.5px solid rgba(255,255,255,.35); border-radius:20px; padding:4px 9px;
-  font-size:12px; font-weight:800; white-space:nowrap;}
+header .logo b{font-size:14px; letter-spacing:.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--ink);}
+header .logo small{display:none;}
+#hud{display:flex; align-items:center; gap:6px; flex:none;}
+.pill{display:flex; align-items:center; gap:5px; background:var(--card);
+  border:1.5px solid var(--line); border-radius:var(--r-pill); padding:5px 11px;
+  font-size:var(--fs-label); font-weight:800; white-space:nowrap; color:var(--ink); box-shadow:var(--e1);}
+#pill-xp{color:var(--oro-700);}
 @media (max-width:400px){ #pill-livello .liv-txt{display:none;} }
-header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background:rgba(255,255,255,.18);color:#fff;font-size:19px;cursor:pointer;flex:none;}
+header .menu-btn{width:36px;height:36px;border:1.5px solid var(--line);border-radius:50%;
+  background:var(--card);color:var(--ink);cursor:pointer;flex:none;
+  display:grid;place-items:center;box-shadow:var(--e1);}
 
 /* ============================================================================
    TIMELINE DEL VIAGGIO NEL TEMPO (tappabile!)
    ============================================================================ */
 #timeline-wrap{
-  position:fixed; top:58px; left:0; right:0; z-index:900;
-  background:rgba(251,243,228,.95); backdrop-filter:blur(5px);
-  padding:7px 12px 9px; box-shadow:0 2px 8px var(--ombra);
+  position:fixed; top:calc(var(--header-h) + var(--safe-t)); left:0; right:0; z-index:900;
+  height:var(--timeline-h);
+  background:rgba(253,247,235,.85); backdrop-filter:blur(10px);
+  padding:var(--sp-2) var(--sp-4) 0; box-shadow:0 1px 0 var(--line);
 }
-#timeline-wrap .tl-labels{display:flex; justify-content:space-between; font-size:10px; font-weight:800; color:var(--terra); margin-bottom:4px;}
-.tl-track{position:relative; height:11px; border-radius:8px; background:var(--crema-scuro); overflow:hidden;}
-.tl-fill{position:absolute; inset:0 auto 0 0; background:linear-gradient(90deg,var(--arancio),var(--oro),var(--bosco));
-  width:0%; transition:width .9s cubic-bezier(.2,.8,.2,1); border-radius:8px;}
-.tl-dots{display:flex; justify-content:space-between; margin-top:6px;}
+#timeline-wrap .tl-labels{display:flex; justify-content:space-between; font-size:10px;
+  font-weight:800; letter-spacing:.8px; color:var(--ink-3); text-transform:uppercase; margin-bottom:3px;}
+#timeline-wrap .tl-labels span:nth-child(2){display:none;}
+.tl-track{position:relative; height:6px; border-radius:var(--r-pill); background:var(--paper-2);
+  background-image:repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 14px);}
+.tl-fill{position:absolute; inset:0 auto 0 0; background:linear-gradient(90deg,#3E9BDE,var(--oro-400),#2F8352);
+  width:0%; transition:width .9s var(--ease-out); border-radius:var(--r-pill);}
+.tl-dots{display:flex; justify-content:space-between; margin-top:-15px; padding:0 2px;}
 .tl-dot{
   width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-size:14px;background:#fff;border:2.5px solid var(--crema-scuro);box-shadow:0 1px 3px var(--ombra);
-  transition:.3s; cursor:pointer; border-style:solid; padding:0;
+  font-size:13px;background:var(--card);border:2.5px solid var(--line);box-shadow:var(--e1);
+  transition:transform var(--t-base) var(--ease-spring), border-color var(--t-base), background var(--t-base);
+  cursor:pointer; padding:0;
 }
-.tl-dot.future{filter:grayscale(1); opacity:.55;}
-.tl-dot.done{border-color:var(--bosco); background:#e6f5ec;}
-.tl-dot.current{border-color:var(--arancio); transform:scale(1.28); animation:pulse 1.4s infinite;}
+.tl-dot.future{filter:grayscale(1); opacity:.45;}
+.tl-dot.done{border-color:var(--bosco-500); background:var(--bosco-100);}
+.tl-dot.current{border-color:var(--brand-500); transform:scale(1.3); animation:pulse 1.4s infinite;}
 @keyframes pulse{0%,100%{box-shadow:0 1px 3px var(--ombra),0 0 0 0 rgba(224,122,47,.55);}50%{box-shadow:0 1px 3px var(--ombra),0 0 0 10px rgba(224,122,47,0);}}
 
 /* ============================================================================
    MAPPA
    ============================================================================ */
-#map{position:absolute; top:58px; bottom:var(--nav-h); left:0; right:0; z-index:1; background:#dfeef0;}
+#map{position:absolute; top:calc(var(--chrome-top) + var(--safe-t)); bottom:var(--nav-h); left:0; right:0; z-index:1; background:#dfeef0;}
 .leaflet-tile-pane{filter:saturate(1.08) brightness(1.02) contrast(1.02);}
-/* Cornice "mappa del tesoro" + loader */
-#map-frame{position:absolute; top:58px; bottom:var(--nav-h); left:0; right:0; z-index:2; pointer-events:none;
-  box-shadow:inset 0 0 55px rgba(74,47,24,.30), inset 0 0 0 4px rgba(251,243,228,.65);}
-#map-loader{position:absolute; top:58px; bottom:var(--nav-h); left:0; right:0; z-index:3;
-  display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg,#dff0e4,#e9dcc0);
-  font-weight:800; color:var(--terra); font-size:15px; transition:opacity .6s; pointer-events:none;}
+#map-frame{position:absolute; top:calc(var(--chrome-top) + var(--safe-t)); bottom:var(--nav-h); left:0; right:0; z-index:2; pointer-events:none;
+  box-shadow:inset 0 0 34px rgba(89,60,32,.14);}
+#map-loader{position:absolute; top:calc(var(--chrome-top) + var(--safe-t)); bottom:var(--nav-h); left:0; right:0; z-index:3;
+  display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg,#E4F3E9,#F6ECD8);
+  font-weight:800; color:var(--ink-2); font-size:15px; transition:opacity var(--t-scene); pointer-events:none;}
 #map-loader.via{opacity:0;}
-#btn-locate,#btn-lago,#btn-cammino{
-  position:fixed; right:12px; z-index:901; width:48px; height:48px; border-radius:50%;
-  border:none; background:#fff; box-shadow:0 4px 12px var(--ombra); font-size:22px; cursor:pointer;
+/* Chip-bar "livelli mappa": tutto visibile, zero scoperta nascosta */
+#map-chips{position:fixed; top:calc(var(--chrome-top) + var(--safe-t) + 10px); left:var(--sp-3);
+  z-index:901; display:flex; gap:var(--sp-2);}
+#btn-lago,#btn-cammino{
+  display:flex; align-items:center; gap:6px; height:40px; padding:0 14px 0 10px;
+  border:1.5px solid var(--line); border-radius:var(--r-pill); background:var(--card);
+  box-shadow:var(--e1); cursor:pointer; color:var(--ink-2);
+  font-family:var(--font-display); font-size:var(--fs-label); font-weight:800;
+  transition:background var(--t-base), color var(--t-base), border-color var(--t-base), transform var(--t-fast);
 }
-#btn-locate{ top:162px; }
-#btn-lago{ top:220px; }
-#btn-cammino{ top:278px; }
-#btn-locate:active,#btn-lago:active,#btn-cammino:active{transform:scale(.92);}
-#btn-lago.attivo{ background:var(--paleolago); box-shadow:0 0 0 3px rgba(74,159,196,.4),0 4px 12px var(--ombra); }
-#btn-cammino.attivo{ background:var(--arancio-chiaro); box-shadow:0 0 0 3px rgba(224,122,47,.35),0 4px 12px var(--ombra); }
+#btn-lago:active,#btn-cammino:active{transform:scale(.95);}
+#btn-lago.attivo{background:var(--lago-500); border-color:var(--lago-700); color:#fff;}
+#btn-cammino.attivo{background:var(--brand-500); border-color:var(--brand-700); color:#fff;}
+/* Bussola: unico FAB, in basso a sinistra (l'angolo destro è di Gnut) */
+#btn-locate{
+  position:fixed; left:var(--sp-3); bottom:calc(var(--nav-h) + var(--sp-3)); z-index:901;
+  width:52px; height:52px; border-radius:50%; border:1.5px solid var(--line);
+  background:var(--card); color:var(--ink); box-shadow:var(--e2); cursor:pointer;
+  display:grid; place-items:center; transition:transform var(--t-fast);
+}
+#btn-locate:active{transform:scale(.92);}
 
 /* ---- AR "Incontra Gnut" (fotocamera + overlay) ------------------------- */
 #ar{position:fixed; inset:0; z-index:2400; display:none; background:#000; overflow:hidden;}
@@ -261,14 +325,22 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
    ============================================================================ */
 #nav{
   position:fixed; left:0; right:0; bottom:0; height:var(--nav-h); z-index:1150;
-  display:flex; background:#fff; box-shadow:0 -4px 16px var(--ombra);
-  border-radius:20px 20px 0 0; overflow:hidden; padding-bottom:var(--safe-b);
+  display:flex; background:rgba(255,255,255,.94); backdrop-filter:blur(12px);
+  box-shadow:var(--e3); border-radius:var(--r-xl) var(--r-xl) 0 0; overflow:hidden;
+  padding:6px 8px var(--safe-b);
 }
 #nav button{flex:1; border:none; background:none; cursor:pointer; font-size:11px; font-weight:800;
-  color:#9b8a72; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;}
-#nav button .ic{font-size:22px; transition:transform .15s;}
-#nav button.active{color:var(--arancio);}
-#nav button.active .ic{transform:translateY(-2px) scale(1.15);}
+  color:var(--ink-3); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+  border-radius:var(--r-md); position:relative; transition:color var(--t-base) var(--ease-out);}
+#nav button .ic{width:26px; height:26px; transition:transform var(--t-base) var(--ease-spring);}
+#nav button::before{content:''; position:absolute; top:5px; left:50%; translate:-50% 0;
+  width:0; height:32px; border-radius:var(--r-pill); background:var(--brand-100);
+  transition:width var(--t-base) var(--ease-spring);}
+#nav button > *{position:relative;}
+#nav button.active{color:var(--brand-600);}
+#nav button.active::before{width:58px;}
+#nav button.active .ic{transform:translateY(-1px) scale(1.08);}
+#nav button:active .ic{transform:scale(.88);}
 
 /* ============================================================================
    MASCOTTE + FUMETTO — espressioni facciali via classi
@@ -402,9 +474,12 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
 /* ============================================================================
    ZAINO / ALBUM
    ============================================================================ */
-#album{position:fixed; top:58px; bottom:var(--nav-h); left:0; right:0; z-index:800;
-  overflow-y:auto; background:var(--crema); padding:14px 14px 100px; display:none;}
-#album.show{display:block;}
+#album{position:fixed; top:calc(var(--chrome-top) + var(--safe-t)); bottom:var(--nav-h); left:0; right:0; z-index:800;
+  overflow-y:auto; background:var(--paper); padding:var(--sp-4) var(--sp-4) 110px;
+  opacity:0; transform:translateY(14px); pointer-events:none;
+  transition:opacity var(--t-base) var(--ease-out), transform var(--t-base) var(--ease-out);
+  display:block;}
+#album.show{opacity:1; transform:none; pointer-events:auto;}
 #album h2{margin:4px 0 10px; font-size:21px; color:var(--terra-scuro);}
 .card-livello{background:linear-gradient(140deg,#fff,#fff8ec); border-radius:20px; padding:16px; box-shadow:0 4px 14px var(--ombra); margin-bottom:14px;}
 .card-livello .liv-top{display:flex; align-items:center; gap:12px;}
@@ -448,7 +523,7 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
 @keyframes brilla{50%{opacity:.15;transform:scale(.6);}}
 
 #toast-livello{
-  position:fixed; top:74px; left:50%; transform:translate(-50%,-200%); z-index:2600;
+  position:fixed; top:calc(var(--chrome-top) + var(--safe-t) + 8px); left:50%; transform:translate(-50%,-260%); z-index:2600;
   background:linear-gradient(140deg,#fff,#fff3da); border:3px solid var(--oro); border-radius:20px;
   padding:12px 22px; text-align:center; box-shadow:0 10px 30px var(--ombra);
   transition:transform .45s cubic-bezier(.2,.9,.3,1.2), opacity .3s;
@@ -460,12 +535,17 @@ header .menu-btn{width:38px;height:38px;border:none;border-radius:50%;background
 /* ============================================================================
    MENU
    ============================================================================ */
-#menu{position:fixed; top:58px; right:8px; z-index:1400; background:#fff; border-radius:16px;
-  box-shadow:0 8px 24px var(--ombra); padding:8px; width:240px; display:none;}
-#menu.open{display:block;}
-#menu button{width:100%;text-align:left;background:none;border:none;padding:12px;font-size:15px;font-weight:700;color:var(--testo);border-radius:10px;cursor:pointer;}
-#menu button:active{background:var(--crema);}
-#menu .danger{color:#c0392b;}
+#menu{position:fixed; top:calc(var(--header-h) + var(--safe-t) + 6px); right:8px; z-index:1400;
+  background:var(--card); border-radius:var(--r-md); border:1.5px solid var(--line);
+  box-shadow:var(--e3); padding:var(--sp-2); width:250px; display:none; transform-origin:top right;}
+#menu.open{display:block; animation:menu-pop var(--t-base) var(--ease-spring);}
+@keyframes menu-pop{from{opacity:0; transform:scale(.92) translateY(-6px);}}
+#menu button{width:100%;display:flex;align-items:center;gap:10px;text-align:left;background:none;border:none;
+  padding:var(--sp-3);font-size:15px;font-weight:700;color:var(--ink);border-radius:var(--r-sm);cursor:pointer;}
+#menu button .ic{color:var(--ink-2);}
+#menu button:active{background:var(--paper-2);}
+#menu .danger{color:var(--no); border-top:1px solid var(--line); border-radius:0 0 var(--r-sm) var(--r-sm); margin-top:4px;}
+#menu .danger .ic{color:var(--no);}
 
 /* ============================================================================
    FINALE + DIPLOMA
@@ -519,6 +599,31 @@ img.scena-foresta{aspect-ratio:1; object-fit:cover; border-radius:22px; border:5
       <stop offset="100%" stop-color="#c9772f"/>
     </radialGradient>
   </defs>
+  <!-- ============ ICON SET di sistema (stroke 2, round, currentColor) ===== -->
+  <symbol id="i-map" viewBox="0 0 24 24"><path d="M9 4.5 4 6.5v13l5-2 6 2 5-2v-13l-5 2-6-2Z"/><path d="M9 4.5v13M15 6.5v13"/></symbol>
+  <symbol id="i-mammut" viewBox="0 0 24 24"><path d="M4.5 12.2C4.5 8 7.8 5.5 12 5.5s7.5 2.5 7.5 6.7c0 2.3-1.3 3.8-3 3.8-1.3 0-2.1-.8-2.3-2"/><path d="M12 9.5v5.8c0 2-.9 3.2-2.6 3.2-1.2 0-2-.7-2-1.8"/><path d="M8.2 13.5c-1 .6-2.2.6-3.2 0"/><path d="M9.3 10.2h.01M14.7 10.2h.01"/></symbol>
+  <symbol id="i-zaino" viewBox="0 0 24 24"><path d="M6.5 10a5.5 5.5 0 0 1 11 0v9.5h-11V10Z"/><path d="M9.5 9V6.5a2.5 2.5 0 0 1 5 0V9M9.5 14.5h5"/></symbol>
+  <symbol id="i-bussola" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M14.8 9.2l-1.9 4.5-3.7 1.5 1.9-4.5 3.7-1.5Z"/></symbol>
+  <symbol id="i-onde" viewBox="0 0 24 24"><path d="M3 9.5q2.25-2.6 4.5 0t4.5 0 4.5 0 4.5 0"/><path d="M3 15q2.25-2.6 4.5 0t4.5 0 4.5 0 4.5 0"/></symbol>
+  <symbol id="i-sentiero" viewBox="0 0 24 24"><path d="M5 19.5c6 0 2.5-6 7.5-6.5S17.5 8 19 4.5" stroke-dasharray="3.2 3.4"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4.5 7.5h15M4.5 12h15M4.5 16.5h10"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+  <symbol id="i-freccia" viewBox="0 0 24 24"><path d="M4.5 12H19M13.5 6l6 6-6 6"/></symbol>
+  <symbol id="i-stella" viewBox="0 0 24 24"><path d="M12 4.4l2.2 4.5 5 .7-3.6 3.4.9 4.9L12 15.6l-4.5 2.3.9-4.9L4.8 9.6l5-.7L12 4.4Z"/></symbol>
+  <symbol id="i-scintilla" viewBox="0 0 24 24"><path d="M12 3.5c.6 3.9 2 6.4 6.1 7-4.1.6-5.5 3.1-6.1 7-.6-3.9-2-6.4-6.1-7 4.1-.6 5.5-3.1 6.1-7Z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 13l4.5 4.5L19 7"/></symbol>
+  <symbol id="i-lucchetto" viewBox="0 0 24 24"><rect x="5.5" y="11" width="13" height="8.5" rx="2.5"/><path d="M8.5 11V8.5a3.5 3.5 0 0 1 7 0V11"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4.5 8.3a1.8 1.8 0 0 1 1.8-1.8h1.6l1.4-2h5.4l1.4 2h1.6a1.8 1.8 0 0 1 1.8 1.8v8.4a1.8 1.8 0 0 1-1.8 1.8H6.3a1.8 1.8 0 0 1-1.8-1.8V8.3Z"/><circle cx="12" cy="12.3" r="3.4"/></symbol>
+  <symbol id="i-flip" viewBox="0 0 24 24"><path d="M7 9a6.5 6.5 0 0 1 11 2M18 5.5V11h-5.5M17 15A6.5 6.5 0 0 1 6 13M6 18.5V13h5.5"/></symbol>
+  <symbol id="i-audio-on" viewBox="0 0 24 24"><path d="M5 10v4h3l4.5 3.5v-11L8 10H5Z"/><path d="M15.5 9.5a4 4 0 0 1 0 5M18 7.5a7.5 7.5 0 0 1 0 9"/></symbol>
+  <symbol id="i-audio-off" viewBox="0 0 24 24"><path d="M5 10v4h3l4.5 3.5v-11L8 10H5Z"/><path d="M15.5 9.8l4.7 4.4M20.2 9.8l-4.7 4.4"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6.5-5.3-6.5-10.3a6.5 6.5 0 0 1 13 0C18.5 15.7 12 21 12 21Z"/><circle cx="12" cy="10.5" r="2.4"/></symbol>
+  <symbol id="i-replay" viewBox="0 0 24 24"><path d="M6 7A7.5 7.5 0 1 1 4.6 12.6"/><path d="M6.6 3.4 6 7l3.5.7"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4.5 18.5V7A2.5 2.5 0 0 1 7 4.5h10A2.5 2.5 0 0 1 19.5 7v6a2.5 2.5 0 0 1-2.5 2.5H9l-4.5 3Z"/><path d="M9 10.5h.01M12 10.5h.01M15 10.5h.01"/></symbol>
+  <symbol id="i-stampa" viewBox="0 0 24 24"><path d="M7 8V4.5h10V8M7 16H5.5A1.5 1.5 0 0 1 4 14.5v-4A1.5 1.5 0 0 1 5.5 9h13A1.5 1.5 0 0 1 20 10.5v4a1.5 1.5 0 0 1-1.5 1.5H17"/><path d="M7 13.5h10v6H7v-6Z"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 14V4M8.5 7.5 12 4l3.5 3.5"/><path d="M6 12v6.5A1.5 1.5 0 0 0 7.5 20h9a1.5 1.5 0 0 0 1.5-1.5V12"/></symbol>
+  <symbol id="i-vortice" viewBox="0 0 24 24"><path d="M12 4.5a7.5 7.5 0 1 1-7.5 7.5"/><path d="M12 8a4 4 0 1 0 4 4"/></symbol>
+
   <symbol id="svg-tumbo" viewBox="0 0 160 150">
     <ellipse cx="80" cy="103" rx="50" ry="42" fill="url(#gradCorpo)"/>
     <path d="M40 120 q4 10 10 3 M55 128 q4 9 10 3 M105 128 q-4 9 -10 3 M120 120 q-4 10 -10 3"
@@ -583,15 +688,15 @@ img.scena-foresta{aspect-ratio:1; object-fit:cover; border-radius:22px; border:5
   <div id="hud">
     <div class="pill" id="pill-livello" title="Il tuo livello">🐣</div>
     <div class="pill" id="pill-xp" title="Punti esperienza">✨ 0</div>
-    <button class="menu-btn" id="menu-btn" aria-label="Menu">☰</button>
+    <button class="menu-btn" id="menu-btn" aria-label="Menu"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-menu"/></svg></button>
   </div>
 </header>
 
 <div id="menu">
-  <button id="btn-aiuto">💬 Cosa devo fare?</button>
-  <button id="btn-ricentra">🗺️ Mostra tutta la mappa</button>
-  <button id="btn-audio">🔊 Suoni: attivi</button>
-  <button class="danger" id="btn-reset">🔄 Ricomincia l'avventura</button>
+  <button id="btn-aiuto"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-chat"/></svg>Cosa devo fare?</button>
+  <button id="btn-ricentra"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-map"/></svg>Mostra tutta la mappa</button>
+  <button id="btn-audio"><svg class="ic ic-sm" aria-hidden="true"><use id="audio-ic" href="#i-audio-on"/></svg><span id="audio-lbl">Suoni: attivi</span></button>
+  <button class="danger" id="btn-reset"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-replay"/></svg>Ricomincia l'avventura</button>
 </div>
 
 <!-- ============================ TIMELINE ================================== -->
@@ -605,18 +710,20 @@ img.scena-foresta{aspect-ratio:1; object-fit:cover; border-radius:22px; border:5
 <div id="map"></div>
 <div id="map-frame"></div>
 <div id="map-loader">🗺️ Sto disegnando la mappa…</div>
-<button id="btn-locate" title="Quanto sei lontano dalla tappa?" aria-label="Mostra distanza dalla tappa">🧭</button>
-<button id="btn-lago" title="Rivela il Paleolago Tiberino" aria-label="Rivela il Paleolago Tiberino">🌊</button>
-<button id="btn-cammino" title="Il Cammino del Lago Tiberino" aria-label="Mostra il Cammino del Lago Tiberino">🥾</button>
+<div id="map-chips">
+  <button id="btn-lago" title="Rivela il Paleolago Tiberino" aria-label="Rivela il Paleolago Tiberino"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-onde"/></svg>Paleolago</button>
+  <button id="btn-cammino" title="Il Cammino del Lago Tiberino" aria-label="Mostra il Cammino del Lago Tiberino"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-sentiero"/></svg>Cammino</button>
+</div>
+<button id="btn-locate" title="Quanto sei lontano dalla tappa?" aria-label="Mostra distanza dalla tappa"><svg class="ic" aria-hidden="true"><use href="#i-bussola"/></svg></button>
 
 <!-- ============================ ZAINO / ALBUM ============================= -->
 <div id="album"></div>
 
 <!-- ============================ BOTTOM NAV ================================ -->
 <nav id="nav">
-  <button id="tab-mappa" class="active" aria-label="Mappa"><span class="ic">🗺️</span>Mappa</button>
-  <button id="tab-3d" aria-label="Vedi Gnut in 3D"><span class="ic">🦣</span>Gnut 3D</button>
-  <button id="tab-zaino" aria-label="Zaino dei ricordi"><span class="ic">🎒</span>Zaino</button>
+  <button id="tab-mappa" class="active" aria-label="Mappa"><svg class="ic" aria-hidden="true"><use href="#i-map"/></svg>Mappa</button>
+  <button id="tab-3d" aria-label="Vedi Gnut in 3D"><svg class="ic" aria-hidden="true"><use href="#i-mammut"/></svg>Gnut 3D</button>
+  <button id="tab-zaino" aria-label="Zaino dei ricordi"><svg class="ic" aria-hidden="true"><use href="#i-zaino"/></svg>Zaino</button>
 </nav>
 
 <!-- ============================ MASCOTTE (con espressioni) =============== -->
@@ -1955,8 +2062,13 @@ const tabMappa = document.getElementById('tab-mappa');
 const tabZaino = document.getElementById('tab-zaino');
 function mostraTab(quale){
   const album = document.getElementById('album');
-  if(quale === "zaino"){ renderAlbum(); album.classList.add('show'); tabZaino.classList.add('active'); tabMappa.classList.remove('active'); }
+  const suMappa = quale !== "zaino";
+  if(!suMappa){ renderAlbum(); album.classList.add('show'); tabZaino.classList.add('active'); tabMappa.classList.remove('active'); }
   else{ album.classList.remove('show'); tabMappa.classList.add('active'); tabZaino.classList.remove('active'); }
+  // I controlli della mappa non devono galleggiare sopra lo Zaino
+  const chips = document.getElementById('map-chips'), loc = document.getElementById('btn-locate');
+  if(chips) chips.style.display = suMappa ? 'flex' : 'none';
+  if(loc) loc.style.display = suMappa ? 'grid' : 'none';
 }
 tabMappa.onclick = ()=>{ suono("pop"); mostraTab("mappa"); };
 tabZaino.onclick = ()=>{ suono("pop"); mostraTab("zaino"); };
@@ -2049,7 +2161,7 @@ if(navigator.share){
 const menu = document.getElementById('menu');
 document.getElementById('menu-btn').onclick = ()=>menu.classList.toggle('open');
 document.addEventListener('click', e=>{
-  if(!menu.contains(e.target) && e.target.id !== 'menu-btn') menu.classList.remove('open');
+  if(!menu.contains(e.target) && !e.target.closest('#menu-btn')) menu.classList.remove('open');
 });
 document.getElementById('btn-aiuto').onclick = ()=>{ menu.classList.remove('open'); suggerimentoCorrente(); };
 document.getElementById('btn-ricentra').onclick = ()=>{
@@ -2057,9 +2169,13 @@ document.getElementById('btn-ricentra').onclick = ()=>{
   if(!map){ assicuraLeaflet(()=>{ try{ initMappa(); }catch(e){} }); }   // riprova se non era partita
   else{ map.invalidateSize(); ricentra(); }
 };
+function aggiornaBtnAudio(){
+  document.getElementById('audio-lbl').textContent = stato.audio ? "Suoni: attivi" : "Suoni: spenti";
+  document.getElementById('audio-ic').setAttribute('href', stato.audio ? "#i-audio-on" : "#i-audio-off");
+}
 document.getElementById('btn-audio').onclick = function(){
   stato.audio = !stato.audio; salvaStato();
-  this.textContent = stato.audio ? "🔊 Suoni: attivi" : "🔇 Suoni: spenti";
+  aggiornaBtnAudio();
   if(stato.audio) suono("pop");
 };
 document.getElementById('btn-reset').onclick = ()=>{
@@ -2073,7 +2189,7 @@ function reset(){
   document.getElementById('finale').classList.remove('show');
   document.getElementById('gnut3d').classList.remove('show');
   chiudiAR(); chiudiSheet(); mostraTab("mappa");
-  document.getElementById('btn-audio').textContent = stato.audio ? "🔊 Suoni: attivi" : "🔇 Suoni: spenti";
+  aggiornaBtnAudio();
   document.getElementById('btn-gioca').innerHTML = "▶ &nbsp;Inizia l'avventura";
   disegnaMarker(); aggiornaTimeline(); aggiornaHud(); ricentra();
   document.getElementById('splash').classList.remove('away');
@@ -2115,7 +2231,7 @@ document.getElementById('btn-gioca').onclick = ()=>{
 if(stato.completate.length > 0)
   document.getElementById('btn-gioca').innerHTML = "▶ &nbsp;Continua l'avventura";
 
-aggiornaHud(); aggiornaTimeline();
+aggiornaHud(); aggiornaTimeline(); aggiornaBtnAudio();
 // Carica la mappa (con CDN di riserva) senza bloccare il resto del gioco
 assicuraLeaflet(()=>{ try{ initMappa(); }catch(e){ console.warn("Mappa:", e); } });
 // La mappa deve ridimensionarsi quando cambia lo schermo o si ruota il telefono

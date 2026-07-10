@@ -1,0 +1,2382 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#e07a2f" />
+<title>Gnut e il Lago Perduto · Visit Avigliano Umbro</title>
+
+<!--
+  ============================================================================
+  "RIPORTA TUMBO A CASA" — prototipo single-file, edizione "gioco mobile"
+  ----------------------------------------------------------------------------
+  Gioco turistico gamificato per bambini (6-11) su Avigliano Umbro (TR).
+  Un cucciolo di mammut si è perso nel presente: lo si riporta a casa
+  viaggiando indietro nel tempo fino alla Foresta Fossile di Dunarobba.
+
+  TUTTO in un unico file: nessun build, nessuna dipendenza npm.
+  Risorse esterne: Leaflet (cdnjs) + tile OpenStreetMap + font Baloo 2
+  (Google Fonts, con fallback: il gioco funziona anche senza).
+
+  FEATURES:
+   · splash screen animata con nome giocatore
+   · 5 MINI-GIOCHI diversi: quiz, memory, trova l'intruso, ordina la storia,
+     acchiappa-cibo a tempo — configurabili per tappa (campo "gioco")
+   · XP + livelli esploratore, stelle per mini-gioco, zaino/album ricordi
+   · PORTALE DEL TEMPO: transizione animata con contatore degli anni
+     (tocca lo schermo per saltarla)
+   · mascotte SVG disegnata a mano con espressioni facciali reali
+     (normale / festante / pensierosa) + palpebre e proboscide animate
+   · effetti sonori WebAudio (zero file audio) + vibrazione
+   · geolocalizzazione: distanza reale dalla prossima tappa
+   · UX mobile: swipe per chiudere le schede, timeline tappabile,
+     safe-area iPhone, prefers-reduced-motion rispettato
+
+  Da evolvere (cerca "TODO" nel codice):
+   · verifica QR reale / geofencing sul pulsante "Sono arrivato!"
+   · backend per attivare/disattivare tappe da remoto (campo "attiva")
+   · multilingua (ora: tutti i testi in italiano dentro la config)
+  ============================================================================
+-->
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<!-- Dati geografici REALI: Paleolago Tiberino (da KMZ) + Cammino del Lago (Wikiloc) -->
+<script src="assets/geo/geo-data.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<!-- Illustrazioni premium di Gnut (WebP ottimizzate, in assets/gnut/) -->
+<link rel="preload" as="image" href="assets/gnut/gnut-saluto.webp">
+<link rel="preload" as="image" href="assets/gnut/gnut-avatar.webp">
+<link rel="preload" as="image" href="assets/gnut/ui-logo.webp">
+<link rel="preload" as="image" href="assets/gnut/gnut-fossile.webp">
+
+<style>
+/* ============================================================================
+   DESIGN TOKENS — "Storybook moderno": carta calda + componenti chunky
+   ============================================================================ */
+:root{
+  /* Superfici (carta calda, mai bianco freddo) */
+  --paper:#FDF7EB; --paper-2:#F6ECD8; --card:#FFFFFF; --card-warm:#FFFBF2;
+  --line:#EADFC9; --scrim:rgba(59,42,24,.45);
+  /* Inchiostro */
+  --ink:#42301D; --ink-2:#7B6A52; --ink-3:#A9987D; --ink-inverse:#FFF9EF;
+  /* Brand (arancio Gnut) */
+  --brand-100:#FDEBD9; --brand-200:#F9CFA4; --brand-400:#F49B54;
+  --brand-500:#EC7A2E; --brand-600:#D2621D; --brand-700:#A84F1C;
+  /* Lago / Bosco / Oro */
+  --lago-100:#E3F3FA; --lago-300:#8FD0E8; --lago-500:#3FA3CC; --lago-700:#25738F;
+  --bosco-100:#E4F3E9; --bosco-300:#7FC49A; --bosco-500:#2F8352; --bosco-700:#1D5636;
+  --oro-100:#FCF3DC; --oro-400:#F2C25E; --oro-500:#E3A93C; --oro-700:#A97B22;
+  /* Stato */
+  --ok:#2F8352; --ok-bg:#E4F3E9; --no:#D0563E; --no-bg:#FBE7E1;
+  --notte:#141B38; --notte-2:#2A3C72;
+  /* Tipografia: Baloo 2 = display/UI · Nunito = lettura bambini */
+  --font-display:'Baloo 2','Trebuchet MS',system-ui,sans-serif;
+  --font-body:'Nunito','Baloo 2',system-ui,sans-serif;
+  --fs-display:clamp(32px,8.5vw,42px); --fs-title:24px; --fs-h3:18px;
+  --fs-body:16px; --fs-body-sm:14px; --fs-label:13px; --fs-caption:12px; --fs-overline:11px;
+  /* Spazio (base 4) */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px; --sp-6:24px; --sp-7:32px;
+  /* Raggi */
+  --r-sm:10px; --r-md:16px; --r-lg:22px; --r-xl:30px; --r-pill:999px;
+  /* Elevazione (ombra calda) + edge "chunky" */
+  --e1:0 1px 2px rgba(89,60,32,.06), 0 2px 6px rgba(89,60,32,.06);
+  --e2:0 2px 4px rgba(89,60,32,.07), 0 10px 24px rgba(89,60,32,.11);
+  --e3:0 6px 12px rgba(89,60,32,.10), 0 24px 48px rgba(89,60,32,.18);
+  --edge:0 4px 0;
+  /* Motion */
+  --ease-out:cubic-bezier(.22,1,.36,1);
+  --ease-spring:cubic-bezier(.34,1.56,.64,1);
+  --ease-inout:cubic-bezier(.65,0,.35,1);
+  --t-fast:120ms; --t-base:220ms; --t-slow:360ms; --t-scene:600ms;
+  /* Layout chrome (tokenizzato: mai più top hard-coded) */
+  --safe-b:env(safe-area-inset-bottom, 0px);
+  --safe-t:env(safe-area-inset-top, 0px);
+  --header-h:48px;
+  --timeline-h:56px;
+  --chrome-top:calc(var(--header-h) + var(--timeline-h));
+  --nav-h:calc(64px + var(--safe-b));
+  --quest-h:104px;   /* altezza del pannello missione in pergamena */
+  /* Alias retro-compatibilità (le vecchie regole/inline-style continuano a funzionare) */
+  --terra:var(--ink-2); --terra-scuro:var(--ink);
+  --arancio:var(--brand-500); --arancio-chiaro:var(--brand-400);
+  --crema:var(--paper); --crema-scuro:var(--paper-2);
+  --bosco:var(--bosco-500); --bosco-chiaro:var(--bosco-300);
+  --paleolago:var(--lago-500); --paleolago-chiaro:var(--lago-300);
+  --oro:var(--oro-500); --testo:var(--ink); --ombra:rgba(89,60,32,.14);
+  --font:var(--font-display);
+}
+/* Colori epoca: rampa armonica (badge, bande, timeline) */
+.era-oggi{background:#3E9BDE;} .era-900{background:#9A6FD0;}
+.era-medioevo{background:#CE5F49;} .era-romana{background:#D99A2E;}
+.era-preistoria{background:#A5794B;} .era-fossile{background:#2F8352;}
+
+/* Icone SVG di sistema (sprite in fondo al body) */
+.ic{width:24px;height:24px;flex:none;fill:none;stroke:currentColor;
+  stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.ic-sm{width:19px;height:19px;} .ic-lg{width:28px;height:28px;}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;height:100%;}
+body{
+  font-family:var(--font); color:var(--testo); background:var(--crema);
+  overflow:hidden; position:fixed; width:100%; touch-action:manipulation;
+  -webkit-font-smoothing:antialiased; user-select:none;
+}
+input,button{font-family:var(--font);}
+button:focus-visible,input:focus-visible{outline:3px solid var(--paleolago); outline-offset:2px;}
+
+/* Rispetta chi preferisce meno animazioni */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important;}
+}
+
+/* ============================================================================
+   SPLASH SCREEN
+   ============================================================================ */
+#splash{
+  position:fixed; inset:0; z-index:3000; display:flex; flex-direction:column;
+  align-items:center; justify-content:flex-end; text-align:center; padding:0;
+  background:#8ecbe8; transition:opacity var(--t-scene) var(--ease-inout), transform var(--t-scene) var(--ease-inout);
+}
+#splash.away{opacity:0; transform:scale(1.06); pointer-events:none;}
+#splash .hero{position:absolute; inset:0; z-index:0;}
+#splash .hero img{width:100%; height:100%; object-fit:cover; object-position:50% 20%;}
+#splash .hero svg{width:min(60vw,260px); margin:18vh auto 0; display:block;}
+#splash .hero::after{content:''; position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(20,27,56,.16) 0%, transparent 28%,
+             transparent 44%, rgba(253,247,235,.9) 76%, var(--paper) 94%);}
+#splash .panel{position:relative; z-index:1; width:100%; display:flex; flex-direction:column; align-items:center;
+  padding:0 var(--sp-6) calc(var(--sp-5) + var(--safe-b));
+  animation:panel-in .7s var(--ease-out) both .1s;}
+@keyframes panel-in{from{opacity:0; transform:translateY(28px);}}
+@keyframes fluttua{50%{transform:translateY(-12px) rotate(-2deg);}}
+#splash .kicker{font-size:var(--fs-overline); font-weight:800; letter-spacing:2.5px; color:var(--lago-700);
+  background:rgba(255,255,255,.85); backdrop-filter:blur(4px);
+  padding:6px 16px; border-radius:var(--r-pill); box-shadow:var(--e1);}
+#splash h1{margin:var(--sp-3) 0 var(--sp-1); font-size:var(--fs-display); line-height:1.04;
+  color:var(--ink); font-weight:800; text-shadow:0 2px 0 rgba(255,255,255,.65);}
+#splash h1 b{color:var(--brand-600);}
+#splash .logo-img{width:min(80vw,340px); margin:var(--sp-3) 0 var(--sp-1);
+  filter:drop-shadow(0 10px 18px rgba(59,42,24,.35));}
+.visually-hidden{position:absolute; clip:rect(0 0 0 0); width:1px; height:1px; overflow:hidden;}
+#splash .sotto{font-family:var(--font-body); font-size:var(--fs-body-sm); font-weight:700;
+  color:var(--ink-2); margin:0 0 var(--sp-4); max-width:340px;}
+#splash .nome-box{width:min(84vw,340px); background:var(--card); border:2.5px solid var(--line);
+  border-radius:var(--r-lg); padding:var(--sp-4); font-size:17px; font-weight:800; text-align:center;
+  color:var(--ink); outline:none; box-shadow:var(--e1); transition:border-color var(--t-base) var(--ease-out);}
+#splash .nome-box::placeholder{color:var(--ink-3);}
+#splash .nome-box:focus{border-color:var(--brand-500);}
+#btn-gioca{
+  margin-top:var(--sp-3); width:min(84vw,340px); border:none; border-radius:var(--r-lg); padding:var(--sp-4);
+  font-family:var(--font-display); font-size:19px; font-weight:800; letter-spacing:.3px; color:#fff; cursor:pointer;
+  background:var(--brand-500); box-shadow:var(--edge) var(--brand-700), var(--e2);
+  transition:transform var(--t-fast) var(--ease-out), box-shadow var(--t-fast);
+}
+#btn-gioca:active{transform:translateY(4px); box-shadow:0 1px 0 var(--brand-700);}
+#splash .credit{margin-top:var(--sp-3); font-size:var(--fs-overline); font-weight:800;
+  letter-spacing:.6px; color:var(--ink-2);}
+
+/* ============================================================================
+   HEADER + HUD
+   ============================================================================ */
+header{
+  position:fixed; top:0; left:0; right:0; height:calc(var(--header-h) + var(--safe-t)); z-index:1200;
+  display:flex; align-items:center; justify-content:space-between; gap:var(--sp-2);
+  padding:var(--safe-t) var(--sp-3) 0 var(--sp-4);
+  background:rgba(253,247,235,.9); backdrop-filter:blur(10px) saturate(1.2);
+  color:var(--ink); box-shadow:0 1px 0 var(--line);
+}
+header .logo{display:flex; flex-direction:column; line-height:1.05; min-width:0; overflow:hidden;}
+header .logo b{font-size:14px; letter-spacing:.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--ink);}
+header .logo small{display:none;}
+#hud{display:flex; align-items:center; gap:6px; flex:none;}
+.pill{display:flex; align-items:center; gap:5px; background:var(--card);
+  border:1.5px solid var(--line); border-radius:var(--r-pill); padding:5px 11px;
+  font-size:var(--fs-label); font-weight:800; white-space:nowrap; color:var(--ink); box-shadow:var(--e1);}
+#pill-xp{color:var(--oro-700);}
+@media (max-width:400px){ #pill-livello .liv-txt{display:none;} }
+header .menu-btn{width:36px;height:36px;border:1.5px solid var(--line);border-radius:50%;
+  background:var(--card);color:var(--ink);cursor:pointer;flex:none;
+  display:grid;place-items:center;box-shadow:var(--e1);}
+
+/* ============================================================================
+   TIMELINE DEL VIAGGIO NEL TEMPO (tappabile!)
+   ============================================================================ */
+#timeline-wrap{
+  position:fixed; top:calc(var(--header-h) + var(--safe-t)); left:0; right:0; z-index:900;
+  height:var(--timeline-h);
+  background:rgba(253,247,235,.85); backdrop-filter:blur(10px);
+  padding:var(--sp-2) var(--sp-4) 0; box-shadow:0 1px 0 var(--line);
+}
+#timeline-wrap .tl-labels{display:flex; justify-content:space-between; font-size:9px;
+  font-weight:800; letter-spacing:.8px; color:var(--ink-3); text-transform:uppercase; margin-bottom:0;}
+#timeline-wrap .tl-labels span:nth-child(2){display:none;}
+.tl-track{position:relative; height:6px; border-radius:var(--r-pill); background:var(--paper-2); margin-top:13px;
+  background-image:repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 14px);}
+.tl-fill{position:absolute; inset:0 auto 0 0; background:linear-gradient(90deg,#3E9BDE,var(--oro-400),#2F8352);
+  width:0%; transition:width .9s var(--ease-out); border-radius:var(--r-pill);}
+.tl-dots{display:flex; justify-content:space-between; margin-top:-16px; padding:0 2px;}
+.tl-dot{
+  width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:13px;background:var(--card);border:2.5px solid var(--line);box-shadow:var(--e1);
+  transition:transform var(--t-base) var(--ease-spring), border-color var(--t-base), background var(--t-base);
+  cursor:pointer; padding:0;
+}
+.tl-dot.future{filter:grayscale(1); opacity:.45;}
+.tl-dot.done{border-color:var(--bosco-500); background:var(--bosco-100);}
+.tl-dot.current{border-color:var(--brand-500); transform:scale(1.3); animation:pulse 1.4s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 1px 3px var(--ombra),0 0 0 0 rgba(224,122,47,.55);}50%{box-shadow:0 1px 3px var(--ombra),0 0 0 10px rgba(224,122,47,0);}}
+
+/* ============================================================================
+   MAPPA
+   ============================================================================ */
+#map{position:absolute; top:calc(var(--chrome-top) + var(--safe-t)); bottom:var(--nav-h); left:0; right:0; z-index:1; background:#dfeef0;}
+.leaflet-tile-pane{filter:saturate(1.08) brightness(1.02) contrast(1.02);}
+#map-frame{position:absolute; top:calc(var(--chrome-top) + var(--safe-t)); bottom:var(--nav-h); left:0; right:0; z-index:2; pointer-events:none;
+  box-shadow:inset 0 0 34px rgba(89,60,32,.14);}
+#map-loader{position:absolute; top:calc(var(--chrome-top) + var(--safe-t)); bottom:var(--nav-h); left:0; right:0; z-index:3;
+  display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg,#E4F3E9,#F6ECD8);
+  font-weight:800; color:var(--ink-2); font-size:15px; transition:opacity var(--t-scene); pointer-events:none;}
+#map-loader.via{opacity:0;}
+/* Chip-bar "livelli mappa": tutto visibile, zero scoperta nascosta */
+#map-chips{position:fixed; top:calc(var(--chrome-top) + var(--safe-t) + 10px); left:var(--sp-3);
+  z-index:901; display:flex; gap:var(--sp-2);}
+#btn-lago,#btn-cammino{
+  display:flex; align-items:center; gap:6px; height:40px; padding:0 14px 0 10px;
+  border:1.5px solid var(--line); border-radius:var(--r-pill); background:var(--card);
+  box-shadow:var(--e1); cursor:pointer; color:var(--ink-2);
+  font-family:var(--font-display); font-size:var(--fs-label); font-weight:800;
+  transition:background var(--t-base), color var(--t-base), border-color var(--t-base), transform var(--t-fast);
+}
+#btn-lago:active,#btn-cammino:active{transform:scale(.95);}
+#btn-lago.attivo{background:var(--lago-500); border-color:var(--lago-700); color:#fff;}
+#btn-cammino.attivo{background:var(--brand-500); border-color:var(--brand-700); color:#fff;}
+/* Bussola: unico FAB, in basso a sinistra (l'angolo destro è di Gnut) */
+#btn-locate{
+  position:fixed; left:var(--sp-3); bottom:calc(var(--nav-h) + var(--quest-h) + var(--sp-3)*2); z-index:901;
+  width:52px; height:52px; border-radius:50%; border:1.5px solid var(--line);
+  background:var(--card); color:var(--ink); box-shadow:var(--e2); cursor:pointer;
+  display:grid; place-items:center; transition:transform var(--t-fast);
+}
+#btn-locate:active{transform:scale(.92);}
+
+/* ---- AR "Incontra Gnut" (fotocamera + overlay) ------------------------- */
+#ar{position:fixed; inset:0; z-index:2400; display:none; background:#000; overflow:hidden;}
+#ar.show{display:block;}
+#ar-video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
+#ar-scena{position:absolute; inset:0; display:none;
+  background:linear-gradient(180deg,#8ecbe8 0%,#dff0e4 60%,#9dc98a 100%);}
+#ar.no-cam #ar-scena{display:block;}
+#ar.no-cam #ar-video{display:none;}
+#ar-gnut{position:absolute; left:50%; bottom:14%; width:min(52vw,230px); aspect-ratio:1; transform:translateX(-50%);
+  filter:drop-shadow(0 12px 16px rgba(0,0,0,.45));}
+#ar-gnut img{width:100%; height:100%; object-fit:cover; border-radius:50%; border:5px solid #fff; display:block; animation:fluttua 3s ease-in-out infinite;}
+#ar-bolla{position:absolute; left:50%; top:11%; transform:translateX(-50%); max-width:82vw;
+  background:#fff; border:3px solid var(--arancio); border-radius:18px; padding:10px 14px;
+  font-weight:700; font-size:15px; line-height:1.35; box-shadow:0 8px 22px rgba(0,0,0,.35);}
+#ar-bolla .chi{display:flex; align-items:center; gap:4px; font-size:10px; letter-spacing:1.5px; color:var(--arancio); margin-bottom:3px;}
+#ar-hint{position:absolute; left:50%; bottom:calc(116px + var(--safe-b)); transform:translateX(-50%);
+  color:#fff; font-size:12px; font-weight:700; text-shadow:0 1px 4px rgba(0,0,0,.7); white-space:nowrap;}
+#ar-scatta{position:absolute; left:50%; bottom:calc(26px + var(--safe-b)); transform:translateX(-50%);
+  width:74px; height:74px; border-radius:50%; border:5px solid #fff; background:var(--brand-500);
+  color:#fff; display:grid; place-items:center; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.4);}
+#ar-scatta:active{transform:translateX(-50%) scale(.92);}
+#ar-chiudi{position:absolute; top:calc(14px + env(safe-area-inset-top,0px)); right:14px;
+  width:42px; height:42px; border:none; border-radius:50%; background:rgba(0,0,0,.5); color:#fff;
+  display:grid; place-items:center; cursor:pointer;}
+#ar-flip{position:absolute; top:calc(14px + env(safe-area-inset-top,0px)); left:14px; z-index:2;
+  width:42px; height:42px; border:none; border-radius:50%; background:rgba(0,0,0,.5); color:#fff;
+  display:grid; place-items:center; cursor:pointer;}
+#ar-flip:active{transform:scale(.9);}
+#ar.selfie #ar-video{transform:scaleX(-1);}   /* anteprima specchiata per il selfie */
+#ar-flash{position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none;}
+#ar-flash.go{animation:flash .5s ease;}
+@keyframes flash{0%{opacity:0;}18%{opacity:.9;}100%{opacity:0;}}
+
+/* ---- Gnut in 3D (model-viewer) + AR reale ------------------------------ */
+#gnut3d{position:fixed; inset:0; z-index:2450; display:none;
+  background:radial-gradient(circle at 50% 35%, #dff0e4 0%, #bfe3f2 60%, #8ecbe8 100%);}
+#gnut3d.show{display:block;}
+#g3d-mv{width:100%; height:100%; --poster-color:transparent;
+  background:radial-gradient(circle at 50% 35%, #dff0e4 0%, #bfe3f2 60%, #8ecbe8 100%);}
+#g3d-titolo{position:absolute; top:calc(14px + env(safe-area-inset-top,0px)); left:0; right:0; text-align:center;
+  font-weight:800; font-size:18px; color:var(--terra-scuro); text-shadow:0 1px 4px rgba(255,255,255,.7); pointer-events:none; z-index:2;}
+#g3d-hint{position:absolute; top:calc(42px + env(safe-area-inset-top,0px)); left:0; right:0; text-align:center;
+  font-weight:700; font-size:12px; color:var(--terra); pointer-events:none; z-index:2;}
+#g3d-chiudi{position:absolute; top:calc(12px + env(safe-area-inset-top,0px)); right:14px; z-index:3;
+  width:42px; height:42px; border:none; border-radius:50%; background:rgba(255,255,255,.9); color:var(--ink);
+  display:grid; place-items:center; cursor:pointer; box-shadow:var(--e2);}
+#g3d-arbtn{position:absolute; left:50%; bottom:calc(28px + var(--safe-b)); transform:translateX(-50%);
+  border:none; border-radius:22px; padding:15px 22px; font-family:var(--font); font-size:16px; font-weight:800;
+  color:#fff; background:linear-gradient(160deg,var(--arancio),#d0662a); box-shadow:0 6px 0 #a84f1c,0 10px 22px var(--ombra); cursor:pointer;}
+#g3d-arbtn:active{transform:translateX(-50%) translateY(4px); box-shadow:0 2px 0 #a84f1c;}
+#g3d-loader{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-weight:800; color:var(--terra); font-size:15px; z-index:1;}
+
+.marker-pin{width:40px;height:40px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+  display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px var(--ombra);border:3px solid #fff;}
+.marker-pin>*{transform:rotate(45deg);font-size:19px;}
+.marker-pin span{color:#fff;display:grid;place-items:center;}
+.marker-pin img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.marker-done{background:var(--bosco);}
+.marker-future{background:#9c9c9c;}
+.marker-bonus{background:var(--oro);} .marker-bonus.fatto{background:var(--bosco);}
+.marker-current{background:var(--arancio);animation:pulse 1.4s infinite;}
+.marker-current>*{animation:balza .9s ease-in-out infinite;}
+@keyframes balza{50%{transform:rotate(45deg) translateY(-4px);}}
+.dot-utente{width:18px;height:18px;border-radius:50%;background:var(--paleolago);border:3px solid #fff;animation:pulse 1.6s infinite;}
+
+/* ============================================================================
+   BOTTOM NAV
+   ============================================================================ */
+#nav{
+  position:fixed; left:0; right:0; bottom:0; height:var(--nav-h); z-index:1150;
+  display:flex; background:#5B3A21 url('assets/gnut/ui-legno.webp') center/cover no-repeat;
+  box-shadow:var(--e3), inset 0 2px 0 rgba(255,255,255,.12);
+  border-radius:var(--r-xl) var(--r-xl) 0 0; overflow:hidden;
+  padding:6px 8px var(--safe-b);
+}
+#nav button{flex:1; border:none; background:none; cursor:pointer; font-size:11px; font-weight:800;
+  color:#E9D5AE; text-shadow:0 1px 2px rgba(0,0,0,.35);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+  border-radius:var(--r-md); position:relative; transition:color var(--t-base) var(--ease-out);}
+#nav button .ic{width:26px; height:26px; transition:transform var(--t-base) var(--ease-spring);
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.4));}
+#nav button::before{content:''; position:absolute; top:5px; left:50%; translate:-50% 0;
+  width:0; height:32px; border-radius:var(--r-pill); background:rgba(255,215,138,.22);
+  transition:width var(--t-base) var(--ease-spring);}
+#nav button > *{position:relative;}
+#nav button.active{color:#FFD98A;}
+#nav button.active::before{width:58px;}
+#nav button.active .ic{transform:translateY(-1px) scale(1.08);}
+#nav button:active .ic{transform:scale(.88);}
+
+/* ---- Pannello missione "La tua avventura" (pergamena + GIOCA) ---------- */
+#quest{
+  position:fixed; left:var(--sp-3); right:var(--sp-3); bottom:calc(var(--nav-h) + var(--sp-3)); z-index:940;
+  display:flex; align-items:center; gap:8px; padding:16px 14px 18px 6px;
+  background:url('assets/gnut/ui-pergamena.webp'); background-size:100% 100%;
+  filter:drop-shadow(0 8px 16px rgba(89,60,32,.28));
+}
+#quest .q-gnut{width:74px; height:74px; object-fit:contain; flex:none;
+  transform:translateY(-10px); filter:drop-shadow(0 4px 6px rgba(59,42,24,.3));}
+#quest .q-body{flex:1; min-width:0; text-align:left;}
+#quest .q-kicker{font-size:9.5px; letter-spacing:1.8px; font-weight:800; color:var(--lago-700); font-family:var(--font-display);}
+#quest .q-testo{font-family:var(--font-body); font-weight:800; font-size:13.5px; line-height:1.3; color:#5B4425;}
+#quest .q-gioca{
+  flex:none; border:none; border-radius:var(--r-pill); padding:13px 18px;
+  font-family:var(--font-display); font-weight:800; font-size:16px; letter-spacing:.8px; color:#fff;
+  background:linear-gradient(180deg,#FFB347,var(--brand-500));
+  box-shadow:0 4px 0 var(--brand-700), inset 0 2px 0 rgba(255,255,255,.45), 0 4px 12px rgba(236,122,46,.4);
+  cursor:pointer; animation:gioca-glow 2.2s ease-in-out infinite;
+  transition:transform var(--t-fast);
+}
+#quest .q-gioca:active{transform:translateY(3px); box-shadow:0 1px 0 var(--brand-700);}
+@keyframes gioca-glow{50%{box-shadow:0 4px 0 var(--brand-700), inset 0 2px 0 rgba(255,255,255,.45), 0 4px 22px rgba(236,122,46,.75);}}
+
+/* ============================================================================
+   MASCOTTE + FUMETTO — espressioni facciali via classi
+   ============================================================================ */
+#mascotte{position:fixed; right:var(--sp-3); bottom:calc(var(--nav-h) + var(--quest-h) + var(--sp-3)*2); z-index:1100; width:84px; height:84px; cursor:pointer;}
+#mascotte img{width:100%; height:100%; object-fit:cover; border-radius:50%;
+  border:3px solid #fff; outline:2.5px solid var(--brand-400); box-shadow:var(--e2); display:block;
+  transition:opacity var(--t-base);}
+#mascotte svg{display:none; width:100%; height:auto; filter:drop-shadow(0 6px 8px var(--ombra));}
+#mascotte.festante{animation:salto .6s ease infinite;}
+#mascotte.pensieroso{animation:oscilla 1.2s ease-in-out infinite;}
+@keyframes salto{0%,100%{transform:translateY(0) rotate(0);}30%{transform:translateY(-16px) rotate(-4deg);}60%{transform:translateY(-4px) rotate(3deg);}}
+@keyframes oscilla{0%,100%{transform:rotate(-3deg);}50%{transform:rotate(3deg);}}
+
+/* Espressioni: mostra/nascondi bocche e sopracciglia in base allo stato */
+#mascotte .exp{transition:opacity .18s;}
+#mascotte .exp-f, #mascotte .exp-t{opacity:0;}
+#mascotte.festante .exp-n{opacity:0;}   #mascotte.festante .exp-f{opacity:1;}
+#mascotte.pensieroso .exp-n{opacity:0;} #mascotte.pensieroso .exp-t{opacity:1;}
+
+#fumetto{
+  position:fixed; right:var(--sp-3); bottom:calc(var(--nav-h) + var(--quest-h) + 84px + var(--sp-6)); z-index:1100;
+  max-width:min(78vw,330px); background:var(--card-warm); border:none;
+  border-radius:var(--r-lg) var(--r-lg) var(--r-sm) var(--r-lg);
+  padding:var(--sp-3) var(--sp-4); font-family:var(--font-body);
+  font-size:var(--fs-body-sm); font-weight:700; line-height:1.45; color:var(--ink);
+  box-shadow:var(--e3);
+  transition:opacity var(--t-base) var(--ease-out), transform var(--t-base) var(--ease-spring);
+  transform-origin:bottom right; cursor:pointer;
+}
+#fumetto .chi{display:flex; align-items:center; gap:5px; font-size:10px; letter-spacing:1.2px; color:var(--brand-600); margin-bottom:4px; font-family:var(--font-display);}
+.chi-av{width:20px; height:20px; border-radius:50%; object-fit:cover; border:1.5px solid var(--brand-400); flex:none;}
+#fumetto:after{content:'';position:absolute;right:20px;bottom:-14px;border:8px solid transparent;border-top-color:var(--card-warm);
+  filter:drop-shadow(0 3px 2px rgba(89,60,32,.08));}
+#fumetto.hidden{opacity:0;transform:scale(.7);pointer-events:none;}
+
+.xp-float{
+  position:fixed; right:48px; bottom:calc(var(--nav-h) + var(--quest-h) + 100px); z-index:1160;
+  font-size:22px; font-weight:800; color:var(--brand-600); text-shadow:0 2px 0 #fff;
+  animation:salexp 1.4s ease forwards; pointer-events:none;
+}
+@keyframes salexp{0%{opacity:0;transform:translateY(10px) scale(.6);}20%{opacity:1;transform:translateY(0) scale(1.15);}100%{opacity:0;transform:translateY(-70px) scale(1);}}
+
+/* ============================================================================
+   BOTTOM SHEET
+   ============================================================================ */
+.overlay-bg{position:fixed;inset:0;z-index:1250;background:var(--scrim);
+  display:block; opacity:0; pointer-events:none; transition:opacity var(--t-slow) var(--ease-out);}
+.overlay-bg.show{opacity:1; pointer-events:auto;}
+.sheet{
+  position:fixed; left:0; right:0; bottom:0; z-index:1300; max-height:90vh; overflow-y:auto;
+  background:var(--paper); border-radius:var(--r-xl) var(--r-xl) 0 0; box-shadow:var(--e3);
+  transform:translateY(103%); transition:transform var(--t-slow) var(--ease-spring);
+  padding:0 var(--sp-4) calc(var(--sp-6) + var(--safe-b)); overscroll-behavior:contain;
+}
+.sheet.open{transform:translateY(0);}
+.sheet .banda{margin:0 calc(var(--sp-4)*-1); padding:var(--sp-3) var(--sp-4) var(--sp-3);
+  border-radius:var(--r-xl) var(--r-xl) 0 0; color:#fff; position:relative; touch-action:none;
+  background-image:linear-gradient(160deg, rgba(255,255,255,.22), rgba(0,0,0,.12));}
+.sheet .banda .grip{width:44px;height:5px;border-radius:var(--r-pill);background:rgba(255,255,255,.55);margin:0 auto var(--sp-2);}
+.sheet .banda h2{margin:2px 0 0;font-size:var(--fs-title);line-height:1.12;text-shadow:0 1px 3px rgba(0,0,0,.22);padding-right:40px;}
+.sheet .chiudi{
+  position:absolute; top:14px; right:14px; width:34px; height:34px; border:none; border-radius:50%;
+  background:rgba(255,255,255,.28); color:#fff; cursor:pointer; display:grid; place-items:center;
+}
+.badge-epoca{display:inline-block;background:rgba(255,255,255,.28);
+  color:#fff;font-size:var(--fs-overline);font-weight:800;padding:4px 12px;
+  border-radius:var(--r-pill);letter-spacing:1.5px;}
+.racconto{font-family:var(--font-body);font-size:var(--fs-body);line-height:1.5;font-weight:600;color:var(--ink);
+  margin:var(--sp-4) 0;background:var(--card-warm);border-radius:var(--r-md);padding:var(--sp-4);
+  box-shadow:var(--e1); display:flow-root;}
+.racconto .racconto-av{width:42px;height:42px;border-radius:50%;object-fit:cover;float:left;
+  margin:0 10px 4px 0;border:2.5px solid var(--brand-200);}
+.curiosita{font-family:var(--font-body);font-size:var(--fs-body-sm);line-height:1.45;font-weight:600;color:var(--ink);
+  margin:var(--sp-3) 0;background:var(--oro-100);border-radius:var(--r-md);padding:var(--sp-3);box-shadow:var(--e1);}
+
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:none;
+  border-radius:var(--r-lg);padding:var(--sp-4);font-family:var(--font-display);
+  font-size:17px;font-weight:800;cursor:pointer;color:#fff;
+  margin-top:var(--sp-3);transition:transform var(--t-fast) var(--ease-out), box-shadow var(--t-fast), filter var(--t-fast);}
+.btn:active{transform:translateY(3px);filter:brightness(.97);}
+.btn-arancio{background:var(--brand-500);box-shadow:var(--edge) var(--brand-700);}
+.btn-arancio:active{box-shadow:0 1px 0 var(--brand-700);}
+.btn-bosco{background:var(--bosco-500);box-shadow:var(--edge) var(--bosco-700);}
+.btn-bosco:active{box-shadow:0 1px 0 var(--bosco-700);}
+.btn-oro{background:var(--oro-400);color:var(--ink);box-shadow:var(--edge) var(--oro-700);}
+.btn-oro:active{box-shadow:0 1px 0 var(--oro-700);}
+.btn-viola{background:var(--lago-500);box-shadow:var(--edge) var(--lago-700);}
+.btn-viola:active{box-shadow:0 1px 0 var(--lago-700);}
+.btn-ghost{background:var(--card);color:var(--ink-2);border:1.5px solid var(--line);box-shadow:none;}
+.btn-ghost:active{box-shadow:none;}
+
+/* ============================================================================
+   MINI-GIOCHI
+   ============================================================================ */
+.gioco-titolo{font-size:var(--fs-h3);margin:var(--sp-4) 0 var(--sp-1);color:var(--ink);font-weight:800;}
+.gioco-istruzioni{font-family:var(--font-body);font-weight:700;font-size:var(--fs-body-sm);color:var(--ink-2);margin:0 0 var(--sp-3);}
+.stelle-earned{text-align:center;font-size:34px;letter-spacing:4px;margin:var(--sp-2) 0 0;animation:pop .5s var(--ease-spring);}
+@keyframes pop{0%{transform:scale(0);}70%{transform:scale(1.3);}100%{transform:scale(1);}}
+
+/* Quiz */
+.opzione{display:block;width:100%;min-height:56px;text-align:left;background:var(--card);
+  border:2.5px solid var(--line);border-radius:var(--r-md);
+  padding:var(--sp-4);font-family:var(--font-body);font-size:var(--fs-body);font-weight:700;color:var(--ink);
+  margin-top:var(--sp-2);cursor:pointer;box-shadow:0 3px 0 var(--line);
+  transition:transform var(--t-fast) var(--ease-out), border-color var(--t-base), background var(--t-base), box-shadow var(--t-fast);}
+.opzione:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line);}
+.opzione.giusta{border-color:var(--ok);background:var(--ok-bg);box-shadow:0 3px 0 var(--ok);}
+.opzione.sbagliata{border-color:var(--no);background:var(--no-bg);box-shadow:0 3px 0 var(--no);animation:shake .4s;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+
+/* Memory */
+.memory-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-2);margin-top:var(--sp-2);}
+.mcard{aspect-ratio:3/4;border:none;border-radius:var(--r-sm);cursor:pointer;perspective:400px;background:none;padding:0;}
+.mcard .inner{position:relative;width:100%;height:100%;transition:transform var(--t-slow) var(--ease-spring);transform-style:preserve-3d;}
+.mcard.girata .inner{transform:rotateY(180deg);}
+.mcard .faccia{position:absolute;inset:0;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;
+  font-size:clamp(22px,7vw,32px);backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.mcard .retro{background:var(--brand-500);color:rgba(255,255,255,.9);font-size:20px;
+  box-shadow:inset 0 -4px 0 var(--brand-700);
+  background-image:radial-gradient(rgba(255,255,255,.18) 2.5px, transparent 3px);
+  background-size:14px 14px;}
+.mcard .fronte{background:var(--card);border:2.5px solid var(--line);transform:rotateY(180deg);}
+.mcard.trovata .fronte{border-color:var(--ok);background:var(--ok-bg);animation:pop .4s var(--ease-spring);}
+
+/* Intruso */
+.intruso-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-2);margin-top:var(--sp-2);}
+.intruso-item{background:var(--card);border:2.5px solid var(--line);border-radius:var(--r-md);
+  min-height:76px;padding:var(--sp-3) var(--sp-2);text-align:center;
+  font-family:var(--font-body);font-size:15px;font-weight:700;color:var(--ink);
+  cursor:pointer;box-shadow:0 3px 0 var(--line);
+  transition:transform var(--t-fast), border-color var(--t-base), background var(--t-base);}
+.intruso-item:active{transform:translateY(2px);}
+.intruso-item .em{display:block;font-size:32px;margin-bottom:2px;}
+.intruso-item.sbagliata{border-color:var(--no);background:var(--no-bg);box-shadow:0 3px 0 var(--no);animation:shake .4s;}
+.intruso-item.giusta{border-color:var(--ok);background:var(--ok-bg);box-shadow:0 3px 0 var(--ok);animation:pop .4s var(--ease-spring);}
+
+/* Ordina la storia */
+.ordina-slots{display:flex;gap:6px;margin:var(--sp-2) 0;}
+.ordina-slot{flex:1;min-height:58px;border:2.5px dashed var(--line);border-radius:var(--r-sm);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-size:11px;font-weight:800;color:var(--ink-3);background:var(--paper-2);padding:4px 2px;text-align:center;
+  transition:border-color var(--t-base), background var(--t-base);}
+.ordina-slot.pieno{border-style:solid;border-color:var(--ok);background:var(--ok-bg);color:var(--ink);animation:pop .35s var(--ease-spring);}
+.ordina-slot .em{font-size:22px;}
+.ordina-chips{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin-top:6px;}
+.ordina-chip{border:2.5px solid var(--line);background:var(--card);border-radius:var(--r-pill);
+  min-height:48px;padding:8px 14px;font-family:var(--font-body);font-size:var(--fs-body-sm);
+  font-weight:800;cursor:pointer;color:var(--ink);box-shadow:0 3px 0 var(--line);
+  transition:transform var(--t-fast), opacity var(--t-base);}
+.ordina-chip:active{transform:translateY(2px);}
+.ordina-chip .em{font-size:20px;margin-right:4px;}
+.ordina-chip.usata{opacity:.25;pointer-events:none;}
+.ordina-chip.sbagliata{border-color:var(--no);background:var(--no-bg);box-shadow:0 3px 0 var(--no);animation:shake .4s;}
+
+/* Acchiappa (gioco a tempo) */
+.acchiappa-hud{display:flex;justify-content:space-between;font-weight:800;font-size:var(--fs-body-sm);color:var(--ink-2);margin:6px 0 4px;}
+.acchiappa-area{
+  position:relative; height:300px; border-radius:var(--r-md); overflow:hidden; touch-action:none;
+  background:linear-gradient(180deg,#CDE9F6 0%,#E4F3E9 70%,#AFD8A0 100%); border:2.5px solid var(--line);
+}
+.acchiappa-item{position:absolute; font-size:34px; cursor:pointer; user-select:none; transition:transform var(--t-fast); will-change:top; z-index:2;}
+.acchiappa-item:active{transform:scale(1.3);}
+.acchiappa-timerbar{height:10px;border-radius:var(--r-pill);background:var(--paper-2);overflow:hidden;margin-top:var(--sp-2);}
+.acchiappa-timerbar>div{height:100%;background:linear-gradient(90deg,var(--bosco-300),var(--bosco-500));width:100%;}
+.punto-float{position:absolute;font-size:18px;font-weight:800;pointer-events:none;animation:salexp 0.8s ease forwards;z-index:3;}
+
+/* ============================================================================
+   ZAINO / ALBUM
+   ============================================================================ */
+#album{position:fixed; top:calc(var(--chrome-top) + var(--safe-t)); bottom:var(--nav-h); left:0; right:0; z-index:800;
+  overflow-y:auto;
+  background:linear-gradient(rgba(253,247,235,.86), rgba(253,247,235,.93)),
+             url('assets/gnut/ui-mappa-illustrata.webp') center/cover no-repeat var(--paper);
+  padding:var(--sp-4) var(--sp-4) 110px;
+  opacity:0; transform:translateY(14px); pointer-events:none;
+  transition:opacity var(--t-base) var(--ease-out), transform var(--t-base) var(--ease-out);
+  display:block;}
+#album.show{opacity:1; transform:none; pointer-events:auto;}
+#album h2{margin:4px 0 10px; font-size:var(--fs-title); color:var(--ink);}
+.card-livello{background:var(--card); border:1.5px solid var(--line); border-radius:var(--r-lg);
+  padding:var(--sp-4); box-shadow:var(--e2); margin-bottom:var(--sp-4);
+  background-image:linear-gradient(140deg, var(--oro-100), transparent 55%);}
+.card-livello .liv-top{display:flex; align-items:center; gap:12px;}
+.card-livello .liv-ic{font-size:40px;}
+.card-livello .liv-nome{font-size:19px; font-weight:800; color:var(--ink); line-height:1.1;}
+.card-livello .liv-xp{font-size:var(--fs-caption); font-weight:700; color:var(--ink-2);}
+.liv-bar{height:14px;border-radius:var(--r-pill);background:var(--paper-2);overflow:hidden;margin-top:10px;
+  box-shadow:inset 0 1px 2px rgba(89,60,32,.12);}
+.liv-bar>div{height:100%;background:linear-gradient(90deg,var(--oro-400),var(--brand-500));border-radius:var(--r-pill);transition:width .6s var(--ease-out);}
+.griglia-ricordi{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-3);}
+.card-ricordo{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r-md);
+  padding:var(--sp-4) var(--sp-2);text-align:center;box-shadow:var(--e1);
+  animation:card-in .5s var(--ease-out) both;}
+.card-ricordo:nth-child(1){animation-delay:.03s}.card-ricordo:nth-child(2){animation-delay:.09s}
+.card-ricordo:nth-child(3){animation-delay:.15s}.card-ricordo:nth-child(4){animation-delay:.21s}
+.card-ricordo:nth-child(5){animation-delay:.27s}.card-ricordo:nth-child(6){animation-delay:.33s}
+.card-ricordo:nth-child(7){animation-delay:.39s}.card-ricordo:nth-child(8){animation-delay:.45s}
+.card-ricordo:nth-child(9){animation-delay:.51s}
+@keyframes card-in{from{opacity:0;transform:translateY(16px) scale(.96);}}
+.card-ricordo .em{font-size:40px;line-height:1;}
+.card-ricordo .nm{font-size:12.5px;font-weight:800;margin-top:6px;color:var(--ink);line-height:1.15;}
+.card-ricordo .ep{font-size:10px;font-weight:800;letter-spacing:.6px;color:#fff;border-radius:var(--r-pill);padding:2px 9px;display:inline-block;margin-top:5px;}
+.card-ricordo .st{font-size:13px;letter-spacing:1px;margin-top:3px;}
+.card-ricordo.bloccato{background:var(--paper-2);border-style:dashed;box-shadow:none;opacity:.8;}
+.card-ricordo.bloccato .em{filter:blur(2px) grayscale(.6);}
+.card-ricordo.bloccato .nm{color:var(--ink-3);}
+
+/* ============================================================================
+   PORTALE DEL TEMPO
+   ============================================================================ */
+#timeportal{
+  position:fixed; inset:0; z-index:2500; display:none; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center; overflow:hidden; cursor:pointer;
+  background:radial-gradient(circle at 50% 42%, #33477F 0%, var(--notte) 58%, #060A1E 100%); color:#fff;
+}
+#timeportal.show{display:flex;}
+#timeportal::before{content:''; position:absolute; left:50%; top:45%; translate:-50% -50%;
+  width:92vmin; height:92vmin; border-radius:50%;
+  background:conic-gradient(from 0deg, transparent, rgba(63,163,204,.28), transparent 30%,
+             rgba(242,194,94,.22), transparent 60%, rgba(236,122,46,.28), transparent);
+  animation:gira 7s linear infinite; filter:blur(6px);}
+.ring{position:absolute; left:50%; top:45%; border-radius:50%; translate:-50% -50%;
+  border:0; padding:2.5px;
+  -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor; mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite:exclude;}
+.r1{width:76vmin;height:76vmin;animation:gira 6s linear infinite;
+  background:conic-gradient(from 90deg, transparent 10%, rgba(143,208,232,.85), transparent 42%);}
+.r2{width:56vmin;height:56vmin;animation:gira 4s linear infinite reverse;
+  background:conic-gradient(from 250deg, transparent 12%, rgba(242,194,94,.8), transparent 45%);}
+.r3{width:38vmin;height:38vmin;padding:3.5px;animation:gira 2.6s linear infinite;
+  background:conic-gradient(from 0deg, transparent 8%, rgba(244,155,84,.95), transparent 40%);}
+@keyframes gira{to{transform:rotate(360deg);}}
+#timeportal .tumbo-mini{width:150px; height:150px; object-fit:cover; border-radius:50%;
+  border:4px solid rgba(255,255,255,.9); animation:vortice 2.4s ease-in-out infinite;
+  box-shadow:0 0 60px 8px rgba(236,122,46,.55), 0 0 120px 30px rgba(63,163,204,.25);}
+@keyframes vortice{0%,100%{transform:rotate(-8deg) scale(1);}50%{transform:rotate(8deg) scale(1.1);}}
+#portal-anno{font-size:clamp(34px,10vw,56px);font-weight:800;letter-spacing:.5px;margin-top:var(--sp-5);
+  text-shadow:0 0 24px rgba(124,196,224,.8);font-variant-numeric:tabular-nums;}
+#portal-dest{font-size:var(--fs-body);font-weight:800;color:var(--brand-400);margin-top:6px;min-height:22px;}
+#portal-skip{font-size:var(--fs-caption);font-weight:800;color:rgba(255,255,255,.85);margin-top:var(--sp-4);animation:pulse-skip 1.6s ease-in-out infinite;}
+@keyframes pulse-skip{50%{opacity:.45;}}
+.stellina{position:absolute;background:#fff;border-radius:50%;opacity:.8;animation:brilla 2s ease-in-out infinite;}
+@keyframes brilla{50%{opacity:.15;transform:scale(.6);}}
+
+#toast-livello{
+  position:fixed; top:calc(var(--chrome-top) + var(--safe-t) + 8px); left:50%; transform:translate(-50%,-260%); z-index:2600;
+  background:linear-gradient(140deg,var(--card),var(--oro-100)); border:2.5px solid var(--oro-400); border-radius:var(--r-lg);
+  padding:var(--sp-3) var(--sp-6); text-align:center; box-shadow:var(--e3);
+  transition:transform .45s var(--ease-spring), opacity var(--t-base);
+  font-weight:800; color:var(--ink); opacity:0; pointer-events:none;
+}
+#toast-livello.show{transform:translate(-50%,0); opacity:1;}
+#toast-livello .big{font-size:28px;}
+
+/* ============================================================================
+   MENU
+   ============================================================================ */
+#menu{position:fixed; top:calc(var(--header-h) + var(--safe-t) + 6px); right:8px; z-index:1400;
+  background:var(--card); border-radius:var(--r-md); border:1.5px solid var(--line);
+  box-shadow:var(--e3); padding:var(--sp-2); width:250px; display:none; transform-origin:top right;}
+#menu.open{display:block; animation:menu-pop var(--t-base) var(--ease-spring);}
+@keyframes menu-pop{from{opacity:0; transform:scale(.92) translateY(-6px);}}
+#menu button{width:100%;display:flex;align-items:center;gap:10px;text-align:left;background:none;border:none;
+  padding:var(--sp-3);font-size:15px;font-weight:700;color:var(--ink);border-radius:var(--r-sm);cursor:pointer;}
+#menu button .ic{color:var(--ink-2);}
+#menu button:active{background:var(--paper-2);}
+#menu .danger{color:var(--no); border-top:1px solid var(--line); border-radius:0 0 var(--r-sm) var(--r-sm); margin-top:4px;}
+#menu .danger .ic{color:var(--no);}
+
+/* ============================================================================
+   FINALE + DIPLOMA
+   ============================================================================ */
+#finale{position:fixed; inset:0; z-index:2000; display:none; overflow-y:auto;
+  background:var(--paper);
+  text-align:center; padding:0 var(--sp-4) calc(var(--sp-7) + var(--safe-b));}
+#finale.show{display:block;}
+#finale h1{font-size:var(--fs-display);line-height:1.05;color:var(--ink);margin:var(--sp-2) 0 var(--sp-1);}
+#finale p.sub{font-size:var(--fs-body-sm);font-weight:800;letter-spacing:1px;color:var(--bosco-500);margin:var(--sp-4) 0 0;}
+#finale p.testo{font-family:var(--font-body);font-weight:700;color:var(--ink-2);}
+.scena-foresta{display:block; margin:0 auto;}
+img.scena-foresta{width:calc(100% + var(--sp-4)*2); max-width:none; margin:0 calc(var(--sp-4)*-1);
+  aspect-ratio:5/4; object-fit:cover; border-radius:0 0 var(--r-xl) var(--r-xl); box-shadow:var(--e2);}
+svg.scena-foresta{width:100%; max-width:420px; margin:var(--sp-4) auto;}
+.diploma{max-width:460px;margin:var(--sp-5) auto;background:linear-gradient(160deg,#FFFDF6,#FBF3DE);
+  border:3px solid var(--oro-500); outline:3px solid var(--oro-100); outline-offset:-9px;
+  border-radius:var(--r-md); padding:var(--sp-6) var(--sp-5); box-shadow:var(--e2);}
+.diploma h2{font-size:var(--fs-title);color:var(--ink);margin:4px 0;}
+.diploma .nome-input{width:100%;text-align:center;font-size:22px;font-weight:800;color:var(--brand-600);
+  border:none;border-bottom:3px dashed var(--brand-200);background:transparent;padding:6px;margin:10px 0;outline:none;}
+.diploma .nome-input:focus{border-bottom-color:var(--brand-500);}
+.diploma .sigillo{font-size:44px;margin:6px 0;}
+.diploma .data{font-size:var(--fs-label);color:var(--ink-2);font-weight:700;}
+.diploma .statistiche{display:flex;justify-content:center;gap:14px;margin:8px 0 2px;
+  font-size:var(--fs-label);font-weight:800;color:var(--ink-2);flex-wrap:wrap;}
+
+.coriandolo{position:fixed;top:-24px;z-index:2100;font-size:18px;animation:cade linear forwards;pointer-events:none;}
+@keyframes cade{to{transform:translateY(112vh) rotate(720deg);}}
+
+/* ============================================================================
+   STAMPA — sulla carta va SOLO il diploma
+   ============================================================================ */
+@media print{
+  body{position:static;overflow:visible;background:#fff;}
+  header,#map,#map-frame,#map-loader,#map-chips,#quest,#mascotte,#fumetto,#timeline-wrap,#menu,#nav,#album,#splash,#timeportal,#toast-livello,#btn-locate,
+  .sheet,.overlay-bg,.scena-foresta,#finale .btn,#finale h1,#finale p.sub,#finale p.testo,.coriandolo{display:none !important;}
+  #finale{position:static;display:block !important;background:#fff;padding:0;}
+  .diploma{box-shadow:none;margin:0 auto;border-color:#b8860b;}
+  .diploma .nome-input{border-bottom:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- ==================== SVG: TUMBO ==========================================
+     Mascotte disegnata a mano, due copie:
+     1) <symbol id="svg-tumbo">: versione "neutra" per splash e portale
+     2) SVG completo inline dentro #mascotte: con i gruppi-espressione
+        (.exp-n normale / .exp-f felice / .exp-t pensieroso) pilotati via CSS.
+     Palpebre, orecchie e proboscide si muovono da sole (SMIL). -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <radialGradient id="gradCorpo" cx="50%" cy="38%" r="75%">
+      <stop offset="0%" stop-color="#f4a259"/>
+      <stop offset="55%" stop-color="#e07a2f"/>
+      <stop offset="100%" stop-color="#c9772f"/>
+    </radialGradient>
+  </defs>
+  <!-- ============ ICON SET di sistema (stroke 2, round, currentColor) ===== -->
+  <symbol id="i-map" viewBox="0 0 24 24"><path d="M9 4.5 4 6.5v13l5-2 6 2 5-2v-13l-5 2-6-2Z"/><path d="M9 4.5v13M15 6.5v13"/></symbol>
+  <symbol id="i-mammut" viewBox="0 0 24 24"><path d="M4.5 12.2C4.5 8 7.8 5.5 12 5.5s7.5 2.5 7.5 6.7c0 2.3-1.3 3.8-3 3.8-1.3 0-2.1-.8-2.3-2"/><path d="M12 9.5v5.8c0 2-.9 3.2-2.6 3.2-1.2 0-2-.7-2-1.8"/><path d="M8.2 13.5c-1 .6-2.2.6-3.2 0"/><path d="M9.3 10.2h.01M14.7 10.2h.01"/></symbol>
+  <symbol id="i-zaino" viewBox="0 0 24 24"><path d="M6.5 10a5.5 5.5 0 0 1 11 0v9.5h-11V10Z"/><path d="M9.5 9V6.5a2.5 2.5 0 0 1 5 0V9M9.5 14.5h5"/></symbol>
+  <symbol id="i-bussola" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M14.8 9.2l-1.9 4.5-3.7 1.5 1.9-4.5 3.7-1.5Z"/></symbol>
+  <symbol id="i-onde" viewBox="0 0 24 24"><path d="M3 9.5q2.25-2.6 4.5 0t4.5 0 4.5 0 4.5 0"/><path d="M3 15q2.25-2.6 4.5 0t4.5 0 4.5 0 4.5 0"/></symbol>
+  <symbol id="i-sentiero" viewBox="0 0 24 24"><path d="M5 19.5c6 0 2.5-6 7.5-6.5S17.5 8 19 4.5" stroke-dasharray="3.2 3.4"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4.5 7.5h15M4.5 12h15M4.5 16.5h10"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+  <symbol id="i-freccia" viewBox="0 0 24 24"><path d="M4.5 12H19M13.5 6l6 6-6 6"/></symbol>
+  <symbol id="i-stella" viewBox="0 0 24 24"><path d="M12 4.4l2.2 4.5 5 .7-3.6 3.4.9 4.9L12 15.6l-4.5 2.3.9-4.9L4.8 9.6l5-.7L12 4.4Z"/></symbol>
+  <symbol id="i-scintilla" viewBox="0 0 24 24"><path d="M12 3.5c.6 3.9 2 6.4 6.1 7-4.1.6-5.5 3.1-6.1 7-.6-3.9-2-6.4-6.1-7 4.1-.6 5.5-3.1 6.1-7Z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 13l4.5 4.5L19 7"/></symbol>
+  <symbol id="i-lucchetto" viewBox="0 0 24 24"><rect x="5.5" y="11" width="13" height="8.5" rx="2.5"/><path d="M8.5 11V8.5a3.5 3.5 0 0 1 7 0V11"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4.5 8.3a1.8 1.8 0 0 1 1.8-1.8h1.6l1.4-2h5.4l1.4 2h1.6a1.8 1.8 0 0 1 1.8 1.8v8.4a1.8 1.8 0 0 1-1.8 1.8H6.3a1.8 1.8 0 0 1-1.8-1.8V8.3Z"/><circle cx="12" cy="12.3" r="3.4"/></symbol>
+  <symbol id="i-flip" viewBox="0 0 24 24"><path d="M7 9a6.5 6.5 0 0 1 11 2M18 5.5V11h-5.5M17 15A6.5 6.5 0 0 1 6 13M6 18.5V13h5.5"/></symbol>
+  <symbol id="i-audio-on" viewBox="0 0 24 24"><path d="M5 10v4h3l4.5 3.5v-11L8 10H5Z"/><path d="M15.5 9.5a4 4 0 0 1 0 5M18 7.5a7.5 7.5 0 0 1 0 9"/></symbol>
+  <symbol id="i-audio-off" viewBox="0 0 24 24"><path d="M5 10v4h3l4.5 3.5v-11L8 10H5Z"/><path d="M15.5 9.8l4.7 4.4M20.2 9.8l-4.7 4.4"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6.5-5.3-6.5-10.3a6.5 6.5 0 0 1 13 0C18.5 15.7 12 21 12 21Z"/><circle cx="12" cy="10.5" r="2.4"/></symbol>
+  <symbol id="i-replay" viewBox="0 0 24 24"><path d="M6 7A7.5 7.5 0 1 1 4.6 12.6"/><path d="M6.6 3.4 6 7l3.5.7"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4.5 18.5V7A2.5 2.5 0 0 1 7 4.5h10A2.5 2.5 0 0 1 19.5 7v6a2.5 2.5 0 0 1-2.5 2.5H9l-4.5 3Z"/><path d="M9 10.5h.01M12 10.5h.01M15 10.5h.01"/></symbol>
+  <symbol id="i-stampa" viewBox="0 0 24 24"><path d="M7 8V4.5h10V8M7 16H5.5A1.5 1.5 0 0 1 4 14.5v-4A1.5 1.5 0 0 1 5.5 9h13A1.5 1.5 0 0 1 20 10.5v4a1.5 1.5 0 0 1-1.5 1.5H17"/><path d="M7 13.5h10v6H7v-6Z"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 14V4M8.5 7.5 12 4l3.5 3.5"/><path d="M6 12v6.5A1.5 1.5 0 0 0 7.5 20h9a1.5 1.5 0 0 0 1.5-1.5V12"/></symbol>
+  <symbol id="i-vortice" viewBox="0 0 24 24"><path d="M12 4.5a7.5 7.5 0 1 1-7.5 7.5"/><path d="M12 8a4 4 0 1 0 4 4"/></symbol>
+
+  <symbol id="svg-tumbo" viewBox="0 0 160 150">
+    <ellipse cx="80" cy="103" rx="50" ry="42" fill="url(#gradCorpo)"/>
+    <path d="M40 120 q4 10 10 3 M55 128 q4 9 10 3 M105 128 q-4 9 -10 3 M120 120 q-4 10 -10 3"
+          fill="none" stroke="#b5651d" stroke-width="4" stroke-linecap="round" opacity=".6"/>
+    <path d="M128 100 q12 3 10 13" fill="none" stroke="#c9772f" stroke-width="6" stroke-linecap="round"/>
+    <g><animateTransform attributeName="transform" type="rotate" values="0 32 58;-5 32 58;0 32 58" dur="4.6s" repeatCount="indefinite"/>
+      <ellipse cx="30" cy="60" rx="15" ry="19" fill="#c9772f" transform="rotate(-14 30 60)"/>
+      <ellipse cx="32" cy="61" rx="9" ry="12" fill="#f2b27a" transform="rotate(-14 32 61)" opacity=".85"/></g>
+    <g><animateTransform attributeName="transform" type="rotate" values="0 128 58;5 128 58;0 128 58" dur="4.6s" repeatCount="indefinite" begin="1s"/>
+      <ellipse cx="130" cy="60" rx="15" ry="19" fill="#c9772f" transform="rotate(14 130 60)"/>
+      <ellipse cx="128" cy="61" rx="9" ry="12" fill="#f2b27a" transform="rotate(14 128 61)" opacity=".85"/></g>
+    <circle cx="80" cy="62" r="43" fill="url(#gradCorpo)"/>
+    <path d="M60 25 q4 -13 11 -4 q3 -11 11 -6 q7 -8 11 1 q9 -4 8 7" fill="none" stroke="#a85e22" stroke-width="5" stroke-linecap="round"/>
+    <ellipse cx="63" cy="58" rx="12" ry="13" fill="#fff"/>
+    <ellipse cx="97" cy="58" rx="12" ry="13" fill="#fff"/>
+    <ellipse cx="65" cy="60" rx="6" ry="6" fill="#2e2018">
+      <animate attributeName="ry" values="6;6;.7;6;6" keyTimes="0;.45;.5;.55;1" dur="4.2s" repeatCount="indefinite"/></ellipse>
+    <ellipse cx="99" cy="60" rx="6" ry="6" fill="#2e2018">
+      <animate attributeName="ry" values="6;6;.7;6;6" keyTimes="0;.45;.5;.55;1" dur="4.2s" repeatCount="indefinite"/></ellipse>
+    <circle cx="67.5" cy="57" r="2.4" fill="#fff"/><circle cx="101.5" cy="57" r="2.4" fill="#fff"/>
+    <circle cx="62" cy="63" r="1.3" fill="#fff" opacity=".8"/><circle cx="96" cy="63" r="1.3" fill="#fff" opacity=".8"/>
+    <path d="M53 44 q8 -6 17 -3" fill="none" stroke="#a85e22" stroke-width="3.5" stroke-linecap="round"/>
+    <path d="M90 41 q9 -3 17 3" fill="none" stroke="#a85e22" stroke-width="3.5" stroke-linecap="round"/>
+    <ellipse cx="50" cy="76" rx="7.5" ry="5" fill="#f78d5b" opacity=".55"/>
+    <ellipse cx="110" cy="76" rx="7.5" ry="5" fill="#f78d5b" opacity=".55"/>
+    <path d="M62 88 q-9 13 -3 22" fill="none" stroke="#fff3dc" stroke-width="7" stroke-linecap="round"/>
+    <path d="M98 88 q9 13 3 22" fill="none" stroke="#fff3dc" stroke-width="7" stroke-linecap="round"/>
+    <path d="M88 90 q5 4 10 0" fill="none" stroke="#8a4d1d" stroke-width="3" stroke-linecap="round"/>
+    <g><animateTransform attributeName="transform" type="rotate" values="0 80 72;5 80 72;0 80 72;-5 80 72;0 80 72" dur="5s" repeatCount="indefinite"/>
+      <path d="M80 70 C78 86 72 94 64 100 C58 105 58 111 63 115" fill="none" stroke="#e07a2f" stroke-width="13" stroke-linecap="round"/>
+      <path d="M79 74 C77 87 73 93 67 98" fill="none" stroke="#f4a259" stroke-width="4" stroke-linecap="round" opacity=".8"/>
+      <ellipse cx="64" cy="116" rx="7" ry="5.5" fill="#c9772f"/>
+      <circle cx="61.5" cy="116" r="1.4" fill="#8a4d1d"/><circle cx="66.5" cy="116" r="1.4" fill="#8a4d1d"/></g>
+    <ellipse cx="58" cy="139" rx="15" ry="9" fill="#c9772f"/>
+    <ellipse cx="102" cy="139" rx="15" ry="9" fill="#c9772f"/>
+    <ellipse cx="52" cy="142" rx="4" ry="3" fill="#f2d8b8"/><ellipse cx="62" cy="143" rx="4" ry="3" fill="#f2d8b8"/>
+    <ellipse cx="96" cy="143" rx="4" ry="3" fill="#f2d8b8"/><ellipse cx="106" cy="142" rx="4" ry="3" fill="#f2d8b8"/>
+  </symbol>
+</svg>
+
+<!-- ============================ SPLASH ==================================== -->
+<div id="splash">
+  <div class="hero">
+    <img src="assets/gnut/gnut-saluto.webp" alt="Gnut, il mammut del Lago Tiberino"
+         onerror="this.nextElementSibling.style.display='block'; this.style.display='none';" />
+    <svg viewBox="0 0 160 150" style="display:none"><use href="#svg-tumbo"/></svg>
+  </div>
+  <div class="panel">
+    <div class="kicker">VISIT AVIGLIANO UMBRO</div>
+    <img class="logo-img" src="assets/gnut/ui-logo.webp" alt="Gnut e il Lago Perduto — Avigliano Umbro"
+         onerror="this.style.display='none'; this.nextElementSibling.style.position='static'; this.nextElementSibling.style.clip='auto';"/>
+    <h1 class="visually-hidden">Riporta <b id="splash-nome-mascotte">Gnut</b> a casa!</h1>
+    <p class="sotto" id="splash-sotto"></p>
+    <input class="nome-box" id="splash-nome" placeholder="Come ti chiami, esploratore?" maxlength="24" autocomplete="off"/>
+    <button id="btn-gioca">▶ &nbsp;Inizia l'avventura</button>
+    <div class="credit">«Gnut e il Lago Perduto» · Foresta Fossile di Dunarobba</div>
+  </div>
+</div>
+
+<!-- ============================ HEADER + HUD ============================== -->
+<header>
+  <div class="logo">
+    <b>Visit Avigliano Umbro</b>
+    <small id="logo-sub">· Gnut e il Lago Perduto</small>
+  </div>
+  <div id="hud">
+    <div class="pill" id="pill-livello" title="Il tuo livello">🐣</div>
+    <div class="pill" id="pill-xp" title="Punti esperienza">✨ 0</div>
+    <button class="menu-btn" id="menu-btn" aria-label="Menu"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-menu"/></svg></button>
+  </div>
+</header>
+
+<div id="menu">
+  <button id="btn-aiuto"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-chat"/></svg>Cosa devo fare?</button>
+  <button id="btn-ricentra"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-map"/></svg>Mostra tutta la mappa</button>
+  <button id="btn-audio"><svg class="ic ic-sm" aria-hidden="true"><use id="audio-ic" href="#i-audio-on"/></svg><span id="audio-lbl">Suoni: attivi</span></button>
+  <button class="danger" id="btn-reset"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-replay"/></svg>Ricomincia l'avventura</button>
+</div>
+
+<!-- ============================ TIMELINE ================================== -->
+<div id="timeline-wrap">
+  <div class="tl-labels"><span>OGGI</span><span>↩ viaggio nel tempo</span><span>2 MILIONI DI ANNI FA</span></div>
+  <div class="tl-track"><div class="tl-fill" id="tl-fill"></div></div>
+  <div class="tl-dots" id="tl-dots"></div>
+</div>
+
+<!-- ============================ MAPPA + LOCATE ============================ -->
+<div id="map"></div>
+<div id="map-frame"></div>
+<div id="map-loader">🗺️ Sto disegnando la mappa…</div>
+
+<!-- Pannello missione: dice sempre al bambino cosa fare adesso -->
+<div id="quest" aria-live="polite">
+  <img class="q-gnut" src="assets/gnut/gnut-zaino-av.webp" alt=""
+       onerror="this.src='assets/gnut/gnut-avatar.webp'; this.style.borderRadius='50%';"/>
+  <div class="q-body">
+    <div class="q-kicker">LA TUA AVVENTURA</div>
+    <div class="q-testo" id="quest-testo">…</div>
+  </div>
+  <button class="q-gioca" id="quest-gioca">GIOCA</button>
+</div>
+<div id="map-chips">
+  <button id="btn-lago" title="Rivela il Paleolago Tiberino" aria-label="Rivela il Paleolago Tiberino"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-onde"/></svg>Paleolago</button>
+  <button id="btn-cammino" title="Il Cammino del Lago Tiberino" aria-label="Mostra il Cammino del Lago Tiberino"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-sentiero"/></svg>Cammino</button>
+</div>
+<button id="btn-locate" title="Quanto sei lontano dalla tappa?" aria-label="Mostra distanza dalla tappa"><svg class="ic" aria-hidden="true"><use href="#i-bussola"/></svg></button>
+
+<!-- ============================ ZAINO / ALBUM ============================= -->
+<div id="album"></div>
+
+<!-- ============================ BOTTOM NAV ================================ -->
+<nav id="nav">
+  <button id="tab-mappa" class="active" aria-label="Mappa"><svg class="ic" aria-hidden="true"><use href="#i-map"/></svg>Mappa</button>
+  <button id="tab-3d" aria-label="Vedi Gnut in 3D"><svg class="ic" aria-hidden="true"><use href="#i-mammut"/></svg>Gnut 3D</button>
+  <button id="tab-zaino" aria-label="Zaino dei ricordi"><svg class="ic" aria-hidden="true"><use href="#i-zaino"/></svg>Zaino</button>
+</nav>
+
+<!-- ============================ MASCOTTE (con espressioni) =============== -->
+<div id="mascotte" title="Tocca Gnut!">
+  <img id="mascotte-img" src="assets/gnut/gnut-avatar.webp" alt="Gnut"
+       onerror="this.remove(); const s=document.querySelector('#mascotte svg'); if(s) s.style.display='block';" />
+  <svg viewBox="0 0 160 150">
+    <ellipse cx="80" cy="103" rx="50" ry="42" fill="url(#gradCorpo)"/>
+    <path d="M40 120 q4 10 10 3 M55 128 q4 9 10 3 M105 128 q-4 9 -10 3 M120 120 q-4 10 -10 3"
+          fill="none" stroke="#b5651d" stroke-width="4" stroke-linecap="round" opacity=".6"/>
+    <path d="M128 100 q12 3 10 13" fill="none" stroke="#c9772f" stroke-width="6" stroke-linecap="round"/>
+    <g><animateTransform attributeName="transform" type="rotate" values="0 32 58;-5 32 58;0 32 58" dur="4.6s" repeatCount="indefinite"/>
+      <ellipse cx="30" cy="60" rx="15" ry="19" fill="#c9772f" transform="rotate(-14 30 60)"/>
+      <ellipse cx="32" cy="61" rx="9" ry="12" fill="#f2b27a" transform="rotate(-14 32 61)" opacity=".85"/></g>
+    <g><animateTransform attributeName="transform" type="rotate" values="0 128 58;5 128 58;0 128 58" dur="4.6s" repeatCount="indefinite" begin="1s"/>
+      <ellipse cx="130" cy="60" rx="15" ry="19" fill="#c9772f" transform="rotate(14 130 60)"/>
+      <ellipse cx="128" cy="61" rx="9" ry="12" fill="#f2b27a" transform="rotate(14 128 61)" opacity=".85"/></g>
+    <circle cx="80" cy="62" r="43" fill="url(#gradCorpo)"/>
+    <path d="M60 25 q4 -13 11 -4 q3 -11 11 -6 q7 -8 11 1 q9 -4 8 7" fill="none" stroke="#a85e22" stroke-width="5" stroke-linecap="round"/>
+    <!-- occhi -->
+    <ellipse cx="63" cy="58" rx="12" ry="13" fill="#fff"/>
+    <ellipse cx="97" cy="58" rx="12" ry="13" fill="#fff"/>
+    <ellipse cx="65" cy="60" rx="6" ry="6" fill="#2e2018">
+      <animate attributeName="ry" values="6;6;.7;6;6" keyTimes="0;.45;.5;.55;1" dur="4.2s" repeatCount="indefinite"/></ellipse>
+    <ellipse cx="99" cy="60" rx="6" ry="6" fill="#2e2018">
+      <animate attributeName="ry" values="6;6;.7;6;6" keyTimes="0;.45;.5;.55;1" dur="4.2s" repeatCount="indefinite"/></ellipse>
+    <circle cx="67.5" cy="57" r="2.4" fill="#fff"/><circle cx="101.5" cy="57" r="2.4" fill="#fff"/>
+    <circle cx="62" cy="63" r="1.3" fill="#fff" opacity=".8"/><circle cx="96" cy="63" r="1.3" fill="#fff" opacity=".8"/>
+    <!-- sopracciglia: 3 espressioni -->
+    <g class="exp exp-n">
+      <path d="M53 44 q8 -6 17 -3" fill="none" stroke="#a85e22" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M90 41 q9 -3 17 3" fill="none" stroke="#a85e22" stroke-width="3.5" stroke-linecap="round"/></g>
+    <g class="exp exp-f">
+      <path d="M52 40 q9 -8 18 -4" fill="none" stroke="#a85e22" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M90 36 q9 -4 18 4" fill="none" stroke="#a85e22" stroke-width="3.5" stroke-linecap="round"/></g>
+    <g class="exp exp-t">
+      <path d="M54 48 q8 -5 16 -6" fill="none" stroke="#a85e22" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M90 42 q8 1 16 6" fill="none" stroke="#a85e22" stroke-width="3.5" stroke-linecap="round"/></g>
+    <!-- guance -->
+    <ellipse cx="50" cy="76" rx="7.5" ry="5" fill="#f78d5b" opacity=".55"/>
+    <ellipse cx="110" cy="76" rx="7.5" ry="5" fill="#f78d5b" opacity=".55"/>
+    <!-- zanne -->
+    <path d="M62 88 q-9 13 -3 22" fill="none" stroke="#fff3dc" stroke-width="7" stroke-linecap="round"/>
+    <path d="M98 88 q9 13 3 22" fill="none" stroke="#fff3dc" stroke-width="7" stroke-linecap="round"/>
+    <!-- bocche: 3 espressioni -->
+    <path class="exp exp-n" d="M88 90 q5 4 10 0" fill="none" stroke="#8a4d1d" stroke-width="3" stroke-linecap="round"/>
+    <g class="exp exp-f">
+      <path d="M85 88 Q93 102 103 88 Z" fill="#7a3f16"/>
+      <ellipse cx="94" cy="94" rx="4.5" ry="3" fill="#e8654f"/></g>
+    <path class="exp exp-t" d="M88 94 q5 -4 10 0" fill="none" stroke="#8a4d1d" stroke-width="3" stroke-linecap="round"/>
+    <!-- proboscide -->
+    <g><animateTransform attributeName="transform" type="rotate" values="0 80 72;5 80 72;0 80 72;-5 80 72;0 80 72" dur="5s" repeatCount="indefinite"/>
+      <path d="M80 70 C78 86 72 94 64 100 C58 105 58 111 63 115" fill="none" stroke="#e07a2f" stroke-width="13" stroke-linecap="round"/>
+      <path d="M79 74 C77 87 73 93 67 98" fill="none" stroke="#f4a259" stroke-width="4" stroke-linecap="round" opacity=".8"/>
+      <ellipse cx="64" cy="116" rx="7" ry="5.5" fill="#c9772f"/>
+      <circle cx="61.5" cy="116" r="1.4" fill="#8a4d1d"/><circle cx="66.5" cy="116" r="1.4" fill="#8a4d1d"/></g>
+    <!-- piedi -->
+    <ellipse cx="58" cy="139" rx="15" ry="9" fill="#c9772f"/>
+    <ellipse cx="102" cy="139" rx="15" ry="9" fill="#c9772f"/>
+    <ellipse cx="52" cy="142" rx="4" ry="3" fill="#f2d8b8"/><ellipse cx="62" cy="143" rx="4" ry="3" fill="#f2d8b8"/>
+    <ellipse cx="96" cy="143" rx="4" ry="3" fill="#f2d8b8"/><ellipse cx="106" cy="142" rx="4" ry="3" fill="#f2d8b8"/>
+  </svg>
+</div>
+<div id="fumetto" aria-live="polite"><span class="chi"><img class="chi-av" src="assets/gnut/gnut-avatar.webp" alt=""/> GNUT</span><span id="fumetto-testo"></span></div>
+
+<!-- ============================ SHEET TAPPA =============================== -->
+<div class="overlay-bg" id="overlay-bg"></div>
+<div class="sheet" id="sheet"></div>
+
+<!-- ============================ PORTALE DEL TEMPO ========================= -->
+<div id="timeportal">
+  <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
+  <img class="tumbo-mini" src="assets/gnut/gnut-face-corsa.webp" alt="Gnut nel vortice del tempo"/>
+  <div id="portal-anno">OGGI</div>
+  <div id="portal-dest"></div>
+  <div id="portal-skip">tocca per saltare ⏩</div>
+</div>
+
+<div id="toast-livello" aria-live="assertive"></div>
+
+<!-- ============================ AR "INCONTRA GNUT" =======================
+     Prototipo di realtà aumentata: fotocamera del telefono + Gnut in
+     sovrimpressione nel luogo reale, con foto-ricordo scaricabile.
+     TODO(AR reale): per Gnut 3D ancorato al terreno (stile Pokémon Go) serve
+     un modello .glb/.usdz con <model-viewer> (Scene Viewer Android / Quick Look
+     iOS) oppure una libreria AR (AR.js location-based / 8thWall). Qui usiamo un
+     overlay 2D che funziona su iOS e Android senza installare nulla. -->
+<div id="ar">
+  <video id="ar-video" autoplay playsinline muted></video>
+  <div id="ar-scena"></div>
+  <div id="ar-gnut"><img src="assets/gnut/gnut-avatar.webp" alt="Gnut"/></div>
+  <div id="ar-bolla"><span class="chi"><img class="chi-av" src="assets/gnut/gnut-avatar.webp" alt=""/> GNUT</span><span id="ar-bolla-testo"></span></div>
+  <div id="ar-hint">Inquadra il luogo e tocca 📸 per la foto con Gnut</div>
+  <button id="ar-scatta" aria-label="Scatta foto"><svg class="ic ic-lg"><use href="#i-camera"/></svg></button>
+  <button id="ar-flip" aria-label="Cambia fotocamera (interna/esterna)"><svg class="ic ic-sm"><use href="#i-flip"/></svg></button>
+  <button id="ar-chiudi" aria-label="Chiudi"><svg class="ic ic-sm"><use href="#i-close"/></svg></button>
+  <div id="ar-flash"></div>
+  <canvas id="ar-canvas" style="display:none"></canvas>
+</div>
+
+<!-- ============================ GNUT IN 3D + AR REALE ====================
+     model-viewer (vendorizzato in assets/vendor) mostra il modello 3D generato
+     dalla foto: Gnut ruota in 3D e, sui telefoni compatibili, appare in AR nella
+     stanza (Scene Viewer Android / WebXR). Lo script viene caricato solo quando
+     serve, per non appesantire l'avvio.
+     TODO(iOS): per l'AR su iPhone (Quick Look) aggiungere un file .usdz e
+     l'attributo ios-src sul model-viewer. -->
+<div id="gnut3d">
+  <div id="g3d-titolo">Gnut in 3D</div>
+  <div id="g3d-hint">Trascina per girarlo · pizzica per zoomare</div>
+  <button id="g3d-chiudi" aria-label="Chiudi"><svg class="ic ic-sm"><use href="#i-close"/></svg></button>
+  <div id="g3d-loader">Sto arrivando in 3D… 🦣</div>
+  <model-viewer id="g3d-mv" alt="Gnut il mammut in 3D"
+     camera-controls auto-rotate rotation-per-second="18deg"
+     touch-action="pan-y" interaction-prompt="none"
+     shadow-intensity="1" exposure="1.05" environment-image="neutral"
+     ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto"
+     poster="assets/gnut/gnut-saluto.webp">
+    <button slot="ar-button" id="g3d-arbtn">👀 Portami nella tua stanza (AR)</button>
+  </model-viewer>
+</div>
+
+<!-- ============================ FINALE =================================== -->
+<div id="finale">
+  <img class="scena-foresta" src="assets/gnut/gnut-fossile.webp" alt="Gnut nella foresta fossile di Dunarobba"
+       onerror="this.nextElementSibling.style.display='block'; this.style.display='none';" />
+  <svg class="scena-foresta" viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg" style="display:none">
+    <rect width="400" height="220" fill="#bfe3f2"/>
+    <ellipse cx="200" cy="150" rx="220" ry="46" fill="#4a9fc4"/>
+    <ellipse cx="200" cy="146" rx="220" ry="40" fill="#7cc4e0"/>
+    <path d="M0 150 q100 -60 200 -10 q100 40 200 -10 V220 H0 Z" fill="#4f9d6b"/>
+    <g><rect x="60" y="70" width="16" height="110" rx="6" fill="#6b4423"/><ellipse cx="68" cy="66" rx="34" ry="42" fill="#2f6b46"/><ellipse cx="68" cy="40" rx="24" ry="30" fill="#3c8557"/></g>
+    <g><rect x="320" y="60" width="18" height="120" rx="6" fill="#6b4423"/><ellipse cx="329" cy="58" rx="38" ry="46" fill="#2f6b46"/><ellipse cx="329" cy="30" rx="26" ry="32" fill="#3c8557"/></g>
+    <g><rect x="188" y="86" width="14" height="94" rx="6" fill="#6b4423"/><ellipse cx="195" cy="80" rx="30" ry="38" fill="#2f6b46"/></g>
+    <g transform="translate(150,120)">
+      <ellipse cx="40" cy="44" rx="34" ry="28" fill="#e07a2f"/><ellipse cx="40" cy="26" rx="24" ry="22" fill="#e07a2f"/>
+      <circle cx="32" cy="24" r="6" fill="#fff"/><circle cx="48" cy="24" r="6" fill="#fff"/>
+      <circle cx="33" cy="25" r="3" fill="#3a2b1a"/><circle cx="49" cy="25" r="3" fill="#3a2b1a"/>
+      <path d="M40 32 q-2 16 -10 22" fill="none" stroke="#e07a2f" stroke-width="8" stroke-linecap="round"/>
+      <path d="M32 40 q-4 8 -1 12" stroke="#fff6e0" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M48 40 q4 8 1 12" stroke="#fff6e0" stroke-width="4" fill="none" stroke-linecap="round"/>
+    </g>
+  </svg>
+
+  <p class="sub">🎉 EVVIVA! 🎉</p>
+  <h1 id="finale-titolo">Tumbo è tornato a casa!</h1>
+  <p class="testo" style="max-width:440px;margin:6px auto 0;font-weight:700;" id="finale-testo"></p>
+
+  <div class="diploma">
+    <div class="sigillo">🏅</div>
+    <p class="data" style="letter-spacing:2px;">DIPLOMA DI</p>
+    <h2>Esploratore del Tempo</h2>
+    <p style="font-weight:700;font-size:13px;margin:2px 0;">rilasciato a</p>
+    <input class="nome-input" id="nome-bambino" placeholder="scrivi il tuo nome" maxlength="24"/>
+    <p style="font-weight:600;font-size:13px;margin:6px 0;">per aver riportato Gnut, il mammut<br>del Lago Tiberino, alla Foresta Fossile<br>di Dunarobba, fino a <b>2 milioni di anni fa</b>.</p>
+    <div class="statistiche" id="diploma-stat"></div>
+    <p class="data" id="diploma-data"></p>
+  </div>
+
+  <div style="max-width:440px;margin:0 auto;">
+    <button class="btn btn-oro" id="btn-stampa"><svg class="ic ic-sm"><use href="#i-stampa"/></svg>Stampa / Salva il diploma</button>
+    <button class="btn btn-viola" id="btn-condividi" style="display:none;"><svg class="ic ic-sm"><use href="#i-share"/></svg>Racconta l'avventura</button>
+    <button class="btn btn-ghost" id="btn-torna-mappa"><svg class="ic ic-sm"><use href="#i-map"/></svg>Torna alla mappa</button>
+    <button class="btn btn-ghost" id="btn-nuova-avventura" style="margin-top:8px;"><svg class="ic ic-sm"><use href="#i-replay"/></svg>Nuova avventura</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================================
+   COSTANTE NOME MASCOTTE — cambiala qui per rinominare ovunque
+   ============================================================================ */
+const MASCOTTE_NOME = "Gnut";   // Gnut, il mammut del Lago Tiberino
+const NOME_GIOCO = "Gnut e il Lago Perduto";
+
+/* ============================================================================
+   PALEOLAGO TIBERINO + CAMMINO DEL LAGO — dati geografici
+   ----------------------------------------------------------------------------
+   I dati REALI arrivano da assets/geo/geo-data.js (window.GEO_*): il perimetro
+   del Paleolago (dal KMZ "blu effetto acqua") e la traccia del Cammino del Lago
+   Tiberino (Wikiloc). Se quel file non si carica (offline), si usa la sagoma
+   SCHEMATICA di riserva qui sotto. Forma a "Y rovesciata": l'acqua copriva gran
+   parte dell'Umbria, da Città di Castello fino a Spoleto e alla conca ternana.
+   ============================================================================ */
+const LAGO_SCHEMATICO = {
+  type: "Polygon",
+  coordinates: [[
+    [12.21,43.46],[12.31,43.40],[12.40,43.18],[12.46,43.02],[12.55,42.90],
+    [12.66,42.82],[12.76,42.74],[12.80,42.66],[12.70,42.58],[12.60,42.55],
+    [12.51,42.61],[12.45,42.68],[12.41,42.80],[12.35,42.96],[12.29,43.14],
+    [12.23,43.32],[12.21,43.46]
+  ]]
+};
+const LAGO_TIBERINO = (typeof window !== "undefined" && window.GEO_LAGO) ? window.GEO_LAGO : LAGO_SCHEMATICO;
+const CAMMINO = (typeof window !== "undefined" && window.GEO_CAMMINO) ? window.GEO_CAMMINO : null;
+const CAMMINO_START = (typeof window !== "undefined" && window.GEO_CAMMINO_START) ? window.GEO_CAMMINO_START : null;
+/* Converte un KML (Google Earth) nella geometria del lago.
+   Uso: fetch('paleolago.kml').then(r=>r.text()).then(t=>{ lago = kmlToGeoJSON(t); }); */
+function kmlToGeoJSON(kmlText){
+  try{
+    const dom = new DOMParser().parseFromString(kmlText, "text/xml");
+    const c = dom.querySelector("coordinates");
+    if(!c) return LAGO_TIBERINO;
+    const ring = c.textContent.trim().split(/\s+/).map(p=>{
+      const [lon,lat] = p.split(",").map(Number); return [lon,lat];
+    });
+    return { type:"Polygon", coordinates:[ring] };
+  }catch(e){ return LAGO_TIBERINO; }
+}
+
+/* ============================================================================
+   GAMIFICATION: XP e LIVELLI
+   ============================================================================ */
+const XP_BASE_TAPPA = 60;
+const XP_PER_STELLA = 20;
+const LIVELLI = [
+  { xp: 0,   nome: "Cucciolo Curioso",    icona: "🐣" },
+  { xp: 150, nome: "Esploratore in Erba", icona: "🌱" },
+  { xp: 350, nome: "Cacciatore di Epoche",icona: "🧭" },
+  { xp: 600, nome: "Guardiano del Tempo", icona: "⏳" },
+];
+
+/* ============================================================================
+   CONFIGURAZIONE TAPPE (tutto il contenuto vive QUI, mai nel markup)
+   ----------------------------------------------------------------------------
+   Ogni tappa ha un MINI-GIOCO diverso nel campo "gioco":
+     quiz      → domanda con 3 opzioni (opzioni mescolate a ogni tentativo)
+     memory    → trova le coppie (campo "coppie": 4 emoji)
+     intruso   → trova l'oggetto che NON appartiene all'epoca
+     ordina    → metti in fila le epoche dal passato a oggi
+     acchiappa → gioco a tempo: tocca le cose giuste, evita le altre
+   "anno" serve al contatore del Portale del Tempo. "attiva" accende/spegne.
+   TODO(backend): in produzione questo array arriverà da un backend che potrà
+   attivare/disattivare le tappe da remoto (campo "attiva").
+   TODO(multilingua): duplicare i campi testuali per lingua (es. testo_racconto_en).
+   ============================================================================ */
+const TAPPE = [
+  {
+    id: 1, nome: "Piazza di Avigliano Umbro", epoca: "OGGI", eraClass: "era-oggi",
+    lat: 42.6555, lon: 12.4270, ricordo: "🎈", anno: 2026, anno_label: "OGGI",
+    testo_racconto: "Ciao! Mi sono perso e sono finito nella tua piazza, ai giorni nostri! Che confusione: auto, gelati, tanta gente. Ma io vengo da tantissimo tempo fa... Aiutami a tornare a casa viaggiando indietro nel tempo!",
+    curiosita: "Avigliano Umbro è diventato un Comune indipendente solo nel 1975: è uno dei Comuni più giovani dell'Umbria!",
+    gioco: {
+      tipo: "quiz",
+      domanda: "In che epoca ci troviamo adesso, nella piazza?",
+      opzioni: ["Oggi, ai giorni nostri", "Nel Medioevo", "Un milione di anni fa"],
+      corretta: 0
+    },
+    attiva: true
+  },
+  {
+    id: 2, nome: "Teatro Comunale di Avigliano", epoca: "IL '900", eraClass: "era-900",
+    lat: 42.6550, lon: 12.4265, ricordo: "🎭", anno: 1920, anno_label: "ANNO 1920",
+    testo_racconto: "Che bello questo teatro! Qui, circa cento anni fa, la gente veniva la sera a vedere spettacoli e sentire la musica. Non c'era la televisione: ci si divertiva tutti insieme sotto il palco. Facciamo un passo ancora più indietro?",
+    curiosita: "Cento anni fa non esistevano gli smartphone: gli spettacoli dal vivo erano il divertimento più grande del paese!",
+    gioco: {
+      tipo: "memory",
+      istruzioni: "Dietro il sipario si nascondono le coppie del teatro: trovale tutte!",
+      coppie: ["🎭","🎺","🎻","🥁"]
+    },
+    attiva: true
+  },
+  {
+    id: 3, nome: "Castello di Sismano", epoca: "MEDIOEVO", eraClass: "era-medioevo",
+    lat: 42.6280, lon: 12.4180, ricordo: "🏰", anno: 1300, anno_label: "ANNO 1300",
+    testo_racconto: "Uh, un castello vero! Siamo nel Medioevo. Vedi le torri e le mura? Servivano a difendere il borgo. Ho un po' paura dei cavalieri con l'armatura... ma con te al mio fianco sono coraggioso! Andiamo ancora più indietro.",
+    curiosita: "Nel Medioevo i castelli come Sismano proteggevano contadini e animali: quando arrivava un pericolo, tutti correvano dentro le mura!",
+    gioco: {
+      tipo: "intruso",
+      domanda: "Una di queste cose NON esisteva nel Medioevo. Quale?",
+      oggetti: [
+        { e: "⚔️", n: "Spada" }, { e: "🏹", n: "Arco e frecce" },
+        { e: "📱", n: "Telefonino" }, { e: "🛡️", n: "Scudo" },
+        { e: "🐴", n: "Cavallo" }, { e: "🕯️", n: "Candela" }
+      ],
+      intruso: 2
+    },
+    attiva: true
+  },
+  {
+    id: 4, nome: "Santa Restituta", epoca: "ETÀ ROMANA", eraClass: "era-romana",
+    lat: 42.6310, lon: 12.3560, ricordo: "🏛️", anno: 100, anno_label: "100 d.C.",
+    testo_racconto: "Adesso siamo nell'antica età romana, tantissimi anni fa! Qui vicino ci sono grotte e antiche storie. I Romani costruivano strade dritte e ponti robusti per viaggiare in tutto il territorio. Bravissimo, stiamo tornando a casa!",
+    curiosita: "Vicino a Santa Restituta c'è la Grotta Bella, frequentata dall'uomo fin dalla preistoria e poi usata anche in epoca romana!",
+    gioco: {
+      tipo: "ordina",
+      istruzioni: "Metti in fila la storia: tocca le epoche dalla più ANTICA alla più recente!",
+      sequenza: [
+        { e: "🦣", n: "Preistoria" }, { e: "🏛️", n: "Antichi Romani" },
+        { e: "🏰", n: "Medioevo" }, { e: "🏠", n: "Oggi" }
+      ]
+    },
+    attiva: true
+  },
+  {
+    id: 5, nome: "Borgo di Dunarobba", epoca: "PREISTORIA", eraClass: "era-preistoria",
+    lat: 42.6780, lon: 12.4370, ricordo: "🔥", anno: -10000, anno_label: "10.000 ANNI FA",
+    testo_racconto: "Siamo quasi arrivati! Qui, tantissimo tempo fa, gli uomini della preistoria vivevano nella natura: accendevano il fuoco, cacciavano e raccoglievano frutti. Sento odore di casa mia... la mia foresta è vicina!",
+    curiosita: "Gli uomini preistorici conoscevano benissimo i mammut: li disegnavano perfino sulle pareti delle caverne!",
+    gioco: {
+      tipo: "acchiappa",
+      istruzioni: "Nella preistoria non c'erano merendine! Tocca solo il cibo che si trovava in natura, evita le cose moderne!",
+      buoni: ["🍇","🌰","🐟","🍄","🫐"],
+      cattivi: ["📱","🍔","🥤"],
+      durata: 20,
+      obiettivo: 10
+    },
+    attiva: true
+  },
+  {
+    id: 6, nome: "Foresta Fossile di Dunarobba", epoca: "2 MILIONI DI ANNI FA", eraClass: "era-fossile",
+    lat: 42.6800, lon: 12.4300, ricordo: "🌲", anno: -2000000, anno_label: "2.000.000 DI ANNI FA",
+    testo_racconto: "CE L'ABBIAMO FATTA! Questa è casa mia: la Foresta Fossile di Dunarobba, due milioni di anni fa! Vedi questi giganteschi tronchi di sequoia? Crescevano sulle rive di un enorme lago antico, il Paleolago Tiberino. Grazie di cuore, piccolo esploratore!",
+    curiosita: "I tronchi di Dunarobba sono ancora di LEGNO, non di pietra: è una cosa rarissima al mondo per fossili così antichi!",
+    gioco: {
+      tipo: "quiz",
+      domanda: "Cosa sono i famosi tronchi della Foresta Fossile di Dunarobba?",
+      opzioni: ["Antichissimi alberi (sequoie) di 2 milioni di anni fa", "Tronchi di plastica", "Alberi piantati l'anno scorso"],
+      corretta: 0
+    },
+    attiva: true
+  },
+
+  /* ------------------------------------------------------------------------
+     TAPPE BONUS (campo "bonus:true") — luoghi VERI del territorio, deviazioni
+     opzionali che NON bloccano il viaggio nel tempo: danno ricordi e stelle
+     extra. Contenuti verificati (Toscolano, Grotta Bella, Fortezza Dunarobba).
+     Coordinate indicative — da confermare col Comune prima della pubblicazione.
+     ------------------------------------------------------------------------ */
+  {
+    id: 101, nome: "Toscolano — Affreschi di Pier Matteo", epoca: "RINASCIMENTO", eraClass: "era-romana",
+    bonus: true, attiva: true, lat: 42.6470, lon: 12.4030, ricordo: "🎨",
+    testo_racconto: "Appena fuori dal borgo di Toscolano c'è una chiesetta con un tesoro dipinto sul muro: un angelo, una colomba e la Madonna, con colori vivi di più di 500 anni fa!",
+    curiosita: "Li dipinse Pier Matteo d'Amelia, lo stesso artista che dipinse il soffitto della Cappella Sistina PRIMA di Michelangelo: un cielo azzurro pieno di stelle d'oro!",
+    gioco: {
+      tipo: "quiz",
+      domanda: "Cosa c'era dipinto sul soffitto della Cappella Sistina prima di Michelangelo?",
+      opzioni: ["Un cielo azzurro con stelle d'oro", "Un grande drago", "Una partita di calcio"],
+      corretta: 0
+    }
+  },
+  {
+    id: 102, nome: "Grotta Bella", epoca: "GROTTA MILLENARIA", eraClass: "era-preistoria",
+    bonus: true, attiva: true, lat: 42.6250, lon: 12.3600, ricordo: "🕯️",
+    testo_racconto: "Sul fianco di un monte, nel bosco, si apre una grotta segreta. Qui gli uomini sono venuti per migliaia di anni: prima cacciatori, poi persone che lasciavano piccoli doni agli dei.",
+    curiosita: "Dentro la Grotta Bella le persone antiche lasciavano piccole statuette di bronzo come regalo agli dei per oltre mille anni: una gigantesca cassetta dei desideri sotto la montagna!",
+    gioco: {
+      tipo: "quiz",
+      domanda: "Cosa lasciavano gli antichi dentro la Grotta Bella come dono?",
+      opzioni: ["Piccole statuette di bronzo", "Monete di cioccolato", "Palloni da calcio"],
+      corretta: 0
+    }
+  },
+  {
+    id: 103, nome: "Fortezza di Dunarobba", epoca: "RINASCIMENTO", eraClass: "era-medioevo",
+    bonus: true, attiva: true, lat: 42.6785, lon: 12.4360, ricordo: "🏯",
+    testo_racconto: "A Dunarobba c'è una fortezza con torri rotonde agli angoli, robusta come un dado di pietra. Serviva a difendere il borgo: dall'alto si vedevano arrivare da lontano gli amici... e i nemici!",
+    curiosita: "La Fortezza Alta di Dunarobba è in piedi da più di 500 anni (dal 1482) e ha quattro torri tonde, una per ogni angolo!",
+    gioco: {
+      tipo: "quiz",
+      domanda: "Quante torri agli angoli ha la Fortezza Alta di Dunarobba?",
+      opzioni: ["Quattro", "Una sola", "Dieci"],
+      corretta: 0
+    }
+  }
+];
+
+/* ============================================================================
+   STATO DI GIOCO + localStorage
+   ============================================================================ */
+const STORAGE_KEY = "tumbo_avventura_v2";
+let stato = caricaStato();
+
+function statoIniziale(){
+  return { completate: [], stelle: {}, xp: 0, nomeBambino: "", audio: true, finaleVisto: false };
+}
+function caricaStato(){
+  try{
+    const s = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if(s && Array.isArray(s.completate)) return Object.assign(statoIniziale(), s);
+  }catch(e){}
+  return statoIniziale();
+}
+function salvaStato(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(stato)); }catch(e){} }
+
+const tappeAttive = TAPPE.filter(t => t.attiva && !t.bonus);   // la SPINA del viaggio nel tempo
+const tappeBonus  = TAPPE.filter(t => t.attiva && t.bonus);    // deviazioni opzionali (side-quest)
+
+function indiceCorrente(){
+  for(let i=0;i<tappeAttive.length;i++) if(!stato.completate.includes(tappeAttive[i].id)) return i;
+  return tappeAttive.length;
+}
+function statoTappa(i){
+  if(stato.completate.includes(tappeAttive[i].id)) return "done";
+  return i === indiceCorrente() ? "current" : "future";
+}
+function stelleTotali(){ return Object.values(stato.stelle).reduce((a,b)=>a+b,0); }
+function stelleMax(){ return (tappeAttive.length + tappeBonus.length) * 3; }   // include i bonus
+function livelloAttuale(){ let L0 = LIVELLI[0]; for(const l of LIVELLI) if(stato.xp >= l.xp) L0 = l; return L0; }
+function livelloProssimo(){ for(const l of LIVELLI) if(stato.xp < l.xp) return l; return null; }
+
+/* ============================================================================
+   AUDIO WebAudio + vibrazione
+   ============================================================================ */
+let audioCtx = null;
+function nota(freq, start, dur, tipo, vol){
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type = tipo || "triangle"; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, start);
+  g.gain.linearRampToValueAtTime(vol || .18, start + .015);
+  g.gain.exponentialRampToValueAtTime(.0001, start + dur);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(start); o.stop(start + dur + .05);
+}
+function suono(tipo){
+  if(!stato.audio) return;
+  try{
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state === "suspended") audioCtx.resume();
+    const t = audioCtx.currentTime;
+    if(tipo === "ok"){ [523,659,784,1047].forEach((f,i)=>nota(f, t+i*.09, .22, "triangle", .2)); }
+    else if(tipo === "no"){ nota(196, t, .25, "sawtooth", .12); nota(147, t+.16, .3, "sawtooth", .12); }
+    else if(tipo === "pop"){ nota(880, t, .08, "sine", .15); }
+    else if(tipo === "tic"){ nota(660, t, .06, "sine", .1); }
+    else if(tipo === "lock"){ nota(220, t, .1, "square", .08); nota(180, t+.1, .12, "square", .08); }
+    else if(tipo === "portal"){ for(let i=0;i<14;i++) nota(300 + i*90, t + i*.11, .3, "sine", .1); }
+    else if(tipo === "level"){ [392,523,659,784,1047,1319].forEach((f,i)=>nota(f, t+i*.08, .25, "triangle", .18)); }
+    else if(tipo === "s1"){ [523,659].forEach((f,i)=>nota(f, t+i*.1, .2, "triangle", .2)); }
+    else if(tipo === "s2"){ [523,659,784].forEach((f,i)=>nota(f, t+i*.09, .2, "triangle", .2)); }
+    else if(tipo === "s3"){ [523,659,784,1047,1319].forEach((f,i)=>nota(f, t+i*.08, .22, "triangle", .2)); }
+    else if(tipo === "fanfare"){
+      [523,523,523,659,784,784,1047].forEach((f,i)=>nota(f, t+i*.14, .3, "triangle", .2));
+      [262,330,392].forEach((f)=>nota(f, t+.9, .8, "sine", .1));
+    }
+  }catch(e){}
+}
+function vibra(pat){ try{ navigator.vibrate && navigator.vibrate(pat); }catch(e){} }
+
+/* Musica/ambiente di sottofondo: melodia pentatonica dolce in loop.
+   Rispetta l'interruttore audio (ogni battuta controlla stato.audio). */
+let musicaTimer = null;
+function avviaMusica(){
+  if(musicaTimer) return;
+  const scala = [261.63, 293.66, 329.63, 392.0, 440.0, 523.25]; // do re mi sol la do'
+  let step = 0;
+  musicaTimer = setInterval(()=>{
+    if(!stato.audio) return;
+    try{
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if(audioCtx.state === "suspended") audioCtx.resume();
+      const t = audioCtx.currentTime;
+      const f = scala[step % scala.length];
+      nota(f, t, 1.7, "sine", .05);                         // melodia soffusa
+      if(step % 4 === 0) nota(f/2, t, 2.6, "triangle", .035); // basso morbido
+      step++;
+    }catch(e){}
+  }, 1400);
+}
+
+/* ============================================================================
+   MAPPA LEAFLET
+   ============================================================================ */
+let map = null, markers = [], markerUtente = null;
+
+function initMappa(){
+  if(typeof L === "undefined"){
+    document.getElementById('map').innerHTML =
+      '<div style="padding:40px 20px;text-align:center;font-weight:700;color:var(--terra);">' +
+      '🗺️ Serve una connessione a internet per caricare la mappa.<br>Controlla la rete e ricarica la pagina.</div>';
+    return;
+  }
+  map = L.map('map', { zoomControl:false, attributionControl:true });
+  // Tile "storybook" CARTO Voyager (senza API key) — più caldo di OSM
+  const tl = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    maxZoom: 20, subdomains:'abcd', attribution: '&copy; OpenStreetMap &copy; CARTO'
+  }).addTo(map);
+  tl.on('load', ()=>{ const ld = document.getElementById('map-loader'); if(ld) ld.classList.add('via'); });
+  L.polyline(tappeAttive.map(t=>[t.lat,t.lon]),
+    { color:'#e07a2f', weight:4, dashArray:'2 12', opacity:.85, lineCap:'round' }).addTo(map);
+  disegnaMarker();
+  ricentra();
+  // La mappa nasce dietro lo splash: forziamo il ricalcolo dimensioni più volte
+  // così le tile non restano grigie (problema classico di Leaflet su mobile).
+  [200,600,1200].forEach(ms=>setTimeout(()=>{ if(map){ map.invalidateSize(); } }, ms));
+}
+
+/* Assicura che Leaflet sia disponibile: se il primo CDN è stato bloccato,
+   prova un CDN di riserva (unpkg) prima di rinunciare. */
+function assicuraLeaflet(cb){
+  if(typeof L !== "undefined") return cb();
+  const css = document.createElement('link');
+  css.rel = "stylesheet"; css.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+  document.head.appendChild(css);
+  const s = document.createElement('script');
+  s.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+  s.onload = cb; s.onerror = cb;
+  document.head.appendChild(s);
+}
+function iconaPer(i){
+  const st = statoTappa(i);
+  let cls = "marker-future", inner = '<span><svg class="ic ic-sm"><use href="#i-lucchetto"/></svg></span>';
+  if(st === "done"){ cls = "marker-done"; inner = '<span><svg class="ic ic-sm"><use href="#i-check"/></svg></span>'; }
+  else if(st === "current"){ cls = "marker-current"; inner = '<img src="assets/gnut/gnut-avatar.webp" alt="Gnut"/>'; }
+  return L.divIcon({ className:'', html:`<div class="marker-pin ${cls}">${inner}</div>`,
+    iconSize:[44,44], iconAnchor:[22,44] });
+}
+function disegnaMarker(){
+  if(!map) return;
+  markers.forEach(m=>map.removeLayer(m)); markers = [];
+  tappeAttive.forEach((t,i)=>{
+    const m = L.marker([t.lat,t.lon], { icon: iconaPer(i) }).addTo(map);
+    m.on('click', ()=>onMarkerClick(i));
+    markers.push(m);
+  });
+  // Marker BONUS (sempre sbloccati, stella dorata): side-quest facoltative
+  tappeBonus.forEach(t=>{
+    const done = stato.completate.includes(t.id);
+    const icon = L.divIcon({ className:'',
+      html:`<div class="marker-pin marker-bonus ${done?'fatto':''}"><span>${done?'<svg class="ic ic-sm"><use href="#i-check"/></svg>':'⭐'}</span></div>`,
+      iconSize:[38,38], iconAnchor:[19,38] });
+    const m = L.marker([t.lat,t.lon], { icon }).addTo(map);
+    m.on('click', ()=>apriSchedaBonus(t));
+    markers.push(m);
+  });
+}
+function onMarkerClick(i){
+  const st = statoTappa(i);
+  if(st === "future"){
+    suono("lock"); vibra(60);
+    setStatoMascotte("pensieroso");
+    parla("Aspetta! Le tappe si aprono in ordine, dal presente al passato. Prima completiamo quella col mio marker 🐘!");
+    return;
+  }
+  suono("pop");
+  apriScheda(i);
+}
+function ricentra(){
+  if(map && tappeAttive.length)
+    map.fitBounds(L.latLngBounds(tappeAttive.map(t=>[t.lat,t.lon])).pad(0.22));
+}
+
+/* ---- Geolocalizzazione: distanza reale dalla tappa ---- */
+function distanzaKm(lat1,lon1,lat2,lon2){
+  const R=6371, rad=Math.PI/180;
+  const dLat=(lat2-lat1)*rad, dLon=(lon2-lon1)*rad;
+  const a=Math.sin(dLat/2)**2 + Math.cos(lat1*rad)*Math.cos(lat2*rad)*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function formattaDist(km){ return km < 1 ? Math.round(km*1000)+" metri" : km.toFixed(1).replace(".",",")+" km"; }
+
+document.getElementById('btn-locate').onclick = ()=>{
+  suono("pop");
+  if(!navigator.geolocation){ parla("Il tuo telefono non mi dice dove siamo... chiedi a un adulto di attivare la posizione!"); return; }
+  parla("Sto annusando l'aria per capire dove siamo... 👃");
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const { latitude:la, longitude:lo } = pos.coords;
+    if(map){
+      if(markerUtente) map.removeLayer(markerUtente);
+      markerUtente = L.marker([la,lo], { icon: L.divIcon({ className:'', html:'<div class="dot-utente"></div>', iconSize:[18,18], iconAnchor:[9,9] }) }).addTo(map);
+    }
+    const i = indiceCorrente();
+    if(i >= tappeAttive.length){ parla("Siamo già a casa! Che bello essere tornati nella mia foresta. 🌲"); return; }
+    const t = tappeAttive[i];
+    const km = distanzaKm(la, lo, t.lat, t.lon);
+    setStatoMascotte("normale");
+    if(km < 0.15) parla(`Siamo ARRIVATI a ${t.nome}! 🎉 Tocca il mio marker sulla mappa!`);
+    else parla(`Siamo a circa ${formattaDist(km)} da "${t.nome}". In marcia, esploratore! 🥾`);
+  }, (err)=>{
+    setStatoMascotte("pensieroso");
+    if(err && err.code === 1) parla("Per sapere quanto manca, chiedi a un adulto di dare il permesso alla posizione! 📍");
+    else parla("Non riesco a capire dove siamo... riprova tra un momento!");
+  }, { enableHighAccuracy:true, timeout:8000 });
+};
+
+/* ---- Paleolago Tiberino: overlay attivabile sulla mappa ---- */
+let lago = LAGO_TIBERINO, lagoLayer = null;
+document.getElementById('btn-lago').onclick = ()=>{
+  suono("pop"); vibra(30);
+  const btn = document.getElementById('btn-lago');
+  if(!map){ parla("La mappa non è disponibile senza connessione, ma il mio lago era immenso!"); return; }
+  if(lagoLayer){   // già visibile → nascondi
+    map.removeLayer(lagoLayer); lagoLayer = null;
+    btn.classList.remove('attivo'); ricentra();
+    setStatoMascotte("normale");
+    parla("Ho ritirato le acque del lago. Torniamo alle nostre tappe! 🗺️");
+    return;
+  }
+  lagoLayer = L.geoJSON(lago, { style:{ color:'#2a7ca3', weight:2, dashArray:'6 6',
+    fillColor:'#4a9fc4', fillOpacity:.35 } }).addTo(map);
+  try{ map.fitBounds(lagoLayer.getBounds().pad(0.12)); }catch(e){}
+  btn.classList.add('attivo');
+  setStatoMascotte("festante");
+  parla("Ecco il mio Lago Tiberino! Tanto tempo fa l'acqua copriva gran parte dell'Umbria, da Città di Castello fino a Spoleto e Terni. La mia foresta cresceva proprio sulla sua riva! 🌊");
+};
+
+/* ---- Cammino del Lago Tiberino: traccia reale (Wikiloc) attivabile ---- */
+let camminoLayer = null;
+document.getElementById('btn-cammino').onclick = ()=>{
+  suono("pop"); vibra(30);
+  const btn = document.getElementById('btn-cammino');
+  if(!map){ parla("La mappa non è disponibile senza connessione, ma il Cammino è bellissimo!"); return; }
+  if(!CAMMINO){ parla("La traccia del Cammino non si è caricata. Riprova online!"); return; }
+  if(camminoLayer){   // già visibile → nascondi
+    map.removeLayer(camminoLayer); camminoLayer = null;
+    btn.classList.remove('attivo'); ricentra();
+    setStatoMascotte("normale");
+    parla("Ho riposto la mappa del Cammino. Torniamo alle nostre tappe! 🗺️");
+    return;
+  }
+  const g = L.layerGroup();
+  L.geoJSON(CAMMINO, { style:{ color:'#d0662a', weight:4, opacity:.95, dashArray:'1 9', lineCap:'round' } }).addTo(g);
+  if(CAMMINO_START){
+    L.marker([CAMMINO_START[1], CAMMINO_START[0]], { icon: L.divIcon({ className:'',
+      html:'<div class="marker-pin marker-bonus"><span>🥾</span></div>', iconSize:[38,38], iconAnchor:[19,38] }) }).addTo(g);
+  }
+  g.addTo(map); camminoLayer = g;
+  try{ map.fitBounds(L.geoJSON(CAMMINO).getBounds().pad(0.15)); }catch(e){}
+  btn.classList.add('attivo');
+  setStatoMascotte("festante");
+  parla("Questo è il Cammino del Lago Tiberino: un vero sentiero che puoi percorrere a piedi, seguendo le tracce del mio antico lago! 🥾");
+};
+
+/* ============================================================================
+   AR "INCONTRA GNUT" — fotocamera + overlay + foto-ricordo
+   ============================================================================ */
+let arStream = null, arFacing = 'environment';   // 'environment' = posteriore, 'user' = interna (selfie)
+function avviaCamera(){
+  const el = document.getElementById('ar');
+  el.classList.toggle('selfie', arFacing === 'user');   // specchia l'anteprima del selfie
+  if(!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)){ el.classList.add('no-cam'); return; }
+  if(arStream){ arStream.getTracks().forEach(t=>t.stop()); arStream = null; }
+  navigator.mediaDevices.getUserMedia({ video:{ facingMode: arFacing }, audio:false })
+    .then(s=>{ el.classList.remove('no-cam'); arStream = s; document.getElementById('ar-video').srcObject = s; })
+    .catch(()=>{ el.classList.add('no-cam'); parlaAR("Non riesco ad accendere la fotocamera, ma resto qui con te! Tocca 📸 per la foto."); });
+}
+function apriAR(testo){
+  const el = document.getElementById('ar');
+  parlaAR(testo || `Eccomi! Siamo insieme in questo posto magico. Facciamoci una foto-ricordo!`);
+  el.classList.remove('no-cam'); el.classList.add('show');
+  suono("pop"); vibra(30);
+  arFacing = 'environment';   // di default la posteriore per inquadrare il luogo
+  // In produzione questa schermata si aprirà dal QR sul cartello della tappa.
+  avviaCamera();
+}
+function flipCamera(){
+  suono("pop"); vibra(20);
+  arFacing = (arFacing === 'environment') ? 'user' : 'environment';
+  parlaAR(arFacing === 'user' ? "Fotocamera interna: facciamoci un selfie insieme! 🤳"
+                              : "Fotocamera posteriore: inquadra il posto! 📸");
+  avviaCamera();
+}
+function chiudiAR(){
+  const el = document.getElementById('ar');
+  el.classList.remove('show');
+  if(arStream){ arStream.getTracks().forEach(t=>t.stop()); arStream = null; }
+}
+function parlaAR(t){ document.getElementById('ar-bolla-testo').textContent = t; }
+
+function scattaFoto(){
+  suono("ok"); vibra([30,40,60]);
+  const flash = document.getElementById('ar-flash');
+  flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go');
+
+  const canvas = document.getElementById('ar-canvas');
+  const W = 1080, H = 1440; canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  const el = document.getElementById('ar');
+  const v = document.getElementById('ar-video');
+
+  // Sfondo: fotogramma della camera (cover) oppure gradiente natura
+  if(!el.classList.contains('no-cam') && v.videoWidth){
+    const vr = v.videoWidth / v.videoHeight, cr = W / H;
+    let sw, sh, sx, sy;
+    if(vr > cr){ sh = v.videoHeight; sw = sh*cr; sx = (v.videoWidth-sw)/2; sy = 0; }
+    else{ sw = v.videoWidth; sh = sw/cr; sx = 0; sy = (v.videoHeight-sh)/2; }
+    if(arFacing === 'user'){   // selfie: ribalta il fotogramma come nell'anteprima
+      ctx.save(); ctx.translate(W,0); ctx.scale(-1,1);
+      ctx.drawImage(v, sx, sy, sw, sh, 0, 0, W, H);
+      ctx.restore();
+    }else{
+      ctx.drawImage(v, sx, sy, sw, sh, 0, 0, W, H);
+    }
+  }else{
+    const g = ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,'#8ecbe8'); g.addColorStop(.6,'#dff0e4'); g.addColorStop(1,'#9dc98a');
+    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+  }
+
+  // Gnut premium: disegno il medaglione circolare sulla foto (illustrazione, non più SVG)
+  const img = new Image();
+  img.onload = ()=>{
+    const d = W*0.46, cx = W/2, cy = H - d/2 - 150;
+    ctx.save();
+    ctx.beginPath(); ctx.arc(cx, cy, d/2, 0, Math.PI*2); ctx.closePath(); ctx.clip();
+    ctx.drawImage(img, cx-d/2, cy-d/2, d, d);
+    ctx.restore();
+    ctx.lineWidth = 12; ctx.strokeStyle = '#fff';
+    ctx.beginPath(); ctx.arc(cx, cy, d/2, 0, Math.PI*2); ctx.stroke();
+    ctx.fillStyle = 'rgba(224,122,47,.92)'; ctx.fillRect(0, H-96, W, 96);
+    ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
+    ctx.font = 'bold 46px "Baloo 2",sans-serif';
+    ctx.fillText('Io e Gnut · Visit Avigliano Umbro', W/2, H-34);
+    canvas.toBlob(b=>{
+      if(!b){ parlaAR("Che bello scatto! (Per salvarlo servono i permessi del telefono.)"); return; }
+      const file = new File([b], 'io-e-gnut.png', { type:'image/png' });
+      // iOS spesso non salva col download programmatico → usa la condivisione nativa
+      if(navigator.canShare && navigator.canShare({ files:[file] })){
+        navigator.share({ files:[file], title:'Io e Gnut' }).catch(()=>{});
+        parlaAR("Ecco la nostra foto! Salvala o inviala a mamma e papà. 📸");
+      }else{
+        const url = URL.createObjectURL(b);
+        const a = document.createElement('a'); a.href = url; a.download = 'io-e-gnut.png';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url), 1500);
+        parlaAR("Che bella foto insieme! L'ho salvata per te. 📸 Mostrala a mamma e papà!");
+      }
+    }, 'image/png');
+  };
+  img.onerror = ()=>parlaAR("Ci siamo divertiti! (La foto non si è salvata qui.)");
+  img.src = 'assets/gnut/gnut-avatar.webp';
+}
+document.getElementById('ar-chiudi').onclick = chiudiAR;
+document.getElementById('ar-scatta').onclick = scattaFoto;
+document.getElementById('ar-flip').onclick = flipCamera;
+
+/* ============================================================================
+   SCHEDA TAPPA
+   ============================================================================ */
+const sheet = document.getElementById('sheet');
+const overlayBg = document.getElementById('overlay-bg');
+let schedaCorrente = null;
+
+function apriScheda(i){
+  schedaCorrente = i;
+  const t = tappeAttive[i];
+  const gia = stato.completate.includes(t.id);
+
+  setStatoMascotte("normale");
+  parla(t.testo_racconto);
+
+  sheet.innerHTML = `
+    <div class="banda ${t.eraClass}" id="sheet-banda">
+      <div class="grip"></div>
+      <button class="chiudi" id="sheet-chiudi" aria-label="Chiudi"><svg class="ic ic-sm"><use href="#i-close"/></svg></button>
+      <span class="badge-epoca">⏳ ${t.epoca}</span>
+      <h2>${t.nome}</h2>
+    </div>
+    <div class="racconto"><img class="racconto-av" src="assets/gnut/gnut-avatar.webp" alt=""/>«${t.testo_racconto}»</div>
+    <button class="btn btn-viola" id="btn-ar"><svg class="ic ic-sm"><use href="#i-camera"/></svg>Foto-ricordo con ${MASCOTTE_NOME}</button>
+    ${ gia ? renderCompletata(t) : `
+      <p style="font-weight:800;text-align:center;color:var(--terra);margin:4px 0;">Sei arrivato in questo luogo?</p>
+      <button class="btn btn-arancio" id="btn-arrivato"><svg class="ic ic-sm"><use href="#i-pin"/></svg>Sono arrivato!</button>` }
+  `;
+  sheet.classList.add('open'); overlayBg.classList.add('show');
+  document.getElementById('sheet-chiudi').onclick = ()=>{ suono("pop"); chiudiSheet(); };
+  document.getElementById('btn-ar').onclick = ()=>
+    apriAR(`Eccomi a ${t.nome}! Siamo nell'epoca "${t.epoca}". Inquadra il posto e facciamoci una foto insieme! 📸`);
+  abilitaSwipeChiusura();
+  cablaScheda(i, gia);
+}
+
+/* Swipe verso il basso sulla banda = chiudi (UX da app) */
+function abilitaSwipeChiusura(){
+  const banda = document.getElementById('sheet-banda');
+  if(!banda) return;
+  let y0 = null;
+  banda.addEventListener('touchstart', e=>{ y0 = e.touches[0].clientY; }, { passive:true });
+  banda.addEventListener('touchmove', e=>{
+    if(y0 !== null && e.touches[0].clientY - y0 > 55){ y0 = null; chiudiSheet(); }
+  }, { passive:true });
+  banda.addEventListener('touchend', ()=>{ y0 = null; });
+}
+
+function stelleHtml(n){ return "⭐".repeat(n) + "☆".repeat(3-n); }
+function renderCompletata(t){
+  const st = stato.stelle[t.id] || 1;
+  return `
+    <div class="racconto" style="border-left-color:var(--bosco);background:#e6f5ec;">
+      ✅ Tappa completata! Ricordo: <b style="font-size:20px;">${t.ricordo}</b>
+      <div style="font-size:20px;letter-spacing:3px;margin-top:4px;">${stelleHtml(st)}</div>
+    </div>
+    <div class="curiosita">💡 <b>Lo sapevi?</b> ${t.curiosita}</div>
+    <button class="btn btn-bosco" id="btn-prossima">Continua il viaggio<svg class="ic ic-sm"><use href="#i-freccia"/></svg></button>`;
+}
+
+function cablaScheda(i, gia){
+  const t = tappeAttive[i];
+  if(gia){
+    const b = document.getElementById('btn-prossima');
+    if(b) b.onclick = ()=>{ suono("pop"); chiudiSheet(); vaiAllaCorrente(); };
+    return;
+  }
+  document.getElementById('btn-arrivato').onclick = (ev)=>{
+    // TODO(QR/geofencing): qui va la verifica reale dell'arrivo.
+    //  - QR: scansione del codice sul cartello fisico e confronto con t.id
+    //  - Geofencing: navigator.geolocation + distanzaKm(...) < 0.15
+    // Nel prototipo sblocchiamo direttamente il mini-gioco.
+    suono("pop"); vibra(30);
+    setStatoMascotte("normale");
+    parla("Perfetto, sei qui con me! Supera il mini-gioco per accendere il Portale del Tempo!");
+    const wrap = document.createElement('div');
+    ev.target.replaceWith(wrap);
+    avviaGioco(t, wrap, (stelle)=>vittoriaGioco(i, stelle));
+  };
+}
+
+function chiudiSheet(){ sheet.classList.remove('open'); overlayBg.classList.remove('show'); schedaCorrente = null; fermaAcchiappa(); }
+overlayBg.onclick = chiudiSheet;
+
+/* ---- Tappe BONUS (side-quest): scheda + vittoria, senza Portale del Tempo ---- */
+function apriSchedaBonus(t){
+  const gia = stato.completate.includes(t.id);
+  setStatoMascotte("normale");
+  parla(t.testo_racconto);
+  sheet.innerHTML = `
+    <div class="banda ${t.eraClass}" id="sheet-banda">
+      <div class="grip"></div>
+      <button class="chiudi" id="sheet-chiudi" aria-label="Chiudi"><svg class="ic ic-sm"><use href="#i-close"/></svg></button>
+      <span class="badge-epoca">⭐ TAPPA BONUS · ${t.epoca}</span>
+      <h2>${t.nome}</h2>
+    </div>
+    <div class="racconto"><img class="racconto-av" src="assets/gnut/gnut-avatar.webp" alt=""/>«${t.testo_racconto}»</div>
+    <button class="btn btn-viola" id="btn-ar"><svg class="ic ic-sm"><use href="#i-camera"/></svg>Foto-ricordo con ${MASCOTTE_NOME}</button>
+    ${ gia ? renderCompletata(t) : `
+      <p style="font-weight:800;text-align:center;color:var(--terra);margin:4px 0;">Sei arrivato in questo luogo?</p>
+      <button class="btn btn-arancio" id="btn-arrivato"><svg class="ic ic-sm"><use href="#i-pin"/></svg>Sono arrivato!</button>` }
+  `;
+  sheet.classList.add('open'); overlayBg.classList.add('show');
+  document.getElementById('sheet-chiudi').onclick = ()=>{ suono("pop"); chiudiSheet(); };
+  document.getElementById('btn-ar').onclick = ()=>
+    apriAR(`Eccomi a ${t.nome}! Un posto speciale del nostro territorio. Facciamoci una foto! 📸`);
+  abilitaSwipeChiusura();
+  if(gia){
+    const b = document.getElementById('btn-prossima');
+    if(b){ b.innerHTML = 'Chiudi<svg class="ic ic-sm"><use href="#i-check"/></svg>'; b.onclick = ()=>{ suono("pop"); chiudiSheet(); }; }
+    return;
+  }
+  document.getElementById('btn-arrivato').onclick = (ev)=>{
+    suono("pop"); vibra(30); setStatoMascotte("normale");
+    parla("Che bello esplorare fuori percorso! Supera il mini-gioco per il ricordo bonus!");
+    const wrap = document.createElement('div');
+    ev.target.replaceWith(wrap);
+    avviaGioco(t, wrap, (stelle)=>vittoriaBonus(t, stelle));
+  };
+}
+function vittoriaBonus(t, stelle){
+  const nuovo = !stato.completate.includes(t.id);
+  if(nuovo) stato.completate.push(t.id);
+  stato.stelle[t.id] = Math.max(stato.stelle[t.id] || 0, stelle);
+  const xp = nuovo ? (XP_BASE_TAPPA + stelle * XP_PER_STELLA) : 0;
+  const livPrima = livelloAttuale();
+  stato.xp += xp; salvaStato();
+  suono("s" + stelle); vibra([40,30,40,30,120]);
+  setStatoMascotte("festante");
+  parla(`Bravissimo esploratore! Tappa bonus superata! ${stelleHtml(stelle)}`);
+  if(xp) mostraXpFloat("+" + xp + " ✨");
+  aggiornaHud(); disegnaMarker();
+  const livDopo = livelloAttuale();
+  if(livDopo !== livPrima) setTimeout(()=>toastLivello(livDopo), 1200);
+  const banda = document.getElementById('sheet-banda');
+  const dopoBanda = banda ? banda.nextElementSibling : null;
+  if(dopoBanda){
+    let n = dopoBanda.nextElementSibling;
+    while(n){ const nx = n.nextElementSibling; n.remove(); n = nx; }
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <div class="stelle-earned">${stelleHtml(stelle)}</div>
+      <div class="racconto" style="border-left-color:var(--oro);background:#fff8e8;">
+        🎒 Ricordo bonus: <b style="font-size:22px;">${t.ricordo}</b>${xp ? ` &nbsp;·&nbsp; +${xp} ✨` : ""}
+      </div>
+      <div class="curiosita">💡 <b>Lo sapevi?</b> ${t.curiosita}</div>
+      <button class="btn btn-bosco" id="btn-chiudi-bonus">Continua l'esplorazione<svg class="ic ic-sm"><use href="#i-freccia"/></svg></button>`;
+    sheet.appendChild(div);
+    document.getElementById('btn-chiudi-bonus').onclick = ()=>{ suono("pop"); chiudiSheet(); };
+  }
+}
+
+/* ============================================================================
+   MOTORE MINI-GIOCHI
+   ----------------------------------------------------------------------------
+   Ogni gioco riceve (tappa, contenitore, fine) e chiama fine(stelle 1..3).
+   ============================================================================ */
+function avviaGioco(t, box, fine){
+  const g = t.gioco || { tipo:"quiz", domanda:"?", opzioni:["Sì"], corretta:0 };
+  if(g.tipo === "memory") giocoMemory(g, box, fine);
+  else if(g.tipo === "intruso") giocoIntruso(g, box, fine);
+  else if(g.tipo === "ordina") giocoOrdina(g, box, fine);
+  else if(g.tipo === "acchiappa") giocoAcchiappa(g, box, fine);
+  else giocoQuiz(g, box, fine);
+}
+
+/* ---- QUIZ ------------------------------------------------------------- */
+function giocoQuiz(g, box, fine){
+  let errori = 0;
+  function render(){
+    const ordine = g.opzioni.map((_,idx)=>idx).sort(()=>Math.random()-.5);
+    box.innerHTML = `
+      <div class="gioco-titolo">🧠 Indovinello dell'epoca</div>
+      <p class="gioco-istruzioni">${g.domanda}</p>
+      ${ordine.map(idx=>`<button class="opzione" data-ok="${idx===g.corretta?1:0}">${g.opzioni[idx]}</button>`).join("")}
+    `;
+    box.querySelectorAll('.opzione').forEach(btn=>{
+      btn.onclick = ()=>{
+        if(btn.dataset.ok === "1"){
+          btn.classList.add('giusta');
+          fine(errori === 0 ? 3 : errori === 1 ? 2 : 1);
+        }else{
+          errori++;
+          btn.classList.add('sbagliata');
+          incoraggia();
+          setTimeout(()=>btn.classList.remove('sbagliata'), 600);
+        }
+      };
+    });
+  }
+  render();
+}
+
+/* ---- MEMORY: trova le coppie ------------------------------------------ */
+function giocoMemory(g, box, fine){
+  const valori = [...g.coppie, ...g.coppie].sort(()=>Math.random()-.5);
+  let girate = [], blocco = false, trovate = 0, mosse = 0;
+  box.innerHTML = `
+    <div class="gioco-titolo">🃏 Memory dell'epoca</div>
+    <p class="gioco-istruzioni">${g.istruzioni || "Trova tutte le coppie!"}</p>
+    <div class="memory-grid">
+      ${valori.map((v,k)=>`
+        <button class="mcard" data-v="${v}" aria-label="Carta coperta">
+          <div class="inner">
+            <div class="faccia retro">❔</div>
+            <div class="faccia fronte">${v}</div>
+          </div>
+        </button>`).join("")}
+    </div>`;
+  box.querySelectorAll('.mcard').forEach(c=>{
+    c.onclick = ()=>{
+      if(blocco || c.classList.contains('girata')) return;
+      suono("tic");
+      c.classList.add('girata');
+      girate.push(c);
+      if(girate.length === 2){
+        mosse++; blocco = true;
+        const [a,b] = girate;
+        if(a.dataset.v === b.dataset.v){
+          trovate++;
+          a.classList.add('trovata'); b.classList.add('trovata');
+          suono("pop"); vibra(30);
+          girate = []; blocco = false;
+          if(trovate === g.coppie.length){
+            fine(mosse <= g.coppie.length + 1 ? 3 : mosse <= g.coppie.length + 3 ? 2 : 1);
+          }
+        }else{
+          incoraggia(true);
+          setTimeout(()=>{ a.classList.remove('girata'); b.classList.remove('girata'); girate = []; blocco = false; }, 750);
+        }
+      }
+    };
+  });
+}
+
+/* ---- INTRUSO: cosa non appartiene all'epoca? --------------------------- */
+function giocoIntruso(g, box, fine){
+  let errori = 0;
+  const ordine = g.oggetti.map((_,idx)=>idx).sort(()=>Math.random()-.5);
+  box.innerHTML = `
+    <div class="gioco-titolo">🔍 Trova l'intruso</div>
+    <p class="gioco-istruzioni">${g.domanda}</p>
+    <div class="intruso-grid">
+      ${ordine.map(idx=>`
+        <button class="intruso-item" data-ok="${idx===g.intruso?1:0}">
+          <span class="em">${g.oggetti[idx].e}</span>${g.oggetti[idx].n}
+        </button>`).join("")}
+    </div>`;
+  box.querySelectorAll('.intruso-item').forEach(el=>{
+    el.onclick = ()=>{
+      if(el.dataset.ok === "1"){
+        el.classList.add('giusta');
+        fine(errori === 0 ? 3 : errori === 1 ? 2 : 1);
+      }else{
+        errori++;
+        el.classList.add('sbagliata');
+        incoraggia();
+        setTimeout(()=>el.classList.remove('sbagliata'), 600);
+      }
+    };
+  });
+}
+
+/* ---- ORDINA: metti in fila la storia ----------------------------------- */
+function giocoOrdina(g, box, fine){
+  let prossimo = 0, errori = 0;
+  const ordine = g.sequenza.map((_,idx)=>idx).sort(()=>Math.random()-.5);
+  box.innerHTML = `
+    <div class="gioco-titolo">⏳ Ordina la storia</div>
+    <p class="gioco-istruzioni">${g.istruzioni}</p>
+    <div class="ordina-slots">
+      ${g.sequenza.map((_,k)=>`<div class="ordina-slot" data-slot="${k}">${k+1}°</div>`).join("")}
+    </div>
+    <div class="ordina-chips">
+      ${ordine.map(idx=>`
+        <button class="ordina-chip" data-pos="${idx}">
+          <span class="em">${g.sequenza[idx].e}</span>${g.sequenza[idx].n}
+        </button>`).join("")}
+    </div>`;
+  box.querySelectorAll('.ordina-chip').forEach(chip=>{
+    chip.onclick = ()=>{
+      const pos = parseInt(chip.dataset.pos,10);
+      if(pos === prossimo){
+        suono("tic"); vibra(20);
+        const slot = box.querySelector(`.ordina-slot[data-slot="${pos}"]`);
+        slot.classList.add('pieno');
+        slot.innerHTML = `<span class="em">${g.sequenza[pos].e}</span>${g.sequenza[pos].n}`;
+        chip.classList.add('usata');
+        prossimo++;
+        if(prossimo === g.sequenza.length){
+          fine(errori === 0 ? 3 : errori <= 2 ? 2 : 1);
+        }
+      }else{
+        errori++;
+        chip.classList.add('sbagliata');
+        incoraggia();
+        setTimeout(()=>chip.classList.remove('sbagliata'), 600);
+      }
+    };
+  });
+}
+
+/* ---- ACCHIAPPA: gioco a tempo ------------------------------------------ */
+let acchiappaTimers = [];
+function fermaAcchiappa(){ acchiappaTimers.forEach(t=>clearInterval(t)); acchiappaTimers = []; }
+function giocoAcchiappa(g, box, fine){
+  let punti = 0, finito = false;
+  const durata = g.durata || 20;
+  box.innerHTML = `
+    <div class="gioco-titolo">🎯 Acchiappa!</div>
+    <p class="gioco-istruzioni">${g.istruzioni}</p>
+    <div class="acchiappa-hud"><span id="acch-punti">Punti: 0</span><span id="acch-tempo">⏱ ${durata}s</span></div>
+    <div class="acchiappa-area" id="acch-area"></div>
+    <div class="acchiappa-timerbar"><div id="acch-bar"></div></div>`;
+  const area = document.getElementById('acch-area');
+  const elPunti = document.getElementById('acch-punti');
+  const elTempo = document.getElementById('acch-tempo');
+  const elBar = document.getElementById('acch-bar');
+  let resta = durata;
+
+  function spawna(){
+    if(finito) return;
+    const buono = Math.random() < .62;
+    const lista = buono ? g.buoni : g.cattivi;
+    const el = document.createElement('div');
+    el.className = 'acchiappa-item';
+    el.textContent = lista[Math.floor(Math.random()*lista.length)];
+    el.style.left = (5 + Math.random()*80) + "%";
+    el.style.top = "-44px";
+    const caduta = 2600 + Math.random()*1400;
+    el.style.transition = `top ${caduta}ms linear`;
+    area.appendChild(el);
+    requestAnimationFrame(()=>{ el.style.top = "300px"; });
+    const cleanup = setTimeout(()=>el.remove(), caduta + 100);
+    el.onpointerdown = ()=>{
+      if(finito) return;
+      clearTimeout(cleanup);
+      const r = el.getBoundingClientRect(), ar = area.getBoundingClientRect();
+      const f = document.createElement('div');
+      f.className = 'punto-float';
+      f.style.left = (r.left - ar.left) + "px";
+      f.style.top = (r.top - ar.top) + "px";
+      if(buono){ punti++; suono("pop"); vibra(20); f.textContent = "+1"; f.style.color = "#2f6b46"; }
+      else{ punti = Math.max(0, punti - 1); suono("no"); vibra([60,30,60]); f.textContent = "-1"; f.style.color = "#c0392b"; }
+      area.appendChild(f); setTimeout(()=>f.remove(), 800);
+      elPunti.textContent = "Punti: " + punti;
+      el.remove();
+    };
+  }
+
+  acchiappaTimers.push(setInterval(spawna, 620));
+  acchiappaTimers.push(setInterval(()=>{
+    resta--;
+    elTempo.textContent = "⏱ " + resta + "s";
+    elBar.style.width = (resta/durata*100) + "%";
+    if(resta <= 5 && resta > 0) suono("tic");
+    if(resta <= 0){
+      finito = true; fermaAcchiappa();
+      area.querySelectorAll('.acchiappa-item').forEach(e=>e.remove());
+      const stelle = punti >= g.obiettivo ? 3 : punti >= Math.ceil(g.obiettivo*.6) ? 2 : 1;
+      fine(stelle);
+    }
+  }, 1000));
+}
+
+/* Il mammut incoraggia dopo un errore (nessuna penalità) */
+function incoraggia(soft){
+  suono("no"); vibra([70,40,70]);
+  setStatoMascotte("pensieroso");
+  const frasi = soft
+    ? ["Mmm, non era una coppia... memoria da mammut, riprova!", "Quasi! Dove le ho viste quelle carte?"]
+    : ["Ohh, quasi! Non è quella. Riprova, ci riusciamo insieme! 💪", "Mmm, non credo... prova ancora, tu ce la fai!", "Uh, no! Ma i grandi esploratori non mollano mai!"];
+  parla(frasi[Math.floor(Math.random()*frasi.length)]);
+}
+
+/* ============================================================================
+   VITTORIA MINI-GIOCO
+   ============================================================================ */
+function vittoriaGioco(i, stelle){
+  const t = tappeAttive[i];
+  if(!stato.completate.includes(t.id)) stato.completate.push(t.id);
+  stato.stelle[t.id] = Math.max(stato.stelle[t.id] || 0, stelle);
+  const xpGuadagnati = XP_BASE_TAPPA + stelle * XP_PER_STELLA;
+  const livPrima = livelloAttuale();
+  stato.xp += xpGuadagnati;
+  salvaStato();
+
+  suono("s" + stelle); vibra([40,30,40,30,120]);
+  setStatoMascotte("festante");
+  parla(`EVVIVA! Ce l'hai fatta! ${stelleHtml(stelle)} Il Portale del Tempo si sta accendendo!`);
+  mostraXpFloat("+" + xpGuadagnati + " ✨");
+
+  aggiornaHud(); aggiornaTimeline(); disegnaMarker(); aggiornaQuest();
+
+  const livDopo = livelloAttuale();
+  if(livDopo !== livPrima) setTimeout(()=>toastLivello(livDopo), 1200);
+
+  const ultima = indiceCorrente() >= tappeAttive.length;
+  // Sostituisce il contenuto del gioco con il riepilogo vittoria
+  const banda = document.getElementById('sheet-banda');
+  const dopoBanda = banda ? banda.nextElementSibling : null;
+  if(dopoBanda){
+    let n = dopoBanda.nextElementSibling;
+    while(n){ const nx = n.nextElementSibling; n.remove(); n = nx; }
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <div class="stelle-earned">${stelleHtml(stelle)}</div>
+      <div class="racconto" style="border-left-color:var(--bosco);background:#e6f5ec;">
+        🎒 Nuovo ricordo nello zaino: <b style="font-size:22px;">${t.ricordo}</b> &nbsp;·&nbsp; +${xpGuadagnati} ✨
+      </div>
+      <div class="curiosita">💡 <b>Lo sapevi?</b> ${t.curiosita}</div>
+      <button class="btn btn-viola" id="btn-viaggia"><svg class="ic ic-sm"><use href="#i-vortice"/></svg>${ultima ? "Torna a casa!" : "Viaggia nel tempo!"}</button>`;
+    sheet.appendChild(div);
+    document.getElementById('btn-viaggia').onclick = ()=>{
+      chiudiSheet();
+      if(ultima){
+        portale(t.anno, t.anno, t.anno_label, ()=>mostraFinale());
+      }else{
+        const prossima = tappeAttive[indiceCorrente()];
+        portale(t.anno, prossima.anno, prossima.anno_label, ()=>vaiAllaCorrente());
+      }
+    };
+  }
+}
+
+function vaiAllaCorrente(){
+  const i = indiceCorrente();
+  if(i >= tappeAttive.length){ mostraFinale(); return; }
+  const t = tappeAttive[i];
+  if(map) map.flyTo([t.lat,t.lon], 15, { duration:1.2 });
+  setStatoMascotte("normale");
+  parla(`Prossima tappa: ${t.nome} (${t.epoca}). Tocca il mio marker 🐘 sulla mappa! Usa 🧭 per sapere quanto manca.`);
+}
+
+/* ============================================================================
+   PORTALE DEL TEMPO (tocca per saltare)
+   ============================================================================ */
+let portaleSkip = null;
+function testoAnno(v){
+  v = Math.round(v);
+  if(v >= 1500) return "ANNO " + v;
+  if(v > 0) return v + " d.C.";
+  return Math.abs(v).toLocaleString("it-IT") + " ANNI FA";
+}
+function portale(daAnno, adAnno, labelFinale, done){
+  const el = document.getElementById('timeportal');
+  const elAnno = document.getElementById('portal-anno');
+  const elDest = document.getElementById('portal-dest');
+
+  el.querySelectorAll('.stellina').forEach(s=>s.remove());
+  for(let k=0;k<26;k++){
+    const s = document.createElement('div');
+    s.className = 'stellina';
+    const sz = 1.5 + Math.random()*2.5;
+    s.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*2}s;`;
+    el.appendChild(s);
+  }
+  elDest.textContent = "Viaggio nel tempo in corso…";
+  el.classList.add('show');
+  suono("portal"); vibra([20,30,20,30,20,30,80]);
+
+  let saltato = false, chiuso = false;
+  function chiudi(){
+    if(chiuso) return; chiuso = true;
+    elAnno.textContent = labelFinale;
+    elDest.textContent = "✨ Siamo arrivati! ✨";
+    setTimeout(()=>{ el.classList.remove('show'); done && done(); }, saltato ? 350 : 900);
+  }
+  portaleSkip = ()=>{ saltato = true; chiudi(); };
+
+  const DUR = 2300, t0 = performance.now();
+  function anim(now){
+    if(chiuso) return;
+    const p = Math.min(1, (now - t0) / DUR);
+    const ease = p < .5 ? 4*p*p*p : 1 - Math.pow(-2*p + 2, 3)/2;
+    elAnno.textContent = testoAnno(daAnno + (adAnno - daAnno) * ease);
+    if(p < 1) requestAnimationFrame(anim);
+    else chiudi();
+  }
+  requestAnimationFrame(anim);
+}
+document.getElementById('timeportal').onclick = ()=>{ if(portaleSkip) portaleSkip(); };
+
+/* ============================================================================
+   MASCOTTE: stati + fumetto + XP float
+   ============================================================================ */
+const elMascotte = document.getElementById('mascotte');
+const elFumetto = document.getElementById('fumetto');
+const elFumettoTesto = document.getElementById('fumetto-testo');
+let fumettoTimer = null;
+
+// Il medaglione della mascotte cambia posa in base allo stato d'animo
+const MASC_IMG = {
+  normale:    'assets/gnut/gnut-avatar.webp',
+  festante:   'assets/gnut/gnut-face-corsa.webp',
+  pensieroso: 'assets/gnut/gnut-face-seduto.webp'
+};
+function setStatoMascotte(s){
+  elMascotte.classList.remove('festante','pensieroso');
+  if(s === "festante") elMascotte.classList.add('festante');
+  else if(s === "pensieroso") elMascotte.classList.add('pensieroso');
+  const img = document.getElementById('mascotte-img');
+  const src = MASC_IMG[s] || MASC_IMG.normale;
+  if(img && !img.src.endsWith(src)) img.src = src;
+}
+function parla(testo){
+  elFumettoTesto.textContent = testo;
+  elFumetto.classList.remove('hidden');
+  if(fumettoTimer) clearTimeout(fumettoTimer);
+  // Durata proporzionale alla lunghezza: i lettori piccoli hanno tempo di leggere
+  const dur = Math.max(4500, Math.min(14000, testo.length * 95));
+  fumettoTimer = setTimeout(()=>elFumetto.classList.add('hidden'), dur);
+}
+elFumetto.onclick = ()=>elFumetto.classList.add('hidden');
+elMascotte.onclick = ()=>{
+  suono("pop");
+  if(elFumetto.classList.contains('hidden')) suggerimentoCorrente();
+  else elFumetto.classList.add('hidden');
+};
+function suggerimentoCorrente(){
+  const i = indiceCorrente();
+  setStatoMascotte("normale");
+  const nome = stato.nomeBambino ? `, ${stato.nomeBambino}` : "";
+  if(i >= tappeAttive.length){ parla(`Ce l'abbiamo fatta insieme${nome}! Sono a casa, nella mia foresta 🌲 Apri lo 🎒 Zaino per rivedere i ricordi!`); return; }
+  const t = tappeAttive[i];
+  parla(`Portami a: ${t.nome} — ${t.epoca}. Tocca il mio marker 🐘 che pulsa sulla mappa${nome}!`);
+}
+function mostraXpFloat(txt){
+  const d = document.createElement('div');
+  d.className = 'xp-float'; d.textContent = txt;
+  document.body.appendChild(d);
+  setTimeout(()=>d.remove(), 1500);
+}
+
+/* ============================================================================
+   HUD, TIMELINE (tappabile), TOAST
+   ============================================================================ */
+/* Pannello missione: dice sempre qual è il prossimo passo, con GIOCA diretto */
+function aggiornaQuest(){
+  const el = document.getElementById('quest-testo');
+  const btn = document.getElementById('quest-gioca');
+  if(!el || !btn) return;
+  const i = indiceCorrente();
+  if(i >= tappeAttive.length){
+    el.textContent = `Hai riportato ${MASCOTTE_NOME} a casa! Rivedi il tuo diploma.`;
+    btn.textContent = "DIPLOMA";
+    btn.onclick = ()=>{ suono("pop"); mostraFinale(false); };
+  }else{
+    const t = tappeAttive[i];
+    el.textContent = `Raggiungi ${t.nome} e supera la prova!`;
+    btn.textContent = "GIOCA";
+    btn.onclick = ()=>{ suono("pop"); apriScheda(i); };
+  }
+}
+
+function aggiornaHud(){
+  const liv = livelloAttuale();
+  document.getElementById('pill-livello').innerHTML = liv.icona + '<span class="liv-txt">&nbsp;' + liv.nome.split(" ")[0] + '</span>';
+  document.getElementById('pill-xp').innerHTML = '<svg class="ic ic-sm"><use href="#i-scintilla"/></svg>' + stato.xp;
+}
+function aggiornaTimeline(){
+  const tot = tappeAttive.length;
+  const fatte = stato.completate.filter(id=>tappeAttive.some(t=>t.id===id)).length;
+  document.getElementById('tl-fill').style.width = (fatte/tot*100) + "%";
+  const dots = document.getElementById('tl-dots');
+  dots.innerHTML = "";
+  tappeAttive.forEach((t,i)=>{
+    const st = statoTappa(i);
+    const d = document.createElement('button');
+    d.className = "tl-dot " + st;
+    d.textContent = t.ricordo;
+    d.title = t.nome + " — " + t.epoca;
+    d.setAttribute('aria-label', t.nome);
+    d.onclick = ()=>onMarkerClick(i);   // la timeline è tappabile come i marker
+    dots.appendChild(d);
+  });
+}
+function toastLivello(liv){
+  suono("level"); vibra([50,50,50,50,150]);
+  const el = document.getElementById('toast-livello');
+  el.innerHTML = `<div class="big">${liv.icona}</div>LIVELLO SU!<br>Ora sei <b>${liv.nome}</b>`;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 3200);
+}
+
+/* ============================================================================
+   ZAINO / ALBUM
+   ============================================================================ */
+function renderAlbum(){
+  const liv = livelloAttuale(), next = livelloProssimo();
+  const pct = next ? Math.min(100, Math.round((stato.xp - liv.xp) / (next.xp - liv.xp) * 100)) : 100;
+  const tutte = indiceCorrente() >= tappeAttive.length;
+
+  const cardHtml = (t, misterioso)=>{
+    const done = stato.completate.includes(t.id);
+    return `
+      <div class="card-ricordo ${done ? "" : "bloccato"}">
+        <div class="em">${done ? t.ricordo : "❓"}</div>
+        <div class="nm">${done ? t.nome : misterioso}</div>
+        <div class="ep ${t.eraClass}">${t.epoca}</div>
+        <div class="st">${done ? stelleHtml(stato.stelle[t.id] || 1) : "☆☆☆"}</div>
+      </div>`;
+  };
+  const cards = tappeAttive.map(t=>cardHtml(t, "Ricordo misterioso")).join("");
+  const bonusCards = tappeBonus.map(t=>cardHtml(t, "Luogo segreto da scoprire")).join("");
+
+  document.getElementById('album').innerHTML = `
+    <h2>🎒 Zaino dell'Esploratore${stato.nomeBambino ? " di " + stato.nomeBambino : ""}</h2>
+    <div class="card-livello">
+      <div class="liv-top">
+        <div class="liv-ic">${liv.icona}</div>
+        <div>
+          <div class="liv-nome">${liv.nome}</div>
+          <div class="liv-xp">✨ ${stato.xp} XP ${next ? "· al prossimo livello: " + next.xp + " XP" : "· livello massimo!"} &nbsp; ⭐ ${stelleTotali()}/${stelleMax()}</div>
+        </div>
+      </div>
+      <div class="liv-bar"><div style="width:${pct}%"></div></div>
+    </div>
+    <div class="griglia-ricordi">${cards}</div>
+    ${ tappeBonus.length ? `
+      <h2 style="margin-top:20px;">⭐ Luoghi Bonus del territorio</h2>
+      <div class="griglia-ricordi">${bonusCards}</div>` : "" }
+    ${ tutte ? `<button class="btn btn-oro" id="btn-rivedi-diploma" style="margin-top:16px;">🎓 Rivedi il tuo diploma</button>` : "" }
+  `;
+  const bd = document.getElementById('btn-rivedi-diploma');
+  if(bd) bd.onclick = ()=>{ suono("pop"); mostraFinale(false); };
+}
+
+const tabMappa = document.getElementById('tab-mappa');
+const tabZaino = document.getElementById('tab-zaino');
+function mostraTab(quale){
+  const album = document.getElementById('album');
+  const suMappa = quale !== "zaino";
+  if(!suMappa){ renderAlbum(); album.classList.add('show'); tabZaino.classList.add('active'); tabMappa.classList.remove('active'); }
+  else{ album.classList.remove('show'); tabMappa.classList.add('active'); tabZaino.classList.remove('active'); }
+  // I controlli della mappa non devono galleggiare sopra lo Zaino
+  const chips = document.getElementById('map-chips'), loc = document.getElementById('btn-locate');
+  const quest = document.getElementById('quest');
+  if(chips) chips.style.display = suMappa ? 'flex' : 'none';
+  if(loc) loc.style.display = suMappa ? 'grid' : 'none';
+  if(quest) quest.style.display = suMappa ? 'flex' : 'none';
+}
+tabMappa.onclick = ()=>{ suono("pop"); mostraTab("mappa"); };
+tabZaino.onclick = ()=>{ suono("pop"); mostraTab("zaino"); };
+// ---- Gnut in 3D + AR reale (model-viewer, caricato in modo pigro) ----
+let mvCaricato = false;
+function apri3D(){
+  const scr = document.getElementById('gnut3d');
+  const mv = document.getElementById('g3d-mv');
+  const loader = document.getElementById('g3d-loader');
+  scr.classList.add('show');
+  setStatoMascotte("festante");
+  if(!mvCaricato){
+    mvCaricato = true;
+    const s = document.createElement('script');
+    s.type = 'module'; s.src = 'assets/vendor/model-viewer.min.js';
+    s.onerror = ()=>{ loader.textContent = "Per il 3D serve la connessione a internet 📶"; };
+    document.head.appendChild(s);
+    let caricato = false;
+    mv.addEventListener('load', ()=>{ caricato = true; loader.style.display = 'none'; });
+    mv.addEventListener('error', ()=>{ loader.textContent = "Ops, non riesco a caricare il 3D. Controlla la connessione."; });
+    // Fallback: se dopo un po' non è caricato, NON cancello il messaggio d'errore
+    setTimeout(()=>{
+      if(caricato) loader.style.display = 'none';
+      else if(loader.textContent.indexOf('Sto arrivando') === 0) loader.textContent = "Ci metto un pochino… (connessione lenta)";
+    }, 12000);
+  }
+  if(!mv.getAttribute('src')) mv.setAttribute('src', 'assets/gnut/gnut.glb');
+}
+function chiudi3D(){ document.getElementById('gnut3d').classList.remove('show'); }
+document.getElementById('g3d-chiudi').onclick = ()=>{ suono("pop"); chiudi3D(); };
+document.getElementById('tab-3d').onclick = ()=>{ suono("pop"); apri3D(); };
+
+/* ============================================================================
+   FINALE + coriandoli + diploma
+   ============================================================================ */
+function mostraFinale(conFesta = true){
+  stato.finaleVisto = true; salvaStato();
+  document.getElementById('finale-titolo').textContent = `${MASCOTTE_NOME} è tornato a casa!`;
+  document.getElementById('finale-testo').textContent =
+    `Hai riportato ${MASCOTTE_NOME} indietro nel tempo fino alla sua foresta di 2 milioni di anni fa. Sei un vero Esploratore del Tempo!`;
+  document.getElementById('nome-bambino').value = stato.nomeBambino || "";
+  document.getElementById('diploma-data').textContent = "Avigliano Umbro, " + dataOggi();
+  document.getElementById('diploma-stat').innerHTML =
+    `<span>⭐ ${stelleTotali()}/${stelleMax()} stelle</span><span>✨ ${stato.xp} XP</span><span>${livelloAttuale().icona} ${livelloAttuale().nome}</span>`;
+  document.getElementById('finale').classList.add('show');
+  elFumetto.classList.add('hidden');
+  if(conFesta){ suono("fanfare"); vibra([60,60,60,60,200]); coriandoli(); }
+}
+function dataOggi(){
+  return new Date().toLocaleDateString('it-IT', { day:'numeric', month:'long', year:'numeric' });
+}
+function coriandoli(){
+  const pezzi = ['🍂','🍃','⭐','🎉','🧡','💚'];
+  for(let k=0;k<70;k++){
+    const c = document.createElement('div');
+    c.className = 'coriandolo';
+    c.textContent = pezzi[k % pezzi.length];
+    c.style.left = Math.random()*100 + 'vw';
+    c.style.fontSize = (14 + Math.random()*14) + 'px';
+    c.style.animationDuration = (2.5 + Math.random()*2.5) + 's';
+    c.style.animationDelay = (Math.random()*1.5) + 's';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(), 6500);
+  }
+}
+document.getElementById('nome-bambino').addEventListener('input', e=>{
+  stato.nomeBambino = e.target.value; salvaStato();
+});
+document.getElementById('btn-stampa').onclick = ()=>window.print();
+document.getElementById('btn-torna-mappa').onclick = ()=>{
+  suono("pop");
+  document.getElementById('finale').classList.remove('show');
+  mostraTab("mappa");
+};
+document.getElementById('btn-nuova-avventura').onclick = ()=>reset();
+if(navigator.share){
+  const bc = document.getElementById('btn-condividi');
+  bc.style.display = "flex";
+  bc.onclick = ()=>{
+    navigator.share({
+      title: "Il viaggio di " + MASCOTTE_NOME,
+      text: `Ho riportato ${MASCOTTE_NOME} il mammut a casa, alla Foresta Fossile di Dunarobba! ⭐ ${stelleTotali()}/${stelleMax()} stelle, ${stato.xp} XP. Vieni a giocare ad Avigliano Umbro!`
+    }).catch(()=>{});
+  };
+}
+
+/* ============================================================================
+   MENU
+   ============================================================================ */
+const menu = document.getElementById('menu');
+document.getElementById('menu-btn').onclick = ()=>menu.classList.toggle('open');
+document.addEventListener('click', e=>{
+  if(!menu.contains(e.target) && !e.target.closest('#menu-btn')) menu.classList.remove('open');
+});
+document.getElementById('btn-aiuto').onclick = ()=>{ menu.classList.remove('open'); suggerimentoCorrente(); };
+document.getElementById('btn-ricentra').onclick = ()=>{
+  menu.classList.remove('open'); mostraTab("mappa");
+  if(!map){ assicuraLeaflet(()=>{ try{ initMappa(); }catch(e){} }); }   // riprova se non era partita
+  else{ map.invalidateSize(); ricentra(); }
+};
+function aggiornaBtnAudio(){
+  document.getElementById('audio-lbl').textContent = stato.audio ? "Suoni: attivi" : "Suoni: spenti";
+  document.getElementById('audio-ic').setAttribute('href', stato.audio ? "#i-audio-on" : "#i-audio-off");
+}
+document.getElementById('btn-audio').onclick = function(){
+  stato.audio = !stato.audio; salvaStato();
+  aggiornaBtnAudio();
+  if(stato.audio) suono("pop");
+};
+document.getElementById('btn-reset').onclick = ()=>{
+  menu.classList.remove('open');
+  if(confirm("Vuoi ricominciare l'avventura da capo? I progressi verranno cancellati.")) reset();
+};
+function reset(){
+  const nome = stato.nomeBambino;
+  stato = statoIniziale(); stato.nomeBambino = nome;
+  salvaStato();
+  document.getElementById('finale').classList.remove('show');
+  document.getElementById('gnut3d').classList.remove('show');
+  chiudiAR(); chiudiSheet(); mostraTab("mappa");
+  aggiornaBtnAudio();
+  document.getElementById('btn-gioca').innerHTML = "▶ &nbsp;Inizia l'avventura";
+  disegnaMarker(); aggiornaTimeline(); aggiornaHud(); aggiornaQuest(); ricentra();
+  document.getElementById('splash').classList.remove('away');
+}
+
+/* ============================================================================
+   SPLASH + AVVIO
+   ============================================================================ */
+document.getElementById('logo-sub').textContent = `· ${NOME_GIOCO}`;
+document.getElementById('splash-nome-mascotte').textContent = MASCOTTE_NOME;
+document.getElementById('splash-sotto').textContent =
+  `Un viaggio nel tempo, una tappa alla volta, fino a 2 milioni di anni fa.`;
+document.getElementById('splash-nome').value = stato.nomeBambino || "";
+document.querySelector('#fumetto .chi').innerHTML = `<img class="chi-av" src="assets/gnut/gnut-avatar.webp" alt=""/> ${MASCOTTE_NOME.toUpperCase()}`;
+elMascotte.title = `Tocca ${MASCOTTE_NOME}!`;
+
+document.getElementById('btn-gioca').onclick = ()=>{
+  stato.nomeBambino = document.getElementById('splash-nome').value.trim();
+  salvaStato();
+  suono("ok"); vibra(40); avviaMusica();   // la musica parte col primo tocco (policy audio)
+  document.getElementById('splash').classList.add('away');
+  // Rivelata la mappa: ricalcola le dimensioni più volte (evita tile grigie)
+  if(map){ [300,700,1300].forEach(ms=>setTimeout(()=>{ map.invalidateSize(); ricentra(); }, ms)); }
+
+  setTimeout(()=>{
+    const nome = stato.nomeBambino ? ` ${stato.nomeBambino}` : "";
+    if(indiceCorrente() >= tappeAttive.length){
+      parla(`Bentornato${nome}! Sono a casa grazie a te 🌲 Apri lo 🎒 Zaino per rivedere ricordi e diploma!`);
+    }else if(stato.completate.length > 0){
+      parla(`Bentornato${nome}! Riprendiamo il viaggio da dove eravamo. Tocca il mio marker 🐘 sulla mappa!`);
+      vaiAllaCorrente();
+    }else{
+      parla(`Ciao${nome}! Sono ${MASCOTTE_NOME} e mi sono perso ai giorni nostri! Aiutami a tornare a casa: si parte dalla piazza. Tocca il mio marker 🐘!`);
+      vaiAllaCorrente();
+    }
+  }, 600);
+};
+
+if(stato.completate.length > 0)
+  document.getElementById('btn-gioca').innerHTML = "▶ &nbsp;Continua l'avventura";
+
+aggiornaHud(); aggiornaTimeline(); aggiornaBtnAudio(); aggiornaQuest();
+// Carica la mappa (con CDN di riserva) senza bloccare il resto del gioco
+assicuraLeaflet(()=>{ try{ initMappa(); }catch(e){ console.warn("Mappa:", e); } });
+// La mappa deve ridimensionarsi quando cambia lo schermo o si ruota il telefono
+window.addEventListener('resize', ()=>{ if(map) map.invalidateSize(); });
+window.addEventListener('orientationchange', ()=>setTimeout(()=>{ if(map) map.invalidateSize(); }, 300));
+</script>
+</body>
+</html>
